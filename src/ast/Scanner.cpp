@@ -14,6 +14,10 @@
 
 namespace ast {
 
+int Identifier::equals(Identifier& i) {
+	return text.equals(i.text);
+}
+
 void Scanner::setText(const char* s) {
 	text.text = s;
 	text.position = 0;
@@ -45,12 +49,28 @@ int Scanner::accept(const char* t) {
 	return len;
 }
 
+int Scanner::optional(const char* t) {
+	return accept(t);
+}
+
+int Scanner::expect(const char* t) {
+	int len = accept(t);
+	if (!len) {
+		throw UnexpectedToken();
+	}
+	return len;
+}
+
 void Scanner::getText(Text& t) {
 	text.get(t);
 }
 
 void Scanner::setText(const Text& t) {
 	text.set(t);
+}
+
+int Scanner::getPosition() {
+	return text.getPosition();
 }
 
 int Scanner::isWhiteSpace() {

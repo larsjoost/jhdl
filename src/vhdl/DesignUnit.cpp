@@ -20,10 +20,15 @@ void DesignUnit::addArchitecture(Architecture* a) {
 }
 
 DesignUnit& DesignUnit::parse() {
+	ArchitectureParser architecture;
+	EntityParser entity;
 	try {
 		mScanner.skipWhiteSpaceAndComments();
-		if (mScanner.accept(Scanner::VHDL_ARCHITECTURE)) {
-			addArchitecture((new Architecture(mScanner))->parse());
+		int position = mScanner.getPosition();
+		add(architecture.optional());
+		add(entity.optional());
+		if (mScanner.getPosition() == position) {
+			mScanner.critical("Did not find anything");
 		}
 	} catch (ast::TextEof e) {}
 	return this;

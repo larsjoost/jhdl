@@ -11,8 +11,10 @@ namespace ast {
 class Identifier {
 	Text text;
 public:
-
+	int equals(Identifier& t);
 };
+
+class UnexpectedToken {};
 
 class Scanner {
 
@@ -33,10 +35,11 @@ public:
 	int expect(const char* text);
 	int match(const char* text);
 
-
 	int isWhiteSpace();
 	int skipWhiteSpace();
 	int skipUntilEndOfLine();
+
+	int getPosition();
 
 	void getText(Text& t);
 	void setText(const Text& t);

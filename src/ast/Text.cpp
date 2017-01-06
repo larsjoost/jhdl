@@ -9,12 +9,14 @@
 
 namespace ast {
 
-Text::Text(const char* t) {
+Text::Text(const char* t, std::true_type caseSensitive) {
 	text = t;
 	size = strlen(t);
 	position = 0;
 	line_number = 0;
+	line_start = 0;
 	column_number = 0;
+	this->caseSentitive = caseSensitive;
 }
 
 void Text::incrementPosition() {
@@ -24,6 +26,7 @@ void Text::incrementPosition() {
 		if (text[position] == '\n') {
 			line_number++;
 			column_number = 0;
+			line_start = position + 1;
 		} else {
 			column_number++;
 		}
@@ -43,6 +46,7 @@ void Text::get(Text& t) {
 	t.size = size;
 	t.line_number = line_number;
 	t.column_number = column_number;
+	t.line_start = line_start;
 }
 
 void Text::set(const Text& t) {
@@ -51,6 +55,7 @@ void Text::set(const Text& t) {
 	size = t.size;
 	line_number = t.line_number;
 	column_number = t.column_number;
+	line_start = t.line_start;
 }
 
 char Text::lookAhead(int n) {
@@ -67,6 +72,10 @@ int Text::getLine() {
 
 int Text::getColumn() {
 	return column_number;
+}
+
+int Text::getPosition() {
+	return position;
 }
 
 void Text::setSize(int s) {

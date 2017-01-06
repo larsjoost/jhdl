@@ -9,23 +9,22 @@
 #define SRC_VHDL_ARCHITECTURE_H_
 
 #include "Scanner.h"
-#include "../ast/Text.h"
 
 namespace vhdl {
 
 class ArchitectureNameNull {};
 
-class Architecture {
+class ArchitectureParser {
 
 	 Scanner mScanner;
 
-	 ast::Text name;
+	 Identifier name;
 
 public:
 
-	Architecture(Scanner& s);
+	ArchitectureParser(Scanner& s);
 
-	Architecture* parse();
+	ArchitectureParser* optional();
 
 	char* getName();
 

@@ -8,8 +8,10 @@
 #ifndef VHDLDESIGNUNIT_HPP_
 #define VHDLDESIGNUNIT_HPP_
 
-#include <map>
+#include <list>
 #include "Scanner.h"
+#include "Architecture.h"
+#include "Entity.h"
 
 namespace vhdl {
 
@@ -17,9 +19,11 @@ class DesignUnit {
 
 	Scanner mScanner;
 
-	std::map<std::string, Architecture&> architectures;
+	std::list<ArchitectureParser*> architectures;
+	std::list<EntityParser*> entity;
 
-	void addArchitecture(Architecture* a);
+	void add(ArchitectureParser* a);
+	void add(EntityParser* e);
 
 public:
 

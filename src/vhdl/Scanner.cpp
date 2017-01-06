@@ -21,6 +21,14 @@ int Scanner::accept(Scanner::VhdlKeyword keyword) {
 	return accept(VhdlKeywordLookup[keyword]);
 }
 
+int Scanner::expect(Scanner::VhdlKeyword keyword) {
+	return expect(VhdlKeywordLookup[keyword]);
+}
+
+int Scanner::optional(Scanner::VhdlKeyword keyword) {
+	return optional(VhdlKeywordLookup[keyword]);
+}
+
 int Scanner::accept(Identifier& id) {
 	getText(id.text);
 	int i = 0;

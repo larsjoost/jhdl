@@ -17,9 +17,11 @@ class Text {
 	int position;
 	int size;
 	int line_number;
+	int line_start;
 	int column_number;
+	std::true_type caseSentitive;
 public:
-	Text(const char* t);
+	Text(const char* t, std::true_type caseSensitive = true);
 	void get(Text& t);
 	void set(const Text& t);
 	char lookAhead(int n);
@@ -27,7 +29,9 @@ public:
 	void advancePosition(int size);
 	int getLine();
 	int getColumn();
+	int getPosition();
 	void setSize(int s);
+	int equals(Text& t);
 };
 
 }
