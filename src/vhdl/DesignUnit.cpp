@@ -18,23 +18,31 @@ namespace vhdl {
   }
 
   void DesignUnit::add(ArchitectureParser* a) {
-    architectures.push_back(a);
+    if (a != NULL) {
+      architectures.push_back(a);
+    }
   }
 
   void DesignUnit::add(EntityParser* e) {
-    entities.push_back(e);
+    if (e != NULL) {
+      entities.push_back(e);
+    }
   }
 
   DesignUnit* DesignUnit::parse() {
     try {
-      mScanner->skipWhiteSpaceAndComments();
-      int position = mScanner->getPosition();
-      add(architecture->optional());
-      add(entity->optional());
-      if (mScanner->getPosition() == position) {
-        mScanner->critical("Did not find anything");
+      while (1) {
+        mScanner->skipWhiteSpaceAndComments();
+        int position = mScanner->getPosition();
+        add(entity->optional());
+        add(architecture->optional());
+        if (mScanner->getPosition() == position) {
+          mScanner->critical("Did not find anything");
+        }
       }
-    } catch (ast::TextEof e) {}
+    } catch (ast::TextEof e) {
+      printf("Reached end of file...\n");
+    }
     return this;
   }
 

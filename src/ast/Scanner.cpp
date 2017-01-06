@@ -8,6 +8,9 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 #include "Scanner.h"
 #include "Text.h"
@@ -18,26 +21,56 @@ namespace ast {
     return text.equals(i.text);
   }
 
-  Scanner::Scanner() {
-    text = new Text();
+  Scanner::Scanner(int c, int v) {
+    caseSensitive = c;
+    verbose = v;
+    text = new Text(v);
   }
 
+  void Scanner::debug(const char* msg, const char* a) {
+    if (verbose) {
+      printf("ast::Scanner.cpp: %s = %s\n", msg, a);
+    }
+  }
+  
   void Scanner::setText(const char* s) {
     text->set(s);
   }
 
   void Scanner::loadFile(const char* filename) {
-    std::ifstream ifs(filename);
-    std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                         (std::istreambuf_iterator<char>()    ) );
-    setText(content.c_str());
+    printf("Reading file %s\n", filename);
+    this->filename = filename;
+    FILE *f = fopen(filename, "rb");
+    if (f != NULL) {
+      fseek(f, 0, SEEK_END);
+      long fsize = ftell(f);
+      fseek(f, 0, SEEK_SET);  //same as rewind(f);
+
+      char *string = (char *)malloc(fsize + 1);
+      fread(string, fsize, 1, f);
+      fclose(f);
+
+      string[fsize] = 0;
+      text->set(string);
+    } else {
+      throw FileNotFound();
+    }
   }
 
+  int Scanner::compare(char l, char r) {
+    if (!caseSensitive) {
+      l = tolower(l);
+      r = tolower(r);
+    }
+    return (l == r);
+  }
+  
   int Scanner::match(const char* t) {
+    debug("match", t);
     int len = strlen(t);
     try {
       for (int i=0; i<len; i++) {
-        if (text->lookAhead(i) != t[i]) {
+        if (!compare(text->lookAhead(i), t[i])) {
           return 0;
         }
       }
@@ -46,19 +79,22 @@ namespace ast {
   }
 
   int Scanner::accept(const char* t) {
+    debug("accept", t);
     int len = match(t);
     text->advancePosition(len);
     return len;
   }
 
   int Scanner::optional(const char* t) {
+    debug("optional", t);
     return accept(t);
   }
 
   int Scanner::expect(const char* t) {
+    debug("expect", t);
     int len = accept(t);
     if (!len) {
-      throw UnexpectedToken();
+      throw UnexpectedToken(t);
     }
     return len;
   }
@@ -113,22 +149,38 @@ namespace ast {
     return i;
   }
 
-  void Scanner::print(const char* severity, const char* msg) {
-    fprintf(stderr, "#%s in file %s at %i, %i: %s\n", severity,
-            filename, text->getLine(), text->getColumn(), msg);
+  void Scanner::print(const char* severity, const char* format, ...) {
+    fprintf(stderr, "#%s in file %s at %i, %i: ", severity,
+            filename, text->getLine(), text->getColumn());
+    va_list argptr;
+    va_start(argptr, format);
+    vfprintf(stderr, format, argptr);
+    va_end(argptr);
+    text->printLinePosition(stderr);
   }
 
-  void Scanner::error(const char* msg) {
+  void Scanner::error(const char* format, ...)
+  {
     number_of_errors++;
-    print("Error", msg);
+    va_list argptr;
+    va_start(argptr, format);
+    printf("error", format, argptr);
+    va_end(argptr);
   }
 
-  void Scanner::warning(const char* msg) {
-    print("Warning", msg);
+  void Scanner::warning(const char* format, ...) {
+    va_list argptr;
+    va_start(argptr, format);
+    printf("warning", format, argptr);
+    va_end(argptr);
   }
   
-  void Scanner::critical(const char* msg) {
-    print("Critical", msg);
+  void Scanner::critical(const char* format, ...) {
+    va_list argptr;
+    va_start(argptr, format);
+    printf("critical", format, argptr);
+    va_end(argptr);
+    throw CriticalError();
   }
 
   int Scanner::getNumberOfErrors() {

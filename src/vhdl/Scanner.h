@@ -56,15 +56,17 @@ namespace vhdl {
     };
     
     char** VhdlKeywordLookup;
-    
+
   public:
     
-    Scanner();
+    int verbose;
+
+    Scanner(int verbose = 0);
     
-    int accept(VhdlKeyword keyword);
+    void accept(VhdlKeyword keyword);
     int accept(Identifier& i);
-    int expect(VhdlKeyword keyword);
-    int expect(Identifier& i);
+    void expect(VhdlKeyword keyword);
+    void expect(Identifier& i);
     int optional(VhdlKeyword keyword);
     
     void skipWhiteSpaceAndComments();
@@ -76,6 +78,7 @@ namespace vhdl {
     using ast::Scanner::getText;
     using ast::Scanner::lookAhead;
     using ast::Scanner::incrementPosition;
+    using ast::Scanner::getNumberOfErrors;
   };
   
 }

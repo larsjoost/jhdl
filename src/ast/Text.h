@@ -22,11 +22,19 @@ namespace ast {
     int caseSensitive;
 
     char toLower(char c);
-    
-  public:
-    Text(const char* text, int caseSensitive = 0);
-    Text();
 
+    int verbose = 0;
+
+    void debug(const char* msg, char c = ' ');
+
+    void printCurrentLine(FILE* output);
+    void printCurrentLinePositionMarker(FILE* output);
+
+  public:
+    Text();
+    Text(int verbose);
+    Text(const char* text, int caseSensitive = 0, int verbose = 0);
+    
     void get(Text& t);
     void set(const Text& text);
     void set(const char* text, int caseSensitive = 0);
@@ -38,6 +46,8 @@ namespace ast {
     int getPosition();
     void setSize(int size);
     int equals(Text& text);
+
+    void printLinePosition(FILE* output);
   };
   
 }

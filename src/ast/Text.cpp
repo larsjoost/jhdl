@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <cctype>
+#include <stdio.h>
 
 #include "Text.h"
 
@@ -15,11 +16,23 @@ namespace ast {
   Text::Text() {
   };
 
-  Text::Text(const char* text, int caseSensitive) {
+  Text::Text(int v) {
+    verbose = v;
+  };
+
+  Text::Text(const char* text, int caseSensitive, int v) {
+    verbose = v;
     set(text, caseSensitive);
   };
 
+  void Text::debug(const char* msg, char a) {
+    if (verbose) {
+      printf("ast::Text.cpp: %s = %c\n", msg, a);
+    }
+  }
+
   void Text::incrementPosition() {
+    debug("incrementPosition", lookAhead(0));
     if ((position + 1) >= size) {
       throw TextEof();
     } else {
@@ -112,6 +125,37 @@ namespace ast {
       return 0;
     }
     return 1;
+  }
+
+  void Text::printCurrentLine(FILE* output) {
+   try {
+      char a;
+      int i = lineStart - position;
+      fprintf(output, "%u: ", lineNumber);
+      do {
+        a = lookAhead(i++);
+        fputc(a, output);
+      } while (a != '\n');
+    } catch (TextEof e) {
+    }
+  }
+
+  void Text::printCurrentLinePositionMarker(FILE* output) {
+    fprintf(output, "   ");
+    int i = lineNumber;
+    while (i > 0) {
+      i /= 10;
+      fputc(' ', output);
+    }
+    for (i = 0; i < (position - lineStart); i++) {
+      fputc(' ', output);
+    }
+    fprintf(output, "^\n");
+  }
+  
+  void Text::printLinePosition(FILE* output) {
+    printCurrentLine(output);
+    printCurrentLinePositionMarker(output);
   }
   
 }

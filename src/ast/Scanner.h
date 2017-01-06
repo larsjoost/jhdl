@@ -14,8 +14,16 @@ namespace ast {
     int equals(Identifier& t);
   };
 
-  class UnexpectedToken {};
+  class UnexpectedToken {
+  public:
+    const char* text;
+    UnexpectedToken(const char* t) {
+      text = t;
+    }
+  };
   class TokenNotAccepted {};
+  class FileNotFound {};
+  class CriticalError {};
   
   class Scanner {
 
@@ -25,10 +33,19 @@ namespace ast {
     
     int number_of_errors = 0;
     
-    void print(const char* severity, const char* msg);
-public:
+    void print(const char* severity, const char* format, ...);
 
-    Scanner();
+    void debug(const char* msg, const char* a = '\0');
+
+    int caseSensitive;
+    
+    int verbose;
+
+    int compare(char l, char r);
+    
+  public:
+
+    Scanner(int caseSensitive, int verbose = 0);
         
     void setText(const char* s);
     void loadFile(const char* filename);
@@ -49,10 +66,10 @@ public:
     void getText(Text& t);
     void setText(const Text& t);
     
-    void warning(const char* msg);
-    void error(const char* msg);
-    void critical(const char* msg);
-    
+    void warning(const char* format, ...);
+    void error(const char* format, ...);
+    void critical(const char* format, ...);
+
     int getNumberOfErrors();
   };
   

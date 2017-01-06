@@ -25,18 +25,21 @@ namespace vhdl {
       mScanner->expect(Scanner::VHDL_IS);
       mScanner->expect(Scanner::VHDL_END);
       mScanner->optional(Scanner::VHDL_ENTITY);
-      Identifier name;
+      Identifier name = Identifier();
       mScanner->expect(name);
       if (!name.equals(result->name)) {
         mScanner->error("Entity terminator name did not match entity name");
-        throw ast::UnexpectedToken();
+        throw ast::UnexpectedToken("entity end name");
       }
       mScanner->expect(";");
       return result;
     } catch (ast::UnexpectedToken e) {
-      mScanner->error("Did not expect this token");
+      mScanner->error("Expected %s", e.text);
       if (result) {delete result;}
     } catch (ast::TokenNotAccepted e) {
+      if (mScanner->verbose) {
+        printf("Not an entity\n");
+      }
     }
 
     return NULL;

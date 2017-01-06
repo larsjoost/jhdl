@@ -1,6 +1,6 @@
 SRC := jhdl.cpp
 MODULES := ast vhdl
-CXXFLAGS = -std=c++11 -Wno-write-strings
+CXXFLAGS = -std=c++11 -Wno-write-strings -g
 CXX := g++
 -include $(patsubst %, %/module.mk, $(MODULES))
 
@@ -17,4 +17,5 @@ print-%:
 .PHONY: clean
 
 clean:
+	rm *.o
 

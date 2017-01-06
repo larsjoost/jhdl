@@ -11,7 +11,8 @@
 
 namespace vhdl {
 
-  Scanner::Scanner() {
+  Scanner::Scanner(int v) : ast::Scanner(0, v) {
+    verbose = v;
     VhdlKeywordLookup = (char **)malloc(sizeof(char*) * NUMBER_OF_VHDL_KEYWORDS);
     for (int i=0; i<NUMBER_OF_VHDL_KEYWORDS; i++) {
       int x = VHDL_KEYWORD_INFO[i].keyword;
@@ -19,12 +20,12 @@ namespace vhdl {
     }
   }
 
-  int Scanner::accept(Scanner::VhdlKeyword keyword) {
-    return accept(VhdlKeywordLookup[keyword]);
+  void Scanner::accept(Scanner::VhdlKeyword keyword) {
+    accept(VhdlKeywordLookup[keyword]);
   }
 
-  int Scanner::expect(Scanner::VhdlKeyword keyword) {
-    return expect(VhdlKeywordLookup[keyword]);
+  void Scanner::expect(Scanner::VhdlKeyword keyword) {
+    expect(VhdlKeywordLookup[keyword]);
   }
 
   int Scanner::optional(Scanner::VhdlKeyword keyword) {
@@ -45,26 +46,24 @@ namespace vhdl {
     return i;
   }
 
-  int Scanner::expect(Identifier& id) {
+  void Scanner::expect(Identifier& id) {
     int len = accept(id);
     if (!len) {
-      throw ast::UnexpectedToken(); 
+      throw ast::UnexpectedToken("identifier"); 
     }
-    return len;
   }
   
   void Scanner::skipWhiteSpaceAndComments() {
-
-	try {
-		while (skipWhiteSpace()) {
-			if (accept("--")) {
-				skipUntilEndOfLine();
-			}
-		}
-	} catch (ast::TextEof e) {
-
-	}
-}
+    try {
+      while (skipWhiteSpace()) {
+        if (accept("--")) {
+          skipUntilEndOfLine();
+        }
+      }
+    } catch (ast::TextEof e) {
+      
+    }
+  }
 
 }
 

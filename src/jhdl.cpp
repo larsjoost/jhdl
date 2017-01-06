@@ -13,19 +13,29 @@
 
 #include "vhdl/Scanner.h"
 #include "vhdl/DesignUnit.h"
+#include "ast/Scanner.h"
+
+void usage() {
+  printf("jhdl -f <filename> [-v]\n");
+  printf("  -v : Verbose\n");
+}
 
 int
 main (int argc, char **argv)
 {
   char *filename = NULL;
   int c;
-
+  int verbose = 0;
+  
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:")) != -1)
+  while ((c = getopt (argc, argv, "f:v")) != -1) {
     switch (c)
       {
       case 'f':
-       filename = optarg;
+        filename = optarg;
+        break;
+      case 'v':
+        verbose = 1;
         break;
       case '?':
         if (optopt == 'c')
@@ -40,12 +50,28 @@ main (int argc, char **argv)
       default:
         abort ();
       }
+  }
+  
+  if (filename == NULL) {
+    fprintf(stderr, "File name is not specified\n");
+    usage();
+    exit(1);
+  } else {
+    
+    vhdl::Scanner* s = new vhdl::Scanner(verbose);
+    try {
+      s->loadFile(filename);
 
-  vhdl::Scanner* s = new vhdl::Scanner();
-  s->loadFile(filename);
+      vhdl::DesignUnit* u = new vhdl::DesignUnit(s);
+      u->parse();
 
-  vhdl::DesignUnit* u = new vhdl::DesignUnit(s);
-  u->parse();
-
+      if (s->getNumberOfErrors() > 0) {
+        return 1;
+      }
+    } catch (ast::FileNotFound e) {
+      printf("File %s not found...\n", filename);
+    }
+  }
+  
   return 0;
 }
