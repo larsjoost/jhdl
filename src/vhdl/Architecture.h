@@ -12,26 +12,23 @@
 
 namespace vhdl {
 
-class ArchitectureNameNull {};
+  class ArchitectureNameNull {};
 
-class ArchitectureParser {
+  class ArchitectureParser {
 
-	 Scanner mScanner;
+    Scanner* mScanner;
 
-	 Identifier name;
 
-public:
+  public:
 
-	ArchitectureParser(Scanner& s);
+    Identifier name;
 
-	ArchitectureParser* optional();
+    ArchitectureParser(Scanner* s);
 
-	char* getName();
+    ArchitectureParser* optional();
 
-};
+  };
 
 }
-
-
 
 #endif /* SRC_VHDL_ARCHITECTURE_H_ */

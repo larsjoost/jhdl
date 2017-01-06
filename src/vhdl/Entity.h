@@ -12,18 +12,19 @@
 
 namespace vhdl {
 
-}
-class EntityParser {
+  class EntityParser {
 	
-	Scanner mScanner;
+    Scanner* mScanner;
+    
+  public:
 
-public:
+    Identifier name;
 
-	EntityParser(Scanner& s);
+    EntityParser(Scanner* s);
 
-	EntityParser* optional();
-	
-}
+    EntityParser* optional();
+
+  };
 
 }
 

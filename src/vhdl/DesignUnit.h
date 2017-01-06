@@ -14,24 +14,26 @@
 #include "Entity.h"
 
 namespace vhdl {
+  
+  class DesignUnit {
+    
+    Scanner* mScanner;
 
-class DesignUnit {
+    std::list<ArchitectureParser*> architectures;
+    std::list<EntityParser*> entities;
 
-	Scanner mScanner;
+    void add(ArchitectureParser* a);
+    void add(EntityParser* e);
 
-	std::list<ArchitectureParser*> architectures;
-	std::list<EntityParser*> entity;
+    ArchitectureParser* architecture;
+    EntityParser* entity;
 
-	void add(ArchitectureParser* a);
-	void add(EntityParser* e);
+  public:
 
-public:
+    DesignUnit(Scanner* v);
 
-	DesignUnit(Scanner& v);
-
-
-	DesignUnit& parse();
-};
+    DesignUnit* parse();
+  };
 
 }
 

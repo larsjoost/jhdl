@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "vhdl/scanner.h"
+#include "vhdl/Scanner.h"
 #include "vhdl/DesignUnit.h"
 
 int
@@ -41,11 +41,11 @@ main (int argc, char **argv)
         abort ();
       }
 
-  vhdl::Scanner s;
-  s.loadFile(filename);
+  vhdl::Scanner* s = new vhdl::Scanner();
+  s->loadFile(filename);
 
-  vhdl::DesignUnit u = vhdl::DesignUnit(s);
-  u.parse();
+  vhdl::DesignUnit* u = new vhdl::DesignUnit(s);
+  u->parse();
 
   return 0;
 }
