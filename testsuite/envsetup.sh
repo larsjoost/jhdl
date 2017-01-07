@@ -10,7 +10,7 @@ if [ -n "$VALGRIND" ]; then
     JHDL="valgrind --leak-check=yes $JHDL"
 else
     if [ -n "$DEBUG" ]; then
-        JHDL="gdbtui --args $JHDL"
+        JHDL="gdb --args $JHDL"
     fi
 
     if [ -n "$VERBOSE" ]; then

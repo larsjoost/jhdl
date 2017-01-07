@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <cctype>
+#include <cassert>
 #include <stdio.h>
 
 #include "Text.h"
@@ -31,22 +32,30 @@ namespace ast {
     }
   }
 
-  void Text::incrementPosition() {
+  void Text::incrementPosition(int s) {
     debug("incrementPosition", lookAhead(0));
-    if ((position + 1) >= size) {
+    if ((position + s) >= size) {
       throw TextEof();
     } else {
-      if (text[position] == '\n') {
-        lineNumber++;
-        columnNumber = 0;
-        lineStart = position + 1;
-      } else {
-        columnNumber++;
+      for (int i=0; i<s; i++) {
+        if (text[position] == '\n') {
+          lineNumber++;
+          columnNumber = 0;
+          lineStart = position + 1;
+        } else {
+          columnNumber++;
+        }
+        position++;
       }
-      position++;
     }
   }
 
+  void Text::subString(Text& t, int s) {
+    assert(s <= remainingSize());
+    get(t);
+    t.size = t.position + s;
+  }
+  
   void Text::advancePosition(int n) {
     for (int i = 0; i < n; i++) {
       incrementPosition();
@@ -113,10 +122,15 @@ namespace ast {
     }
     return a;
   }
+
+  int Text::remainingSize() {
+    return size - position;
+  }
   
   int Text::equals(Text& t) {
-    if (size == t.size) {
-      for (int i=0; i<size; i++) {
+    int s = remainingSize();
+    if (s == t.remainingSize()) {
+      for (int i=0; i<s; i++) {
         if (toLower(lookAhead(i)) != toLower(t.lookAhead(i))) {
           return 0;
         }
@@ -159,10 +173,15 @@ namespace ast {
   }
 
   void Text::print(FILE* output) {
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < (size - position); i++) {
       fputc(lookAhead(i), output);
     }
   }
-  
+
+  void Text::debug(FILE* output) {
+    fprintf(output, "Text::position = %u\n", position);
+    fprintf(output, "Text::size = %u\n", size);
+  }
+
 }
 

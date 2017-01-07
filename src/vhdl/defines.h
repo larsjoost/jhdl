@@ -9,6 +9,7 @@ namespace vhdl {
     
     enum VhdlKeyword {
       VHDL_ARCHITECTURE,
+      VHDL_OF,
       VHDL_IS,
       VHDL_BEGIN,
       VHDL_END,

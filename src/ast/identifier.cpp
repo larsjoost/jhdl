@@ -11,4 +11,8 @@ namespace ast {
     text.print(output);
   }
   
+  void Identifier::debug(FILE* output) {
+    text.debug(output);
+  }
+  
 }

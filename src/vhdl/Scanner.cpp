@@ -28,6 +28,7 @@ namespace vhdl {
   static const VhdlKeywordInfo* getVhdlKeywordInfo(int i) {
     static const VhdlKeywordInfo VHDL_KEYWORD_INFO[defines::NUMBER_OF_VHDL_KEYWORDS] {
       {defines::VHDL_ARCHITECTURE, "architecture", defines::VHDL_1987},
+      {defines::VHDL_OF, "of", defines::VHDL_1987},
       {defines::VHDL_IS, "is", defines::VHDL_1987},
       {defines::VHDL_BEGIN, "begin", defines::VHDL_1987},
       {defines::VHDL_END, "end", defines::VHDL_1987},
@@ -98,18 +99,15 @@ namespace vhdl {
         assignRange(VALID_CHAR, '_', '_', true);
       }
     } BASIC_IDENTIFIER;
-    getText(id.text);
-    int i = 0;
     char a = lookAhead(0);
     if (!BASIC_IDENTIFIER.VALID_FIRST_CHAR[a]) {
       return 0;
     }
-    while (BASIC_IDENTIFIER.VALID_CHAR[a]) {
-      i++;
-      incrementPosition();
-      a = lookAhead(0);
-    }
-    id.text.setSize(i);
+    int i = 0;
+    do {
+      a = lookAhead(++i);
+    } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
+    eat(id.text, i);
     return i;
   }
 
@@ -121,14 +119,10 @@ namespace vhdl {
   }
   
   void Scanner::skipWhiteSpaceAndComments() {
-    try {
-      while (skipWhiteSpace()) {
-        if (accept("--")) {
-          skipUntilEndOfLine();
-        }
+    while (skipWhiteSpace()) {
+      if (accept("--")) {
+        skipUntilEndOfLine();
       }
-    } catch (ast::TextEof e) {
-      
     }
   }
 

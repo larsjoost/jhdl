@@ -57,7 +57,8 @@ namespace ast {
     int expect(const char* text);
     int match(const char* text);
     char lookAhead(int number);
-    void incrementPosition();
+    void eat(Text& t, int size);
+    void incrementPosition(int size = 1);
     
     int isWhiteSpace();
     int skipWhiteSpace();

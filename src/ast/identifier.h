@@ -12,6 +12,7 @@ namespace ast {
   public:
     Text text;
     void print(FILE* output = stdout);
+    void debug(FILE* output = stdout);
     int equals(Identifier& t);
   };
 

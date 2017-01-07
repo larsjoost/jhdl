@@ -32,20 +32,13 @@ namespace vhdl {
       mScanner->optional(defines::VHDL_ENTITY);
       mScanner->skipOneOrMoreWhiteSpaces();
       static BasicIdentifier name = BasicIdentifier();
-      printf("1\n");
       mScanner->expect(name);
-      printf("2\n");
       if (!name.equals(result->name)) {
-        printf("2a\n");
         mScanner->error("Entity terminator name did not match entity name");
-        printf("2b\n");
         throw ast::UnexpectedToken("entity end name");
       }
-      printf("3\n");
       mScanner->skipWhiteSpace();
-      printf("4\n");
       mScanner->expect(";");
-      printf("5\n");
       return result;
     } catch (ast::UnexpectedToken e) {
       mScanner->error("Expected %s", e.text);

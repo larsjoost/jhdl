@@ -34,7 +34,9 @@ namespace ast {
   }
 
   void Scanner::loadFile(const char* filename) {
-    printf("Reading file %s\n", filename);
+    if (verbose) {
+      printf("Reading file %s\n", filename);
+    }
     this->filename = filename;
     FILE *f = fopen(filename, "rb");
     if (f != NULL) {
@@ -99,10 +101,15 @@ namespace ast {
     return text->lookAhead(n);
   }
 
-  void Scanner::incrementPosition() {
-    text->incrementPosition();
+  void Scanner::incrementPosition(int size) {
+    text->incrementPosition(size);
   }
-    
+
+  void Scanner::eat(Text& t, int size) {
+    text->subString(t, size);
+    incrementPosition(size);
+  }
+  
   void Scanner::getText(Text& t) {
     text->get(t);
   }
@@ -117,7 +124,7 @@ namespace ast {
 
   int Scanner::isWhiteSpace() {
     char a = text->lookAhead(0);
-    if (a == ' ' || a == '\t' || a == '\n') {
+    if (a == ' ' || a == '\t' || a == '\n' || a == '\r') {
       return 1;
     }
     return 0;
@@ -125,12 +132,10 @@ namespace ast {
 
   int Scanner::skipWhiteSpace() {
     int i = 0;
-    try {
-      if (isWhiteSpace()) {
-        text->incrementPosition();
-        i++;
-      }
-    } catch(...) {};
+    if (isWhiteSpace()) {
+      text->incrementPosition();
+      i++;
+    }
     return i;
   }
 
@@ -143,12 +148,10 @@ namespace ast {
   
   int Scanner::skipUntilEndOfLine() {
     int i = 0;
-    try {
-      while (text->lookAhead(0) != '\n') {
-        text->incrementPosition();
-        i++;
-      }
-    } catch(...) {};
+    while (text->lookAhead(0) != '\n') {
+      text->incrementPosition();
+      i++;
+    }
     return i;
   }
 

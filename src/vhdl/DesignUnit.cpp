@@ -31,17 +31,18 @@ namespace vhdl {
 
   DesignUnit* DesignUnit::parse() {
     try {
+      mScanner->skipWhiteSpaceAndComments();
       while (1) {
-        mScanner->skipWhiteSpaceAndComments();
         int position = mScanner->getPosition();
         add(entity->optional());
         add(architecture->optional());
+        mScanner->skipWhiteSpaceAndComments();
         if (mScanner->getPosition() == position) {
           mScanner->critical("Did not find anything");
         }
       }
     } catch (ast::TextEof e) {
-      printf("Reached end of file...\n");
+      printf("Done.\n");
     }
     return this;
   }

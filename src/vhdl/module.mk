@@ -1,1 +1,1 @@
-SRC += vhdl/Scanner.cpp vhdl/DesignUnit.cpp vhdl/Architecture.cpp vhdl/Entity.cpp 
+SRC += vhdl/Scanner.cpp vhdl/DesignUnit.cpp vhdl/architecture.cpp vhdl/entity.cpp 

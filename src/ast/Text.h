@@ -41,7 +41,9 @@ namespace ast {
     void set(const Text& text);
     void set(const char* text, int caseSensitive = 0);
     char lookAhead(int number);
-    void incrementPosition();
+    void incrementPosition(int size = 1);
+    void subString(Text& text, int size);
+    int remainingSize();
     void advancePosition(int size);
     int getLine();
     int getColumn();
@@ -51,6 +53,7 @@ namespace ast {
 
     void printLinePosition(FILE* output);
     void print(FILE* output = stdout);
+    void debug(FILE* output = stdout);
   };
   
 }

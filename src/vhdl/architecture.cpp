@@ -23,9 +23,11 @@ namespace vhdl {
       mScanner->accept(defines::VHDL_ARCHITECTURE);
       mScanner->skipOneOrMoreWhiteSpaces();
       result = new ArchitectureParser(mScanner);
-      mScanner->expect(result->name);
-      printf("Architecture name = ");
-      result->name.print();
+      mScanner->expect(result->architectureName);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_OF);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(result->entityName);
       mScanner->skipOneOrMoreWhiteSpaces();
       mScanner->expect(defines::VHDL_IS);
       mScanner->skipOneOrMoreWhiteSpaces();
@@ -38,7 +40,7 @@ namespace vhdl {
       };
       static BasicIdentifier name = BasicIdentifier();
       mScanner->expect(name);
-      if (!name.equals(result->name)) {
+      if (!name.equals(result->architectureName)) {
         mScanner->error("Architecture terminator name did not match architecture name");
         throw ast::UnexpectedToken("architecture end name");
       }

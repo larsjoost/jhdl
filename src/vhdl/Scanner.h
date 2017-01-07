@@ -20,10 +20,10 @@ namespace vhdl {
   public:
     using ast::Identifier::equals;
     using ast::Identifier::print;
+    using ast::Identifier::debug;
   };
 
   class Scanner : public ast::Scanner {
-
   
   public:
     
@@ -45,6 +45,7 @@ namespace vhdl {
     using ast::Scanner::optional;
     using ast::Scanner::getText;
     using ast::Scanner::lookAhead;
+    using ast::Scanner::eat;
     using ast::Scanner::incrementPosition;
     using ast::Scanner::getNumberOfErrors;
     using ast::Scanner::skipOneOrMoreWhiteSpaces;

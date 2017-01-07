@@ -20,7 +20,8 @@ namespace vhdl {
 
   public:
 
-    BasicIdentifier name;
+    BasicIdentifier entityName;
+    BasicIdentifier architectureName;
 
     ArchitectureParser(Scanner* s);
 
