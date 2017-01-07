@@ -33,7 +33,7 @@ namespace vhdl {
       {defines::VHDL_END, "end", defines::VHDL_1987},
       {defines::VHDL_ENTITY, "entity", defines::VHDL_1987}
     };
-    assert(i >= defines::NUMBER_OF_VHDL_KEYWORDS);
+    assert(i < defines::NUMBER_OF_VHDL_KEYWORDS);
     return &VHDL_KEYWORD_INFO[i];
   }
     
@@ -58,7 +58,13 @@ namespace vhdl {
   }
 
   void Scanner::expect(defines::VhdlKeyword keyword) {
-    expect(keywordLookup(keyword));
+    const char* a = keywordLookup(keyword);
+    try {
+      expect(a);
+    } catch (ast::UnexpectedToken e) {
+      error("Expected keyword %s", a);
+      throw e;
+    }
   }
 
   int Scanner::optional(defines::VhdlKeyword keyword) {

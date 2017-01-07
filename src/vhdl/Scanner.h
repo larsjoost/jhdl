@@ -11,14 +11,15 @@
 #include <array>
 
 #include "../ast/Scanner.h"
+#include "../ast/identifier.h"
 #include "defines.h"
 
 namespace vhdl {
 
   class BasicIdentifier : public ast::Identifier {
-
   public:
     using ast::Identifier::equals;
+    using ast::Identifier::print;
   };
 
   class Scanner : public ast::Scanner {

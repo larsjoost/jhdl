@@ -50,6 +50,7 @@ namespace ast {
     int equals(Text& text);
 
     void printLinePosition(FILE* output);
+    void print(FILE* output = stdout);
   };
   
 }

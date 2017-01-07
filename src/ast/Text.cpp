@@ -157,6 +157,12 @@ namespace ast {
     printCurrentLine(output);
     printCurrentLinePositionMarker(output);
   }
+
+  void Text::print(FILE* output) {
+    for (int i = 0; i < size; i++) {
+      fputc(lookAhead(i), output);
+    }
+  }
   
 }
 

@@ -159,6 +159,7 @@ namespace ast {
     va_start(argptr, format);
     vfprintf(stderr, format, argptr);
     va_end(argptr);
+    fprintf(stderr, "\n");
     text->printLinePosition(stderr);
   }
 
@@ -167,21 +168,21 @@ namespace ast {
     number_of_errors++;
     va_list argptr;
     va_start(argptr, format);
-    printf("error", format, argptr);
+    print("error", format, argptr);
     va_end(argptr);
   }
 
   void Scanner::warning(const char* format, ...) {
     va_list argptr;
     va_start(argptr, format);
-    printf("warning", format, argptr);
+    print("warning", format, argptr);
     va_end(argptr);
   }
   
   void Scanner::critical(const char* format, ...) {
     va_list argptr;
     va_start(argptr, format);
-    printf("critical", format, argptr);
+    print("critical", format, argptr);
     va_end(argptr);
     throw CriticalError();
   }

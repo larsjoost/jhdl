@@ -7,4 +7,8 @@ namespace ast {
     return text.equals(i.text);
   }
 
+  void Identifier::print(FILE* output) {
+    text.print(output);
+  }
+  
 }
