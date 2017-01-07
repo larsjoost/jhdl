@@ -18,10 +18,9 @@ namespace vhdl {
 
     Scanner* mScanner;
 
-
   public:
 
-    Identifier name;
+    BasicIdentifier name;
 
     ArchitectureParser(Scanner* s);
 

@@ -5,6 +5,7 @@
  *      Author: lars_
  */
 
+#include "defines.h"
 #include "Entity.h"
 #include "Scanner.h"
 #include "../ast/Scanner.h"
@@ -19,18 +20,24 @@ namespace vhdl {
     EntityParser* result = NULL;
     try {
       mScanner->skipWhiteSpaceAndComments();
-      mScanner->accept(Scanner::VHDL_ENTITY);
+      mScanner->accept(defines::VHDL_ENTITY);
+      mScanner->skipOneOrMoreWhiteSpaces();
       result = new EntityParser(mScanner);
       mScanner->expect(result->name);
-      mScanner->expect(Scanner::VHDL_IS);
-      mScanner->expect(Scanner::VHDL_END);
-      mScanner->optional(Scanner::VHDL_ENTITY);
-      Identifier name = Identifier();
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_IS);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_END);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->optional(defines::VHDL_ENTITY);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      BasicIdentifier name = BasicIdentifier();
       mScanner->expect(name);
       if (!name.equals(result->name)) {
         mScanner->error("Entity terminator name did not match entity name");
         throw ast::UnexpectedToken("entity end name");
       }
+      mScanner->skipWhiteSpace();
       mScanner->expect(";");
       return result;
     } catch (ast::UnexpectedToken e) {

@@ -8,6 +8,8 @@
 #ifndef SRC_AST_TEXT_H_
 #define SRC_AST_TEXT_H_
 
+#include <stdio.h>
+
 namespace ast {
 
   class TextEof {};

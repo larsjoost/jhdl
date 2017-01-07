@@ -7,6 +7,7 @@
 
 #include "Architecture.h"
 #include "Scanner.h"
+#include "defines.h"
 #include "../ast/Scanner.h"
 
 namespace vhdl {
@@ -19,19 +20,27 @@ namespace vhdl {
     ArchitectureParser* result = NULL;
     try {
       mScanner->skipWhiteSpaceAndComments();
-      mScanner->accept(Scanner::VHDL_ARCHITECTURE);
+      mScanner->accept(defines::VHDL_ARCHITECTURE);
+      mScanner->skipOneOrMoreWhiteSpaces();
       result = new ArchitectureParser(mScanner);
       mScanner->expect(result->name);
-      mScanner->expect(Scanner::VHDL_IS);
-      mScanner->expect(Scanner::VHDL_BEGIN);
-      mScanner->expect(Scanner::VHDL_END);
-      mScanner->optional(Scanner::VHDL_ARCHITECTURE);
-      Identifier name = Identifier();
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_IS);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_BEGIN);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      mScanner->expect(defines::VHDL_END);
+      mScanner->skipOneOrMoreWhiteSpaces();
+      if (mScanner->optional(defines::VHDL_ARCHITECTURE)) {
+        mScanner->skipOneOrMoreWhiteSpaces();
+      };
+      BasicIdentifier name = BasicIdentifier();
       mScanner->expect(name);
       if (!name.equals(result->name)) {
         mScanner->error("Architecture terminator name did not match architecture name");
         throw ast::UnexpectedToken("architecture end name");
       }
+      mScanner->skipWhiteSpace();
       mScanner->expect(";");
       return result;
     } catch (ast::UnexpectedToken e) {

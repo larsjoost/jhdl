@@ -17,10 +17,6 @@
 
 namespace ast {
 
-  int Identifier::equals(Identifier& i) {
-    return text.equals(i.text);
-  }
-
   Scanner::Scanner(int c, int v) {
     caseSensitive = c;
     verbose = v;
@@ -138,6 +134,13 @@ namespace ast {
     return i;
   }
 
+  int Scanner::skipOneOrMoreWhiteSpaces() {
+    if (!isWhiteSpace()) {
+      throw NoWhiteSpace(text->lookAhead(0));
+    }
+    return skipWhiteSpace();
+  }
+  
   int Scanner::skipUntilEndOfLine() {
     int i = 0;
     try {

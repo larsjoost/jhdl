@@ -5,20 +5,22 @@
 #include <string>
 
 #include "Text.h"
+#include "identifier.h"
 
 namespace ast {
-
-  class Identifier {
-  public:
-    Text text;
-    int equals(Identifier& t);
-  };
 
   class UnexpectedToken {
   public:
     const char* text;
     UnexpectedToken(const char* t) {
       text = t;
+    }
+  };
+  class NoWhiteSpace {
+  public:
+    char letter;
+    NoWhiteSpace(char c) {
+      letter = c;
     }
   };
   class TokenNotAccepted {};
@@ -59,6 +61,7 @@ namespace ast {
     
     int isWhiteSpace();
     int skipWhiteSpace();
+    int skipOneOrMoreWhiteSpaces();
     int skipUntilEndOfLine();
     
     int getPosition();

@@ -18,7 +18,7 @@ namespace vhdl {
     
   public:
 
-    Identifier name;
+    BasicIdentifier name;
 
     EntityParser(Scanner* s);
 

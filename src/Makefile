@@ -17,5 +17,5 @@ print-%:
 .PHONY: clean
 
 clean:
-	rm *.o
+	rm -r *.o
 

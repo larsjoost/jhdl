@@ -8,11 +8,14 @@
 #ifndef SRC_VHDL_SCANNER_H_
 #define SRC_VHDL_SCANNER_H_
 
+#include <array>
+
 #include "../ast/Scanner.h"
+#include "defines.h"
 
 namespace vhdl {
 
-  class Identifier : public ast::Identifier {
+  class BasicIdentifier : public ast::Identifier {
 
   public:
     using ast::Identifier::equals;
@@ -20,54 +23,18 @@ namespace vhdl {
 
   class Scanner : public ast::Scanner {
 
-  public:
-
-    enum VhdlKeyword {
-      VHDL_ARCHITECTURE,
-      VHDL_IS,
-      VHDL_BEGIN,
-      VHDL_END,
-      VHDL_ENTITY,
-      NUMBER_OF_VHDL_KEYWORDS
-    };
-    
-    enum VhdlStandard {
-      VHDL_1987,
-      VHDL_1993,
-      VHDL_2002,
-      VHDL_2008,
-      NUMBER_OF_VHDL_STANDARDS
-    };
-    
-  private:
-    
-    struct VhdlKeywordInfo {
-      VhdlKeyword keyword;
-      char* text;
-      VhdlStandard standard;
-    };
-    
-    const VhdlKeywordInfo VHDL_KEYWORD_INFO[NUMBER_OF_VHDL_KEYWORDS] {
-      {VHDL_ARCHITECTURE, "architecture", VHDL_1987},
-      {VHDL_IS, "is", VHDL_1987},
-      {VHDL_BEGIN, "begin", VHDL_1987},
-      {VHDL_END, "end", VHDL_1987},
-      {VHDL_ENTITY, "entity", VHDL_1987}
-    };
-    
-    char** VhdlKeywordLookup;
-
+  
   public:
     
     int verbose;
 
     Scanner(int verbose = 0);
     
-    void accept(VhdlKeyword keyword);
-    int accept(Identifier& i);
-    void expect(VhdlKeyword keyword);
-    void expect(Identifier& i);
-    int optional(VhdlKeyword keyword);
+    void accept(defines::VhdlKeyword keyword);
+    int accept(BasicIdentifier& i);
+    void expect(defines::VhdlKeyword keyword);
+    void expect(BasicIdentifier& i);
+    int optional(defines::VhdlKeyword keyword);
     
     void skipWhiteSpaceAndComments();
     
@@ -79,6 +46,7 @@ namespace vhdl {
     using ast::Scanner::lookAhead;
     using ast::Scanner::incrementPosition;
     using ast::Scanner::getNumberOfErrors;
+    using ast::Scanner::skipOneOrMoreWhiteSpaces;
   };
   
 }
