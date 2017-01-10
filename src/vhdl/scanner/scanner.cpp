@@ -1,50 +1,47 @@
-/*
- * Scanner.cpp
- *
- *  Created on: 5 Jan 2017
- *      Author: lars_
- */
 
 #include <cassert>
 
-#include "Scanner.h"
-#include "../ast/Text.h"
-#include "../ast/Scanner.h"
+#include "../../ast/text.hpp"
+#include "../../ast/scanner.hpp"
 
-#include "defines.h"
+#include "scanner.hpp"
+#include "defines.hpp"
 
 namespace vhdl {
-
+  namespace scanner {
+    
   Scanner::Scanner(int v) : ast::Scanner(0, v) {
     verbose = v;
   }
 
   struct VhdlKeywordInfo {
-    defines::VhdlKeyword keyword;
+    VhdlKeyword keyword;
     char* text;
-    defines::VhdlStandard standard;
+    VhdlStandard standard;
   };
     
   static const VhdlKeywordInfo* getVhdlKeywordInfo(int i) {
-    static const VhdlKeywordInfo VHDL_KEYWORD_INFO[defines::NUMBER_OF_VHDL_KEYWORDS] {
-      {defines::VHDL_ARCHITECTURE, "architecture", defines::VHDL_1987},
-      {defines::VHDL_OF, "of", defines::VHDL_1987},
-      {defines::VHDL_IS, "is", defines::VHDL_1987},
-      {defines::VHDL_BEGIN, "begin", defines::VHDL_1987},
-      {defines::VHDL_END, "end", defines::VHDL_1987},
-      {defines::VHDL_ENTITY, "entity", defines::VHDL_1987}
+    static const VhdlKeywordInfo VHDL_KEYWORD_INFO[NUMBER_OF_VHDL_KEYWORDS] {
+      {VHDL_LIBRARY, "library", VHDL_1987},
+      {VHDL_USE, "use", VHDL_1987},
+      {VHDL_ARCHITECTURE, "architecture", VHDL_1987},
+      {VHDL_OF, "of", VHDL_1987},
+      {VHDL_IS, "is", VHDL_1987},
+      {VHDL_BEGIN, "begin", VHDL_1987},
+      {VHDL_END, "end", VHDL_1987},
+      {VHDL_ENTITY, "entity", VHDL_1987}
     };
-    assert(i < defines::NUMBER_OF_VHDL_KEYWORDS);
+    assert(i < NUMBER_OF_VHDL_KEYWORDS);
     return &VHDL_KEYWORD_INFO[i];
   }
     
-  static const char* keywordLookup(defines::VhdlKeyword keyword) {
+  static const char* keywordLookup(VhdlKeyword keyword) {
     static const struct VhdlKeywordLookup
     {
-      std::array<char *, defines::NUMBER_OF_VHDL_KEYWORDS> LUT;
+      std::array<char *, NUMBER_OF_VHDL_KEYWORDS> LUT;
 
       VhdlKeywordLookup() {
-        for (int i=0; i<defines::NUMBER_OF_VHDL_KEYWORDS; i++) {
+        for (int i=0; i<NUMBER_OF_VHDL_KEYWORDS; i++) {
           const VhdlKeywordInfo* k = getVhdlKeywordInfo(i);
           int x = k->keyword;
           LUT[x] = k->text;
@@ -54,11 +51,11 @@ namespace vhdl {
     return KEYWORD.LUT[keyword];
   }
 
-  void Scanner::accept(defines::VhdlKeyword keyword) {
+  void Scanner::accept(VhdlKeyword keyword) {
     accept(keywordLookup(keyword));
   }
 
-  void Scanner::expect(defines::VhdlKeyword keyword) {
+  void Scanner::expect(VhdlKeyword keyword) {
     const char* a = keywordLookup(keyword);
     try {
       expect(a);
@@ -68,7 +65,7 @@ namespace vhdl {
     }
   }
 
-  int Scanner::optional(defines::VhdlKeyword keyword) {
+  int Scanner::optional(VhdlKeyword keyword) {
     return optional(keywordLookup(keyword));
   }
 
@@ -76,16 +73,16 @@ namespace vhdl {
     static const int LUT_SIZE = sizeof(char) * 256;
     static const struct VhdlBasicIdentifierLookup
     {
-      std::array<int, LUT_SIZE> VALID_FIRST_CHAR;
-      std::array<int, LUT_SIZE> VALID_CHAR;
+      std::array<char, LUT_SIZE> VALID_FIRST_CHAR;
+      std::array<char, LUT_SIZE> VALID_CHAR;
 
-      void assignRange(std::array<int, LUT_SIZE>& lut, char start, char stop, int value) {
+      void assignRange(std::array<char, LUT_SIZE>& lut, char start, char stop, char value) {
         for (int i=start; i <= stop; i++) {
           lut[i] = value;
         }
       }
       
-      void assignRange(char start, char stop, int value) {
+      void assignRange(char start, char stop, char value) {
         for (int i=start; i <= stop; i++) {
           VALID_FIRST_CHAR[i] = VALID_CHAR[i] = value;
         }
@@ -117,14 +114,17 @@ namespace vhdl {
       throw ast::UnexpectedToken("basic identifier"); 
     }
   }
-  
+
   void Scanner::skipWhiteSpaceAndComments() {
     while (skipWhiteSpace()) {
-      if (accept("--")) {
+      try {
+        accept("--");
         skipUntilEndOfLine();
+      } catch (ast::TokenNotAccepted e) {
       }
     }
   }
-
+    
+  }
 }
 

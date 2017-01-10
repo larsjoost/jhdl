@@ -1,19 +1,12 @@
-//============================================================================
-// Name        : jhdl.cpp
-// Author      : 
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C, Ansi-style
-//============================================================================
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "vhdl/Scanner.h"
-#include "vhdl/DesignUnit.h"
-#include "ast/Scanner.h"
+#include "vhdl/scanner/scanner.hpp"
+#include "vhdl/parser/design_file.hpp"
+#include "ast/scanner.hpp"
 
 void usage() {
   printf("jhdl -f <filename> [-v]\n");
@@ -58,18 +51,14 @@ main (int argc, char **argv)
     exit(1);
   } else {
     
-    vhdl::Scanner* s = new vhdl::Scanner(verbose);
     try {
-      s->loadFile(filename);
-
-      vhdl::DesignUnit* u = new vhdl::DesignUnit(s);
-      u->parse();
-
-      if (s->getNumberOfErrors() > 0) {
-        return 1;
-      }
+      vhdl::scanner::Scanner scanner;
+      scanner.loadFile(filename);
+      scanner.accept<vhdl::parser::DesignFile>();
     } catch (ast::FileNotFound e) {
       printf("File %s not found...\n", filename);
+    } catch (ast::SyntaxError e) {
+      return 1;
     }
   }
   

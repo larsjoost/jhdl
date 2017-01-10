@@ -1,13 +1,14 @@
 
 
-#ifndef VHDL_DEFINES_H_
-#define VHDL_DEFINES_H_
+#ifndef VHDL_SCANNER_DEFINES_H_
+#define VHDL_SCANNER_DEFINES_H_
 
 namespace vhdl {
-
-  namespace defines {
+  namespace scanner {
     
     enum VhdlKeyword {
+      VHDL_LIBRARY,
+      VHDL_USE,
       VHDL_ARCHITECTURE,
       VHDL_OF,
       VHDL_IS,

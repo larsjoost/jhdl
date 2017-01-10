@@ -1,10 +1,4 @@
-/*
- * VhdlScanner.cpp
- *
- *  Created on: 4 Jan 2017
- *      Author: lars_
- */
-
+ 
 #include <fstream>
 #include <string>
 #include <cstring>
@@ -12,8 +6,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "Scanner.h"
-#include "Text.h"
+#include "scanner.hpp"
+#include "text.hpp"
 
 namespace ast {
 
@@ -64,7 +58,7 @@ namespace ast {
   }
   
   int Scanner::match(const char* t) {
-    debug("match", t);
+    debug("mat.hpp", t);
     int len = strlen(t);
     try {
       for (int i=0; i<len; i++) {
@@ -97,6 +91,14 @@ namespace ast {
     return len;
   }
 
+  int Scanner::expect(Text& text) {
+    int size = text.remainingSize();
+    Text t = text.subString(size);
+    if (!t.equals(text)) {
+      throw UnexpectedToken(text);
+    };
+  }
+
   char Scanner::lookAhead(int n) {
     return text->lookAhead(n);
   }
@@ -106,16 +108,16 @@ namespace ast {
   }
 
   void Scanner::eat(Text& t, int size) {
-    text->subString(t, size);
+    t = text->subString(size);
     incrementPosition(size);
   }
   
   void Scanner::getText(Text& t) {
-    text->get(t);
+    t = *text;
   }
 
   void Scanner::setText(const Text& t) {
-    text->set(t);
+    *text = t;
   }
 
   int Scanner::getPosition() {
@@ -193,5 +195,6 @@ namespace ast {
   int Scanner::getNumberOfErrors() {
     return number_of_errors;
   }
+
   
 }

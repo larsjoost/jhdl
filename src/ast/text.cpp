@@ -10,7 +10,7 @@
 #include <cassert>
 #include <stdio.h>
 
-#include "Text.h"
+#include "text.hpp"
 
 namespace ast {
 
@@ -50,36 +50,17 @@ namespace ast {
     }
   }
 
-  void Text::subString(Text& t, int s) {
+  Text Text::subString(int s) {
     assert(s <= remainingSize());
-    get(t);
+    Text t = *this;
     t.size = t.position + s;
+    return t;
   }
   
   void Text::advancePosition(int n) {
     for (int i = 0; i < n; i++) {
       incrementPosition();
     }
-  }
-
-  void Text::get(Text& t) {
-    t.text = text;
-    t.position = position;
-    t.size = size;
-    t.lineNumber = lineNumber;
-    t.columnNumber = columnNumber;
-    t.lineStart = lineStart;
-    t.caseSensitive = caseSensitive;
-  }
-
-  void Text::set(const Text& t) {
-    text = t.text;
-    position = t.position;
-    size = t.size;
-    lineNumber = t.lineNumber;
-    columnNumber = t.columnNumber;
-    lineStart = t.lineStart;
-    caseSensitive = t.caseSensitive;
   }
 
   void Text::set(const char* t, int c) {

@@ -1,5 +1,5 @@
 /*
- * Text.h
+ * text.h
  *
  *  Created on: 5 Jan 2017
  *      Author: lars_
@@ -37,12 +37,10 @@ namespace ast {
     Text(int verbose);
     Text(const char* text, int caseSensitive = 0, int verbose = 0);
     
-    void get(Text& t);
-    void set(const Text& text);
     void set(const char* text, int caseSensitive = 0);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
-    void subString(Text& text, int size);
+    Text subString(int size);
     int remainingSize();
     void advancePosition(int size);
     int getLine();

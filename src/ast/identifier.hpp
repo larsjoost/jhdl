@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-#include "Text.h"
+#include "text.hpp"
 
 namespace ast {
 

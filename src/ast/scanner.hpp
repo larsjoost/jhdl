@@ -1,18 +1,19 @@
 
-#ifndef SCANNER_HPP_
-#define SCANNER_HPP_
+#ifndef AST_SCANNER_HPP_
+#define AST_SCANNER_HPP_
 
 #include <string>
 
-#include "Text.h"
-#include "identifier.h"
+#include "text.hpp"
+#include "list.hpp"
+#include "identifier.hpp"
 
 namespace ast {
 
   class UnexpectedToken {
   public:
-    const char* text;
-    UnexpectedToken(const char* t) {
+    Text text;
+    UnexpectedToken(Text t) {
       text = t;
     }
   };
@@ -26,6 +27,7 @@ namespace ast {
   class TokenNotAccepted {};
   class FileNotFound {};
   class CriticalError {};
+  class SyntaxError {};
   
   class Scanner {
 
@@ -55,9 +57,10 @@ namespace ast {
     int accept(const char *text);
     int optional(const char* text);
     int expect(const char* text);
+    int expect(Text& text);
     int match(const char* text);
     char lookAhead(int number);
-    void eat(Text& t, int size);
+    void eat(Text& text, int size);
     void incrementPosition(int size = 1);
     
     int isWhiteSpace();
@@ -75,8 +78,13 @@ namespace ast {
     void critical(const char* format, ...);
 
     int getNumberOfErrors();
-  };
-  
+
+  };  
+
+
+
 }
 
-#endif /* VHDLSCANNER_HPP_ */
+#endif
+
+    
