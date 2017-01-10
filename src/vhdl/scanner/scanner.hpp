@@ -65,7 +65,7 @@ namespace vhdl {
     T* Scanner::accept() {
       try {
         return expect<T>();
-      } catch (ast::UnexpectedToken e) {
+      } catch (ast::TokenNotAccepted e) {
       }
       return NULL;
     }

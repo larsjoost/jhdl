@@ -52,7 +52,7 @@ main (int argc, char **argv)
   } else {
     
     try {
-      vhdl::scanner::Scanner scanner;
+      vhdl::scanner::Scanner scanner = vhdl::scanner::Scanner(verbose);
       scanner.loadFile(filename);
       scanner.accept<vhdl::parser::DesignFile>();
     } catch (ast::FileNotFound e) {

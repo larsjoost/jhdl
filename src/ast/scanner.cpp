@@ -58,7 +58,7 @@ namespace ast {
   }
   
   int Scanner::match(const char* t) {
-    debug("mat.hpp", t);
+    debug("match", t);
     int len = strlen(t);
     try {
       for (int i=0; i<len; i++) {
@@ -70,22 +70,28 @@ namespace ast {
     return len;
   }
 
-  int Scanner::accept(const char* t) {
-    debug("accept", t);
-    int len = match(t);
-    text->advancePosition(len);
-    return len;
-  }
-
   int Scanner::optional(const char* t) {
     debug("optional", t);
-    return accept(t);
+    int len = match(t);
+    if (len > 0) {
+      text->advancePosition(len);
+    }
+    return len;
+  }
+  
+  int Scanner::accept(const char* t) {
+    debug("accept", t);
+    int len = optional(t);
+    if (len == 0) {
+      throw TokenNotAccepted();
+    }
+    return len;
   }
 
   int Scanner::expect(const char* t) {
     debug("expect", t);
-    int len = accept(t);
-    if (!len) {
+    int len = optional(t);
+    if (len == 0) {
       throw UnexpectedToken(t);
     }
     return len;
@@ -133,6 +139,7 @@ namespace ast {
   }
 
   int Scanner::skipWhiteSpace() {
+    debug("skipWhiteSpace");
     int i = 0;
     if (isWhiteSpace()) {
       text->incrementPosition();
@@ -142,6 +149,7 @@ namespace ast {
   }
 
   int Scanner::skipOneOrMoreWhiteSpaces() {
+    debug("skipOneOrMoreWhiteSpace");
     if (!isWhiteSpace()) {
       throw NoWhiteSpace(text->lookAhead(0));
     }
