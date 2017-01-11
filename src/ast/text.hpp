@@ -42,7 +42,8 @@ namespace ast {
     int getPosition();
     void setSize(int size);
     int equals(Text& text);
-
+    const char* toString();
+    
     void printLinePosition(FILE* output);
     void print(FILE* output = stdout);
     void debug(FILE* output = stdout);

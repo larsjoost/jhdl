@@ -1,2 +1,2 @@
 entity test is
-end entity test;
+end entity test; 

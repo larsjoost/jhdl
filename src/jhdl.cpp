@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <exception>
+#include <iostream>
 #include "parser/design_file.hpp"
 
 void usage() {
@@ -46,7 +47,10 @@ main (int argc, char **argv)
   try {
     parser::DesignFile designFile = parser::DesignFile(filename, verbose);
     return 0;
-  } catch (...) {
+  } catch (const std::exception &e) {
+    if (verbose) {
+      std::cerr << e.what();
+    }
   }
 
   return 1;

@@ -62,7 +62,8 @@ namespace ast {
     int len = strlen(t);
     try {
       for (int i=0; i<len; i++) {
-        if (!compare(text->lookAhead(i), t[i])) {
+        char a = text->lookAhead(i);
+        if (!compare(a, t[i])) {
           return 0;
         }
       }
@@ -92,6 +93,7 @@ namespace ast {
     debug("expect", t);
     int len = optional(t);
     if (len == 0) {
+      error("Expected '%s'\n", t);
       throw UnexpectedToken(t);
     }
     return len;
@@ -101,9 +103,10 @@ namespace ast {
     int size = t.remainingSize();
     Text a = text->subString(size);
     if (!a.equals(t)) {
-      error("Expected: ");
-      t.print(stderr);
+      error("Expected '%s', but found '%s'", t.toString(), a.toString());
       throw UnexpectedToken(t);
+    } else {
+      incrementPosition(size);
     };
   }
 
@@ -143,7 +146,7 @@ namespace ast {
   int Scanner::skipWhiteSpace() {
     debug("skipWhiteSpace");
     int i = 0;
-    if (isWhiteSpace()) {
+    while (isWhiteSpace()) {
       text->incrementPosition();
       i++;
     }

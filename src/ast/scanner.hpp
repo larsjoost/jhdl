@@ -3,6 +3,7 @@
 #define AST_SCANNER_HPP_
 
 #include <string>
+#include <exception>
 
 #include "text.hpp"
 #include "list.hpp"
@@ -17,7 +18,7 @@ namespace ast {
       text = t;
     }
   };
-  class ExpectFailed {};
+  class ExpectFailed : public std::exception  {};
 
   class NoWhiteSpace {
   public:
@@ -26,10 +27,10 @@ namespace ast {
       letter = c;
     }
   };
-  class TokenNotAccepted {};
-  class FileNotFound {};
-  class CriticalError {};
-  class SyntaxError {};
+  class TokenNotAccepted : public std::exception {};
+  class FileNotFound : public std::exception  {};
+  class CriticalError : public std::exception  {};
+  class SyntaxError : public std::exception  {};
   
   class Scanner {
 

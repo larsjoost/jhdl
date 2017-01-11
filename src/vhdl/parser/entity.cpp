@@ -1,4 +1,4 @@
-
+#include <cassert>
 #include "../scanner/defines.hpp"
 #include "../scanner/scanner.hpp"
 #include "entity.hpp"

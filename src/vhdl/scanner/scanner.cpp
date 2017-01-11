@@ -22,14 +22,14 @@ namespace vhdl {
     
   static const VhdlKeywordInfo* getVhdlKeywordInfo(int i) {
     static const VhdlKeywordInfo VHDL_KEYWORD_INFO[NUMBER_OF_VHDL_KEYWORDS] {
-      {VHDL_LIBRARY, "library", VHDL_1987},
-      {VHDL_USE, "use", VHDL_1987},
-      {VHDL_ARCHITECTURE, "architecture", VHDL_1987},
-      {VHDL_OF, "of", VHDL_1987},
-      {VHDL_IS, "is", VHDL_1987},
-      {VHDL_BEGIN, "begin", VHDL_1987},
-      {VHDL_END, "end", VHDL_1987},
-      {VHDL_ENTITY, "entity", VHDL_1987}
+      {VHDL_LIBRARY, (char *)"library", VHDL_1987},
+      {VHDL_USE, (char *)"use", VHDL_1987},
+      {VHDL_ARCHITECTURE, (char *)"architecture", VHDL_1987},
+      {VHDL_OF, (char *)"of", VHDL_1987},
+      {VHDL_IS, (char *)"is", VHDL_1987},
+      {VHDL_BEGIN, (char *)"begin", VHDL_1987},
+      {VHDL_END, (char *)"end", VHDL_1987},
+      {VHDL_ENTITY, (char *)"entity", VHDL_1987}
     };
     assert(i < NUMBER_OF_VHDL_KEYWORDS);
     return &VHDL_KEYWORD_INFO[i];

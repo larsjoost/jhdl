@@ -70,7 +70,7 @@ namespace vhdl {
       try {
 	T* p = new T();
 	return p->parse(this);
-      } catch (...) {
+      } catch (ast::TokenNotAccepted e) {
       }
       return NULL;
     }

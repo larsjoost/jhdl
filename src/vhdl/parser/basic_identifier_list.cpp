@@ -11,7 +11,7 @@ namespace vhdl {
       i = scanner->expect<BasicIdentifier>();
       textList.add(&i->text);
       scanner->skipWhiteSpaceAndComments();
-      while (scanner->optional(",")) {
+      while (scanner->optional(".")) {
         scanner->skipWhiteSpaceAndComments();
         i = scanner->expect<BasicIdentifier>();
         textList.add(&i->text);

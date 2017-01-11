@@ -53,7 +53,7 @@ namespace ast {
   Text Text::subString(int s) {
     assert(s <= remainingSize());
     Text t = *this;
-    t.size = t.position + s;
+    t.size = t.position + s - 1;
     return t;
   }
   
@@ -75,7 +75,7 @@ namespace ast {
 
   char Text::lookAhead(int n) {
     int i = position + n;
-    if (i >= size) {
+    if (i > size) {
       throw TextEof();
     }
     return text[i];
@@ -94,7 +94,7 @@ namespace ast {
   }
 
   void Text::setSize(int s) {
-    size = s;
+    size = s - 1;
   }
 
   char Text::toLower(char a) {
@@ -105,7 +105,7 @@ namespace ast {
   }
 
   int Text::remainingSize() {
-    return size - position;
+    return size - position + 1;
   }
   
   int Text::equals(Text& t) {
@@ -155,6 +155,16 @@ namespace ast {
   void Text::debug(FILE* output) {
     fprintf(output, "Text::position = %u\n", position);
     fprintf(output, "Text::size = %u\n", size);
+  }
+
+  const char* Text::toString() {
+    int size = remainingSize();
+    char* a = new char[size + 1];
+    for (int i = 0; i < size; i++) {
+      a[i] = lookAhead(i);
+    }
+    a[size] = '\0';
+    return a;
   }
 
 }
