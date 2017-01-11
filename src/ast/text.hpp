@@ -1,12 +1,6 @@
-/*
- * text.h
- *
- *  Created on: 5 Jan 2017
- *      Author: lars_
- */
 
-#ifndef SRC_AST_TEXT_H_
-#define SRC_AST_TEXT_H_
+#ifndef AST_TEXT_H_
+#define AST_TEXT_H_
 
 #include <stdio.h>
 
@@ -56,4 +50,4 @@ namespace ast {
   
 }
 
-#endif /* SRC_AST_TEXT_H_ */
+#endif

@@ -7,7 +7,7 @@
 namespace vhdl {
   namespace parser {
   
-    void Architecture::parse(scanner::Scanner* scanner) {
+    Architecture* Architecture::parse(scanner::Scanner* scanner) {
       scanner->skipWhiteSpaceAndComments();
       scanner->accept(scanner::VHDL_ARCHITECTURE);
       scanner->skipOneOrMoreWhiteSpaces();
@@ -32,6 +32,7 @@ namespace vhdl {
       scanner->expect(architectureName);
       scanner->skipWhiteSpace();
       scanner->expect(";");
+      return this;
     }
     
   }

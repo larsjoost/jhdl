@@ -6,9 +6,10 @@
 namespace vhdl {
   namespace parser {
   
-    void ContextClause::parse(scanner::Scanner* scanner) {
+    ContextClause* ContextClause::parse(scanner::Scanner* scanner) {
       scanner->skipWhiteSpaceAndComments();
-      useClauses.add(scanner->accept<UseClause>());
+      useClauses.add(scanner->optional<UseClause>());
+      return this;
     }
     
   }

@@ -12,7 +12,7 @@ namespace vhdl {
     
     public:
 
-      void parse(scanner::Scanner* s);
+      UseClause* parse(scanner::Scanner* s);
 
     };
   }

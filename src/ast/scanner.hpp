@@ -17,6 +17,8 @@ namespace ast {
       text = t;
     }
   };
+  class ExpectFailed {};
+
   class NoWhiteSpace {
   public:
     char letter;

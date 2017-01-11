@@ -13,7 +13,7 @@ namespace vhdl {
 	
     public:
 
-      void parse(scanner::Scanner* s);
+      Entity* parse(scanner::Scanner* s);
 
     };
     

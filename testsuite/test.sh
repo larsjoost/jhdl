@@ -6,42 +6,56 @@ TEST_SCRIPT_NAME=test.sh
 
 RESULT=0
 
-echo "Test cases that is expected to succeed"
+TEST=("success" "failure")
 
-SUCCESS_TEST=$(find success/ -name $TEST_SCRIPT_NAME)
+red=1
+green=2
 
-for i in $SUCCESS_TEST; do
-    DIR=${i%/*}
-    cd $WORKDIR/$DIR
-    ./${TEST_SCRIPT_NAME} > /dev/null
-    EXIT_VALUE=$?
-    echo -n "$i "
-    if [ $EXIT_VALUE -eq 0 ]; then
-        echo "[SUCCESS]"
+function echo_color {
+    color=$(tput setaf $1)
+    reset=$(tput sgr0)
+    echo "$(tput setaf $1)$2$(tput sgr0)"
+}
+
+for t in ${TEST[@]}; do
+
+    cd $WORKDIR
+    
+    echo "Test case expect result = $t"
+
+    TEST_RUNS=$(find "$t/" -name $TEST_SCRIPT_NAME)
+
+    if [ "$t" == "success" ]; then
+	EXPECTED_EXIT_VALUE=0
     else
-        echo "[FAILURE]"
-        RESULT=1
+	EXPECTED_EXIT_VALUE=1
     fi
+    
+    for i in $TEST_RUNS; do
+	DIR=${i%/*}
+	cd $WORKDIR/$DIR
+	ERROR_MESSAGE=$(./${TEST_SCRIPT_NAME} 2>&1 > /dev/null)
+	EXIT_VALUE=$?
+	echo -n "$i "
+	if [ "$t" == "success" ]; then
+	    if [ -n "$ERROR_MESSAGE" ]; then
+	       echo -n "Unexpected error message, "
+	       RESULT=1
+	    fi
+	else
+	    if [ -z "$ERROR_MESSAGE" ]; then
+	       echo -n "No error message, "
+	       RESULT=1
+	    fi
+
+	fi
+	if [ $EXIT_VALUE -eq $EXPECTED_EXIT_VALUE ]; then
+            echo_color "[SUCCESS]" $red
+	else
+            echo_color "[FAILURE]" $green
+            RESULT=1
+	fi
+    done
 done
-
-cd $WORKDIR
-
-echo "Test cases that is expected to fail"
-
-FAILURE_TEST=$(find failure/ -name $TEST_SCRIPT_NAME)
-
-for i in $FAILURE_TEST; do
-    DIR=${i%/*}
-    cd $WORKDIR/$DIR
-    ./${TEST_SCRIPT_NAME} > /dev/null
-    EXIT_VALUE=$?
-    echo -n "$i "
-    if [ $EXIT_VALUE -ne 0 ]; then
-        echo "[SUCCESS]"
-    else
-        echo "[FAILURE]"
-        RESULT=1
-    fi
-done
-
+    
 exit $RESULT

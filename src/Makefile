@@ -1,4 +1,5 @@
 SOURCE := $(shell find ./ -type f -iname '*.cpp' -print)
+INCLUDE := $(shell find ./ -type f -iname '*.hpp' -print)
 CXXFLAGS := -std=c++11 -Wno-write-strings -g
 # CXX = g++
 
@@ -8,7 +9,7 @@ OBJ=jhdl.o
 
 all: jhdl
 
-jhdl: $(SOURCE)
+jhdl: $(SOURCE) $(INCLUDE)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(FLAGS)
 
 

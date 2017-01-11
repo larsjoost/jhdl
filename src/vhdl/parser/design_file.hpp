@@ -11,8 +11,8 @@ namespace vhdl {
       public ast::DesignFile {
 
     public:
-
-      void parse(scanner::Scanner* s);
+      
+      DesignFile* parse(scanner::Scanner* s);
     
     };
 

@@ -47,7 +47,6 @@ namespace vhdl {
       using ::ast::Scanner::skipOneOrMoreWhiteSpaces;
 
       template<typename T> T* expect();
-      template<typename T> T* accept();
       template<typename T> T* optional();
       template<typename T> ::ast::List<T*>* zeroOrMore();
       template<typename T> ::ast::List<T*>* oneOrMore();
@@ -57,24 +56,21 @@ namespace vhdl {
     template<typename T>
     T* Scanner::expect() {
       T* p = new T();
+      int position = getPosition();
       p->parse(this);
+      if (getPosition() == position) {
+	error("Expected something else");
+	throw ast::ExpectFailed();
+      }
       return p; 
     }
 
     template<typename T>
-    T* Scanner::accept() {
-      try {
-        return expect<T>();
-      } catch (ast::TokenNotAccepted e) {
-      }
-      return NULL;
-    }
-    
-    template<typename T>
     T* Scanner::optional() {
       try {
-        return expect<T>();
-      } catch (ast::UnexpectedToken e) {
+	T* p = new T();
+	return p->parse(this);
+      } catch (...) {
       }
       return NULL;
     }

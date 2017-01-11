@@ -97,11 +97,13 @@ namespace ast {
     return len;
   }
 
-  int Scanner::expect(Text& text) {
-    int size = text.remainingSize();
-    Text t = text.subString(size);
-    if (!t.equals(text)) {
-      throw UnexpectedToken(text);
+  int Scanner::expect(Text& t) {
+    int size = t.remainingSize();
+    Text a = text->subString(size);
+    if (!a.equals(t)) {
+      error("Expected: ");
+      t.print(stderr);
+      throw UnexpectedToken(t);
     };
   }
 
@@ -151,6 +153,7 @@ namespace ast {
   int Scanner::skipOneOrMoreWhiteSpaces() {
     debug("skipOneOrMoreWhiteSpace");
     if (!isWhiteSpace()) {
+      error("Expected white-space");
       throw NoWhiteSpace(text->lookAhead(0));
     }
     return skipWhiteSpace();

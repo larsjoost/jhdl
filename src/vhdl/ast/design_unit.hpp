@@ -12,9 +12,9 @@ namespace vhdl {
     class DesignUnit {
       
     public:
-      ContextClause contextClause;
-      Entity entity;
-      Architecture architecture;
+      ContextClause* contextClause = NULL;
+      Entity* entity = NULL;
+      Architecture* architecture = NULL;
 
     };
 

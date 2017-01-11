@@ -126,7 +126,6 @@ namespace ast {
    try {
       char a;
       int i = lineStart - position;
-      fprintf(output, "%u: ", lineNumber);
       do {
         a = lookAhead(i++);
         fputc(a, output);
@@ -136,13 +135,7 @@ namespace ast {
   }
 
   void Text::printCurrentLinePositionMarker(FILE* output) {
-    fprintf(output, "   ");
-    int i = lineNumber;
-    while (i > 0) {
-      i /= 10;
-      fputc(' ', output);
-    }
-    for (i = 0; i < (position - lineStart); i++) {
+    for (int i = 0; i < (position - lineStart); i++) {
       fputc(' ', output);
     }
     fprintf(output, "^\n");

@@ -6,7 +6,7 @@
 namespace vhdl {
   namespace parser {
   
-    void UseClause::parse(scanner::Scanner* scanner) {
+    UseClause* UseClause::parse(scanner::Scanner* scanner) {
       scanner->skipWhiteSpaceAndComments();
       scanner->accept(scanner::VHDL_USE);
       scanner->skipOneOrMoreWhiteSpaces();
@@ -15,6 +15,7 @@ namespace vhdl {
       list = i->textList;
       scanner->skipWhiteSpace();
       scanner->expect(";");
+      return this;
     }
     
   }

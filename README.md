@@ -16,4 +16,8 @@ VHDL and Verilog formatted filename dependency list. Could be used to generate f
 
 The code is written for maintainability and should be easily expandable since it uses the visitor pattern.
 
-Regression tests are located in testsuite directory. 
+Source code are located in ./src
+
+Unit tests are located in ./test
+
+Regression tests are located in ./testsuite

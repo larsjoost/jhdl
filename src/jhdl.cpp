@@ -4,9 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "vhdl/scanner/scanner.hpp"
-#include "vhdl/parser/design_file.hpp"
-#include "ast/scanner.hpp"
+#include "parser/design_file.hpp"
 
 void usage() {
   printf("jhdl -f <filename> [-v]\n");
@@ -44,23 +42,12 @@ main (int argc, char **argv)
         abort ();
       }
   }
-  
-  if (filename == NULL) {
-    fprintf(stderr, "File name is not specified\n");
-    usage();
-    exit(1);
-  } else {
-    
-    try {
-      vhdl::scanner::Scanner scanner = vhdl::scanner::Scanner(verbose);
-      scanner.loadFile(filename);
-      scanner.accept<vhdl::parser::DesignFile>();
-    } catch (ast::FileNotFound e) {
-      printf("File %s not found...\n", filename);
-    } catch (ast::SyntaxError e) {
-      return 1;
-    }
+
+  try {
+    parser::DesignFile designFile = parser::DesignFile(filename, verbose);
+    return 0;
+  } catch (...) {
   }
-  
-  return 0;
+
+  return 1;
 }
