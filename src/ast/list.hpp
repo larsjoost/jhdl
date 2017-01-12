@@ -7,8 +7,8 @@
 namespace ast {
 
   template<class T> class List {
-    std::list<T> list;
   public:
+    std::list<T> list;
     void add(T* t);
   };
 

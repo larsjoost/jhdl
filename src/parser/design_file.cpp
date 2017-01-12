@@ -3,7 +3,7 @@
 #include "../ast/scanner.hpp"
 #include "../ast/text.hpp"
 #include "../vhdl/scanner/scanner.hpp"
-#include "../vhdl/parser/design_file.hpp"
+#include "../vhdl/parser/design_unit.hpp"
 
 namespace parser {
 
@@ -16,7 +16,9 @@ namespace parser {
       try {
 	vhdl::scanner::Scanner scanner = vhdl::scanner::Scanner(verbose);
 	scanner.loadFile(filename);
-	scanner.optional<vhdl::parser::DesignFile>();
+        while (true) {
+          designUnits.add(scanner.expect<vhdl::parser::DesignUnit>());
+        }
       } catch (ast::TextEof e) {
       }
     }

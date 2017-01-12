@@ -1,12 +1,14 @@
 
+#include "../ast/design_file.hpp"
+
 namespace parser {
 
   class FileNotFound {};
   
-  class DesignFile {
+  class DesignFile :
+    public ::ast::DesignFile {
 
   public:
-    const char* filename;
     
     DesignFile (const char* filename, int verbose = 0);
 

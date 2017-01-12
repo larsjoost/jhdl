@@ -2,13 +2,13 @@
 #define VHDL_PARSER_USECLAUSE_H_
 
 #include "../scanner/scanner.hpp"
-#include "../ast/use_clause.hpp"
+#include "../../ast/use_clause.hpp"
 
 namespace vhdl {
   namespace parser {
     
     class UseClause :
-      public ast::UseClause {
+      public ::ast::UseClause {
     
     public:
 

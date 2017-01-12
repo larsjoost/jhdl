@@ -2,13 +2,13 @@
 #define VHDL_PARSER_DESIGNFILE_HPP_
 
 #include "../scanner/scanner.hpp"
-#include "../ast/design_file.hpp"
+#include "../../ast/design_file.hpp"
 
 namespace vhdl {
   namespace parser {
   
     class DesignFile :
-      public ast::DesignFile {
+      public ::ast::DesignFile {
 
     public:
       

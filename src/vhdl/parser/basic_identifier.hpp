@@ -2,13 +2,13 @@
 #define VHDL_PARSER_BASICIDENTIFIER_H_
 
 #include "../scanner/scanner.hpp"
-#include "../ast/basic_identifier.hpp"
+#include "../../ast/basic_identifier.hpp"
 
 namespace vhdl {
   namespace parser {
     
     class BasicIdentifier :
-      public ast::BasicIdentifier {
+      public ::ast::BasicIdentifier {
     
     public:
 

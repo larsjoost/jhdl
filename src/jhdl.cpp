@@ -6,6 +6,7 @@
 #include <exception>
 #include <iostream>
 #include "parser/design_file.hpp"
+#include "generator/design_file.hpp"
 #include "ast/scanner.hpp"
 
 void usage() {
@@ -46,7 +47,8 @@ main (int argc, char **argv)
   }
 
   try {
-    parser::DesignFile designFile = parser::DesignFile(filename, verbose);
+    parser::DesignFile parserDesignFile = parser::DesignFile(filename, verbose);
+    generator::DesignFile generatorDesignFile = generator::DesignFile(parserDesignFile);
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {
