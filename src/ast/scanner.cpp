@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <iostream>
 
 #include "scanner.hpp"
 #include "text.hpp"
@@ -17,12 +18,6 @@ namespace ast {
     text = new Text(v);
   }
 
-  void Scanner::debug(const char* msg, const char* a) {
-    if (verbose) {
-      printf("ast::Scanner.cpp: %s = %s\n", msg, a);
-    }
-  }
-  
   void Scanner::setText(const char* s) {
     text->set(s);
   }
@@ -31,7 +26,7 @@ namespace ast {
     if (verbose) {
       printf("Reading file %s\n", filename);
     }
-    this->filename = filename;
+    this->filename = std::string(filename);
     FILE *f = fopen(filename, "rb");
     if (f != NULL) {
       fseek(f, 0, SEEK_END);
@@ -58,7 +53,7 @@ namespace ast {
   }
   
   int Scanner::match(const char* t) {
-    debug("match", t);
+    DEBUG("match " + std::string(t));
     int len = strlen(t);
     try {
       for (int i=0; i<len; i++) {
@@ -72,7 +67,7 @@ namespace ast {
   }
 
   int Scanner::optional(const char* t) {
-    debug("optional", t);
+    DEBUG("optional " + std::string(t));
     int len = match(t);
     if (len > 0) {
       text->advancePosition(len);
@@ -81,7 +76,7 @@ namespace ast {
   }
   
   int Scanner::accept(const char* t) {
-    debug("accept", t);
+    DEBUG("accept" + std::string(t));
     int len = optional(t);
     if (len == 0) {
       throw TokenNotAccepted();
@@ -90,11 +85,10 @@ namespace ast {
   }
 
   int Scanner::expect(const char* t) {
-    debug("expect", t);
+    DEBUG("expect" + std::string(t));
     int len = optional(t);
     if (len == 0) {
-      error("Expected '%s'\n", t);
-      throw UnexpectedToken(t);
+      error("Expected '" + std::string(t));
     }
     return len;
   }
@@ -103,8 +97,7 @@ namespace ast {
     int size = t.remainingSize();
     Text a = text->subString(size);
     if (!a.equals(t)) {
-      error("Expected '%s', but found '%s'", t.toString(), a.toString());
-      throw UnexpectedToken(t);
+      error("Expected '" + t.toString() + "', but found '" + a.toString());
     } else {
       incrementPosition(size);
     };
@@ -144,7 +137,7 @@ namespace ast {
   }
 
   int Scanner::skipWhiteSpace() {
-    debug("skipWhiteSpace");
+    DEBUG("skipWhiteSpace");
     int i = 0;
     while (isWhiteSpace()) {
       text->incrementPosition();
@@ -154,10 +147,9 @@ namespace ast {
   }
 
   int Scanner::skipOneOrMoreWhiteSpaces() {
-    debug("skipOneOrMoreWhiteSpace");
+    DEBUG("skipOneOrMoreWhiteSpace");
     if (!isWhiteSpace()) {
       error("Expected white-space");
-      throw NoWhiteSpace(text->lookAhead(0));
     }
     return skipWhiteSpace();
   }
@@ -171,38 +163,27 @@ namespace ast {
     return i;
   }
 
-  void Scanner::print(const char* severity, const char* format, ...) {
-    fprintf(stderr, "#%s in file %s at %i, %i: ", severity,
-            filename, text->getLine(), text->getColumn());
-    va_list argptr;
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
-    va_end(argptr);
-    fprintf(stderr, "\n");
-    text->printLinePosition(stderr);
+  void Scanner::print(const std::string &severity, const std::string &text) {
+    std::cerr << severity << " in file " << filename << " at "
+	      << std::to_string(this->text->getLine()) << ", "
+	      << std::to_string(this->text->getColumn()) << ": "
+	      << text << std::endl;
+    this->text->printLinePosition(stderr);
   }
 
-  void Scanner::error(const char* format, ...)
+  void Scanner::error(const std::string &s)
   {
     number_of_errors++;
-    va_list argptr;
-    va_start(argptr, format);
-    print("error", format, argptr);
-    va_end(argptr);
+    print("error", s);
+    throw SyntaxError();
   }
 
-  void Scanner::warning(const char* format, ...) {
-    va_list argptr;
-    va_start(argptr, format);
-    print("warning", format, argptr);
-    va_end(argptr);
+  void Scanner::warning(const std::string &s) {
+    print("warning", s);
   }
   
-  void Scanner::critical(const char* format, ...) {
-    va_list argptr;
-    va_start(argptr, format);
-    print("critical", format, argptr);
-    va_end(argptr);
+  void Scanner::critical(const std::string &s) {
+    print("critical", s);
     throw CriticalError();
   }
 

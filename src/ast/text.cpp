@@ -157,9 +157,10 @@ namespace ast {
     fprintf(output, "Text::size = %u\n", size);
   }
 
-  const char* Text::toString() {
+  const std::string Text::toString() {
     int size = remainingSize();
-    char* a = new char[size + 1];
+    std::string a;
+    a.reserve(size + 1);
     for (int i = 0; i < size; i++) {
       a[i] = lookAhead(i);
     }

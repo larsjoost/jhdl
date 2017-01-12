@@ -6,6 +6,7 @@
 #include <exception>
 #include <iostream>
 #include "parser/design_file.hpp"
+#include "ast/scanner.hpp"
 
 void usage() {
   printf("jhdl -f <filename> [-v]\n");
@@ -47,6 +48,10 @@ main (int argc, char **argv)
   try {
     parser::DesignFile designFile = parser::DesignFile(filename, verbose);
     return 0;
+  } catch (const ast::SyntaxError &e) {
+    if (verbose) {
+      std::cerr << "Syntax error" << std::endl;
+    }
   } catch (const std::exception &e) {
     if (verbose) {
       std::cerr << e.what();

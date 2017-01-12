@@ -57,12 +57,7 @@ namespace vhdl {
 
   void Scanner::expect(VhdlKeyword keyword) {
     const char* a = keywordLookup(keyword);
-    try {
-      expect(a);
-    } catch (ast::UnexpectedToken e) {
-      error("Expected keyword %s", a);
-      throw e;
-    }
+    expect(a);
   }
 
   int Scanner::optional(VhdlKeyword keyword) {

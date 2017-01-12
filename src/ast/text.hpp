@@ -3,6 +3,7 @@
 #define AST_TEXT_H_
 
 #include <stdio.h>
+#include <string>
 
 namespace ast {
 
@@ -42,7 +43,7 @@ namespace ast {
     int getPosition();
     void setSize(int size);
     int equals(Text& text);
-    const char* toString();
+    const std::string toString();
     
     void printLinePosition(FILE* output);
     void print(FILE* output = stdout);

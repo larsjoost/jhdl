@@ -9,6 +9,8 @@
 #include "list.hpp"
 #include "identifier.hpp"
 
+#define DEBUG_ENABLE
+
 namespace ast {
 
   class UnexpectedToken {
@@ -36,13 +38,21 @@ namespace ast {
 
   private:
     Text* text;
-    const char* filename = "";
+    std::string filename;
     
     int number_of_errors = 0;
     
-    void print(const char* severity, const char* format, ...);
+    void print(const std::string &severity, const std::string &message);
 
-    void debug(const char* msg, const char* a = '\0');
+#ifdef DEBUG_ENABLE
+#define DEBUG(x) do {						   \
+      if (verbose) {						   \
+	std::cerr << "ast::Scanner.cpp: " << x << std::endl;	   \
+      }} while(false)
+#else
+#define DEBUG(x) 
+#endif
+    void debug(const std::string &message);
 
     int caseSensitive;
     
@@ -76,9 +86,9 @@ namespace ast {
     void getText(Text& t);
     void setText(const Text& t);
     
-    void warning(const char* format, ...);
-    void error(const char* format, ...);
-    void critical(const char* format, ...);
+    void warning(const std::string &s);
+    void error(const std::string &s);
+    void critical(const std::string &s);
 
     int getNumberOfErrors();
 
