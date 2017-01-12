@@ -97,7 +97,7 @@ namespace ast {
     int size = t.remainingSize();
     Text a = text->subString(size);
     if (!a.equals(t)) {
-      error("Expected '" + t.toString() + "', but found '" + a.toString());
+      error("Expected '" + t.toString() + "'");
     } else {
       incrementPosition(size);
     };

@@ -9,6 +9,7 @@
 #include <cctype>
 #include <cassert>
 #include <stdio.h>
+#include <algorithm>
 
 #include "text.hpp"
 
@@ -53,7 +54,7 @@ namespace ast {
   Text Text::subString(int s) {
     assert(s <= remainingSize());
     Text t = *this;
-    t.size = t.position + s - 1;
+    t.size = t.position + s;
     return t;
   }
   
@@ -75,7 +76,7 @@ namespace ast {
 
   char Text::lookAhead(int n) {
     int i = position + n;
-    if (i > size) {
+    if (i >= size) {
       throw TextEof();
     }
     return text[i];
@@ -94,7 +95,7 @@ namespace ast {
   }
 
   void Text::setSize(int s) {
-    size = s - 1;
+    size = s;
   }
 
   char Text::toLower(char a) {
@@ -105,7 +106,7 @@ namespace ast {
   }
 
   int Text::remainingSize() {
-    return size - position + 1;
+    return size - position;
   }
   
   int Text::equals(Text& t) {
@@ -159,13 +160,12 @@ namespace ast {
 
   const std::string Text::toString() {
     int size = remainingSize();
-    std::string a;
-    a.reserve(size + 1);
+    std::string s;
     for (int i = 0; i < size; i++) {
-      a[i] = lookAhead(i);
+      s += lookAhead(i);
     }
-    a[size] = '\0';
-    return a;
+    s += '\0';
+    return s;
   }
 
 }
