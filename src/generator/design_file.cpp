@@ -14,7 +14,8 @@ namespace generator {
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     for (ast::DesignUnit d : designFile.designUnits.list) {
       if (d.architecture) {
-        std::string name = d.architecture->architectureName.toString();
+        std::string name = d.architecture->entityName.toString();
+        std::cout << "#include \"systemc.h\"" << std::endl << std::endl;
         std::cout << "SC_MODULE(" << name << ")" << std::endl;
         std::cout << "{" << std::endl;
         std::cout << "};" << std::endl;

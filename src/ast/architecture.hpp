@@ -3,6 +3,7 @@
 #define AST_ARCHITECTURE_H_
 
 #include "text.hpp"
+#include "list.hpp"
 
 namespace ast {
     
@@ -12,7 +13,8 @@ namespace ast {
     
     Text entityName;
     Text architectureName;
-
+    List<Text> port; 
+    
   };
 
 }

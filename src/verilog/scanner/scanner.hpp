@@ -1,6 +1,6 @@
 
-#ifndef VHDL_SCANNER_SCANNER_H_
-#define VHDL_SCANNER_SCANNER_H_
+#ifndef VERILOG_SCANNER_SCANNER_H_
+#define VERILOG_SCANNER_SCANNER_H_
 
 #include <array>
 
@@ -9,7 +9,7 @@
 #include "../../ast/list.hpp"
 #include "defines.hpp"
 
-namespace vhdl {
+namespace verilog {
   namespace scanner {
   
     class BasicIdentifier : public ::ast::Identifier {
@@ -27,11 +27,11 @@ namespace vhdl {
 
       Scanner(int verbose = 0);
     
-      void accept(VhdlKeyword keyword);
+      void accept(VerilogKeyword keyword);
       int accept(BasicIdentifier& i);
-      void expect(VhdlKeyword keyword);
+      void expect(VerilogKeyword keyword);
       void expect(BasicIdentifier& i);
-      int optional(VhdlKeyword keyword);
+      int optional(VerilogKeyword keyword);
       
       void skipWhiteSpaceAndComments();
       
@@ -92,7 +92,6 @@ namespace vhdl {
       list->add(a);
       return list;
     }
-    
 
   }
 }

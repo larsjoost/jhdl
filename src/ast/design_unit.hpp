@@ -14,7 +14,7 @@ namespace ast {
     ContextClause* contextClause = NULL;
     Entity* entity = NULL;
     Architecture* architecture = NULL;
-
+    
   };
 
 }

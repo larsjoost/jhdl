@@ -93,9 +93,7 @@ namespace ast {
     int getNumberOfErrors();
 
   };  
-
-
-
+  
 }
 
 #endif

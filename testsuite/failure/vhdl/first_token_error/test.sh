@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ../../envsetup.sh
+source ../../../envsetup.sh
 
 analyse test.vhdl
