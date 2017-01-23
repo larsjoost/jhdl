@@ -107,7 +107,8 @@ namespace ast {
           std::cout << "Optional: " << typeid(p).name() << std::endl;
         }
         return p->parse(this);
-      } catch (ast::TokenNotAccepted e) {
+      } catch (TokenNotAccepted e) {
+      } catch (ExpectFailed e) {
       }
       return NULL;
     }
@@ -176,15 +177,14 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::match(const char* a) {
-    DEBUG("match " + std::string(a));
+    DEBUG("match '" + std::string(a) + "'");
     int len = strlen(a);
     try {
       for (int i=0; i<len; i++) {
         Token* t = tokenLookAhead(i);
-        if (t->type != TOKEN_SPECIAL_CHARACTER) {
-          return 0;
-        }
-        if (t->text.lookAhead(0) != a[i]) {
+        DEBUG("Token = " + toString(t));
+        if ((t->type != TOKEN_SPECIAL_CHARACTER) ||
+            (t->text.lookAhead(0) != a[i])) {
           return 0;
         }
       }
@@ -194,8 +194,8 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::optional(const char* t) {
-    DEBUG("optional " + std::string(t));
     int len = match(t);
+    DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
     if (len > 0) {
       nextToken(len);
     }

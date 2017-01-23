@@ -320,7 +320,7 @@ namespace ast {
       a = text->lookAhead(++i);
     } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
-    t->type = TOKEN_IDENTIFIER;
+    t->type = TOKEN_NUMBER;
     text->subString(t->text, i);
     if (verbose) {
       std::cout << "Found number = " << t->text.toString() << std::endl;
@@ -353,7 +353,6 @@ namespace ast {
   void TokenScanner<ApplicationSpecificScanner>::setText(const char* s) {
     text->set(s);
     tokenize();
-    std::cout << "TOKENIZE DONE!" << std::endl;
     if (verbose) {
       std::cout << "TOKENLIST:" << std::endl;
       for (int i=0; i<tokenInfo.size; i++) {

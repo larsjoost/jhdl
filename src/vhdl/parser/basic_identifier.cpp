@@ -7,7 +7,7 @@ namespace vhdl {
   
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      scanner->expect(::ast::TOKEN_IDENTIFIER);
+      scanner->accept(::ast::TOKEN_IDENTIFIER);
     }
     
   }

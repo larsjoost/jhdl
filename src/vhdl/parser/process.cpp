@@ -13,16 +13,16 @@ namespace vhdl {
     Process* Process::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_IS);
       scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       parseBody(scanner);
       scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_END);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       if (scanner->optional(scanner::Scanner::VHDL_PROCESS)) {
-        scanner->skipOneOrMoreWhiteSpaces();
+        scanner->skipWhiteSpace();
       };
       scanner->expect(";");
       return this;
