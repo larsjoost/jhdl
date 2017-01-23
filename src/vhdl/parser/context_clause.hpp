@@ -2,6 +2,7 @@
 #ifndef VHDL_PARSER_CONTEXTCLAUSE_H_
 #define VHDL_PARSER_CONTEXTCLAUSE_H_
 
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/context_clause.hpp"
 
@@ -13,7 +14,7 @@ namespace vhdl {
 	
     public:
 
-      ContextClause* parse(scanner::Scanner* s);
+      ContextClause* parse(::ast::Scanner<scanner::Scanner>* scanner);
 
     };
     

@@ -4,94 +4,53 @@
 
 #include <array>
 
-#include "../../ast/scanner.hpp"
-#include "../../ast/identifier.hpp"
-#include "../../ast/list.hpp"
-#include "defines.hpp"
+#include "../../ast/token_scanner.hpp"
 
 namespace verilog {
   namespace scanner {
-  
-    class BasicIdentifier : public ::ast::Identifier {
-    public:
-      using ::ast::Identifier::equals;
-      using ::ast::Identifier::print;
-      using ::ast::Identifier::debug;
-    };
-
-    class Scanner : public ::ast::Scanner {
-  
-    public:
     
-      int verbose;
-
-      Scanner(int verbose = 0);
-    
-      void accept(VerilogKeyword keyword);
-      int accept(BasicIdentifier& i);
-      void expect(VerilogKeyword keyword);
-      void expect(BasicIdentifier& i);
-      int optional(VerilogKeyword keyword);
+    class Scanner {
       
-      void skipWhiteSpaceAndComments();
+    public:
       
-      using ::ast::Scanner::getPosition;
-      using ::ast::Scanner::accept;
-      using ::ast::Scanner::expect;
-      using ::ast::Scanner::optional;
-      using ::ast::Scanner::getText;
-      using ::ast::Scanner::lookAhead;
-      using ::ast::Scanner::eat;
-      using ::ast::Scanner::incrementPosition;
-      using ::ast::Scanner::getNumberOfErrors;
-      using ::ast::Scanner::skipOneOrMoreWhiteSpaces;
-
-      template<typename T> T* expect();
-      template<typename T> T* optional();
-      template<typename T> ::ast::List<T*>* zeroOrMore();
-      template<typename T> ::ast::List<T*>* oneOrMore();
-
-    };
-
-    template<typename T>
-    T* Scanner::expect() {
-      T* p = new T();
-      int position = getPosition();
-      p->parse(this);
-      if (getPosition() == position) {
-	error("Expected something else");
-	throw ast::ExpectFailed();
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 5;
+      
+      static char* getSpecialCharacters() {
+        static char a[NUMBER_OF_SPECIAL_CHARACTERS] =  {'(', ')', '=', '>', '<'};
+        return a;
       }
-      return p; 
-    }
 
-    template<typename T>
-    T* Scanner::optional() {
-      try {
-	T* p = new T();
-	return p->parse(this);
-      } catch (ast::TokenNotAccepted e) {
-      }
-      return NULL;
-    }
+      static const bool CASE_SENSITIVE = true;
 
-    template<typename T>
-    ::ast::List<T*>* Scanner::zeroOrMore() {
-      ::ast::List<T> list = new ::ast::List<T>();
-      T* a;
-      while(a = optional<T>()) {
-        list.add(a);
-      }
-      return &list;
-    }
+      enum Keyword {
+        VERILOG_MODULE,
+        VERILOG_ENDMODULE,
+        NUMBER_OF_KEYWORDS
+      };
     
-    template<typename T>
-    ::ast::List<T*>* Scanner::oneOrMore() {
-      T* a = expect<T>();
-      ::ast::List<T*>* list = zeroOrMore<T>();
-      list->add(a);
-      return list;
-    }
+      enum Standard {
+        VERILOG_1995,
+        VERILOG_2001,
+        NUMBER_OF_STANDARDS
+      };
+      
+      struct KeywordInfo {
+        Keyword keyword;
+        char* text;
+        Standard standard;
+      };
+
+      static KeywordInfo* getKeywordInfo() { 
+        static KeywordInfo a[NUMBER_OF_KEYWORDS] = {
+          {VERILOG_MODULE, (char *)"module", VERILOG_1995},
+          {VERILOG_ENDMODULE, (char *)"endmodule", VERILOG_1995}
+        };
+        return a;
+      }
+
+      int skipWhiteSpaceAndComments(::ast::TokenScanner<Scanner>* scanner);
+      
+    };
 
   }
 }

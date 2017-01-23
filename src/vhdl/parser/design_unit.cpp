@@ -1,4 +1,5 @@
 
+#include "../../ast/scanner.hpp"
 #include "design_unit.hpp"
 #include "architecture.hpp"
 #include "entity.hpp"
@@ -8,10 +9,10 @@
 namespace vhdl {
   namespace parser {
 
-    void DesignUnit::parse(scanner::Scanner* scanner) {
-      contextClause = scanner->optional<ContextClause>();
-      entity        = scanner->optional<Entity>();
-      architecture  = scanner->optional<Architecture>();
+    void DesignUnit::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      module.contextClause = scanner->optional<ContextClause>();
+      module.interface = scanner->optional<Entity>();
+      module.implementation = scanner->optional<Architecture>();
     }
     
   }

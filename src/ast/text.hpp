@@ -35,13 +35,14 @@ namespace ast {
     void set(const char* text, int caseSensitive = 0);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
-    Text subString(int size);
+    void subString(Text& t, int size);
     int remainingSize();
     void advancePosition(int size);
     int getLine();
     int getColumn();
     int getPosition();
     void setSize(int size);
+    int getSize();
     int equals(Text& text);
     const std::string toString();
     

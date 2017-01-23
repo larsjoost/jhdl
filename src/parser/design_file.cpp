@@ -18,19 +18,21 @@ namespace parser {
       try {
         std::string s = std::string(f);
         if (s.substr(s.find_last_of(".") + 1) == "v") {
-          verilog::scanner::Scanner scanner = verilog::scanner::Scanner(verbose);
+          ::ast::Scanner<verilog::scanner::Scanner> scanner =
+            ::ast::Scanner<verilog::scanner::Scanner>(verbose);
           scanner.loadFile(filename);
           while (true) {
             designUnits.add(scanner.expect<verilog::parser::DesignUnit>());
           }
         } else {
-          vhdl::scanner::Scanner scanner = vhdl::scanner::Scanner(verbose);
+          ::ast::Scanner<vhdl::scanner::Scanner> scanner =
+            ::ast::Scanner<vhdl::scanner::Scanner>(verbose);
           scanner.loadFile(filename);
           while (true) {
             designUnits.add(scanner.expect<vhdl::parser::DesignUnit>());
           }
         }
-      } catch (ast::TextEof e) {
+      } catch (ast::TokenEof e) {
       }
     }
   } 

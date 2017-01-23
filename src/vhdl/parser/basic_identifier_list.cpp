@@ -1,3 +1,4 @@
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "basic_identifier_list.hpp"
 #include "basic_identifier.hpp"
@@ -5,17 +6,17 @@
 namespace vhdl {
   namespace parser {
   
-    void BasicIdentifierList::parse(scanner::Scanner* scanner) {
-      scanner->skipWhiteSpaceAndComments();
+    void BasicIdentifierList::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      scanner->skipWhiteSpace();
       BasicIdentifier* i;
       i = scanner->expect<BasicIdentifier>();
       textList.add(&i->text);
-      scanner->skipWhiteSpaceAndComments();
+      scanner->skipWhiteSpace();
       while (scanner->optional(".")) {
-        scanner->skipWhiteSpaceAndComments();
+        scanner->skipWhiteSpace();
         i = scanner->expect<BasicIdentifier>();
         textList.add(&i->text);
-        scanner->skipWhiteSpaceAndComments();
+        scanner->skipWhiteSpace();
       };
     }
     

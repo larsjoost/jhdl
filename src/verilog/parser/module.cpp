@@ -1,5 +1,5 @@
 #include <cassert>
-#include "../scanner/defines.hpp"
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "module.hpp"
 #include "basic_identifier.hpp"
@@ -8,25 +8,25 @@
 namespace verilog {
   namespace parser {
   
-    Module* Module::parse(scanner::Scanner* scanner) {
-      scanner->skipWhiteSpaceAndComments();
-      scanner->accept(scanner::VERILOG_MODULE);
+    Module* Module::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      scanner->skipWhiteSpace();
+      scanner->accept(scanner::Scanner::VERILOG_MODULE);
+      interface = new ::ast::Interface();
+      implementation = new ::ast::Implementation();
       scanner->skipOneOrMoreWhiteSpaces();
       BasicIdentifier* i;
       i = scanner->expect<BasicIdentifier>();
-      entityName = i->text;
+      interface->name = i->text;
       scanner->skipWhiteSpace();
       if (scanner->optional("(")) {
-        BasicIdentifierList* i;
-        i = scanner->expect<BasicIdentifierList>();
-        port = i->textList;
+        BasicIdentifierList* i = scanner->expect<BasicIdentifierList>();
         scanner->skipWhiteSpace();
         scanner->expect(")");
       }
       scanner->skipWhiteSpace();
       scanner->expect(";");
       scanner->skipOneOrMoreWhiteSpaces();
-      scanner->expect(scanner::VERILOG_ENDMODULE);
+      scanner->expect(scanner::Scanner::VERILOG_ENDMODULE);
       return this;
     }
 

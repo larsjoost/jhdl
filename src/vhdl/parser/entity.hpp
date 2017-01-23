@@ -2,18 +2,19 @@
 #ifndef VHDL_PARSER_ENTITY_H_
 #define VHDL_PARSER_ENTITY_H_
 
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/entity.hpp"
+#include "../../ast/interface.hpp"
 
 namespace vhdl {
   namespace parser {
   
     class Entity :
-      public ::ast::Entity {
+      public ::ast::Interface {
 	
     public:
 
-      Entity* parse(scanner::Scanner* s);
+      Entity* parse(::ast::Scanner<scanner::Scanner>* scanner);
 
     };
     

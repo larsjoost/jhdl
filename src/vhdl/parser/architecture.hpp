@@ -2,19 +2,24 @@
 #ifndef VHDL_PARSER_ARCHITECTURE_H_
 #define VHDL_PARSER_ARCHITECTURE_H_
 
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/architecture.hpp"
+#include "../../ast/implementation.hpp"
 
 namespace vhdl {
   namespace parser {
 
     class Architecture :
-      public ::ast::Architecture  {
+      public ::ast::Implementation  {
 
+    protected:
+      
+      void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
+      
     public:
 
-      Architecture* parse(scanner::Scanner* s);
-
+      Architecture* parse(::ast::Scanner<scanner::Scanner>* scanner);
+      
     };
 
   }

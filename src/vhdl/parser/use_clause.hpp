@@ -1,6 +1,7 @@
 #ifndef VHDL_PARSER_USECLAUSE_H_
 #define VHDL_PARSER_USECLAUSE_H_
 
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/use_clause.hpp"
 
@@ -12,7 +13,7 @@ namespace vhdl {
     
     public:
 
-      UseClause* parse(scanner::Scanner* s);
+      UseClause* parse(::ast::Scanner<scanner::Scanner>* scanner);
 
     };
   }

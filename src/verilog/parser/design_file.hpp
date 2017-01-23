@@ -1,8 +1,9 @@
 #ifndef VERILOG_PARSER_DESIGNFILE_HPP_
 #define VERILOG_PARSER_DESIGNFILE_HPP_
 
-#include "../scanner/scanner.hpp"
+#include "../../ast/scanner.hpp"
 #include "../../ast/design_file.hpp"
+#include "../scanner/scanner.hpp"
 
 namespace verilog {
   namespace parser {
@@ -12,7 +13,7 @@ namespace verilog {
 
     public:
       
-      DesignFile* parse(scanner::Scanner* s);
+      DesignFile* parse(::ast::Scanner<scanner::Scanner>* s);
     
     };
 

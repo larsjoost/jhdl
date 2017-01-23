@@ -2,18 +2,19 @@
 #ifndef VERILOG_PARSER_ENTITY_H_
 #define VERILOG_PARSER_ENTITY_H_
 
+#include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/architecture.hpp"
+#include "../../ast/module.hpp"
 
 namespace verilog {
   namespace parser {
   
     class Module :
-      public ::ast::Architecture {
+      public ::ast::Module {
 	
     public:
 
-      Module* parse(scanner::Scanner* s);
+      Module* parse(::ast::Scanner<scanner::Scanner>* scanner);
 
     };
     

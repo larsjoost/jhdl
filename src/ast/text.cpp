@@ -51,11 +51,10 @@ namespace ast {
     }
   }
 
-  Text Text::subString(int s) {
+  void Text::subString(Text& t, int s) {
     assert(s <= remainingSize());
-    Text t = *this;
+    t = *this;
     t.size = t.position + s;
-    return t;
   }
   
   void Text::advancePosition(int n) {
@@ -98,6 +97,10 @@ namespace ast {
     size = s;
   }
 
+  int Text::getSize() {
+    return size;
+  }
+  
   char Text::toLower(char a) {
     if (!caseSensitive) {
       return tolower(a);
