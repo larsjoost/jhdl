@@ -7,7 +7,8 @@ namespace vhdl {
   
     Number* Number::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      scanner->expect(::ast::TOKEN_NUMBER);
+      ::ast::Text* v = scanner->expect(::ast::TOKEN_NUMBER);
+      value = *v;
       return this;
     }
     

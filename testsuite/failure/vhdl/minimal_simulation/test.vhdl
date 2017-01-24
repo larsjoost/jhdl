@@ -9,7 +9,7 @@ begin
 
   process is
   begin 
-    finish(0);    
+    finish(1);    
   end process;
   
 end architecture rtl;

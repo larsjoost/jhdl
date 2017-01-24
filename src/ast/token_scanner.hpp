@@ -492,9 +492,6 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::nextToken(int number) {
     tokenInfo.position += number;
-    if (tokenInfo.position >= tokenInfo.size) {
-      throw TokenEof();
-    }
   }
 
   template <class ApplicationSpecificScanner>

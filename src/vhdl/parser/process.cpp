@@ -1,6 +1,7 @@
 
 
 #include "../../ast/scanner.hpp"
+#include "../../ast/sequential_statement.hpp"
 #include "../scanner/scanner.hpp"
 #include "../scanner/defines.hpp"
 #include "process.hpp"
@@ -28,11 +29,21 @@ namespace vhdl {
       return this;
     }
 
+    bool Process::add(::ast::ProcedureCallStatement* p) {
+      if (p) {
+        ::ast::SequentialStatement* s = new ::ast::SequentialStatement();
+        s->procedureCallStatement = p;
+        sequentialStatements.add(s);
+        return true;
+      }
+      return false;
+    }
+    
     void Process::parseBody(::ast::Scanner<scanner::Scanner>* scanner) {
       bool match;
       do {
         match = false;
-        match |= sequentialStatements.add(scanner->optional<ProcedureCallStatement>());
+        match |= add(scanner->optional<ProcedureCallStatement>());
       } while (match);
     }
     

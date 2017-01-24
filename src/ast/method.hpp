@@ -12,7 +12,7 @@ namespace ast {
     
   public:
     
-    Text name;
+    Text* name;
     List<SequentialStatement> sequentialStatements;
     
   };

@@ -4,13 +4,13 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/sequential_statement.hpp"
+#include "../../ast/procedure_call_statement.hpp"
 
 namespace vhdl {
   namespace parser {
 
     class ProcedureCallStatement :
-      public ::ast::SequentialStatement  {
+      public ::ast::ProcedureCallStatement  {
 
     public:
 

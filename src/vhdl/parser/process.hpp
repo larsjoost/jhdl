@@ -5,6 +5,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/method.hpp"
+#include "../../ast/procedure_call_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -14,6 +15,8 @@ namespace vhdl {
 
     protected:
 
+      bool add(::ast::ProcedureCallStatement* p);
+      
       void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
 
     public:

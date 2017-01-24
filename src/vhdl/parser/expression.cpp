@@ -10,7 +10,7 @@ namespace vhdl {
   
     Expression* Expression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      scanner->accept(::ast::TOKEN_NUMBER);
+      number = scanner->expect<Number>();
       return this;
     }
 
