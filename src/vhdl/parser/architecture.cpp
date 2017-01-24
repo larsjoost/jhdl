@@ -33,6 +33,11 @@ namespace vhdl {
         scanner->skipOneOrMoreWhiteSpaces();
       };
       i = scanner->expect<BasicIdentifier>();
+      if (!architectureName.equals(i->text)) {
+        scanner->error("Identifier '" + i->text.toString() +
+                       "' does not match architecture name '" +
+                       architectureName.toString() + "'");
+      }
       scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;

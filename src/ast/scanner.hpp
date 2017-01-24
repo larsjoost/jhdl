@@ -59,12 +59,12 @@ namespace ast {
     int expect(Text& text);
     int match(const char* text);
 
-    bool optional(Keyword keyword);
-    bool optional(TokenType type);
-    void accept(Keyword keyword);
-    void accept(TokenType type);
-    void expect(Keyword keyword);
-    void expect(TokenType type);
+    Text* optional(Keyword keyword);
+    Text* optional(TokenType type);
+    Text* accept(Keyword keyword);
+    Text* accept(TokenType type);
+    Text* expect(Keyword keyword);
+    Text* expect(TokenType type);
 
     bool isWhiteSpace();
     void skipWhiteSpace();
@@ -214,30 +214,34 @@ namespace ast {
 
 
   template <class ApplicationSpecificScanner>
-  bool Scanner<ApplicationSpecificScanner>::optional(Keyword keyword) {
+  Text* Scanner<ApplicationSpecificScanner>::optional(Keyword keyword) {
     DEBUG("Optional keyword = " + toString(keyword));
     Token* t = tokenLookAhead(0);
     if (t->type == TOKEN_KEYWORD && t->keyword == keyword) {
       nextToken();
-      return true;
+      return &t->text;
     }
-    return false;
+    return NULL;
   }
 
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::accept(Keyword keyword) {
+  Text* Scanner<ApplicationSpecificScanner>::accept(Keyword keyword) {
     DEBUG("Accept keyword = " + toString(keyword));
-    if (!optional(keyword)) {
+    Text* t;
+    if (!(t = optional(keyword))) {
       throw TokenNotAccepted();
     }
+    return t;
   }
   
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::expect(Keyword keyword) {
+  Text* Scanner<ApplicationSpecificScanner>::expect(Keyword keyword) {
     DEBUG("Expect keyword = " + toString(keyword));
-    if (!optional(keyword)) {
+    Text* t;
+    if (!(t = optional(keyword))) {
       error("Expected " + toString(keyword));
     }
+    return t;
   }
 
   template <class ApplicationSpecificScanner>
@@ -276,30 +280,34 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  bool Scanner<ApplicationSpecificScanner>::optional(TokenType type) {
+  Text* Scanner<ApplicationSpecificScanner>::optional(TokenType type) {
     DEBUG("Optional token = " + toString(type));
     Token* t = tokenLookAhead(0);
     if (t->type == type) {
       nextToken();
-      return true;
+      return &t->text;
     }
-    return false;
+    return NULL;
   }
 
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::accept(TokenType type) {
+  Text* Scanner<ApplicationSpecificScanner>::accept(TokenType type) {
     DEBUG("Accept token = " + toString(type));
-    if (!optional(type)) {
+    Text* t;
+    if (!(t = optional(type))) {
       throw TokenNotAccepted();
     }
+    return t;
   }
 
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::expect(TokenType type) {
+  Text* Scanner<ApplicationSpecificScanner>::expect(TokenType type) {
     DEBUG("Expect token = " + toString(type));
-    if (!optional(type)) {
+    Text* t;
+    if (!(t = optional(type))) {
       error("Expected " + toString(type));
     }
+    return t;
   }
 
 }

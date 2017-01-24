@@ -12,8 +12,7 @@ namespace vhdl {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_ENTITY);
       scanner->skipOneOrMoreWhiteSpaces();
-      BasicIdentifier* i;
-      i = scanner->expect<BasicIdentifier>();
+      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       name = i->text;
       scanner->skipOneOrMoreWhiteSpaces();
       scanner->expect(scanner::Scanner::VHDL_IS);
@@ -23,7 +22,12 @@ namespace vhdl {
       if (scanner->optional(scanner::Scanner::VHDL_ENTITY)) {
 	scanner->skipOneOrMoreWhiteSpaces();
       }
-      scanner->expect(::ast::TOKEN_IDENTIFIER);
+      i = scanner->expect<BasicIdentifier>();
+      if (!name.equals(i->text)) {
+        scanner->error("Identifier '" + i->text.toString() +
+                       "' does not match entity name '" +
+                       name.toString() + "'");
+      }
       scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;
