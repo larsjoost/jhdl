@@ -1,6 +1,7 @@
 // Filename : test.vhdl
 #include "systemc.h"
-
+#include "vhdl.h"
+using vhdl::std::env::finish;
 SC_MODULE(test)
 {
 void noname0() {

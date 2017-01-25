@@ -19,7 +19,9 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
         std::string name = it->module.interface->name.toString();
-        std::cout << "#include \"systemc.h\"" << std::endl << std::endl;
+        std::cout << "#include \"systemc.h\"" << std::endl;
+        std::cout << "#include \"vhdl.h\"" << std::endl;
+        includes(designFile);
         std::cout << "SC_MODULE(" << name << ")" << std::endl;
         std::cout << "{" << std::endl;
         implementation(designFile, it->module.interface->name);
@@ -30,6 +32,21 @@ namespace generator {
       }
       
     }
+  }
+
+  void DesignFile::includes(ast::DesignFile& designFile) {
+    for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
+         it != designFile.designUnits.list.end(); it++) {
+      if (it->module.contextClause) {
+        for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
+          std::cout << "using vhdl";
+          for (ast::Text t : useClause.list.list) {
+            std::cout << "::" << t.toString();
+          }
+          std::cout << ";" << std::endl;
+        }
+      }
+    }    
   }
 
   void DesignFile::implementation(ast::DesignFile& designFile, ast::Text& name) {

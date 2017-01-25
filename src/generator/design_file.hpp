@@ -10,6 +10,7 @@ namespace generator {
   class DesignFile { 
     void expression(ast::Expression* e);
     void procedureCallStatement(ast::ProcedureCallStatement* p);
+    void includes(ast::DesignFile& designFile);
     void implementation(ast::DesignFile& designFile, ast::Text& name);
   public:
     DesignFile(ast::DesignFile& designFile);
