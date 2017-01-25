@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
+
+filename=$1
+filebase="${filename%.*}"
+cppfile="$filebase.cpp"
+$SCRIPTPATH/jhdl -f $filename > $cppfile
+g++ -std=c++11 -g  -I$SCRIPTPATH/kernel/lib -o $filebase $cppfile
+./$filebase
+EXIT_VALUE=$?
+if [ $EXIT_VALUE -ne 0 ]; then
+    echo "Simulation failed..." 1>&2
+    exit 1
+fi	
