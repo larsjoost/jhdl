@@ -35,6 +35,10 @@ namespace vhdl {
         VHDL_END,
         VHDL_ENTITY,
         VHDL_PROCESS,
+        VHDL_TYPE,
+        VHDL_RANGE,
+        VHDL_TO,
+        VHDL_DOWNTO,
         NUMBER_OF_KEYWORDS
       };
       
@@ -62,7 +66,11 @@ namespace vhdl {
           {VHDL_BEGIN, (char *)"begin", VHDL_1987},
           {VHDL_END, (char *)"end", VHDL_1987},
           {VHDL_ENTITY, (char *)"entity", VHDL_1987},
-          {VHDL_PROCESS, (char *)"process", VHDL_1987}};
+          {VHDL_PROCESS, (char *)"process", VHDL_1987},
+          {VHDL_TYPE, (char *)"type", VHDL_1987},
+          {VHDL_RANGE, (char *)"range", VHDL_1987},
+          {VHDL_TO, (char *)"to", VHDL_1987},
+          {VHDL_DOWNTO, (char *)"downto", VHDL_1987}};
         return a;
       }
       

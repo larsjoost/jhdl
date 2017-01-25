@@ -10,7 +10,8 @@ namespace ast {
   class TextEof {};
 
   class Text {
-    const char* text;
+    static char* text;
+    static int textSize;
     int position;
     int size;
     int lineNumber;
@@ -30,9 +31,9 @@ namespace ast {
   public:
     Text();
     Text(int verbose);
-    Text(const char* text, int caseSensitive = 0, int verbose = 0);
+    Text(char* text, int caseSensitive = 0, int verbose = 0);
     
-    void set(const char* text, int caseSensitive = 0);
+    void set(char* text, int caseSensitive = 0);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
     void subString(Text& t, int size);
@@ -41,7 +42,6 @@ namespace ast {
     int getLine();
     int getColumn();
     int getPosition();
-    void setSize(int size);
     int getSize();
     int equals(Text& text);
     const std::string toString();

@@ -15,6 +15,9 @@
 
 namespace ast {
 
+  char* Text::text = NULL;
+  int Text::textSize = 0;
+
   Text::Text() {
   };
 
@@ -22,7 +25,7 @@ namespace ast {
     verbose = v;
   };
 
-  Text::Text(const char* text, int caseSensitive, int v) {
+  Text::Text(char* text, int caseSensitive, int v) {
     verbose = v;
     set(text, caseSensitive);
   };
@@ -35,7 +38,7 @@ namespace ast {
 
   void Text::incrementPosition(int s) {
     debug("incrementPosition", lookAhead(0));
-    if ((position + s) >= size) {
+    if ((position + s) >= textSize) {
       throw TextEof();
     } else {
       for (int i=0; i<s; i++) {
@@ -63,10 +66,10 @@ namespace ast {
     }
   }
 
-  void Text::set(const char* t, int c) {
+  void Text::set(char* t, int c) {
     text = t;
     position = 0;
-    size = strlen(t);
+    size = textSize = strlen(t);
     lineNumber = 0;
     columnNumber = 0;
     lineStart = 0;
@@ -75,7 +78,7 @@ namespace ast {
 
   char Text::lookAhead(int n) {
     int i = position + n;
-    if (i >= size) {
+    if (i >= textSize) {
       throw TextEof();
     }
     return text[i];
@@ -93,12 +96,8 @@ namespace ast {
     return position;
   }
 
-  void Text::setSize(int s) {
-    size = s;
-  }
-
   int Text::getSize() {
-    return size;
+    return textSize;
   }
   
   char Text::toLower(char a) {

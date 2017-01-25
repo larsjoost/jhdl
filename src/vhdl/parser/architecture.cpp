@@ -5,6 +5,7 @@
 #include "architecture.hpp"
 #include "basic_identifier.hpp"
 #include "process.hpp"
+#include "declaration.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -22,16 +23,15 @@ namespace vhdl {
       name = i->text;
       scanner->skipOneOrMoreWhiteSpaces();
       scanner->expect(scanner::Scanner::VHDL_IS);
-      scanner->skipOneOrMoreWhiteSpaces();
+      parseDeclarations(scanner);
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
-      scanner->skipOneOrMoreWhiteSpaces();
       parseBody(scanner);
       scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_END);
-      scanner->skipOneOrMoreWhiteSpaces();
-      if (scanner->optional(scanner::Scanner::VHDL_ARCHITECTURE)) {
-        scanner->skipOneOrMoreWhiteSpaces();
-      };
+      scanner->skipWhiteSpace();
+      scanner->optional(scanner::Scanner::VHDL_ARCHITECTURE);
+      scanner->skipWhiteSpace();
       i = scanner->expect<BasicIdentifier>();
       if (!architectureName.equals(i->text)) {
         scanner->error("Identifier '" + i->text.toString() +
@@ -43,6 +43,14 @@ namespace vhdl {
       return this;
     }
 
+    void Architecture::parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner) {
+      bool match;
+      do {
+        match = false;
+        match |= declarations.add(scanner->optional<Declaration>());
+      } while (match);
+    }
+    
     void Architecture::parseBody(::ast::Scanner<scanner::Scanner>* scanner) {
       bool match;
       do {

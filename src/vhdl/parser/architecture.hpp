@@ -14,6 +14,7 @@ namespace vhdl {
 
     protected:
       
+      void parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner);
       void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
       
     public:

@@ -8,6 +8,7 @@
 #include "../ast/method.hpp"
 #include "../ast/context_clause.hpp"
 #include "../ast/expression.hpp"
+#include "../ast/declaration.hpp"
 
 #include "design_file.hpp"
 
@@ -49,6 +50,14 @@ namespace generator {
     }    
   }
 
+  void DesignFile::declarations(ast::List<ast::Declaration>& d) {
+    for (ast::Declaration i : d.list) {
+      if (i.type) {
+        
+      }
+    }
+  }
+
   void DesignFile::implementation(ast::DesignFile& designFile, ast::Text& name) {
     int methodId = 0;
     std::list<std::string> methodNames;
@@ -56,6 +65,7 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.implementation) {
         if (name.equals(it->module.implementation->name)) {
+          declarations(it->module.implementation->declarations);
           for (ast::Method m : it->module.implementation->methods.list) {
             std::string methodName;
             if (m.name) {

@@ -104,7 +104,7 @@ namespace ast {
 
     bool accept(const char* c);
     
-    void setText(const char* s);
+    void setText(char* s);
     void loadFile(const char* filename);
     
     void getText(Text& t);
@@ -350,7 +350,7 @@ namespace ast {
   }
   
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::setText(const char* s) {
+  void TokenScanner<ApplicationSpecificScanner>::setText(char* s) {
     text->set(s);
     tokenize();
     if (verbose) {
