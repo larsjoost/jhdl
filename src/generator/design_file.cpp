@@ -9,6 +9,8 @@
 #include "../ast/context_clause.hpp"
 #include "../ast/expression.hpp"
 #include "../ast/declaration.hpp"
+#include "../ast/variable_declaration.hpp"
+#include "../ast/variable_declaration.hpp"
 
 #include "design_file.hpp"
 
@@ -65,29 +67,41 @@ namespace generator {
     test_t(decltype(1) left=1, decltype(1) right=20) : vhdl::Range<decltype(1)>(left, right) {};
   };
   */
-  
+
+  void DesignFile::type_declarations(ast::TypeDeclaration* t) {
+    if (t) {
+      printSourceLine(t->identifier);
+      std::string name = t->identifier.toString();
+      std::cout << "class " << name << " : public vhdl::Range<decltype(";
+      expression(t->left);
+      std::cout << ")> {" << std::endl;
+      std::cout << "  public:" << std::endl; 
+      std::cout << "  " << name << "(decltype(";
+      expression(t->left);
+      std::cout << ") left=";
+      expression(t->left);
+      std::cout << ", decltype(";
+      expression(t->left);
+      std::cout << ") right=";
+      expression(t->right);
+      std::cout << ") : vhdl::Range<decltype(";
+      expression(t->left);
+      std::cout << ")>(left, right) {};" << std::endl;
+      std::cout << "};" << std::endl;
+    }
+  }
+
+  void DesignFile::variable_declarations(ast::VariableDeclaration* v) {
+    if (v) {
+      printSourceLine(v->identifier);
+      std::cout << v->type.toString() << " " << v->identifier.toString() << ";" << std::endl;
+    }
+  }
+
   void DesignFile::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
-      if (i.type) {
-	printSourceLine(i.type->identifier);
-	std::string name = i.type->identifier.toString();
-	std::cout << "class " << name << " : public vhdl::Range<decltype(";
-	expression(i.type->left);
-	std::cout << ")> {" << std::endl;
-	std::cout << "  public:" << std::endl; 
-	std::cout << "  " << name << "(decltype(";
-	expression(i.type->left);
-	std::cout << ") left=";
-	expression(i.type->left);
-	std::cout << ", decltype(";
-	expression(i.type->left);
-	std::cout << ") right=";
-	expression(i.type->right);
-	std::cout << ") : vhdl::Range<decltype(";
-	expression(i.type->left);
-	std::cout << ")>(left, right) {};" << std::endl;
-	std::cout << "};" << std::endl;
-      }
+      type_declarations(i.type);
+      variable_declarations(i.variable);
     }
   }
 
@@ -108,6 +122,7 @@ namespace generator {
             }
             methodNames.push_back(methodName);
             std::cout << "void " << methodName << "() {" << std::endl;
+            declarations(m.declarations);
             for (ast::SequentialStatement s : m.sequentialStatements.list) {
               procedureCallStatement(s.procedureCallStatement);
             }

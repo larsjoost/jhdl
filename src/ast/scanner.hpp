@@ -77,6 +77,7 @@ namespace ast {
     using typename TokenScanner<ApplicationSpecificScanner>::Token;
     
     using TokenScanner<ApplicationSpecificScanner>::getTokenPosition;
+    using TokenScanner<ApplicationSpecificScanner>::setTokenPosition;
     using TokenScanner<ApplicationSpecificScanner>::tokenLookAhead;
     using TokenScanner<ApplicationSpecificScanner>::nextToken;
     using TokenScanner<ApplicationSpecificScanner>::loadFile;
@@ -101,16 +102,28 @@ namespace ast {
   
     template<typename T>
     T* optional() {
-      try {
-        T* p = new T();
-        if (verbose) {
-          std::cout << "Optional: " << typeid(p).name() << std::endl;
-        }
-        return p->parse(this);
-      } catch (TokenNotAccepted e) {
-      } catch (ExpectFailed e) {
+      T* p = new T();
+      int position = getTokenPosition();
+      if (verbose) {
+        std::cout << "Optional: " << typeid(p).name() << std::endl;
       }
-      return NULL;
+      try {
+        p->parse(this);
+      } catch (TokenNotAccepted e) {
+        setTokenPosition(position);
+        p = NULL;
+      } catch (ExpectFailed e) {
+        setTokenPosition(position);
+        p = NULL;
+      }
+      if (getTokenPosition() == position) {
+        p = NULL;
+      }
+      if (verbose) {
+        std::cout << "Optional: " << typeid(p).name() << " : ";
+        std::cout << (p ? "[FOUND]" : "[MISSED]") << std::endl;
+      }
+      return p; 
     }
     
     template<typename T>

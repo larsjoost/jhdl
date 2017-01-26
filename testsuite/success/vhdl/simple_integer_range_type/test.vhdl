@@ -11,6 +11,7 @@ architecture rtl of test is
 begin
 
   process is
+    variable test_i : test_t;
   begin 
     finish(0);    
   end process;

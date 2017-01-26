@@ -12,6 +12,8 @@ namespace generator {
     void expression(ast::Expression* e);
     void procedureCallStatement(ast::ProcedureCallStatement* p);
     void includes(ast::DesignFile& designFile);
+    void type_declarations(ast::TypeDeclaration* t);
+    void variable_declarations(ast::VariableDeclaration* v);
     void declarations(ast::List<ast::Declaration>& d);
     void implementation(ast::DesignFile& designFile, ast::Text& name);
 

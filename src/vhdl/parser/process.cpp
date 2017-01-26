@@ -7,6 +7,7 @@
 #include "process.hpp"
 #include "basic_identifier.hpp"
 #include "procedure_call_statement.hpp"
+#include "declaration.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -16,6 +17,7 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
       scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_IS);
+      parseDeclarations(scanner);
       scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       parseBody(scanner);
@@ -37,6 +39,14 @@ namespace vhdl {
         return true;
       }
       return false;
+    }
+    
+    void Process::parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner) {
+      bool match;
+      do {
+        match = false;
+        match |= declarations.add(scanner->optional<Declaration>());
+      } while (match);
     }
     
     void Process::parseBody(::ast::Scanner<scanner::Scanner>* scanner) {

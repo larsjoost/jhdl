@@ -4,24 +4,26 @@ set -e
 
 SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
+OPTIONS=""
+
 if [ -z "$JHDL" ]; then
     JHDL=$SCRIPTPATH/../src
 fi
 
 if [ -n "$VALGRIND" ]; then
-    JHDL="valgrind --leak-check=yes $JHDL"
+    OPTIONS="valgrind --leak-check=yes"
 else
     if [ -n "$DEBUG" ]; then
-        JHDL="gdb --args $JHDL"
+        OPTIONS="gdb --args"
     fi
 
     if [ -n "$VERBOSE" ]; then
-        JHDL="$JHDL -v"
+        VERBOSE="-v"
     fi
 fi
     
 function analyse {
-    $JHDL/jhdl -f $1
+    $OPTIONS $JHDL/jhdl -f $1 $VERBOSE
 }
 
 function simulate {

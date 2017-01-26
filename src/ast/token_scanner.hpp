@@ -119,7 +119,8 @@ namespace ast {
     Token* tokenLookAhead(int number);
     void nextToken(int number = 1);
     int getTokenPosition();
-
+    void setTokenPosition(int p);
+    
     std::string& getFilename();
     
     void printTextLinePosition(FILE* output, Text& t);
@@ -343,6 +344,9 @@ namespace ast {
           add(acceptIdentifier()) ||
           add(acceptNumber());
       } while (match);
+      // TODO:
+      // std::string e = "Unknown token";
+      // error(e);
     } catch (TextEof e) {
       return true;
     }
@@ -477,6 +481,11 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   int TokenScanner<ApplicationSpecificScanner>::getTokenPosition() {
     return tokenInfo.position;
+  }
+
+  template <class ApplicationSpecificScanner>
+  void TokenScanner<ApplicationSpecificScanner>::setTokenPosition(int p) {
+    tokenInfo.position = p;
   }
 
   template <class ApplicationSpecificScanner>

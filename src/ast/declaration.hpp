@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "type_declaration.hpp"
+#include "variable_declaration.hpp"
 
 namespace ast {
     
@@ -13,6 +14,7 @@ namespace ast {
   public:
 
     TypeDeclaration* type;
+    VariableDeclaration* variable;
     
   };
 
