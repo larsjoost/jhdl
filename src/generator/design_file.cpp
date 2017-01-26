@@ -35,6 +35,12 @@ namespace generator {
     }
   }
 
+  void DesignFile::printSourceLine(ast::Text& t) {
+    std::cout << "/*" << std::endl;
+    t.printLinePosition();
+    std::cout << "*/" << std::endl;
+  }
+  
   void DesignFile::includes(ast::DesignFile& designFile) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
@@ -53,6 +59,7 @@ namespace generator {
   void DesignFile::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       if (i.type) {
+	printSourceLine(i.type->identifier);
 	std::cout << "using " << i.type->identifier.toString() << " = ";
 	std::cout << "vhdl::Range(";
 	expression(i.type->left);
