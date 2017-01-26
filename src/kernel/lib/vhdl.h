@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 namespace vhdl {
+
   namespace std {
     namespace env {
 
@@ -14,6 +15,14 @@ namespace vhdl {
       
     }
   }
+
+  class Range {
+  public:
+    Range(int left, int right);
+    Range(float left, float right);
+  };
+    
+  
 }
 
 #endif

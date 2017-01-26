@@ -53,7 +53,12 @@ namespace generator {
   void DesignFile::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       if (i.type) {
-        
+	std::cout << "using " << i.type->identifier.toString() << " = ";
+	std::cout << "vhdl::Range(";
+	expression(i.type->left);
+	std::cout << ", ";
+	expression(i.type->right);
+	std::cout << ");" << std::endl;
       }
     }
   }
