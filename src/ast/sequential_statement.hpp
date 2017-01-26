@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "procedure_call_statement.hpp"
+#include "variable_assignment.hpp"
 
 namespace ast {
     
@@ -13,6 +14,7 @@ namespace ast {
   public:
 
     ProcedureCallStatement* procedureCallStatement;
+    VariableAssignment* variableAssignment;
     
   };
 

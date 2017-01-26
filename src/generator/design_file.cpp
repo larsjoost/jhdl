@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <cassert>
 
 #include "../ast/design_file.hpp"
 #include "../ast/design_unit.hpp"
@@ -10,7 +11,7 @@
 #include "../ast/expression.hpp"
 #include "../ast/declaration.hpp"
 #include "../ast/variable_declaration.hpp"
-#include "../ast/variable_declaration.hpp"
+#include "../ast/variable_assignment.hpp"
 
 #include "design_file.hpp"
 
@@ -70,23 +71,17 @@ namespace generator {
 
   void DesignFile::type_declarations(ast::TypeDeclaration* t) {
     if (t) {
+      std::string left = toString(t->left);
+      std::string right = toString(t->right);
+      std::string templateType = "decltype(" + left + ")"; 
       printSourceLine(t->identifier);
       std::string name = t->identifier.toString();
-      std::cout << "class " << name << " : public vhdl::Range<decltype(";
-      expression(t->left);
-      std::cout << ")> {" << std::endl;
+      std::cout << "class " << name << " : public vhdl::Range<" << templateType << "> {" << std::endl;
       std::cout << "  public:" << std::endl; 
-      std::cout << "  " << name << "(decltype(";
-      expression(t->left);
-      std::cout << ") left=";
-      expression(t->left);
-      std::cout << ", decltype(";
-      expression(t->left);
-      std::cout << ") right=";
-      expression(t->right);
-      std::cout << ") : vhdl::Range<decltype(";
-      expression(t->left);
-      std::cout << ")>(left, right) {};" << std::endl;
+      std::cout << "  explicit " << name << "(" << templateType << " left=" << left;
+      std::cout << ", " << templateType << " right=" << right;
+      std::cout << ") : vhdl::Range<" << templateType << ">(left, right) {};" << std::endl;
+      std::cout << "  using vhdl::Range<" << templateType + ">::operator=;" << std::endl;
       std::cout << "};" << std::endl;
     }
   }
@@ -125,6 +120,7 @@ namespace generator {
             declarations(m.declarations);
             for (ast::SequentialStatement s : m.sequentialStatements.list) {
               procedureCallStatement(s.procedureCallStatement);
+              variableAssignment(s.variableAssignment);
             }
             std::cout << "}" << std::endl;
           }
@@ -152,11 +148,24 @@ namespace generator {
     }
   }
   
+  void DesignFile::variableAssignment(ast::VariableAssignment* p) {
+    if (p) {
+      std::cout << p->identifier.toString() << " = ";
+      expression(p->expression);
+      std::cout << ";" << std::endl;
+    }
+  }
+
+  std::string DesignFile::toString(ast::Expression* e) {
+    assert(e != NULL);
+    if (e->number) {
+      return e->number->value.toString();
+    }
+  }
+  
   void DesignFile::expression(ast::Expression* e) {
     if (e) {
-      if (e->number) {
-        std::cout << e->number->value.toString();
-      }
+      std::cout << toString(e);
     }
   }
   

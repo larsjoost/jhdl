@@ -16,7 +16,8 @@ namespace vhdl {
     protected:
 
       bool add(::ast::ProcedureCallStatement* p);
-      
+      bool add(::ast::VariableAssignment* p);
+
       void parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner);
       void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
 
