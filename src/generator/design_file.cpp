@@ -56,16 +56,37 @@ namespace generator {
     }    
   }
 
+  /*
+  vhdl:
+  type test_t is range 1 to 20;
+  systemc:
+  class test_t : public vhdl::Range<decltype(1)> {
+  public:
+    test_t(decltype(1) left=1, decltype(1) right=20) : vhdl::Range<decltype(1)>(left, right) {};
+  };
+  */
+  
   void DesignFile::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       if (i.type) {
 	printSourceLine(i.type->identifier);
-	std::cout << "#define " << i.type->identifier.toString();
-	std::cout << " vhdl::Range(";
+	std::string name = i.type->identifier.toString();
+	std::cout << "class " << name << " : public vhdl::Range<decltype(";
 	expression(i.type->left);
-	std::cout << ", ";
+	std::cout << ")> {" << std::endl;
+	std::cout << "  public:" << std::endl; 
+	std::cout << "  " << name << "(decltype(";
+	expression(i.type->left);
+	std::cout << ") left=";
+	expression(i.type->left);
+	std::cout << ", decltype(";
+	expression(i.type->left);
+	std::cout << ") right=";
 	expression(i.type->right);
-	std::cout << std::endl;
+	std::cout << ") : vhdl::Range<decltype(";
+	expression(i.type->left);
+	std::cout << ")>(left, right) {};" << std::endl;
+	std::cout << "};" << std::endl;
       }
     }
   }
