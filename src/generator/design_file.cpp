@@ -60,12 +60,12 @@ namespace generator {
     for (ast::Declaration i : d.list) {
       if (i.type) {
 	printSourceLine(i.type->identifier);
-	std::cout << "using " << i.type->identifier.toString() << " = ";
-	std::cout << "vhdl::Range(";
+	std::cout << "#define " << i.type->identifier.toString();
+	std::cout << " vhdl::Range(";
 	expression(i.type->left);
 	std::cout << ", ";
 	expression(i.type->right);
-	std::cout << ");" << std::endl;
+	std::cout << std::endl;
       }
     }
   }
