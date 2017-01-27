@@ -29,6 +29,8 @@ namespace ast {
   enum TokenType {
     TOKEN_KEYWORD,
     TOKEN_NUMBER,
+    TOKEN_STRING,
+    TOKEN_CHARACTER,
     TOKEN_IDENTIFIER,
     TOKEN_SPECIAL_CHARACTER,
     TOKEN_WHITESPACE
@@ -79,6 +81,8 @@ namespace ast {
     int verbose;
 
     Token* acceptWhiteSpace();
+    Token* acceptString();
+    Token* acceptCharacter();
     Token* acceptSpecialCharacter();
     Token* acceptKeyword();
     Token* acceptIdentifier();
@@ -200,6 +204,32 @@ namespace ast {
       Token* t = new Token();
       t->type = TOKEN_WHITESPACE;
       text.subString(t->text, 0);
+      return t;
+    }
+    return NULL;
+  }
+
+  template <class ApplicationSpecificScanner>
+  typename TokenScanner<ApplicationSpecificScanner>::Token*
+  TokenScanner<ApplicationSpecificScanner>::acceptString() {
+    if (text.lookAhead(0) == '\"') {
+      int i=1;
+      while (text.lookAhead(i++) != '\"') {};
+      Token* t = new Token();
+      t->type = TOKEN_STRING;
+      text.subString(t->text, i);
+      return t;
+    }
+    return NULL;
+  }
+
+  template <class ApplicationSpecificScanner>
+  typename TokenScanner<ApplicationSpecificScanner>::Token*
+  TokenScanner<ApplicationSpecificScanner>::acceptCharacter() {
+    if (text.lookAhead(0) == '\'' and text.lookAhead(2) == '\'') {
+      Token* t = new Token();
+      t->type = TOKEN_CHARACTER;
+      text.subString(t->text, 3);
       return t;
     }
     return NULL;
@@ -339,8 +369,10 @@ namespace ast {
       do {
         match =
           add(acceptWhiteSpace()) || 
-          add(acceptKeyword()) ||
+          add(acceptString()) ||
+          add(acceptCharacter()) ||
           add(acceptSpecialCharacter()) ||
+          add(acceptKeyword()) ||
           add(acceptIdentifier()) ||
           add(acceptNumber());
       } while (match);
