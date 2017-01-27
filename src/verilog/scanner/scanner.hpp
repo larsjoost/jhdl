@@ -13,10 +13,10 @@ namespace verilog {
       
     public:
       
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 5;
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 7;
       
       static char* getSpecialCharacters() {
-        static char a[NUMBER_OF_SPECIAL_CHARACTERS] =  {'(', ')', '=', '>', '<'};
+        static char a[NUMBER_OF_SPECIAL_CHARACTERS] =  {'(', ')', '=', '>', '<', ',', ';'};
         return a;
       }
 

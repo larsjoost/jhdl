@@ -10,7 +10,7 @@ namespace vhdl {
     LibraryClause* LibraryClause::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_LIBRARY);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       scanner->skipWhiteSpace();
       scanner->expect(";");

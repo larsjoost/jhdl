@@ -50,7 +50,7 @@ namespace ast {
   private:
     
     std::string filename;
-    Text* text;
+    Text text;
 
     struct TokenInfo {
       Token** tokens;
@@ -135,7 +135,7 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   TokenScanner<ApplicationSpecificScanner>::TokenScanner(int v) {
     verbose = v;
-    text = new Text(v);
+    text.verbose = v;
   }
 
   template <class ApplicationSpecificScanner>
@@ -152,12 +152,12 @@ namespace ast {
     DEBUG("match " + std::string(a));
     int len = strlen(a);
     for (int i=0; i<len; i++) {
-      char c = text->lookAhead(i);
+      char c = text.lookAhead(i);
       if (!compare(c, a[i])) {
         return false;
       }
     }
-    text->subString(t, len);
+    text.subString(t, len);
     return true;
   }
 
@@ -187,7 +187,7 @@ namespace ast {
       DEBUG("Added token " + token->text.toString());
       tokenInfo.tokens[tokenInfo.size] = token;
       tokenInfo.size++;
-      text->incrementPosition(token->text.remainingSize());
+      text.incrementPosition(token->text.remainingSize());
       return true;
     }
     return false;
@@ -199,7 +199,7 @@ namespace ast {
     if (applicationSpecificScanner.skipWhiteSpaceAndComments(this)) {
       Token* t = new Token();
       t->type = TOKEN_WHITESPACE;
-      text->subString(t->text, 0);
+      text.subString(t->text, 0);
       return t;
     }
     return NULL;
@@ -210,10 +210,10 @@ namespace ast {
   TokenScanner<ApplicationSpecificScanner>::acceptSpecialCharacter() {
     const char* SPECIAL_CHARACTERS = ApplicationSpecificScanner::getSpecialCharacters();
     for (int i=0; i < ApplicationSpecificScanner::NUMBER_OF_SPECIAL_CHARACTERS; i++) {
-      if (text->lookAhead(0) == SPECIAL_CHARACTERS[i]) {
+      if (text.lookAhead(0) == SPECIAL_CHARACTERS[i]) {
         Token* t = new Token();
         t->type = TOKEN_SPECIAL_CHARACTER;
-        text->subString(t->text, 1);
+        text.subString(t->text, 1);
         return t;
       }
     }
@@ -267,17 +267,17 @@ namespace ast {
         assignRange(VALID_CHAR, '_', '_', true);
       }
     } BASIC_IDENTIFIER;
-    char a = text->lookAhead(0);
+    char a = text.lookAhead(0);
     if (!BASIC_IDENTIFIER.VALID_FIRST_CHAR[a]) {
       return NULL;
     }
     int i = 0;
     do {
-      a = text->lookAhead(++i);
+      a = text.lookAhead(++i);
     } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
     t->type = TOKEN_IDENTIFIER;
-    text->subString(t->text, i);
+    text.subString(t->text, i);
     if (verbose) {
       std::cout << "Found basic identifier = " << t->text.toString() << std::endl;
     }
@@ -312,17 +312,17 @@ namespace ast {
         assignRange(VALID_FIRST_CHAR, '-', '-', true);
       }
     } BASIC_IDENTIFIER;
-    char a = text->lookAhead(0);
+    char a = text.lookAhead(0);
     if (!BASIC_IDENTIFIER.VALID_FIRST_CHAR[a]) {
       return NULL;
     }
     int i = 0;
     do {
-      a = text->lookAhead(++i);
+      a = text.lookAhead(++i);
     } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
     t->type = TOKEN_NUMBER;
-    text->subString(t->text, i);
+    text.subString(t->text, i);
     if (verbose) {
       std::cout << "Found number = " << t->text.toString() << std::endl;
     }
@@ -331,7 +331,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::tokenize() {
-    tokenInfo.tokens = new Token *[text->getSize()];
+    tokenInfo.tokens = new Token *[text.getSize()];
     tokenInfo.position = 0;
     tokenInfo.size = 0;
     try {
@@ -344,9 +344,7 @@ namespace ast {
           add(acceptIdentifier()) ||
           add(acceptNumber());
       } while (match);
-      // TODO:
-      // std::string e = "Unknown token";
-      // error(e);
+      error("Unknown token");
     } catch (TextEof e) {
       return true;
     }
@@ -355,7 +353,7 @@ namespace ast {
   
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::setText(char* s) {
-    text->set(s);
+    text.set(s);
     tokenize();
     if (verbose) {
       std::cout << "TOKENLIST:" << std::endl;
@@ -391,27 +389,27 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::incrementPosition(int size) {
-    text->incrementPosition(size);
+    text.incrementPosition(size);
   }
 
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::getText(Text& t) {
-    t = *text;
+    t = text;
   }
 
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::setText(const Text& t) {
-    *text = t;
+    text = t;
   }
 
   template <class ApplicationSpecificScanner>
   int TokenScanner<ApplicationSpecificScanner>::getPosition() {
-    return text->getPosition();
+    return text.getPosition();
   }
 
   template <class ApplicationSpecificScanner>
   int TokenScanner<ApplicationSpecificScanner>::isWhiteSpace() {
-    char a = text->lookAhead(0);
+    char a = text.lookAhead(0);
     if (a == ' ' || a == '\t' || a == '\n' || a == '\r') {
       return 1;
     }
@@ -423,7 +421,7 @@ namespace ast {
     DEBUG("skipWhiteSpace");
     int i = 0;
     while (isWhiteSpace()) {
-      text->incrementPosition();
+      text.incrementPosition();
       i++;
     }
     return i;
@@ -432,8 +430,8 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   int TokenScanner<ApplicationSpecificScanner>::skipUntilEndOfLine() {
     int i = 0;
-    while (text->lookAhead(0) != '\n') {
-      text->incrementPosition();
+    while (text.lookAhead(0) != '\n') {
+      text.incrementPosition();
       i++;
     }
     return i;
@@ -453,8 +451,8 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::print(const std::string &severity, const std::string &text) {
     std::cerr << severity << " in file " << filename << " at "
-              << std::to_string(this->text->getLine()) << ", "
-              << std::to_string(this->text->getColumn()) << ": "
+              << std::to_string(this->text.getLine()) << ", "
+              << std::to_string(this->text.getColumn()) << ": "
               << text << std::endl;
     printTextLinePosition(stderr, this->text);
   }

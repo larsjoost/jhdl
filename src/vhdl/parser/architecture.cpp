@@ -13,15 +13,15 @@ namespace vhdl {
     Architecture* Architecture::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_ARCHITECTURE);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       ::ast::Text architectureName = i->text;
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_OF);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       i = scanner->expect<BasicIdentifier>();
       name = i->text;
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_IS);
       parseDeclarations(scanner);
       scanner->skipWhiteSpace();

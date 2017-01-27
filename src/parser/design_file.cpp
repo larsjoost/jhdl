@@ -21,16 +21,24 @@ namespace parser {
           ::ast::Scanner<verilog::scanner::Scanner> scanner =
             ::ast::Scanner<verilog::scanner::Scanner>(verbose);
           scanner.loadFile(filename);
-          while (true) {
-            designUnits.add(scanner.expect<verilog::parser::DesignUnit>());
-          }
+	  try {
+	    while (true) {
+	      designUnits.add(scanner.expect<verilog::parser::DesignUnit>());
+	    }
+	  } catch (ast::ExpectFailed e) {
+	    scanner.error(e.toString());
+	  }
         } else {
           ::ast::Scanner<vhdl::scanner::Scanner> scanner =
             ::ast::Scanner<vhdl::scanner::Scanner>(verbose);
           scanner.loadFile(filename);
-          while (true) {
-            designUnits.add(scanner.expect<vhdl::parser::DesignUnit>());
-          }
+	  try {
+	    while (true) {
+	      designUnits.add(scanner.expect<vhdl::parser::DesignUnit>());
+	    }
+	  } catch (ast::ExpectFailed e) {
+	    scanner.error(e.toString());
+	  }
         }
       } catch (ast::TokenEof e) {
       }

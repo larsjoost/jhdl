@@ -21,14 +21,14 @@ namespace ast {
 
     char toLower(char c);
 
-    int verbose = 0;
-
     void debug(const char* msg, char c = ' ');
 
     void printCurrentLine(FILE* output);
     void printCurrentLinePositionMarker(FILE* output);
 
   public:
+    int verbose = 0;
+
     Text();
     Text(int verbose);
     Text(char* text, int caseSensitive = 0, int verbose = 0);

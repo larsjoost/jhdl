@@ -13,7 +13,7 @@ namespace verilog {
       scanner->accept(scanner::Scanner::VERILOG_MODULE);
       interface = new ::ast::Interface();
       implementation = new ::ast::Implementation();
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       BasicIdentifier* i;
       i = scanner->expect<BasicIdentifier>();
       interface->name = i->text;
@@ -25,7 +25,7 @@ namespace verilog {
       }
       scanner->skipWhiteSpace();
       scanner->expect(";");
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VERILOG_ENDMODULE);
       return this;
     }

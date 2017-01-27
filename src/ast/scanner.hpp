@@ -27,7 +27,16 @@ namespace ast {
       text = t;
     }
   };
-  class ExpectFailed : public std::exception  {};
+  class ExpectFailed : public std::exception {
+    std::string text;
+  public:
+    ExpectFailed(std::string s) {
+      text = s;
+    }
+    std::string toString() {
+      return text;
+    }
+  };
   class NoWhiteSpace {
   public:
     char letter;
@@ -68,7 +77,6 @@ namespace ast {
 
     bool isWhiteSpace();
     void skipWhiteSpace();
-    void skipOneOrMoreWhiteSpaces();
     
     void warning(const std::string &s);
     void error(const std::string &s);
@@ -94,8 +102,7 @@ namespace ast {
       }
       p->parse(this);
       if (getTokenPosition() == position) {
-        error("Expected something else");
-        throw ExpectFailed();
+        throw ExpectFailed("Expected something else");
       }
       return p; 
     }
@@ -252,7 +259,7 @@ namespace ast {
     DEBUG("Expect keyword = " + toString(keyword));
     Text* t;
     if (!(t = optional(keyword))) {
-      error("Expected " + toString(keyword));
+      throw ExpectFailed("Expected " + toString(keyword));
     }
     return t;
   }
@@ -267,15 +274,6 @@ namespace ast {
   }
     
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::skipOneOrMoreWhiteSpaces() {
-    DEBUG("skipOneOrMoreWhiteSpace");
-    if (!isWhiteSpace()) {
-      error("Expected white-space");
-    }
-    skipWhiteSpace();
-  }
-
-  template <class ApplicationSpecificScanner>
   void Scanner<ApplicationSpecificScanner>::skipWhiteSpace() {
     while (isWhiteSpace()) {
       nextToken();
@@ -287,7 +285,7 @@ namespace ast {
     DEBUG("expect" + std::string(t));
     int len = optional(t);
     if (len == 0) {
-      error("Expected '" + std::string(t));
+      throw ExpectFailed("Expected '" + std::string(t));
     }
     return len;
   }
@@ -318,7 +316,7 @@ namespace ast {
     DEBUG("Expect token = " + toString(type));
     Text* t;
     if (!(t = optional(type))) {
-      error("Expected " + toString(type));
+      throw ExpectFailed("Expected " + toString(type));
     }
     return t;
   }

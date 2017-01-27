@@ -11,16 +11,16 @@ namespace vhdl {
     Entity* Entity::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_ENTITY);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       name = i->text;
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_IS);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_END);
-      scanner->skipOneOrMoreWhiteSpaces();
+      scanner->skipWhiteSpace();
       if (scanner->optional(scanner::Scanner::VHDL_ENTITY)) {
-	scanner->skipOneOrMoreWhiteSpaces();
+	scanner->skipWhiteSpace();
       }
       i = scanner->expect<BasicIdentifier>();
       if (!name.equals(i->text)) {
