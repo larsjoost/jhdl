@@ -8,6 +8,7 @@
 #include "basic_identifier.hpp"
 #include "procedure_call_statement.hpp"
 #include "variable_assignment.hpp"
+#include "report_statement.hpp"
 #include "declaration.hpp"
 
 namespace vhdl {
@@ -52,6 +53,16 @@ namespace vhdl {
       return false;
     }
 
+    bool Process::add(::ast::ReportStatement* p) {
+      if (p) {
+        ::ast::SequentialStatement* s = new ::ast::SequentialStatement();
+        s->reportStatement = p;
+        sequentialStatements.add(s);
+        return true;
+      }
+      return false;
+    }
+
     void Process::parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner) {
       bool match;
       do {
@@ -65,6 +76,7 @@ namespace vhdl {
       do {
         match = false;
         match |= add(scanner->optional<VariableAssignment>());
+        match |= add(scanner->optional<ReportStatement>());
         match |= add(scanner->optional<ProcedureCallStatement>());
       } while (match);
     }

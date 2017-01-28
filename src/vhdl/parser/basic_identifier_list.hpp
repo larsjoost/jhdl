@@ -29,12 +29,12 @@ namespace vhdl {
     
     public:
       
-      void parse(::ast::Scanner<scanner::Scanner>* scanner);
+      BasicIdentifierList<T>* parse(::ast::Scanner<scanner::Scanner>* scanner);
       
     };
 
     template <class T>
-    void BasicIdentifierList<T>::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+    BasicIdentifierList<T>* BasicIdentifierList<T>::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       BasicIdentifier* i;
       i = scanner->expect<BasicIdentifier>();
@@ -47,6 +47,7 @@ namespace vhdl {
         textList.add(&i->text);
         scanner->skipWhiteSpace();
       };
+      this;
     }
 
   }

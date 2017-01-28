@@ -12,7 +12,7 @@ namespace vhdl {
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       identifier = i->text;
       scanner->skipWhiteSpace();
-      scanner->expect(":=");
+      scanner->accept(":=");
       scanner->skipWhiteSpace();
       expression = scanner->expect<Expression>();
       scanner->skipWhiteSpace();

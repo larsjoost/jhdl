@@ -6,6 +6,7 @@
 #include "list.hpp"
 #include "procedure_call_statement.hpp"
 #include "variable_assignment.hpp"
+#include "report_statement.hpp"
 
 namespace ast {
     
@@ -15,6 +16,7 @@ namespace ast {
 
     ProcedureCallStatement* procedureCallStatement;
     VariableAssignment* variableAssignment;
+    ReportStatement* reportStatement;
     
   };
 

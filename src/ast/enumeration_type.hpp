@@ -10,7 +10,7 @@ namespace ast {
     
   public:
 
-    BasicIdentifierList enumerations;
+    BasicIdentifierList* enumerations;
     
   };
 

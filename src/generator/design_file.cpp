@@ -59,9 +59,9 @@ namespace generator {
     }    
   }
 
-  void DesignFile::basicIdentifierList(const char* separator, ast::BasicIdentifierList& list) {
+  void DesignFile::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
     std::string s = "";
-    for (ast::Text t : list.textList.list) {
+    for (ast::Text t : list->textList.list) {
       std::cout << s << t.toString();
       s = separator;
     }
@@ -110,7 +110,7 @@ namespace generator {
 
   void DesignFile::type_declarations(ast::TypeDeclaration* t) {
     if (t) {
-      assert (t->typeDefinition == NULL);
+      assert (t->typeDefinition);
       numberType(t->identifier, t->typeDefinition->numberType);
       enumerationType(t->identifier, t->typeDefinition->enumerationType);
     }

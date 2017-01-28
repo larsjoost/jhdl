@@ -9,7 +9,7 @@ namespace vhdl {
     EnumerationType* EnumerationType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->accept("(");
-      scanner->expect<BasicIdentifierList<CommaSeparation>>();
+      enumerations = scanner->expect<BasicIdentifierList<CommaSeparation>>();
       scanner->expect(")");
       return this;
     }

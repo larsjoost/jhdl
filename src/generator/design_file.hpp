@@ -15,7 +15,7 @@ namespace generator {
   class DesignFile { 
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
-    void basicIdentifierList(const char* separator, ast::BasicIdentifierList& list);
+    void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
     void procedureCallStatement(ast::ProcedureCallStatement* p);
     void variableAssignment(ast::VariableAssignment* p);
