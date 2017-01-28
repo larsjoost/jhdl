@@ -15,11 +15,11 @@ namespace vhdl {
   
     public:
 
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 9;
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 10;
 
       static char* getSpecialCharacters() {
         static char a[NUMBER_OF_SPECIAL_CHARACTERS] =
-          {'(', ')', '\'', '=', '>', '<', ';', '.', ':'};
+          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',','};
         return a;
       }
         
@@ -40,6 +40,8 @@ namespace vhdl {
         VHDL_TO,
         VHDL_DOWNTO,
         VHDL_VARIABLE,
+        VHDL_REPORT,
+        VHDL_SEVERITY,
         NUMBER_OF_KEYWORDS
       };
       
@@ -72,7 +74,9 @@ namespace vhdl {
           {VHDL_RANGE, (char *)"range", VHDL_1987},
           {VHDL_TO, (char *)"to", VHDL_1987},
           {VHDL_DOWNTO, (char *)"downto", VHDL_1987},
-          {VHDL_VARIABLE, (char *)"variable", VHDL_1987}};
+          {VHDL_VARIABLE, (char *)"variable", VHDL_1987},
+          {VHDL_REPORT, (char *)"report", VHDL_1987},
+          {VHDL_SEVERITY, (char *)"severity", VHDL_1987}};
         return a;
       }
       

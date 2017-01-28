@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "expression.hpp"
+#include "type_definition.hpp"
 
 namespace ast {
     
@@ -13,8 +14,7 @@ namespace ast {
   public:
 
     Text identifier;
-    Expression* left;
-    Expression* right;
+    TypeDefinition* typeDefinition;
     
   };
 

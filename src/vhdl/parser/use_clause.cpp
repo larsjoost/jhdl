@@ -11,8 +11,8 @@ namespace vhdl {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_USE);
       scanner->skipWhiteSpace();
-      BasicIdentifierList* i;
-      i = scanner->expect<BasicIdentifierList>();
+      BasicIdentifierList<PunctuationSeparation>* i;
+      i = scanner->expect<BasicIdentifierList<PunctuationSeparation>>();
       list = i->textList;
       scanner->skipWhiteSpace();
       scanner->expect(";");

@@ -27,16 +27,6 @@ namespace ast {
       text = t;
     }
   };
-  class ExpectFailed : public std::exception {
-    std::string text;
-  public:
-    ExpectFailed(std::string s) {
-      text = s;
-    }
-    std::string toString() {
-      return text;
-    }
-  };
   class NoWhiteSpace {
   public:
     char letter;
@@ -102,7 +92,7 @@ namespace ast {
       }
       p->parse(this);
       if (getTokenPosition() == position) {
-        throw ExpectFailed("Expected something else");
+        error("Expected something else");
       }
       return p; 
     }
@@ -117,9 +107,6 @@ namespace ast {
       try {
         p->parse(this);
       } catch (TokenNotAccepted e) {
-        setTokenPosition(position);
-        p = NULL;
-      } catch (ExpectFailed e) {
         setTokenPosition(position);
         p = NULL;
       }
@@ -259,7 +246,7 @@ namespace ast {
     DEBUG("Expect keyword = " + toString(keyword));
     Text* t;
     if (!(t = optional(keyword))) {
-      throw ExpectFailed("Expected " + toString(keyword));
+      error("Expected " + toString(keyword));
     }
     return t;
   }
@@ -285,7 +272,7 @@ namespace ast {
     DEBUG("expect" + std::string(t));
     int len = optional(t);
     if (len == 0) {
-      throw ExpectFailed("Expected '" + std::string(t));
+      error("Expected '" + std::string(t));
     }
     return len;
   }
@@ -316,7 +303,7 @@ namespace ast {
     DEBUG("Expect token = " + toString(type));
     Text* t;
     if (!(t = optional(type))) {
-      throw ExpectFailed("Expected " + toString(type));
+      error("Expected " + toString(type));
     }
     return t;
   }

@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
+#include <unordered_map>
 
 #include "text.hpp"
 #include "list.hpp"
@@ -80,11 +83,11 @@ namespace ast {
 
     int verbose;
 
+    bool isKeyword(Text& t, Keyword& k);
     Token* acceptWhiteSpace();
     Token* acceptString();
     Token* acceptCharacter();
     Token* acceptSpecialCharacter();
-    Token* acceptKeyword();
     Token* acceptIdentifier();
     Token* acceptNumber();
     bool tokenize();
@@ -251,21 +254,24 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  typename TokenScanner<ApplicationSpecificScanner>::Token*
-  TokenScanner<ApplicationSpecificScanner>::acceptKeyword() {
-    const typename ApplicationSpecificScanner::KeywordInfo* KEYWORD_INFO =
+  bool TokenScanner<ApplicationSpecificScanner>::isKeyword(Text& t, Keyword& keyword) {
+    static const typename ApplicationSpecificScanner::KeywordInfo* KEYWORD_INFO =
       ApplicationSpecificScanner::getKeywordInfo();
+    static typename std::unordered_map<std::string, Keyword> hashMap;
     for (int i=0; i < ApplicationSpecificScanner::NUMBER_OF_KEYWORDS; i++) {
-      Text a;
-      if (match(a, KEYWORD_INFO[i].text)) {
-        Token* t = new Token();
-        t->type = TOKEN_KEYWORD;
-        t->keyword = KEYWORD_INFO[i].keyword;
-        t->text = a;
-        return t;
-      }
+      std::string key = KEYWORD_INFO[i].text;
+      hashMap[key] = KEYWORD_INFO[i].keyword;
     }
-    return NULL;
+    std::string key = t.toString();
+    if (!ApplicationSpecificScanner::CASE_SENSITIVE) {
+      std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    }
+    typename std::unordered_map<std::string, Keyword>::const_iterator got = hashMap.find(key);
+    if ( got != hashMap.end() ) {
+      keyword = got->second;
+      return true;
+    }
+    return false;
   }
 
   template <class ApplicationSpecificScanner>
@@ -306,10 +312,19 @@ namespace ast {
       a = text.lookAhead(++i);
     } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
-    t->type = TOKEN_IDENTIFIER;
     text.subString(t->text, i);
-    if (verbose) {
-      std::cout << "Found basic identifier = " << t->text.toString() << std::endl;
+    Keyword k;
+    if (isKeyword(t->text, k)) {
+      t->type = TOKEN_KEYWORD;
+      t->keyword = k;
+      if (verbose) {
+        std::cout << "Found keyword = " << t->text.toString() << std::endl;
+      }
+    } else {    
+      t->type = TOKEN_IDENTIFIER;
+      if (verbose) {
+        std::cout << "Found basic identifier = " << t->text.toString() << std::endl;
+      }
     }
     return t;
   }
@@ -372,7 +387,6 @@ namespace ast {
           add(acceptString()) ||
           add(acceptCharacter()) ||
           add(acceptSpecialCharacter()) ||
-          add(acceptKeyword()) ||
           add(acceptIdentifier()) ||
           add(acceptNumber());
       } while (match);
@@ -389,10 +403,16 @@ namespace ast {
     tokenize();
     if (verbose) {
       std::cout << "TOKENLIST:" << std::endl;
+      int line = -1;
       for (int i=0; i<tokenInfo.size; i++) {
-        std::cout << "TOKEN[" << i << "]: " + toString(tokenInfo.tokens[i]) << std::endl;
+        int nextLine = tokenInfo.tokens[i]->text.getLine();
+        if (nextLine != line) {
+          line = nextLine;
+          std::cout << std::endl << "line " << line << " : ";
+        }
+        std::cout << " [" << toString(tokenInfo.tokens[i]) << "]";
       }
-      std::cout << "TOKENLIST END." << std::endl;
+      std::cout << std::endl << "TOKENLIST END." << std::endl;
     }
   }
 
@@ -564,6 +584,10 @@ namespace ast {
       return "special character";
     case TOKEN_WHITESPACE:
       return "white-space";
+    case TOKEN_CHARACTER:
+      return "character";
+    case TOKEN_STRING:
+      return "string";
     };
     return "unknown keyword";
   }
