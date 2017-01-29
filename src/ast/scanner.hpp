@@ -84,20 +84,6 @@ namespace ast {
     using TokenScanner<ApplicationSpecificScanner>::toString;
     
     template<typename T>
-    T* expect() {
-      T* p = new T();
-      int position = getTokenPosition();
-      if (verbose) {
-        std::cout << "Expect: " << typeid(p).name() << std::endl;
-      }
-      p->parse(this);
-      if (getTokenPosition() == position) {
-        error("Expected something else");
-      }
-      return p; 
-    }
-  
-    template<typename T>
     T* optional() {
       T* p = new T();
       int position = getTokenPosition();
@@ -116,6 +102,30 @@ namespace ast {
       if (verbose) {
         std::cout << "Optional: " << typeid(p).name() << " : ";
         std::cout << (p ? "[FOUND]" : "[MISSED]") << std::endl;
+      }
+      return p; 
+    }
+
+    template<typename T>
+    T* expect() {
+      T* p = optional<T>();
+      if (verbose) {
+        std::cout << "Expect: " << typeid(p).name() << std::endl;
+      }
+      if (!p) {
+        error("Expected something else");
+      }
+      return p; 
+    }
+  
+    template<typename T>
+    T* accept() {
+      T* p = optional<T>();
+      if (verbose) {
+        std::cout << "Accept: " << typeid(p).name() << std::endl;
+      }
+      if (!p) {
+        throw TokenNotAccepted();
       }
       return p; 
     }

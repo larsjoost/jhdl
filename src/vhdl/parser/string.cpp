@@ -1,14 +1,14 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "number.hpp"
+#include "string.hpp"
 
 namespace vhdl {
   namespace parser {
   
-    Number* Number::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+    String* String::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      ::ast::Text* v = scanner->accept(::ast::TOKEN_NUMBER);
-      value = *v;
+      ::ast::Text* v = scanner->accept(::ast::TOKEN_STRING);
+      text = *v;
       return this;
     }
     

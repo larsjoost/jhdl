@@ -9,6 +9,7 @@
 #include "../ast/method.hpp"
 #include "../ast/context_clause.hpp"
 #include "../ast/expression.hpp"
+#include "../ast/expression_term.hpp"
 #include "../ast/declaration.hpp"
 #include "../ast/variable_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
@@ -60,12 +61,18 @@ namespace generator {
     }    
   }
 
-  void DesignFile::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
+  std::string DesignFile::toString(const char* separator, ast::BasicIdentifierList* list) {
     std::string s = "";
+    std::string delimiter = "";
     for (ast::Text t : list->textList.list) {
-      std::cout << s << t.toString();
-      s = separator;
+      s += delimiter + t.toString();
+      delimiter = separator;
     }
+    return s;
+  }
+
+  void DesignFile::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
+    std::cout << toString(separator, list);
   }
   
   void DesignFile::enumerationType(ast::Text& text, ast::EnumerationType* t) {
@@ -182,8 +189,9 @@ namespace generator {
   
   void DesignFile::reportStatement(ast::ReportStatement* p) {
     if (p) {
-      printSourceLine(p->text);
-      std::cout << "vhdl::REPORT(" << p->text.toString() << ", ";
+      std::cout << "vhdl::REPORT(";
+      expression(p->message);
+      std::cout << ", ";
       std::cout << p->severity.toString() << ");" << std::endl;
     }
   }
@@ -196,10 +204,45 @@ namespace generator {
     }
   }
 
+  std::string DesignFile::toString(ast::BasicIdentifier* i) {
+    std::string s = i->text.toString();
+    if (i->attribute) {
+      s += "." + i->attribute->toString();
+      if (i->arguments) {
+        s += "(" + toString((char *)",", i->arguments) + ")";
+      }
+    }
+    return s;
+  }
+
+  void DesignFile::basicIdentifier(ast::BasicIdentifier* i) {
+    if (i) {      
+      std::cout << toString(i) << std::endl;
+    }
+  }
+
+  std::string DesignFile::toString(ast::ExpressionTerm& e) {
+    if (e.number) {
+      return e.number->value.toString();
+    }
+    if (e.text) {
+      return e.text->text.toString();
+    }
+    if (e.identifier) { 
+      return toString(e.identifier);
+    }
+  }
+  
   std::string DesignFile::toString(ast::Expression* e) {
     assert(e != NULL);
-    if (e->number) {
-      return e->number->value.toString();
+    if (e->op) {
+      std::string op;
+      if (e->op->op == "&") {
+        op = "CONCAT";
+      }
+      return op + "(" + toString(e->term) + ", " + toString(e->expression) + ")";
+    } else {
+      return toString(e->term);
     }
   }
   

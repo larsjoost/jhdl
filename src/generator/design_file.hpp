@@ -3,19 +3,25 @@
 
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
+#include "../ast/expression_term.hpp"
 #include "../ast/expression.hpp"
 #include "../ast/procedure_call_statement.hpp"
 #include "../ast/variable_assignment.hpp"
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
+#include "../ast/basic_identifier.hpp"
 #include "../ast/basic_identifier_list.hpp"
 #include "../ast/report_statement.hpp"
 
 namespace generator {
   
   class DesignFile { 
+    std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
+    std::string toString(ast::BasicIdentifier* i);
+    void basicIdentifier(ast::BasicIdentifier* i);
+    std::string toString(const char* separator, ast::BasicIdentifierList* list);
     void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
     void reportStatement(ast::ReportStatement* p);

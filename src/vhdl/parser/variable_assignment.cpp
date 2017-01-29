@@ -9,7 +9,7 @@ namespace vhdl {
   
     VariableAssignment* VariableAssignment::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      BasicIdentifier* i = scanner->accept<BasicIdentifier>();
       identifier = i->text;
       scanner->skipWhiteSpace();
       scanner->accept(":=");
