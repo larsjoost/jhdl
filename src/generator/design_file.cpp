@@ -12,6 +12,7 @@
 #include "../ast/declaration.hpp"
 #include "../ast/variable_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
+#include "../ast/report_statement.hpp"
 
 #include "design_file.hpp"
 
@@ -151,6 +152,7 @@ namespace generator {
             for (ast::SequentialStatement s : m.sequentialStatements.list) {
               procedureCallStatement(s.procedureCallStatement);
               variableAssignment(s.variableAssignment);
+              reportStatement(s.reportStatement);
             }
             std::cout << "}" << std::endl;
           }
@@ -178,6 +180,14 @@ namespace generator {
     }
   }
   
+  void DesignFile::reportStatement(ast::ReportStatement* p) {
+    if (p) {
+      printSourceLine(p->text);
+      std::cout << "vhdl::REPORT(" << p->text.toString() << ", ";
+      std::cout << p->severity.toString() << ");" << std::endl;
+    }
+  }
+
   void DesignFile::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
       std::cout << p->identifier.toString() << " = ";

@@ -9,6 +9,7 @@
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
 #include "../ast/basic_identifier_list.hpp"
+#include "../ast/report_statement.hpp"
 
 namespace generator {
   
@@ -17,6 +18,7 @@ namespace generator {
     void expression(ast::Expression* e);
     void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
+    void reportStatement(ast::ReportStatement* p);
     void procedureCallStatement(ast::ProcedureCallStatement* p);
     void variableAssignment(ast::VariableAssignment* p);
     void includes(ast::DesignFile& designFile);
