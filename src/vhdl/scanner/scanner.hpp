@@ -15,11 +15,11 @@ namespace vhdl {
   
     public:
 
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 11;
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 12;
 
       static char* getSpecialCharacters() {
         static char a[NUMBER_OF_SPECIAL_CHARACTERS] =
-          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&'};
+          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+'};
         return a;
       }
         

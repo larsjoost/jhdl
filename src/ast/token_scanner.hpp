@@ -135,6 +135,8 @@ namespace ast {
     std::string toString(Token* t);
     std::string toString(Keyword k);
     std::string toString(TokenType k);
+
+    std::string currentTokenToString();
     
   };  
 
@@ -593,6 +595,11 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
+  std::string TokenScanner<ApplicationSpecificScanner>::currentTokenToString() {
+    return toString(tokenLookAhead(0));
+  }
+
+    template <class ApplicationSpecificScanner>
   std::string TokenScanner<ApplicationSpecificScanner>::toString(Token* t) {
     std::string s = toString(t->type);
     switch (t->type) {

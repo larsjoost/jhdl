@@ -82,13 +82,14 @@ namespace ast {
     using TokenScanner<ApplicationSpecificScanner>::getFilename;
     using TokenScanner<ApplicationSpecificScanner>::printTextLinePosition;
     using TokenScanner<ApplicationSpecificScanner>::toString;
+    using TokenScanner<ApplicationSpecificScanner>::currentTokenToString;
     
     template<typename T>
     T* optional() {
       T* p = new T();
       int position = getTokenPosition();
       if (verbose) {
-        std::cout << "Optional: " << typeid(p).name() << std::endl;
+        std::cout << "Optional[" << position << "]: " << typeid(p).name() << std::endl;
       }
       try {
         p->parse(this);
@@ -100,8 +101,9 @@ namespace ast {
         p = NULL;
       }
       if (verbose) {
-        std::cout << "Optional: " << typeid(p).name() << " : ";
-        std::cout << (p ? "[FOUND]" : "[MISSED]") << std::endl;
+        std::cout << "Optional[" << getTokenPosition() << "]: " << typeid(p).name() << " : ";
+        std::cout << (p ? "[FOUND]" : "[MISSED]");
+        std::cout << " Token = " + currentTokenToString() << std::endl;
       }
       return p; 
     }
