@@ -25,7 +25,7 @@ namespace ast {
     verbose = v;
   };
 
-  Text::Text(char* text, int caseSensitive, int v) {
+  Text::Text(char* text, bool caseSensitive, int v) {
     verbose = v;
     set(text, caseSensitive);
   };
@@ -66,7 +66,7 @@ namespace ast {
     }
   }
 
-  void Text::set(char* t, int c) {
+  void Text::set(char* t, bool c) {
     text = t;
     position = 0;
     size = textSize = strlen(t);
@@ -160,11 +160,15 @@ namespace ast {
     fprintf(output, "Text::size = %u\n", size);
   }
 
-  const std::string Text::toString() {
+  const std::string Text::toString(bool setCase) {
     int size = remainingSize();
     std::string s;
     for (int i = 0; i < size; i++) {
-      s += lookAhead(i);
+      char c = lookAhead(i);
+      if (setCase && !caseSensitive) {
+	c = toupper(c);
+      }
+      s += c;
     }
     return s;
   }

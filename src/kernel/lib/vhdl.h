@@ -9,10 +9,10 @@
 
 namespace vhdl {
 
-  namespace std {
-    namespace env {
+  namespace STD {
+    namespace ENV {
 
-      void finish(int x) {
+      void FINISH(int x) {
         exit(x);
       }
       
@@ -23,6 +23,7 @@ namespace vhdl {
   class Range {
     T left;
     T right;
+  protected:
     T value;
   public:
     Range(T left, T right) {
@@ -34,6 +35,11 @@ namespace vhdl {
     void operator=(T v) {
       value = v;
     }
+
+    static ::std::string IMAGE(Range<T> r) {
+      return ::std::to_string(r.value);
+    }
+    
   };
 
   namespace STANDARD {
@@ -69,14 +75,25 @@ namespace vhdl {
     
   }
 
+  /*
+    VHDL functions
+   */
+  
   void REPORT(::std::string message, STANDARD::SEVERITY_LEVEL severity) {
-    ::std::cout << STANDARD::toString(severity) << ":" << message << ::std::endl;
+    ::std::cout << STANDARD::toString(severity) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
-      std::env::finish(1);
+      STD::ENV::FINISH(1);
     }
   }
-}
 
-using namespace vhdl::STANDARD;
+  /*
+    Expression operator functions
+   */
+  
+  ::std::string CONCAT(::std::string left, ::std::string right) {
+    return left + right;
+  }
+  
+}
 
 #endif

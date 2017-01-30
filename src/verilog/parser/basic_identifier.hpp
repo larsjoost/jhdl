@@ -13,7 +13,7 @@ namespace verilog {
     
     public:
 
-      void parse(::ast::Scanner<scanner::Scanner>* scanner);
+      BasicIdentifier* parse(::ast::Scanner<scanner::Scanner>* scanner);
       
     };
   }

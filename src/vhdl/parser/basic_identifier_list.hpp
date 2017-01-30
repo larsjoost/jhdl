@@ -36,15 +36,12 @@ namespace vhdl {
     template <class T>
     BasicIdentifierList<T>* BasicIdentifierList<T>::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      BasicIdentifier* i;
-      i = scanner->expect<BasicIdentifier>();
-      textList.add(&i->text);
+      textList.add(scanner->expect<BasicIdentifier>());
       scanner->skipWhiteSpace();
       T t;
       while (scanner->optional(t.getSeparator())) {
         scanner->skipWhiteSpace();
-        i = scanner->expect<BasicIdentifier>();
-        textList.add(&i->text);
+        textList.add(scanner->expect<BasicIdentifier>());
         scanner->skipWhiteSpace();
       };
       this;

@@ -10,8 +10,7 @@ namespace vhdl {
   
     ProcedureCallStatement* ProcedureCallStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
-      BasicIdentifier* i = scanner->accept<BasicIdentifier>();
-      name = i->text;
+      name = scanner->accept<BasicIdentifier>();
       if (scanner->optional("(")) {
         associationList = scanner->expect<AssociationList>();
         scanner->expect(")");

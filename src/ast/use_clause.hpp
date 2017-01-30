@@ -1,15 +1,14 @@
 #ifndef AST_USECLAUSE_HPP_
 #define AST_USECLAUSE_HPP_
 
-#include "list.hpp"
-#include "text.hpp"
+#include "basic_identifier_list.hpp"
 
 namespace ast {
     
   class UseClause {
 
   public:
-    List<Text> list;
+    BasicIdentifierList* list;
     
   };
 }

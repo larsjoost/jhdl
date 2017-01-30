@@ -3,7 +3,7 @@
 #define AST_BASICINDETIFIER_H_
 
 #include "text.hpp"
-#include "basic_identifier_list.hpp"
+#include "basic_identifier.hpp"
 
 namespace ast {
 

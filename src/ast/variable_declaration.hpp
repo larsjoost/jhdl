@@ -2,7 +2,7 @@
 #ifndef AST_VARIABLE_DECLARATION_H_
 #define AST_VARIABLE_DECLARATION_H_
 
-#include "text.hpp"
+#include "basic_identifier.hpp"
 
 namespace ast {
     
@@ -10,8 +10,8 @@ namespace ast {
     
   public:
 
-    Text identifier;
-    Text type;
+    BasicIdentifier* identifier;
+    BasicIdentifier* type;
     
   };
 

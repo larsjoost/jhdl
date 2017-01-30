@@ -399,7 +399,7 @@ namespace ast {
   
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::setText(char* s) {
-    text.set(s);
+    text.set(s, ApplicationSpecificScanner::CASE_SENSITIVE);
     tokenize();
     if (verbose) {
       std::cout << "TOKENLIST:" << std::endl;

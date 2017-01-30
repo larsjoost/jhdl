@@ -3,7 +3,7 @@
 #define AST_PROCEDURECALLSTATEMENT_H_
 
 #include "list.hpp"
-#include "text.hpp"
+#include "basic_identifier.hpp"
 #include "association_list.hpp"
 
 namespace ast {
@@ -12,7 +12,7 @@ namespace ast {
     
   public:
 
-    Text name;
+    BasicIdentifier* name;
     AssociationList* associationList;
     
   };

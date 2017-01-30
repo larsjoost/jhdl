@@ -5,9 +5,10 @@
 namespace verilog {
   namespace parser {
   
-    void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+    BasicIdentifier* BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->skipWhiteSpace();
       scanner->expect(::ast::TOKEN_IDENTIFIER);
+      return this;
     }
     
   }

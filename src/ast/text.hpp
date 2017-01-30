@@ -17,7 +17,7 @@ namespace ast {
     int lineNumber;
     int lineStart;
     int columnNumber;
-    int caseSensitive;
+    bool caseSensitive;
 
     char toLower(char c);
 
@@ -31,9 +31,9 @@ namespace ast {
 
     Text();
     Text(int verbose);
-    Text(char* text, int caseSensitive = 0, int verbose = 0);
+    Text(char* text, bool caseSensitive = false, int verbose = 0);
     
-    void set(char* text, int caseSensitive = 0);
+    void set(char* text, bool caseSensitive = false);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
     void subString(Text& t, int size);
@@ -44,7 +44,7 @@ namespace ast {
     int getPosition();
     int getSize();
     int equals(Text& text);
-    const std::string toString();
+    const std::string toString(bool setCase = false);
     
     void printLinePosition(FILE* output = stdout);
     void print(FILE* output = stdout);

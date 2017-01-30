@@ -39,6 +39,7 @@ namespace generator {
     void implementation(ast::DesignFile& designFile, ast::Text& name);
 
     void printSourceLine(ast::Text& t);
+    void printSourceLine(ast::BasicIdentifier* t);
   public:
     DesignFile(ast::DesignFile& designFile);
   };

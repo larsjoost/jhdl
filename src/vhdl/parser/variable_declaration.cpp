@@ -11,13 +11,11 @@ namespace vhdl {
       scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_VARIABLE);
       scanner->skipWhiteSpace();
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
-      identifier = i->text;
+      identifier = scanner->expect<BasicIdentifier>();
       scanner->skipWhiteSpace();
       scanner->expect(":");
       scanner->skipWhiteSpace();
-      i = scanner->expect<BasicIdentifier>();
-      type = i->text;
+      type = scanner->expect<BasicIdentifier>();
       scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;

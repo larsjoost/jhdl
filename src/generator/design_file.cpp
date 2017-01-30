@@ -27,6 +27,8 @@ namespace generator {
         std::string name = it->module.interface->name.toString();
         std::cout << "#include \"systemc.h\"" << std::endl;
         std::cout << "#include \"vhdl.h\"" << std::endl;
+	std::cout << "using namespace vhdl;" << std::endl;
+	std::cout << "using namespace vhdl::STANDARD;" << std::endl;
         includes(designFile);
         std::cout << "SC_MODULE(" << name << ")" << std::endl;
         std::cout << "{" << std::endl;
@@ -46,15 +48,17 @@ namespace generator {
     std::cout << "*/" << std::endl;
   }
   
+  void DesignFile::printSourceLine(ast::BasicIdentifier* t) {
+    printSourceLine(t->text);
+  }
+
   void DesignFile::includes(ast::DesignFile& designFile) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          std::cout << "using vhdl";
-          for (ast::Text t : useClause.list.list) {
-            std::cout << "::" << t.toString();
-          }
+          std::cout << "using vhdl::";
+	  std::cout << toString((char *)"::", useClause.list);
           std::cout << ";" << std::endl;
         }
       }
@@ -64,8 +68,8 @@ namespace generator {
   std::string DesignFile::toString(const char* separator, ast::BasicIdentifierList* list) {
     std::string s = "";
     std::string delimiter = "";
-    for (ast::Text t : list->textList.list) {
-      s += delimiter + t.toString();
+    for (ast::BasicIdentifier t : list->textList.list) {
+      s += delimiter + toString(&t);
       delimiter = separator;
     }
     return s;
@@ -127,7 +131,7 @@ namespace generator {
   void DesignFile::variable_declarations(ast::VariableDeclaration* v) {
     if (v) {
       printSourceLine(v->identifier);
-      std::cout << v->type.toString() << " " << v->identifier.toString() << ";" << std::endl;
+      std::cout << toString(v->type) << " " << toString(v->identifier) << ";" << std::endl;
     }
   }
 
@@ -176,7 +180,7 @@ namespace generator {
 
   void DesignFile::procedureCallStatement(ast::ProcedureCallStatement* p) {
     if (p) {
-      std::cout << p->name.toString() << "(";
+      std::cout << toString(p->name) << "(";
       if (p->associationList) {
         for (ast::AssociationElement e :
                p->associationList->associationElements.list) {
@@ -198,16 +202,17 @@ namespace generator {
 
   void DesignFile::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
-      std::cout << p->identifier.toString() << " = ";
+      std::cout << toString(p->identifier) << " = ";
       expression(p->expression);
       std::cout << ";" << std::endl;
     }
   }
 
   std::string DesignFile::toString(ast::BasicIdentifier* i) {
-    std::string s = i->text.toString();
+    assert (i != NULL);
+    std::string s = i->text.toString(true);
     if (i->attribute) {
-      s += "." + i->attribute->toString();
+      s += "::" + i->attribute->toString(true);
       if (i->arguments) {
         s += "(" + toString((char *)",", i->arguments) + ")";
       }

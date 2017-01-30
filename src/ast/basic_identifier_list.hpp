@@ -1,7 +1,7 @@
 #ifndef AST_BASICIDENTIFIERLIST_HPP_
 #define AST_BASICIDENTIFIERLIST_HPP_
 
-#include "text.hpp"
+#include "basic_identifier.hpp"
 #include "list.hpp"
 
 namespace ast {
@@ -9,7 +9,7 @@ namespace ast {
   class BasicIdentifierList {
 
   public:
-    List<Text> textList;
+    List<BasicIdentifier> textList;
 
   };
 }
