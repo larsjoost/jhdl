@@ -244,6 +244,8 @@ namespace generator {
       std::string op;
       if (e->op->op == "&") {
         op = "CONCAT";
+      } else if (e->op->op == "+") {
+        op = "ADD";
       }
       return op + "(" + toString(e->term) + ", " + toString(e->expression) + ")";
     } else {

@@ -8,7 +8,6 @@ namespace vhdl {
   namespace parser {
   
     Declaration* Declaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       type = scanner->optional<TypeDeclaration>();
       variable = scanner->optional<VariableDeclaration>();
       return this;

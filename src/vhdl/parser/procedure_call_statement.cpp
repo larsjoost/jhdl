@@ -9,13 +9,11 @@ namespace vhdl {
   namespace parser {
   
     ProcedureCallStatement* ProcedureCallStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       name = scanner->accept<BasicIdentifier>();
       if (scanner->optional("(")) {
         associationList = scanner->expect<AssociationList>();
         scanner->expect(")");
       } 
-      scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;
     }

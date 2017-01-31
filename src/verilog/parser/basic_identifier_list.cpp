@@ -7,13 +7,9 @@ namespace verilog {
   namespace parser {
   
     void BasicIdentifierList::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       textList.add(scanner->expect<BasicIdentifier>());
-      scanner->skipWhiteSpace();
       while (scanner->optional(",")) {
-        scanner->skipWhiteSpace();
         textList.add(scanner->expect<BasicIdentifier>());
-        scanner->skipWhiteSpace();
       };
     }
     

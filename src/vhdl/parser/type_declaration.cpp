@@ -9,16 +9,11 @@ namespace vhdl {
   namespace parser {
   
     TypeDeclaration* TypeDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_TYPE);
-      scanner->skipWhiteSpace();
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
       identifier = i->text;
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_IS);
-      scanner->skipWhiteSpace();
       typeDefinition = scanner->expect<TypeDefinition>();
-      scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;
     }

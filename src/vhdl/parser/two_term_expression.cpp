@@ -9,7 +9,6 @@ namespace vhdl {
   namespace parser {
     
     TwoTermExpression* TwoTermExpression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       term1 = scanner->accept<Expression>(); 
       op = scanner->accept<ExpressionOperator>();
       term2 = scanner->expect<Expression>();

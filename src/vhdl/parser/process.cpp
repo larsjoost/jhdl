@@ -15,20 +15,13 @@ namespace vhdl {
   namespace parser {
   
     Process* Process::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
-      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_IS);
       parseDeclarations(scanner);
-      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       parseBody(scanner);
-      scanner->skipWhiteSpace();
       scanner->expect(scanner::Scanner::VHDL_END);
-      scanner->skipWhiteSpace();
-      if (scanner->optional(scanner::Scanner::VHDL_PROCESS)) {
-        scanner->skipWhiteSpace();
-      };
+      scanner->optional(scanner::Scanner::VHDL_PROCESS);
       scanner->expect(";");
       return this;
     }

@@ -9,7 +9,6 @@ namespace vhdl {
   namespace parser {
   
     AssociationElement* AssociationElement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       expression = scanner->expect<Expression>();
       return this;
     }

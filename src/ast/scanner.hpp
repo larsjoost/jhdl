@@ -65,9 +65,6 @@ namespace ast {
     Text* expect(Keyword keyword);
     Text* expect(TokenType type);
 
-    bool isWhiteSpace();
-    void skipWhiteSpace();
-    
     void warning(const std::string &s);
     void error(const std::string &s);
     void critical(const std::string &s);
@@ -261,22 +258,6 @@ namespace ast {
       error("Expected " + toString(keyword));
     }
     return t;
-  }
-
-  template <class ApplicationSpecificScanner>
-  bool Scanner<ApplicationSpecificScanner>::isWhiteSpace() {
-    Token* t = tokenLookAhead(0);
-    if (t->type == TOKEN_WHITESPACE) {
-      return true;
-    }
-    return false;
-  }
-    
-  template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::skipWhiteSpace() {
-    while (isWhiteSpace()) {
-      nextToken();
-    }
   }
 
   template <class ApplicationSpecificScanner>

@@ -7,7 +7,6 @@ namespace vhdl {
   namespace parser {
   
     EnumerationType* EnumerationType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       scanner->accept("(");
       enumerations = scanner->expect<BasicIdentifierList<CommaSeparation>>();
       scanner->expect(")");

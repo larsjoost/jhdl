@@ -94,6 +94,13 @@ namespace vhdl {
     return left + right;
   }
   
+  static STANDARD::INTEGER ADD(int left, int right) {
+    int sum = left + right;
+    STANDARD::INTEGER l;
+    l = sum;
+    return l;
+  }
+  
 }
 
 #endif

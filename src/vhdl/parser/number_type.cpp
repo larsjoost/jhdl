@@ -8,10 +8,8 @@ namespace vhdl {
   namespace parser {
   
     NumberType* NumberType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_RANGE);
       left = scanner->expect<Expression>();
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_TO);
       right = scanner->expect<Expression>();
       return this;

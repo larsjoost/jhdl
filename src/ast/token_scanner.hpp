@@ -35,13 +35,13 @@ namespace ast {
     TOKEN_STRING,
     TOKEN_CHARACTER,
     TOKEN_IDENTIFIER,
-    TOKEN_SPECIAL_CHARACTER,
-    TOKEN_WHITESPACE
+    TOKEN_SPECIAL_CHARACTER
   };
 
   template <class ApplicationSpecificScanner>
   class TokenScanner {
 
+    bool skippedWhiteSpace = false;
   public:
 
     using Keyword = typename ApplicationSpecificScanner::Keyword;
@@ -50,6 +50,7 @@ namespace ast {
       TokenType type;
       Keyword keyword;
       Text text;
+      bool skippedWhiteSpace;
     };
 
   private:
@@ -84,7 +85,6 @@ namespace ast {
     int verbose;
 
     bool isKeyword(Text& t, Keyword& k);
-    Token* acceptWhiteSpace();
     Token* acceptString();
     Token* acceptCharacter();
     Token* acceptSpecialCharacter();
@@ -194,24 +194,14 @@ namespace ast {
   bool TokenScanner<ApplicationSpecificScanner>::add(Token* token) {
     if (token) {
       DEBUG("Added token " + token->text.toString());
+      token->skippedWhiteSpace = skippedWhiteSpace;
+      skippedWhiteSpace = false;
       tokenInfo.tokens[tokenInfo.size] = token;
       tokenInfo.size++;
       text.incrementPosition(token->text.remainingSize());
       return true;
     }
     return false;
-  }
-
-  template <class ApplicationSpecificScanner>
-  typename TokenScanner<ApplicationSpecificScanner>::Token*
-  TokenScanner<ApplicationSpecificScanner>::acceptWhiteSpace() {
-    if (applicationSpecificScanner.skipWhiteSpaceAndComments(this)) {
-      Token* t = new Token();
-      t->type = TOKEN_WHITESPACE;
-      text.subString(t->text, 0);
-      return t;
-    }
-    return NULL;
   }
 
   template <class ApplicationSpecificScanner>
@@ -384,8 +374,8 @@ namespace ast {
     try {
       bool match;
       do {
+	skippedWhiteSpace |= applicationSpecificScanner.skipWhiteSpaceAndComments(this);
         match =
-          add(acceptWhiteSpace()) || 
           add(acceptString()) ||
           add(acceptCharacter()) ||
           add(acceptSpecialCharacter()) ||
@@ -584,8 +574,6 @@ namespace ast {
       return "identifier";
     case TOKEN_SPECIAL_CHARACTER:
       return "special character";
-    case TOKEN_WHITESPACE:
-      return "white-space";
     case TOKEN_CHARACTER:
       return "character";
     case TOKEN_STRING:
@@ -614,8 +602,6 @@ namespace ast {
       break;
     case TOKEN_SPECIAL_CHARACTER:
       s += ": " + t->text.toString();
-      break;
-    case TOKEN_WHITESPACE:
       break;
     };
     return s;

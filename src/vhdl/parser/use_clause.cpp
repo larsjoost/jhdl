@@ -8,11 +8,8 @@ namespace vhdl {
   namespace parser {
   
     UseClause* UseClause::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->skipWhiteSpace();
       scanner->accept(scanner::Scanner::VHDL_USE);
-      scanner->skipWhiteSpace();
       list = scanner->expect<BasicIdentifierList<PunctuationSeparation>>();
-      scanner->skipWhiteSpace();
       scanner->expect(";");
       return this;
     }

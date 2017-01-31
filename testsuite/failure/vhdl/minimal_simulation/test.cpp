@@ -1,11 +1,13 @@
 // Filename : test.vhdl
 #include "systemc.h"
 #include "vhdl.h"
-using vhdl::std::env::finish;
+using namespace vhdl;
+using namespace vhdl::STANDARD;
+using vhdl::STD::ENV::FINISH;
 SC_MODULE(test)
 {
 void noname0() {
-finish(1);
+FINISH(1);
 }
 public:
 SC_CTOR(test) {

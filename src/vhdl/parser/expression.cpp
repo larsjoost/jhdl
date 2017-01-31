@@ -15,9 +15,7 @@ namespace vhdl {
       if ((term.number = scanner->optional<Number>()) ||
           (term.text = scanner->optional<String>()) ||
           (term.identifier = scanner->optional<BasicIdentifier>())) {
-        scanner->skipWhiteSpace();
         if (op = scanner->optional<ExpressionOperator>()) {
-          scanner->skipWhiteSpace();
           expression = scanner->expect<Expression>();
         }
       }
