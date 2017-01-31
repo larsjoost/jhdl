@@ -10,7 +10,7 @@ namespace vhdl {
   
     ExpressionOperator* ExpressionOperator::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       static const int SIZE = 3;
-      static const ::ast::operators o[SIZE] = {
+      static const ::ast::ExpressionOperator::operators o[SIZE] = {
 	::ast::ExpressionOperator::CONCAT,
 	::ast::ExpressionOperator::ADD,
 	::ast::ExpressionOperator::EQUAL};

@@ -13,6 +13,7 @@
 #include "../ast/basic_identifier_list.hpp"
 #include "../ast/report_statement.hpp"
 #include "../ast/if_statement.hpp"
+#include "../ast/sequential_statement.hpp"
 
 namespace generator {
   
@@ -25,6 +26,7 @@ namespace generator {
     std::string toString(const char* separator, ast::BasicIdentifierList* list);
     void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
+    void sequentialStatements(ast::List<ast::SequentialStatement>& l);
     void ifStatement(ast::IfStatement* p);
     void reportStatement(ast::ReportStatement* p);
     void procedureCallStatement(ast::ProcedureCallStatement* p);

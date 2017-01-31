@@ -143,6 +143,16 @@ namespace generator {
     }
   }
 
+  void DesignFile::sequentialStatements(ast::List<ast::SequentialStatement>& l) {
+    for (ast::SequentialStatement s : l.list) {
+      procedureCallStatement(s.procedureCallStatement);
+      variableAssignment(s.variableAssignment);
+      reportStatement(s.reportStatement);
+      ifStatement(s.ifStatement);
+    }
+  }
+  
+  
   void DesignFile::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     int methodId = 0;
     std::list<std::string> methodNames;
@@ -161,12 +171,7 @@ namespace generator {
             methodNames.push_back(methodName);
             std::cout << "void " << methodName << "() {" << std::endl;
             declarations(m.declarations);
-            for (ast::SequentialStatement s : m.sequentialStatements.list) {
-              procedureCallStatement(s.procedureCallStatement);
-              variableAssignment(s.variableAssignment);
-              reportStatement(s.reportStatement);
-	      ifStatement(s.ifStatement);
-            }
+            sequentialStatements(m.sequentialStatements);
             std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;
@@ -198,25 +203,23 @@ namespace generator {
       std::cout << "REPORT(";
       expression(p->message);
       std::cout << ", ";
-      std::cout << p->severity.toString() << ");" << std::endl;
+      std::cout << toString(p->severity) << ");" << std::endl;
     }
   }
 
   void DesignFile::ifStatement(ast::IfStatement* p) {
     if (p) {
-      std::string command = "if";
+      std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
-	if (c->condition) {
-	  std::cout << command << " " << toString(c->condition) << " {";
+	if (c.condition) {
+	  std::cout << command << " (" << toString(c.condition) << ") {" << std::endl;
 	} else {
-	  std::cout << "} else {";
+	  std::cout << "} else {" << std::endl;
 	}
 	command = "} elsif";
-	for (ast::SequentialStatement s : c->sequentialStatements.list) {
-	  sequentialStatement(s);
-	}
-	std::cout << "}" << std::endl;
+        sequentialStatements(c.sequentialStatements);
       }
+      std::cout << "}" << std::endl;
     }
   }
 

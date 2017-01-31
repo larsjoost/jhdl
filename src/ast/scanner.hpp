@@ -156,7 +156,7 @@ namespace ast {
 	      << std::to_string(t->text.getLine()) << ", "
 	      << std::to_string(t->text.getColumn()) << ": "
 	      << text
-              << ". Found token";
+              << ". Found ";
     if (verbose) {
       std::cerr << "[" << getTokenPosition() << "]";
     }
@@ -265,7 +265,7 @@ namespace ast {
     DEBUG("expect" + std::string(t));
     int len = optional(t);
     if (len == 0) {
-      error("Expected '" + std::string(t));
+      error("Expected '" + std::string(t) + "'");
     }
     return len;
   }

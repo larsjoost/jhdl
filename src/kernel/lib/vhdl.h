@@ -23,9 +23,8 @@ namespace vhdl {
   class Range {
     T left;
     T right;
-  protected:
-    T value;
   public:
+    T value;
     Range(T left, T right) {
       value = left;
       this->left = left;
@@ -90,7 +89,7 @@ namespace vhdl {
     Expression operator functions
    */
   
-  ::std::string CONCAT(::std::string left, ::std::string right) {
+  static ::std::string CONCAT(::std::string left, ::std::string right) {
     return left + right;
   }
   
@@ -101,6 +100,9 @@ namespace vhdl {
     return l;
   }
   
+  static bool EQUAL(STANDARD::INTEGER left, int right) {
+    return left.value == right;
+  }
 }
 
 #endif
