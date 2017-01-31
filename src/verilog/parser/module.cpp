@@ -12,9 +12,7 @@ namespace verilog {
       scanner->accept(scanner::Scanner::VERILOG_MODULE);
       interface = new ::ast::Interface();
       implementation = new ::ast::Implementation();
-      BasicIdentifier* i;
-      i = scanner->expect<BasicIdentifier>();
-      interface->name = i->text;
+      interface->name = scanner->expect<BasicIdentifier>();
       if (scanner->optional("(")) {
         BasicIdentifierList* i = scanner->expect<BasicIdentifierList>();
         scanner->expect(")");

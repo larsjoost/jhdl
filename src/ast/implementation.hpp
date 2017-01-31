@@ -2,7 +2,7 @@
 #ifndef AST_IMPLEMENTATION_H_
 #define AST_IMPLEMENTATION_H_
 
-#include "text.hpp"
+#include "basic_identifier.hpp"
 #include "list.hpp"
 #include "declaration.hpp"
 #include "method.hpp"
@@ -13,7 +13,7 @@ namespace ast {
     
   public:
 
-    Text name;
+    BasicIdentifier* name;
     List<Declaration> declarations;
     List<Method> methods;
     

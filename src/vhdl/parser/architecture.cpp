@@ -12,22 +12,20 @@ namespace vhdl {
   
     Architecture* Architecture::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ARCHITECTURE);
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
-      ::ast::Text architectureName = i->text;
+      BasicIdentifier* architectureName = scanner->expect<BasicIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_OF);
-      i = scanner->expect<BasicIdentifier>();
-      name = i->text;
+      name = scanner->expect<BasicIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       parseDeclarations(scanner);
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       parseBody(scanner);
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_ARCHITECTURE);
-      i = scanner->expect<BasicIdentifier>();
-      if (!architectureName.equals(i->text)) {
-        scanner->error("Identifier '" + i->text.toString() +
+      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      if (!architectureName->equals(i)) {
+        scanner->error("Identifier '" + i->toString() +
                        "' does not match architecture name '" +
-                       architectureName.toString() + "'");
+                       architectureName->toString() + "'");
       }
       scanner->expect(";");
       return this;

@@ -2,7 +2,7 @@
 #ifndef AST_METHOD_H_
 #define AST_METHOD_H_
 
-#include "text.hpp"
+#include "basic_identifier.hpp"
 #include "list.hpp"
 #include "sequential_statement.hpp"
 #include "declaration.hpp"
@@ -13,7 +13,7 @@ namespace ast {
     
   public:
     
-    Text* name;
+    BasicIdentifier* name;
     List<Declaration> declarations;
     List<SequentialStatement> sequentialStatements;
     

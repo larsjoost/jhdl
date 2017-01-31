@@ -10,16 +10,15 @@ namespace vhdl {
   
     Entity* Entity::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ENTITY);
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
-      name = i->text;
+      name = scanner->expect<BasicIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_ENTITY);
-      i = scanner->expect<BasicIdentifier>();
-      if (!name.equals(i->text)) {
-        scanner->error("Identifier '" + i->text.toString() +
+      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      if (!name->equals(i)) {
+        scanner->error("Identifier '" + i->toString() +
                        "' does not match entity name '" +
-                       name.toString() + "'");
+                       name->toString() + "'");
       }
       scanner->expect(";");
       return this;

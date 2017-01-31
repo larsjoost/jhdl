@@ -24,18 +24,19 @@ namespace generator {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
-        std::string name = it->module.interface->name.toString();
+        std::string name = toString(it->module.interface->name);
         std::cout << "#include \"systemc.h\"" << std::endl;
         std::cout << "#include \"vhdl.h\"" << std::endl;
-	std::cout << "using namespace vhdl;" << std::endl;
-	std::cout << "using namespace vhdl::STANDARD;" << std::endl;
+	std::cout << "namespace vhdl {" << std::endl;
+	std::cout << "using namespace STANDARD;" << std::endl;
         includes(designFile);
         std::cout << "SC_MODULE(" << name << ")" << std::endl;
         std::cout << "{" << std::endl;
         implementation(designFile, it->module.interface->name);
         std::cout << "};" << std::endl;
+        std::cout << "}" << std::endl;
         std::cout << "int sc_main(int argc, char* argv[]) {" << std::endl;
-        std::cout << "  " << name << " a;" << std::endl;
+        std::cout << "  vhdl::" << name << " a;" << std::endl;
         std::cout << "}" << std::endl;
       }
       
@@ -57,7 +58,7 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          std::cout << "using vhdl::";
+          std::cout << "using ";
 	  std::cout << toString((char *)"::", useClause.list);
           std::cout << ";" << std::endl;
         }
@@ -87,7 +88,7 @@ namespace generator {
       std::cout << "enum " << enumName << " { ";
       basicIdentifierList(", ", t->enumerations);
       std::cout << "};" << std::endl;
-      std::cout << "class " << name << " : public vhdl::Enumeration<" << enumName << "> {" << std::endl;
+      std::cout << "class " << name << " : public Enumeration<" << enumName << "> {" << std::endl;
       std::cout << "  public:" << std::endl; 
       std::cout << "};" << std::endl;
     }
@@ -110,12 +111,12 @@ namespace generator {
       std::string right = toString(t->right);
       std::string templateType = "decltype(" + left + ")"; 
       printSourceLine(text);
-      std::cout << "class " << name << " : public vhdl::Range<" << templateType << "> {" << std::endl;
+      std::cout << "class " << name << " : public Range<" << templateType << "> {" << std::endl;
       std::cout << "  public:" << std::endl; 
       std::cout << "  explicit " << name << "(" << templateType << " left=" << left;
       std::cout << ", " << templateType << " right=" << right;
-      std::cout << ") : vhdl::Range<" << templateType << ">(left, right) {};" << std::endl;
-      std::cout << "  using vhdl::Range<" << templateType + ">::operator=;" << std::endl;
+      std::cout << ") : Range<" << templateType << ">(left, right) {};" << std::endl;
+      std::cout << "  using Range<" << templateType + ">::operator=;" << std::endl;
       std::cout << "};" << std::endl;
     }
   }
@@ -142,18 +143,18 @@ namespace generator {
     }
   }
 
-  void DesignFile::implementation(ast::DesignFile& designFile, ast::Text& name) {
+  void DesignFile::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     int methodId = 0;
     std::list<std::string> methodNames;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.implementation) {
-        if (name.equals(it->module.implementation->name)) {
+        if (name->equals(it->module.implementation->name)) {
           declarations(it->module.implementation->declarations);
           for (ast::Method m : it->module.implementation->methods.list) {
             std::string methodName;
             if (m.name) {
-              methodName = m.name->toString();
+              methodName = toString(m.name);
             } else {
               methodName = "noname" + std::to_string(methodId++);
             }
@@ -168,7 +169,7 @@ namespace generator {
             std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;
-          std::cout << "SC_CTOR(" << name.toString() << ") {" << std::endl;
+          std::cout << "SC_CTOR(" << toString(name) << ") {" << std::endl;
           for (std::string s : methodNames) {
             std::cout << "  SC_METHOD(" + s + ");" << std::endl;
           }
@@ -193,7 +194,7 @@ namespace generator {
   
   void DesignFile::reportStatement(ast::ReportStatement* p) {
     if (p) {
-      std::cout << "vhdl::REPORT(";
+      std::cout << "REPORT(";
       expression(p->message);
       std::cout << ", ";
       std::cout << p->severity.toString() << ");" << std::endl;

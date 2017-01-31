@@ -2,7 +2,7 @@
 #ifndef AST_INTERFACE_H_
 #define AST_INTERFACE_H_
 
-#include "text.hpp"
+#include "basic_identifier.hpp"
 #include "list.hpp"
 #include "declaration.hpp"
 
@@ -12,7 +12,7 @@ namespace ast {
     
   public:
 
-    Text name;
+    BasicIdentifier* name;
     List<Declaration> generics;
     List<Declaration> ports;
     

@@ -36,7 +36,7 @@ namespace generator {
     void variable_declarations(ast::VariableDeclaration* v);
     void declarations(ast::List<ast::Declaration>& d);
 
-    void implementation(ast::DesignFile& designFile, ast::Text& name);
+    void implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
     void printSourceLine(ast::Text& t);
     void printSourceLine(ast::BasicIdentifier* t);
