@@ -165,6 +165,7 @@ namespace generator {
               procedureCallStatement(s.procedureCallStatement);
               variableAssignment(s.variableAssignment);
               reportStatement(s.reportStatement);
+	      ifStatement(s.ifStatement);
             }
             std::cout << "}" << std::endl;
           }
@@ -198,6 +199,24 @@ namespace generator {
       expression(p->message);
       std::cout << ", ";
       std::cout << p->severity.toString() << ");" << std::endl;
+    }
+  }
+
+  void DesignFile::ifStatement(ast::IfStatement* p) {
+    if (p) {
+      std::string command = "if";
+      for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
+	if (c->condition) {
+	  std::cout << command << " " << toString(c->condition) << " {";
+	} else {
+	  std::cout << "} else {";
+	}
+	command = "} elsif";
+	for (ast::SequentialStatement s : c->sequentialStatements.list) {
+	  sequentialStatement(s);
+	}
+	std::cout << "}" << std::endl;
+      }
     }
   }
 
@@ -243,10 +262,11 @@ namespace generator {
     assert(e != NULL);
     if (e->op) {
       std::string op;
-      if (e->op->op == "&") {
-        op = "CONCAT";
-      } else if (e->op->op == "+") {
-        op = "ADD";
+      switch (e->op->op) {
+      case ::ast::ExpressionOperator::CONCAT: {op = "CONCAT"; break;}
+      case ::ast::ExpressionOperator::ADD: {op = "ADD"; break;}
+      case ::ast::ExpressionOperator::EQUAL: {op = "EQUAL"; break;}
+      default: {assert (false);}
       }
       return op + "(" + toString(e->term) + ", " + toString(e->expression) + ")";
     } else {

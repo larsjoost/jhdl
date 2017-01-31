@@ -14,15 +14,6 @@ namespace vhdl {
     class Process :
       public ::ast::Method  {
 
-    protected:
-
-      bool add(::ast::ProcedureCallStatement* p);
-      bool add(::ast::VariableAssignment* p);
-      bool add(::ast::ReportStatement* p);
-
-      void parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner);
-      void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
-
     public:
 
       Process* parse(::ast::Scanner<scanner::Scanner>* scanner);

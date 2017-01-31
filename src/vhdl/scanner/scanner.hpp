@@ -42,6 +42,10 @@ namespace vhdl {
         VHDL_VARIABLE,
         VHDL_REPORT,
         VHDL_SEVERITY,
+	VHDL_IF,
+	VHDL_THEN,
+	VHDL_ELSIF,
+	VHDL_ELSE,
         NUMBER_OF_KEYWORDS
       };
       
@@ -76,7 +80,11 @@ namespace vhdl {
           {VHDL_DOWNTO, (char *)"downto", VHDL_1987},
           {VHDL_VARIABLE, (char *)"variable", VHDL_1987},
           {VHDL_REPORT, (char *)"report", VHDL_1987},
-          {VHDL_SEVERITY, (char *)"severity", VHDL_1987}};
+          {VHDL_SEVERITY, (char *)"severity", VHDL_1987},
+          {VHDL_IF, (char *)"if", VHDL_1987},
+          {VHDL_THEN, (char *)"then", VHDL_1987},
+          {VHDL_ELSIF, (char *)"elsif", VHDL_1987},
+          {VHDL_ELSE, (char *)"else", VHDL_1987}};
         return a;
       }
       

@@ -10,7 +10,12 @@ namespace ast {
     
   public:
 
-    ::std::string op;
+    enum operators {
+      CONCAT,
+      ADD,
+      EQUAL};
+    
+    operators op;
     
   };
 
