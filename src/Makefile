@@ -1,6 +1,6 @@
 SOURCE := $(shell find ./ -type f -iname '*.cpp' -print)
 INCLUDE := $(shell find ./ -type f -iname '*.hpp' -print)
-CXXFLAGS := -std=c++11 -g
+CXXFLAGS := -std=c++14 -g
 # CXX = g++
 
 # OBJ := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRC)))

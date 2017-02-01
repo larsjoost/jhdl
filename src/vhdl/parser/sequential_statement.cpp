@@ -9,6 +9,7 @@
 #include "report_statement.hpp"
 #include "declaration.hpp"
 #include "if_statement.hpp"
+#include "forloop_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -17,7 +18,8 @@ namespace vhdl {
       (variableAssignment = scanner->optional<VariableAssignment>()) ||
 	(reportStatement = scanner->optional<ReportStatement>()) ||
         (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
-	(ifStatement = scanner->optional<IfStatement>());
+	(ifStatement = scanner->optional<IfStatement>()) ||
+	(forLoopStatement = scanner->optional<ForLoopStatement>());
       return this;
     }
     

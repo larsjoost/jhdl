@@ -18,29 +18,46 @@ namespace vhdl {
       
     }
   }
-
+  
   template<class T>
   class Range {
     T left;
     T right;
   public:
     T value;
-    Range(T left, T right) {
-      value = left;
-      this->left = left;
-      this->right = right;
-    };
 
+    Range<T> operator *() const { return *this; }
+    const Range<T> &operator ++() { ++i_; return *this; }
+    Range<T> operator ++(T) { Range<T> copy(*this); ++i_; return copy; }
+      
+    bool operator ==(const Range<T> &other) const { return i_ == other.i_; }
+    bool operator !=(const Range<T> &other) const { return i_ != other.i_; }
+      
+  private:
+    T i_;
+
+  public:
+      
+  Range(T left, T right) : value(left), left(left), right(right) { }
+    
     void operator=(T v) {
       value = v;
     }
-
+    
     static ::std::string IMAGE(Range<T> r) {
       return ::std::to_string(r.value);
     }
     
-  };
+  private:
+    Range<T> begin_;
+    Range<T> end_;
 
+  public:
+    Range<T> begin() const { return left; }
+    Range<T> end() const { return right; }
+    
+  };
+  
   namespace STANDARD {
   
     class INTEGER : public Range<int> {
@@ -89,18 +106,18 @@ namespace vhdl {
     Expression operator functions
    */
   
-  static ::std::string CONCAT(::std::string left, ::std::string right) {
+  static ::std::string concat(::std::string left, ::std::string right) {
     return left + right;
   }
   
-  static STANDARD::INTEGER ADD(int left, int right) {
-    int sum = left + right;
+  static STANDARD::INTEGER add(auto left, auto right) {
+    auto sum = left + right;
     STANDARD::INTEGER l;
     l = sum;
     return l;
   }
   
-  static bool EQUAL(STANDARD::INTEGER left, int right) {
+  static bool equal(STANDARD::INTEGER left, int right) {
     return left.value == right;
   }
 }

@@ -1,0 +1,30 @@
+// Filename : test.vhdl
+#include "systemc.h"
+#include "vhdl.h"
+namespace vhdl {
+using namespace STANDARD;
+using STD::ENV::FINISH;
+SC_MODULE(TEST)
+{
+void noname0() {
+/*
+    variable x : integer;
+             ^
+*/
+INTEGER X;
+X = 1;
+for (INTEGER I :  INTEGER(0, 10)) {
+X = add(2, 1);
+}
+REPORT(concat("x = ", INTEGER::IMAGE(X)), NOTE);
+FINISH(0);
+}
+public:
+SC_CTOR(TEST) {
+  SC_METHOD(noname0);
+}
+};
+}
+int sc_main(int argc, char* argv[]) {
+  vhdl::TEST a;
+}

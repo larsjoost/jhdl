@@ -46,6 +46,9 @@ namespace vhdl {
 	VHDL_THEN,
 	VHDL_ELSIF,
 	VHDL_ELSE,
+	VHDL_FOR,
+	VHDL_IN,
+	VHDL_LOOP,
         NUMBER_OF_KEYWORDS
       };
       
@@ -84,7 +87,10 @@ namespace vhdl {
           {VHDL_IF, (char *)"if", VHDL_1987},
           {VHDL_THEN, (char *)"then", VHDL_1987},
           {VHDL_ELSIF, (char *)"elsif", VHDL_1987},
-          {VHDL_ELSE, (char *)"else", VHDL_1987}};
+          {VHDL_ELSE, (char *)"else", VHDL_1987},
+          {VHDL_FOR, (char *)"for", VHDL_1987},
+          {VHDL_IN, (char *)"in", VHDL_1987},
+          {VHDL_LOOP, (char *)"loop", VHDL_1987}};
         return a;
       }
       

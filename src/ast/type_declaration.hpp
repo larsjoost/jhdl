@@ -2,9 +2,7 @@
 #ifndef AST_TYPE_DECLARATION_H_
 #define AST_TYPE_DECLARATION_H_
 
-#include "text.hpp"
-#include "list.hpp"
-#include "expression.hpp"
+#include "basic_identifier.hpp"
 #include "type_definition.hpp"
 
 namespace ast {
@@ -13,7 +11,7 @@ namespace ast {
     
   public:
 
-    Text identifier;
+    BasicIdentifier* identifier;
     TypeDefinition* typeDefinition;
     
   };

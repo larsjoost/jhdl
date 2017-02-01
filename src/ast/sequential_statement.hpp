@@ -6,10 +6,12 @@
 #include "variable_assignment.hpp"
 #include "report_statement.hpp"
 #include "if_statement.hpp"
+#include "forloop_statement.hpp"
 
 namespace ast {
 
   class IfStatement;
+  class ForLoopStatement;
   
   class SequentialStatement {
     
@@ -19,6 +21,7 @@ namespace ast {
     VariableAssignment* variableAssignment;
     ReportStatement* reportStatement;
     IfStatement* ifStatement;
+    ForLoopStatement* forLoopStatement;
     
   };
 

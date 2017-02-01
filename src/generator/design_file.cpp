@@ -80,10 +80,10 @@ namespace generator {
     std::cout << toString(separator, list);
   }
   
-  void DesignFile::enumerationType(ast::Text& text, ast::EnumerationType* t) {
+  void DesignFile::enumerationType(ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
-      std::string name = text.toString();
-      printSourceLine(text);
+      std::string name = toString(identifier);
+      printSourceLine(identifier);
       std::string enumName = name + "_enum";
       std::cout << "enum " << enumName << " { ";
       basicIdentifierList(", ", t->enumerations);
@@ -104,13 +104,13 @@ namespace generator {
   };
   */
 
-  void DesignFile::numberType(ast::Text& text, ast::NumberType* t) {
+  void DesignFile::numberType(ast::BasicIdentifier* identifier, ast::NumberType* t) {
     if (t) {
-      std::string name = text.toString();
-      std::string left = toString(t->left);
-      std::string right = toString(t->right);
+      std::string name = toString(identifier);
+      std::string left = toString(t->range->left);
+      std::string right = toString(t->range->right);
       std::string templateType = "decltype(" + left + ")"; 
-      printSourceLine(text);
+      printSourceLine(identifier);
       std::cout << "class " << name << " : public Range<" << templateType << "> {" << std::endl;
       std::cout << "  public:" << std::endl; 
       std::cout << "  explicit " << name << "(" << templateType << " left=" << left;
@@ -149,6 +149,7 @@ namespace generator {
       variableAssignment(s.variableAssignment);
       reportStatement(s.reportStatement);
       ifStatement(s.ifStatement);
+      forLoopStatement(s.forLoopStatement);
     }
   }
   
@@ -223,6 +224,16 @@ namespace generator {
     }
   }
 
+  void DesignFile::forLoopStatement(ast::ForLoopStatement* p) {
+    if (p) {
+      std::cout << "for (auto " << toString(p->identifier) << " : ";
+      std::cout << " INTEGER(" << toString(p->range->left) << ", ";
+      std::cout << toString(p->range->right) << ")) {" << std::endl;
+      sequentialStatements(p->sequentialStatements);
+      std::cout << "}" << std::endl;
+    }
+  }
+
   void DesignFile::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
       std::cout << toString(p->identifier) << " = ";
@@ -266,9 +277,9 @@ namespace generator {
     if (e->op) {
       std::string op;
       switch (e->op->op) {
-      case ::ast::ExpressionOperator::CONCAT: {op = "CONCAT"; break;}
-      case ::ast::ExpressionOperator::ADD: {op = "ADD"; break;}
-      case ::ast::ExpressionOperator::EQUAL: {op = "EQUAL"; break;}
+      case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
+      case ::ast::ExpressionOperator::ADD: {op = "add"; break;}
+      case ::ast::ExpressionOperator::EQUAL: {op = "equal"; break;}
       default: {assert (false);}
       }
       return op + "(" + toString(e->term) + ", " + toString(e->expression) + ")";

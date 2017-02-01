@@ -160,8 +160,7 @@ namespace ast {
     if (verbose) {
       std::cerr << "[" << getTokenPosition() << "]";
     }
-    std::cerr << ": " + toString(t) + "."
-              << std::endl;
+    std::cerr << toString(t) + "." << std::endl;
     
     printTextLinePosition(stderr, t->text);
   }

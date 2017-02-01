@@ -2,7 +2,7 @@
 #ifndef AST_NUMBER_TYPE_H_
 #define AST_NUMBER_TYPE_H_
 
-#include "expression.hpp"
+#include "range_type.hpp"
 
 namespace ast {
     
@@ -10,8 +10,7 @@ namespace ast {
     
   public:
 
-    Expression* left;
-    Expression* right;
+    RangeType* range;
     
   };
 
