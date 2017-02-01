@@ -26,19 +26,27 @@ namespace vhdl {
   public:
     T value;
 
-    Range<T> operator *() const { return *this; }
-    const Range<T> &operator ++() { ++i_; return *this; }
-    Range<T> operator ++(T) { Range<T> copy(*this); ++i_; return copy; }
+    class iterator {
+      friend class Range;
+      Range<T>* parent;
+      T index;
+    public:
+      Range<T> operator *() const { parent->value = index; return *parent; }
+      const iterator &operator ++() { ++index; return *this; }
+      Range<T> operator ++(T) { iterator copy(*this); ++index; return copy; }
       
-    bool operator ==(const Range<T> &other) const { return i_ == other.i_; }
-    bool operator !=(const Range<T> &other) const { return i_ != other.i_; }
-      
-  private:
-    T i_;
+      bool operator ==(const iterator &other) const { return index == other.index; }
+      bool operator !=(const iterator &other) const { return index != other.index; }
 
+    protected:
+      iterator(Range<T>* parent, T start) : parent(parent), index(start) { }
+    };
+    
   public:
       
-  Range(T left, T right) : value(left), left(left), right(right) { }
+    Range(T left, T right) :
+      value(left), left(left), right(right),
+      begin_(this, left), end_(this, right + 1) { }
     
     void operator=(T v) {
       value = v;
@@ -48,14 +56,12 @@ namespace vhdl {
       return ::std::to_string(r.value);
     }
     
+    iterator begin() const { return begin_; }
+    iterator end() const { return end_; }
   private:
-    Range<T> begin_;
-    Range<T> end_;
+    iterator begin_;
+    iterator end_;
 
-  public:
-    Range<T> begin() const { return left; }
-    Range<T> end() const { return right; }
-    
   };
   
   namespace STANDARD {
