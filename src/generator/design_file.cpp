@@ -237,7 +237,7 @@ namespace generator {
 
   void DesignFile::waitStatement(ast::WaitStatement* p) {
     if (p) {
-      std::cout << "wait(" << toString(p->physical->number) << ", "
+      std::cout << "WAIT(" << toString(p->physical->number) << ", "
 		<< toString(p->physical->unit) << ");" << std::endl;
     }
   }

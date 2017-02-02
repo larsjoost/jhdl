@@ -86,13 +86,20 @@ namespace vhdl {
 
     enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};
 
+    static const std::string SEVERITY_LEVEL_STRINGS[] =
+      {"NOTE", "WARNING", "ERROR", "FAILURE"};
+    
     ::std::string toString(SEVERITY_LEVEL severity) {
-      switch (severity) {
-      case NOTE: return "NOTE"; break;
-      case WARNING: return "WARNING"; break;
-      case ERROR: return "ERROR"; break;
-      case FAILURE: return "FAILURE"; break;
-      }  
+      return SEVERITY_LEVEL_STRINGS[severity];
+    }
+    
+    enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
+    
+    static const std::string TIME_UNITS_STRINGS[] =
+      {"FS", "PS", "NS", "US", "MS", "SEC", "MIN", "HR"};
+    
+    ::std::string toString(TIME_UNITS units) {
+      return TIME_UNITS_STRINGS[units];
     }
     
   }
@@ -114,6 +121,10 @@ namespace vhdl {
     } 
   }
 
+  void WAIT(int number, STANDARD::TIME_UNITS units) {
+    REPORT("Waiting for " + std::to_string(number) + " " + STANDARD::toString(units), STANDARD::NOTE);
+  }
+  
   /*
     Expression operator functions
    */
