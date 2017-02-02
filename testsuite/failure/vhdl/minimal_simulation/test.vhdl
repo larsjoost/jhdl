@@ -9,6 +9,7 @@ begin
 
   process is
   begin 
+    report "Finish with error" severity error;
     finish(1);    
   end process;
   

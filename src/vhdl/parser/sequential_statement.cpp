@@ -10,6 +10,7 @@
 #include "declaration.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
+#include "wait_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -19,7 +20,8 @@ namespace vhdl {
 	(reportStatement = scanner->optional<ReportStatement>()) ||
         (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
 	(ifStatement = scanner->optional<IfStatement>()) ||
-	(forLoopStatement = scanner->optional<ForLoopStatement>());
+	(forLoopStatement = scanner->optional<ForLoopStatement>()) ||
+	(waitStatement = scanner->optional<WaitStatement>());
       return this;
     }
     

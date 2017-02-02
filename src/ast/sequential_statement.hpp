@@ -7,6 +7,7 @@
 #include "report_statement.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
+#include "wait_statement.hpp"
 
 namespace ast {
 
@@ -22,7 +23,8 @@ namespace ast {
     ReportStatement* reportStatement;
     IfStatement* ifStatement;
     ForLoopStatement* forLoopStatement;
-    
+    WaitStatement* waitStatement;
+
   };
 
 }

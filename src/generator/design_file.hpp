@@ -14,6 +14,7 @@
 #include "../ast/report_statement.hpp"
 #include "../ast/if_statement.hpp"
 #include "../ast/forloop_statement.hpp"
+#include "../ast/wait_statement.hpp"
 #include "../ast/sequential_statement.hpp"
 
 namespace generator {
@@ -22,12 +23,14 @@ namespace generator {
     std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
+    std::string toString(ast::Number* i);
     std::string toString(ast::BasicIdentifier* i);
     void basicIdentifier(ast::BasicIdentifier* i);
     std::string toString(const char* separator, ast::BasicIdentifierList* list);
     void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
     void sequentialStatements(ast::List<ast::SequentialStatement>& l);
+    void waitStatement(ast::WaitStatement* p);
     void ifStatement(ast::IfStatement* p);
     void forLoopStatement(ast::ForLoopStatement* p);
     void reportStatement(ast::ReportStatement* p);

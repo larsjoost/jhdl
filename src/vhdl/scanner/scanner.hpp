@@ -49,6 +49,7 @@ namespace vhdl {
 	VHDL_FOR,
 	VHDL_IN,
 	VHDL_LOOP,
+	VHDL_WAIT,
         NUMBER_OF_KEYWORDS
       };
       
@@ -90,7 +91,8 @@ namespace vhdl {
           {VHDL_ELSE, (char *)"else", VHDL_1987},
           {VHDL_FOR, (char *)"for", VHDL_1987},
           {VHDL_IN, (char *)"in", VHDL_1987},
-          {VHDL_LOOP, (char *)"loop", VHDL_1987}};
+          {VHDL_LOOP, (char *)"loop", VHDL_1987},
+          {VHDL_WAIT, (char *)"wait", VHDL_1987}};
         return a;
       }
       

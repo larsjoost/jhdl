@@ -102,10 +102,16 @@ namespace vhdl {
    */
   
   void REPORT(::std::string message, STANDARD::SEVERITY_LEVEL severity) {
-    ::std::cout << STANDARD::toString(severity) << ": " << message << ::std::endl;
+    std::ostream* o;
+    if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
+      o = &std::cerr;
+    } else {
+      o = &std::cout;
+    } 
+    *o << STANDARD::toString(severity) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
       STD::ENV::FINISH(1);
-    }
+    } 
   }
 
   /*

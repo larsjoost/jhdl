@@ -150,6 +150,7 @@ namespace generator {
       reportStatement(s.reportStatement);
       ifStatement(s.ifStatement);
       forLoopStatement(s.forLoopStatement);
+      waitStatement(s.waitStatement);
     }
   }
   
@@ -234,6 +235,13 @@ namespace generator {
     }
   }
 
+  void DesignFile::waitStatement(ast::WaitStatement* p) {
+    if (p) {
+      std::cout << "wait(" << toString(p->physical->number) << ", "
+		<< toString(p->physical->unit) << ");" << std::endl;
+    }
+  }
+
   void DesignFile::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
       std::cout << toString(p->identifier) << " = ";
@@ -260,9 +268,14 @@ namespace generator {
     }
   }
 
+  std::string DesignFile::toString(ast::Number* n) {
+    assert(n != NULL);
+    return n->value.toString();
+  }
+  
   std::string DesignFile::toString(ast::ExpressionTerm& e) {
     if (e.number) {
-      return e.number->value.toString();
+      return toString(e.number);
     }
     if (e.text) {
       return e.text->text.toString();

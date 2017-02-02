@@ -7,6 +7,7 @@ using STD::ENV::FINISH;
 SC_MODULE(TEST)
 {
 void noname0() {
+REPORT("Finish with error", ERROR);
 FINISH(1);
 }
 public:
