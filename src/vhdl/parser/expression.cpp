@@ -7,12 +7,14 @@
 #include "basic_identifier.hpp"
 #include "number.hpp"
 #include "string.hpp"
+#include "physical.hpp"
 
 namespace vhdl {
   namespace parser {
   
     Expression* Expression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      if ((term.number = scanner->optional<Number>()) ||
+      if ((term.physical = scanner->optional<Physical>()) ||
+	  (term.number = scanner->optional<Number>()) ||
           (term.text = scanner->optional<String>()) ||
           (term.identifier = scanner->optional<BasicIdentifier>())) {
         if (op = scanner->optional<ExpressionOperator>()) {

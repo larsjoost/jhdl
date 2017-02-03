@@ -235,10 +235,15 @@ namespace generator {
     }
   }
 
+  std::string DesignFile::toString(ast::Physical* p) {
+    assert (p != NULL);
+    return "physical(" + toString(p->number) + ", " +
+      toString(p->unit) + ")";
+  }
+  
   void DesignFile::waitStatement(ast::WaitStatement* p) {
     if (p) {
-      std::cout << "WAIT(" << toString(p->physical->number) << ", "
-		<< toString(p->physical->unit) << ");" << std::endl;
+      std::cout << "WAIT(" << toString(p->physical) << ");" << std::endl;
     }
   }
 
@@ -274,6 +279,9 @@ namespace generator {
   }
   
   std::string DesignFile::toString(ast::ExpressionTerm& e) {
+    if (e.physical) {
+      return toString(e.physical);
+    }
     if (e.number) {
       return toString(e.number);
     }

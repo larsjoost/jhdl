@@ -23,6 +23,7 @@ namespace generator {
     std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
+    std::string toString(ast::Physical* p);
     std::string toString(ast::Number* i);
     std::string toString(ast::BasicIdentifier* i);
     void basicIdentifier(ast::BasicIdentifier* i);

@@ -63,6 +63,24 @@ namespace vhdl {
     iterator end_;
 
   };
+
+  template <class T, typename Units>
+  class Physical {
+  protected:
+  public:
+    T value;
+    Units units;
+
+    Physical() {};
+    
+    Physical(T value, Units units) :
+      value(value), units(units) { }
+
+    static ::std::string IMAGE(Physical<T, Units> r) {
+      return std::to_string(r.value) + " " + toString(r.units);
+    }
+
+  };
   
   namespace STANDARD {
   
@@ -94,6 +112,17 @@ namespace vhdl {
     }
     
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
+
+    /*
+    class TIME : public Physical<int, TIME_UNITS> {
+    public:
+      explicit TIME(int value=0, TIME_UNITS units=NS) : Physical<int, TIME_UNITS>(value, units) {};
+    };
+    */
+
+    typedef Physical<int, TIME_UNITS> TIME;
+    
+    static TIME NOW = TIME(0, NS);
     
     static const std::string TIME_UNITS_STRINGS[] =
       {"FS", "PS", "NS", "US", "MS", "SEC", "MIN", "HR"};
@@ -101,6 +130,8 @@ namespace vhdl {
     ::std::string toString(TIME_UNITS units) {
       return TIME_UNITS_STRINGS[units];
     }
+
+    
     
   }
 
@@ -121,8 +152,8 @@ namespace vhdl {
     } 
   }
 
-  void WAIT(int number, STANDARD::TIME_UNITS units) {
-    REPORT("Waiting for " + std::to_string(number) + " " + STANDARD::toString(units), STANDARD::NOTE);
+  void WAIT(STANDARD::TIME t) {
+    REPORT("Waiting for " + STANDARD::TIME::IMAGE(t), STANDARD::NOTE);
   }
   
   /*
@@ -143,6 +174,12 @@ namespace vhdl {
   static bool equal(STANDARD::INTEGER left, int right) {
     return left.value == right;
   }
+
+  template<typename T1, typename T2>
+  static auto physical(T1 value, T2 units) -> Physical<T1, T2> {
+    return Physical<T1, T2>(value, units);
+  }
+
 }
 
 #endif
