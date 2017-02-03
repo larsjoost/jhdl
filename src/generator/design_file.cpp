@@ -202,7 +202,7 @@ namespace generator {
   
   void DesignFile::reportStatement(ast::ReportStatement* p) {
     if (p) {
-      std::cout << "REPORT(";
+      std::cout << "report(";
       expression(p->message);
       std::cout << ", ";
       std::cout << toString(p->severity) << ");" << std::endl;
@@ -243,12 +243,13 @@ namespace generator {
   
   void DesignFile::waitStatement(ast::WaitStatement* p) {
     if (p) {
-      std::cout << "WAIT(" << toString(p->physical) << ");" << std::endl;
+      std::cout << "wait_for(" << toString(p->physical) << ");" << std::endl;
     }
   }
 
   void DesignFile::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
+      printSourceLine(p->identifier);
       std::cout << toString(p->identifier) << " = ";
       expression(p->expression);
       std::cout << ";" << std::endl;

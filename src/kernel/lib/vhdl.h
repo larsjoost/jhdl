@@ -121,8 +121,13 @@ namespace vhdl {
     */
 
     typedef Physical<int, TIME_UNITS> TIME;
-    
+
     static TIME NOW = TIME(0, NS);
+
+    static TIME operator+(TIME left, const TIME& right) {
+      left.value += right.value;
+      return left;
+    }
     
     static const std::string TIME_UNITS_STRINGS[] =
       {"FS", "PS", "NS", "US", "MS", "SEC", "MIN", "HR"};
@@ -139,7 +144,7 @@ namespace vhdl {
     VHDL functions
    */
   
-  void REPORT(::std::string message, STANDARD::SEVERITY_LEVEL severity) {
+  void report(::std::string message, STANDARD::SEVERITY_LEVEL severity) {
     std::ostream* o;
     if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
       o = &std::cerr;
@@ -152,8 +157,9 @@ namespace vhdl {
     } 
   }
 
-  void WAIT(STANDARD::TIME t) {
-    REPORT("Waiting for " + STANDARD::TIME::IMAGE(t), STANDARD::NOTE);
+  void wait_for(STANDARD::TIME time) {
+    auto t = STANDARD::NOW + time;
+    report("Waiting until " + STANDARD::TIME::IMAGE(t), STANDARD::NOTE);
   }
   
   /*
