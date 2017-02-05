@@ -24,10 +24,9 @@ class sc_module {
   int numberOfMethods = 0;
 
   std::atomic<int> numberOfMethodsDone;
-
-  bool verbose = false;
   
  public:
+  bool verbose = true;
 
   template<class T>
   void add(auto f, T* c) {
@@ -60,23 +59,16 @@ class sc_module {
 
   void wait(int i) {
     // Wait until main() sends data
-    if (verbose) {std::cout << "Waiting until now (" << sc_now << ") = " << i << std::endl;}
     std::unique_lock<std::mutex> lk(m);
-    numberOfMethodsDone++;
-    cv.notify_all();
     int n = sc_now + i;
     do {
-      if (verbose) {std::cout << "Method sleep" << std::endl;}
+      if (verbose) {std::cout << "Waiting until now (" << sc_now << ") = " << n << std::endl;}
+      numberOfMethodsDone++;
+      cv.notify_all();
       cv.wait(lk);
-      if (verbose) {std::cout << "Method woke up" << std::endl;}
-    } while(n < sc_now);
+    } while(sc_now < n);
     if (verbose) {std::cout << "Wait done at now = " << sc_now << std::endl;}
     lk.unlock();
-    cv.notify_one();
-  }
-
-  void setVerbose(bool v) {
-    verbose = v;
   }
   
 };
