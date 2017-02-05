@@ -23,7 +23,7 @@ else
 fi
     
 function analyse {
-    $OPTIONS $JHDL/jhdl -f $1 $VERBOSE
+    $OPTIONS $JHDL/hdlc -f $1 $VERBOSE
 }
 
 function simulate {

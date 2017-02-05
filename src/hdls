@@ -6,7 +6,14 @@ SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
 filename=$1
 filebase="${filename%.*}"
-cppfile="$filebase.cpp"
-$SCRIPTPATH/jhdl -f $filename > $cppfile
-g++ -std=c++14 -g  -I$SCRIPTPATH/kernel/lib -o $filebase $cppfile
+sourcefile="$filebase.hpp"
+$SCRIPTPATH/hdlc -f $filename > $sourcefile
+mainfile=$(dirname $filename)/main.cpp
+if [ ! -e $mainfile ]; then
+    cp $SCRIPTPATH/sim.cpp $mainfile
+    MODULE_NAME=$($SCRIPTPATH/hdlf -f $filename)
+    sed -i "s/%module%/${MODULE_NAME}/g" $mainfile
+    sed -i "s/%include%/$sourcefile/g" $mainfile
+fi
+g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $mainfile
 ./$filebase

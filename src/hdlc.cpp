@@ -6,11 +6,11 @@
 #include <exception>
 #include <iostream>
 #include "parser/design_file.hpp"
-#include "generator/design_file.hpp"
+#include "generator/systemc.hpp"
 #include "ast/scanner.hpp"
 
 void usage() {
-  printf("jhdl -f <filename> [-v]\n");
+  printf("hdlc -f <filename> [-v]\n");
   printf("  -v : Verbose\n");
 }
 
@@ -47,8 +47,8 @@ main (int argc, char **argv)
   }
 
   try {
-    parser::DesignFile parserDesignFile = parser::DesignFile(filename, verbose);
-    generator::DesignFile generatorDesignFile = generator::DesignFile(parserDesignFile);
+    auto parserDesignFile = parser::DesignFile(filename, verbose);
+    auto systemC = generator::SystemC(parserDesignFile);
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {

@@ -15,11 +15,11 @@
 #include "../ast/variable_assignment.hpp"
 #include "../ast/report_statement.hpp"
 
-#include "design_file.hpp"
+#include "systemc.hpp"
 
 namespace generator {
 
-  DesignFile::DesignFile(ast::DesignFile& designFile) {
+  SystemC::SystemC(ast::DesignFile& designFile) {
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
@@ -30,30 +30,26 @@ namespace generator {
 	std::cout << "namespace vhdl {" << std::endl;
 	std::cout << "using namespace STANDARD;" << std::endl;
         includes(designFile);
-        std::cout << "SC_MODULE(" << name << ")" << std::endl;
-        std::cout << "{" << std::endl;
+        std::cout << "SC_MODULE(" << name << ") {" << std::endl;
         implementation(designFile, it->module.interface->name);
         std::cout << "};" << std::endl;
-        std::cout << "}" << std::endl;
-        std::cout << "int sc_main(int argc, char* argv[]) {" << std::endl;
-        std::cout << "  vhdl::" << name << " a;" << std::endl;
         std::cout << "}" << std::endl;
       }
       
     }
   }
 
-  void DesignFile::printSourceLine(ast::Text& t) {
+  void SystemC::printSourceLine(ast::Text& t) {
     std::cout << "/*" << std::endl;
     t.printLinePosition();
     std::cout << "*/" << std::endl;
   }
   
-  void DesignFile::printSourceLine(ast::BasicIdentifier* t) {
+  void SystemC::printSourceLine(ast::BasicIdentifier* t) {
     printSourceLine(t->text);
   }
 
-  void DesignFile::includes(ast::DesignFile& designFile) {
+  void SystemC::includes(ast::DesignFile& designFile) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
@@ -66,7 +62,7 @@ namespace generator {
     }    
   }
 
-  std::string DesignFile::toString(const char* separator, ast::BasicIdentifierList* list) {
+  std::string SystemC::toString(const char* separator, ast::BasicIdentifierList* list) {
     std::string s = "";
     std::string delimiter = "";
     for (ast::BasicIdentifier t : list->textList.list) {
@@ -76,11 +72,11 @@ namespace generator {
     return s;
   }
 
-  void DesignFile::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
+  void SystemC::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
     std::cout << toString(separator, list);
   }
   
-  void DesignFile::enumerationType(ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
+  void SystemC::enumerationType(ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
       std::string name = toString(identifier);
       printSourceLine(identifier);
@@ -104,7 +100,7 @@ namespace generator {
   };
   */
 
-  void DesignFile::numberType(ast::BasicIdentifier* identifier, ast::NumberType* t) {
+  void SystemC::numberType(ast::BasicIdentifier* identifier, ast::NumberType* t) {
     if (t) {
       std::string name = toString(identifier);
       std::string left = toString(t->range->left);
@@ -121,7 +117,7 @@ namespace generator {
     }
   }
 
-  void DesignFile::type_declarations(ast::TypeDeclaration* t) {
+  void SystemC::type_declarations(ast::TypeDeclaration* t) {
     if (t) {
       assert (t->typeDefinition);
       numberType(t->identifier, t->typeDefinition->numberType);
@@ -129,21 +125,21 @@ namespace generator {
     }
   }
 
-  void DesignFile::variable_declarations(ast::VariableDeclaration* v) {
+  void SystemC::variable_declarations(ast::VariableDeclaration* v) {
     if (v) {
       printSourceLine(v->identifier);
       std::cout << toString(v->type) << " " << toString(v->identifier) << ";" << std::endl;
     }
   }
 
-  void DesignFile::declarations(ast::List<ast::Declaration>& d) {
+  void SystemC::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       type_declarations(i.type);
       variable_declarations(i.variable);
     }
   }
 
-  void DesignFile::sequentialStatements(ast::List<ast::SequentialStatement>& l) {
+  void SystemC::sequentialStatements(ast::List<ast::SequentialStatement>& l) {
     for (ast::SequentialStatement s : l.list) {
       procedureCallStatement(s.procedureCallStatement);
       variableAssignment(s.variableAssignment);
@@ -155,7 +151,7 @@ namespace generator {
   }
   
   
-  void DesignFile::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
+  void SystemC::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     int methodId = 0;
     std::list<std::string> methodNames;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
@@ -172,14 +168,16 @@ namespace generator {
             }
             methodNames.push_back(methodName);
             std::cout << "void " << methodName << "() {" << std::endl;
+            std::cout << "while(true) {" << std::endl;
             declarations(m.declarations);
             sequentialStatements(m.sequentialStatements);
             std::cout << "}" << std::endl;
+            std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;
-          std::cout << "SC_CTOR(" << toString(name) << ") {" << std::endl;
+          std::cout << toString(name) << "() {" << std::endl;
           for (std::string s : methodNames) {
-            std::cout << "  SC_METHOD(" + s + ");" << std::endl;
+            std::cout << "  SC_METHOD(&" + toString(name) + "::" + s + ");" << std::endl;
           }
           std::cout << "}" << std::endl;
         }
@@ -187,7 +185,7 @@ namespace generator {
     }
   }
 
-  void DesignFile::procedureCallStatement(ast::ProcedureCallStatement* p) {
+  void SystemC::procedureCallStatement(ast::ProcedureCallStatement* p) {
     if (p) {
       std::cout << toString(p->name) << "(";
       if (p->associationList) {
@@ -200,7 +198,7 @@ namespace generator {
     }
   }
   
-  void DesignFile::reportStatement(ast::ReportStatement* p) {
+  void SystemC::reportStatement(ast::ReportStatement* p) {
     if (p) {
       std::cout << "report(";
       expression(p->message);
@@ -209,7 +207,7 @@ namespace generator {
     }
   }
 
-  void DesignFile::ifStatement(ast::IfStatement* p) {
+  void SystemC::ifStatement(ast::IfStatement* p) {
     if (p) {
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
@@ -225,7 +223,7 @@ namespace generator {
     }
   }
 
-  void DesignFile::forLoopStatement(ast::ForLoopStatement* p) {
+  void SystemC::forLoopStatement(ast::ForLoopStatement* p) {
     if (p) {
       std::cout << "for (auto " << toString(p->identifier) << " : ";
       std::cout << " INTEGER(" << toString(p->range->left) << ", ";
@@ -235,19 +233,19 @@ namespace generator {
     }
   }
 
-  std::string DesignFile::toString(ast::Physical* p) {
+  std::string SystemC::toString(ast::Physical* p) {
     assert (p != NULL);
     return "physical(" + toString(p->number) + ", " +
       toString(p->unit) + ")";
   }
   
-  void DesignFile::waitStatement(ast::WaitStatement* p) {
+  void SystemC::waitStatement(ast::WaitStatement* p) {
     if (p) {
-      std::cout << "wait_for(" << toString(p->physical) << ");" << std::endl;
+      std::cout << "wait(" << toString(p->physical->number) << ");" << std::endl;
     }
   }
 
-  void DesignFile::variableAssignment(ast::VariableAssignment* p) {
+  void SystemC::variableAssignment(ast::VariableAssignment* p) {
     if (p) {
       printSourceLine(p->identifier);
       std::cout << toString(p->identifier) << " = ";
@@ -256,7 +254,7 @@ namespace generator {
     }
   }
 
-  std::string DesignFile::toString(ast::BasicIdentifier* i) {
+  std::string SystemC::toString(ast::BasicIdentifier* i) {
     assert (i != NULL);
     std::string s = i->text.toString(true);
     if (i->attribute) {
@@ -268,18 +266,18 @@ namespace generator {
     return s;
   }
 
-  void DesignFile::basicIdentifier(ast::BasicIdentifier* i) {
+  void SystemC::basicIdentifier(ast::BasicIdentifier* i) {
     if (i) {      
       std::cout << toString(i) << std::endl;
     }
   }
 
-  std::string DesignFile::toString(ast::Number* n) {
+  std::string SystemC::toString(ast::Number* n) {
     assert(n != NULL);
     return n->value.toString();
   }
   
-  std::string DesignFile::toString(ast::ExpressionTerm& e) {
+  std::string SystemC::toString(ast::ExpressionTerm& e) {
     if (e.physical) {
       return toString(e.physical);
     }
@@ -294,7 +292,7 @@ namespace generator {
     }
   }
   
-  std::string DesignFile::toString(ast::Expression* e) {
+  std::string SystemC::toString(ast::Expression* e) {
     assert(e != NULL);
     if (e->op) {
       std::string op;
@@ -310,7 +308,7 @@ namespace generator {
     }
   }
   
-  void DesignFile::expression(ast::Expression* e) {
+  void SystemC::expression(ast::Expression* e) {
     if (e) {
       std::cout << toString(e);
     }

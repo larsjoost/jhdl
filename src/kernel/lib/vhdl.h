@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include "systemc.h"
+
 namespace vhdl {
 
   namespace STD {
@@ -157,11 +159,13 @@ namespace vhdl {
     } 
   }
 
-  void wait_for(STANDARD::TIME time) {
+  /*  
+  void wait_for(STANDARD::TIME& time) {
     auto t = STANDARD::NOW + time;
+    sc_wait(time.value);
     report("Waiting until " + STANDARD::TIME::IMAGE(t), STANDARD::NOTE);
   }
-  
+  */
   /*
     Expression operator functions
    */

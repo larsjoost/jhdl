@@ -1,5 +1,5 @@
-#ifndef GENERATOR_DESIGNFILE_HPP_
-#define GENERATOR_DESIGNFILE_HPP_
+#ifndef GENERATOR_SYSTEMC_HPP_
+#define GENERATOR_SYSTEMC_HPP_
 
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
@@ -19,7 +19,7 @@
 
 namespace generator {
   
-  class DesignFile { 
+  class SystemC { 
     std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
@@ -51,7 +51,7 @@ namespace generator {
     void printSourceLine(ast::Text& t);
     void printSourceLine(ast::BasicIdentifier* t);
   public:
-    DesignFile(ast::DesignFile& designFile);
+    SystemC(ast::DesignFile& designFile);
   };
 }
 

@@ -2,12 +2,87 @@
 #ifndef SYSTEMC_H
 #define SYSTEMC_H
 
-#define SC_MODULE(x) class x 
+#include <iostream>
+#include <string>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <vector>
+#include <atomic>
 
-#define SC_CTOR(x)  x()
+enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
 
-#define SC_METHOD(x) x()
+static int sc_now = 0;
 
-#define sc_main main
+class sc_module {
+   
+  std::mutex m;
+  std::condition_variable cv;
+ 
+  std::vector<std::thread*> methods;
+
+  int numberOfMethods = 0;
+
+  std::atomic<int> numberOfMethodsDone;
+
+  bool verbose = false;
+  
+ public:
+
+  template<class T>
+  void add(auto f, T* c) {
+    std::thread* th = new std::thread(f, c);
+    methods.push_back(th);
+    numberOfMethods++;
+  };
+  
+  void start() {
+    {
+      if (verbose) {std::cout << "Starting" << std::endl;}
+      std::unique_lock<std::mutex> lk(m);
+      numberOfMethodsDone = 0;
+      if (verbose) {std::cout << "main() signals data ready for processing\n";}
+      sc_now++;
+      cv.notify_all();
+    }
+
+    {
+      if (verbose) {std::cout << "Main lock" << std::endl;}
+      std::unique_lock<std::mutex> lk(m);
+      while (numberOfMethodsDone != numberOfMethods) {
+        if (verbose) {std::cout << "Main sleep" << std::endl;}
+        cv.wait(lk);
+        if (verbose) {std::cout << "Main woke up" << std::endl;}
+      }
+      if (verbose) {std::cout << "All methods are done" << std::endl;}
+    }
+  }
+
+  void wait(int i) {
+    // Wait until main() sends data
+    if (verbose) {std::cout << "Waiting until now (" << sc_now << ") = " << i << std::endl;}
+    std::unique_lock<std::mutex> lk(m);
+    numberOfMethodsDone++;
+    cv.notify_all();
+    int n = sc_now + i;
+    do {
+      if (verbose) {std::cout << "Method sleep" << std::endl;}
+      cv.wait(lk);
+      if (verbose) {std::cout << "Method woke up" << std::endl;}
+    } while(n < sc_now);
+    if (verbose) {std::cout << "Wait done at now = " << sc_now << std::endl;}
+    lk.unlock();
+    cv.notify_one();
+  }
+
+  void setVerbose(bool v) {
+    verbose = v;
+  }
+  
+};
+
+#define SC_MODULE(x) class x : public sc_module
+
+#define SC_METHOD(x) add(x, this)
 
 #endif
