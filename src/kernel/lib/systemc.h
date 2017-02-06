@@ -32,7 +32,7 @@ class sc_module {
   bool verbose = false;
 
   template<class T>
-  void add(auto f, T* c) {
+  void addMethod(auto f, T* c) {
     std::thread* th = new std::thread(f, c);
     methods.push_back(th);
     numberOfMethods++;
@@ -79,6 +79,6 @@ class sc_module {
 
 #define SC_MODULE(x) class x : public sc_module
 
-#define SC_METHOD(x) add(x, this)
+#define SC_METHOD(x) addMethod(x, this)
 
 #endif

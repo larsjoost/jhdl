@@ -12,12 +12,15 @@ red=1
 green=2
 
 function echo_color {
+    local color=$(tput setaf $1)
+    local reset=$(tput sgr0)
+    printf "${color}$2${reset} $3\n"
+}
+
+function echo_size {
     local size
     let "size=$1 + 10"
-    local c=$3
-    local color=$(tput setaf $3)
-    local reset=$(tput sgr0)
-    printf "%-${size}s${color}$4${reset} $5\n" "$2"
+    printf "%-${size}s" $2
 }
 
 function max {
@@ -41,6 +44,7 @@ for t in ${TEST[@]}; do
     fi
     
     for test_run in $TEST_RUNS; do
+        echo_size $MAX_SIZE $test_run
 	DIR=${test_run%/*}
 	cd $WORKDIR/$DIR
 	ERROR_MESSAGE=$(./${TEST_SCRIPT_NAME} 2>&1 > /dev/null)
@@ -59,9 +63,9 @@ for t in ${TEST[@]}; do
 
 	fi
         if [ $EXIT_VALUE -eq $EXPECTED_EXIT_VALUE ] && [ -z "$MESSAGE" ] ; then
-            echo_color $MAX_SIZE "$test_run" $green "[SUCCESS]" 
+            echo_color $green "[SUCCESS]" 
 	else
-            echo_color $MAX_SIZE "$test_run" $red "[FAILURE]" "$MESSAGE"
+            echo_color $red "[FAILURE]" "$MESSAGE"
             RESULT=1
 	fi
     done

@@ -27,5 +27,5 @@ function analyse {
 }
 
 function simulate {
-    $JHDL/hdls $1
+    $JHDL/hdls -f $@
 }

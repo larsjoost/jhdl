@@ -296,13 +296,15 @@ namespace generator {
     assert(e != NULL);
     if (e->op) {
       std::string op;
+      std::string term = toString(e->term);
+      std::string expr = toString(e->expression);
       switch (e->op->op) {
       case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
-      case ::ast::ExpressionOperator::ADD: {op = "add"; break;}
+      case ::ast::ExpressionOperator::ADD: {return term + " + " + expr;}
       case ::ast::ExpressionOperator::EQUAL: {op = "equal"; break;}
       default: {assert (false);}
       }
-      return op + "(" + toString(e->term) + ", " + toString(e->expression) + ")";
+      return op + "(" + term + ", " + expr + ")";
     } else {
       return toString(e->term);
     }

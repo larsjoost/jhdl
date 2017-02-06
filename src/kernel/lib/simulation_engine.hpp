@@ -81,7 +81,6 @@ public:
       if (!simulationUnit) {
         simulationUnit = new T();
       }
-      std::cout << "run for " << number << std::endl;
       for (int i=0; i<number; i++) {
         simulationUnit->start();
       }

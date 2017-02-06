@@ -171,14 +171,7 @@ namespace vhdl {
   static ::std::string concat(::std::string left, ::std::string right) {
     return left + right;
   }
-  
-  static STANDARD::INTEGER add(auto left, auto right) {
-    auto sum = left + right;
-    STANDARD::INTEGER l;
-    l = sum;
-    return l;
-  }
-  
+
   static bool equal(STANDARD::INTEGER left, int right) {
     return left.value == right;
   }
@@ -191,3 +184,4 @@ namespace vhdl {
 }
 
 #endif
+
