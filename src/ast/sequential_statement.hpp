@@ -4,6 +4,7 @@
 
 #include "procedure_call_statement.hpp"
 #include "variable_assignment.hpp"
+#include "signal_assignment.hpp"
 #include "report_statement.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
@@ -20,6 +21,7 @@ namespace ast {
 
     ProcedureCallStatement* procedureCallStatement;
     VariableAssignment* variableAssignment;
+    SignalAssignment* signalAssignment;
     ReportStatement* reportStatement;
     IfStatement* ifStatement;
     ForLoopStatement* forLoopStatement;

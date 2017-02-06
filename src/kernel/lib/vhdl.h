@@ -90,6 +90,11 @@ namespace vhdl {
       using Range<int>::operator=;
     };
     
+    static INTEGER operator+(INTEGER left, const int right) {
+      left.value += right;
+      return left;
+    }
+
     class NATURAL : public INTEGER {
     public:
       explicit NATURAL(int left=0, int right=INT_MAX) : INTEGER(left, right) {};

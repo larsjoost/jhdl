@@ -6,6 +6,8 @@
 #include "list.hpp"
 #include "type_declaration.hpp"
 #include "variable_declaration.hpp"
+#include "signal_declaration.hpp"
+#include "constant_declaration.hpp"
 
 namespace ast {
     
@@ -15,6 +17,8 @@ namespace ast {
 
     TypeDeclaration* type;
     VariableDeclaration* variable;
+    SignalDeclaration* signal;
+    ConstantDeclaration* constant;
     
   };
 

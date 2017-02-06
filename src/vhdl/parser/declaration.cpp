@@ -2,6 +2,8 @@
 #include "../scanner/scanner.hpp"
 #include "type_declaration.hpp"
 #include "variable_declaration.hpp"
+#include "signal_declaration.hpp"
+#include "constant_declaration.hpp"
 #include "declaration.hpp"
 
 namespace vhdl {
@@ -10,6 +12,8 @@ namespace vhdl {
     Declaration* Declaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       type = scanner->optional<TypeDeclaration>();
       variable = scanner->optional<VariableDeclaration>();
+      signal = scanner->optional<SignalDeclaration>();
+      constant = scanner->optional<ConstantDeclaration>();
       return this;
     }
 

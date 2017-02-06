@@ -12,7 +12,10 @@
 #include "../ast/expression_term.hpp"
 #include "../ast/declaration.hpp"
 #include "../ast/variable_declaration.hpp"
+#include "../ast/signal_declaration.hpp"
+#include "../ast/constant_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
+#include "../ast/signal_assignment.hpp"
 #include "../ast/report_statement.hpp"
 
 #include "systemc.hpp"
@@ -29,9 +32,9 @@ namespace generator {
         std::cout << "#include \"vhdl.h\"" << std::endl;
 	std::cout << "namespace vhdl {" << std::endl;
 	std::cout << "using namespace STANDARD;" << std::endl;
-        includes(designFile);
+        includes(indentSpace, designFile);
         std::cout << "SC_MODULE(" << name << ") {" << std::endl;
-        implementation(designFile, it->module.interface->name);
+        implementation(indentSpace, designFile, it->module.interface->name);
         std::cout << "};" << std::endl;
         std::cout << "}" << std::endl;
       }
@@ -49,12 +52,12 @@ namespace generator {
     printSourceLine(t->text);
   }
 
-  void SystemC::includes(ast::DesignFile& designFile) {
+  void SystemC::includes(int indent, ast::DesignFile& designFile) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          std::cout << "using ";
+          std::cout << std::string(indent, ' ') << "using ";
 	  std::cout << toString((char *)"::", useClause.list);
           std::cout << ";" << std::endl;
         }
@@ -132,10 +135,26 @@ namespace generator {
     }
   }
 
+  void SystemC::signal_declarations(ast::SignalDeclaration* v) {
+    if (v) {
+      printSourceLine(v->identifier);
+      std::cout << toString(v->type) << " " << toString(v->identifier) << ";" << std::endl;
+    }
+  }
+
+  void SystemC::constant_declarations(ast::ConstantDeclaration* v) {
+    if (v) {
+      printSourceLine(v->identifier);
+      std::cout << "const " << toString(v->type) << " " << toString(v->identifier) << ";" << std::endl;
+    }
+  }
+
   void SystemC::declarations(ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       type_declarations(i.type);
       variable_declarations(i.variable);
+      signal_declarations(i.signal);
+      constant_declarations(i.constant);
     }
   }
 
@@ -143,6 +162,7 @@ namespace generator {
     for (ast::SequentialStatement s : l.list) {
       procedureCallStatement(s.procedureCallStatement);
       variableAssignment(s.variableAssignment);
+      signalAssignment(s.signalAssignment);
       reportStatement(s.reportStatement);
       ifStatement(s.ifStatement);
       forLoopStatement(s.forLoopStatement);
@@ -151,7 +171,7 @@ namespace generator {
   }
   
   
-  void SystemC::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
+  void SystemC::implementation(int indent, ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     int methodId = 0;
     std::list<std::string> methodNames;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
@@ -246,6 +266,15 @@ namespace generator {
   }
 
   void SystemC::variableAssignment(ast::VariableAssignment* p) {
+    if (p) {
+      printSourceLine(p->identifier);
+      std::cout << toString(p->identifier) << " = ";
+      expression(p->expression);
+      std::cout << ";" << std::endl;
+    }
+  }
+
+  void SystemC::signalAssignment(ast::SignalAssignment* p) {
     if (p) {
       printSourceLine(p->identifier);
       std::cout << toString(p->identifier) << " = ";

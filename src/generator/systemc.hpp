@@ -7,6 +7,8 @@
 #include "../ast/expression.hpp"
 #include "../ast/procedure_call_statement.hpp"
 #include "../ast/variable_assignment.hpp"
+#include "../ast/signal_declaration.hpp"
+#include "../ast/constant_declaration.hpp"
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
 #include "../ast/basic_identifier.hpp"
@@ -20,6 +22,9 @@
 namespace generator {
   
   class SystemC { 
+
+    const int indentSpace = 2;
+
     std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
     void expression(ast::Expression* e);
@@ -37,16 +42,19 @@ namespace generator {
     void reportStatement(ast::ReportStatement* p);
     void procedureCallStatement(ast::ProcedureCallStatement* p);
     void variableAssignment(ast::VariableAssignment* p);
-    void includes(ast::DesignFile& designFile);
+    void signalAssignment(ast::SignalAssignment* p);
+    void includes(int indent, ast::DesignFile& designFile);
 
     void numberType(ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(ast::TypeDeclaration* t);
 
     void variable_declarations(ast::VariableDeclaration* v);
+    void signal_declarations(ast::SignalDeclaration* v);
+    void constant_declarations(ast::ConstantDeclaration* v);
     void declarations(ast::List<ast::Declaration>& d);
 
-    void implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name);
+    void implementation(int indent, ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
     void printSourceLine(ast::Text& t);
     void printSourceLine(ast::BasicIdentifier* t);
