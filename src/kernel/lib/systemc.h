@@ -10,6 +10,8 @@
 #include <vector>
 #include <atomic>
 
+#include "vhdl.h"
+
 enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
 
 static int sc_now = 0;
@@ -17,7 +19,8 @@ static int sc_now = 0;
 class sc_module {
    
   std::mutex m;
-  std::condition_variable cv;
+  std::condition_variable masterWait;
+  std::condition_variable methodWait;
  
   std::vector<std::thread*> methods;
 
@@ -26,7 +29,7 @@ class sc_module {
   std::atomic<int> numberOfMethodsDone;
   
  public:
-  bool verbose = true;
+  bool verbose = false;
 
   template<class T>
   void add(auto f, T* c) {
@@ -42,7 +45,8 @@ class sc_module {
       numberOfMethodsDone = 0;
       if (verbose) {std::cout << "main() signals data ready for processing\n";}
       sc_now++;
-      cv.notify_all();
+      vhdl::STANDARD::NOW.value = sc_now;
+      methodWait.notify_all();
     }
 
     {
@@ -50,7 +54,7 @@ class sc_module {
       std::unique_lock<std::mutex> lk(m);
       while (numberOfMethodsDone != numberOfMethods) {
         if (verbose) {std::cout << "Main sleep" << std::endl;}
-        cv.wait(lk);
+        masterWait.wait(lk);
         if (verbose) {std::cout << "Main woke up" << std::endl;}
       }
       if (verbose) {std::cout << "All methods are done" << std::endl;}
@@ -64,8 +68,8 @@ class sc_module {
     do {
       if (verbose) {std::cout << "Waiting until now (" << sc_now << ") = " << n << std::endl;}
       numberOfMethodsDone++;
-      cv.notify_all();
-      cv.wait(lk);
+      masterWait.notify_all();
+      methodWait.wait(lk);
     } while(sc_now < n);
     if (verbose) {std::cout << "Wait done at now = " << sc_now << std::endl;}
     lk.unlock();

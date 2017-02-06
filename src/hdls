@@ -4,16 +4,62 @@ set -e
 
 SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
-filename=$1
-filebase="${filename%.*}"
+usage()
+{
+    cat << EOF
+Command: $0 $ALL_ARGUMENTS
+
+usage: $0 options
+
+OPTIONS:
+   -h           Show this message
+   -f <name>    Filename
+   -d <name>    Do filename
+   -v           Verbose 
+EOF
+}
+
+while getopts ":hd:f:v" OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        f)
+            FILENAME="$OPTARG"
+            ;;
+        d)
+            DO_FILENAME="-d $OPTARG"
+            ;;
+        ?)
+            echo "Unknown option $OPTARG"
+            usage
+            exit 1
+            ;;
+        :)
+            echo "No argument value for option $OPTARG"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ -z "$FILENAME" ]; then
+    echo "Filename must be specified" 1>&2
+    usage
+    exit 1
+fi
+
+filebase="${FILENAME%.*}"
 sourcefile="$filebase.hpp"
-$SCRIPTPATH/hdlc -f $filename > $sourcefile
-mainfile=$(dirname $filename)/main.cpp
+$SCRIPTPATH/hdlc -f $FILENAME > $sourcefile
+mainfile=$(dirname $FILENAME)/main.cpp
 if [ ! -e $mainfile ]; then
     cp $SCRIPTPATH/sim.cpp $mainfile
-    MODULE_NAME=$($SCRIPTPATH/hdlf -f $filename)
+    MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
     sed -i "s/%module%/${MODULE_NAME}/g" $mainfile
     sed -i "s/%include%/$sourcefile/g" $mainfile
 fi
 g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $mainfile
-./$filebase
+./$filebase $DO_FILENAME

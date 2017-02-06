@@ -7,8 +7,6 @@
 #include <iostream>
 #include <string>
 
-#include "systemc.h"
-
 namespace vhdl {
 
   namespace STD {
