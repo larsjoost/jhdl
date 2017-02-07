@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "systemc.h"
 #include "%include%"
@@ -13,11 +14,13 @@ int sc_main(int argc, char* argv[]) {
   
   opterr = 0;
   int c;
-  while ((c = getopt (argc, argv, "d:v")) != -1) {
+  while ((c = getopt (argc, argv, "o:d:v")) != -1) {
     switch (c)
       {
-      case 'd':
+      case 'o':
         vcdFilename = optarg;
+        break;
+      case 'd':
         break;
       case 'v':
         verbose = true;
@@ -37,13 +40,14 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  vhdl::%module% dut("DUT"); 
+  auto* dut = new vhdl::%module%("DUT"); 
 
   if (vcdFilename) {
-  
+
+    if (verbose) {std::cout << "Creating VCD file " << vcdFilename << std::endl;}
     sc_trace_file* fp = sc_create_vcd_trace_file(vcdFilename);
 
-    // sc_trace(fp, dut.test, "test");
+    sc_trace(fp, dut->A, "A");
 
     /*
     for (int i=0; i<100; i++) {

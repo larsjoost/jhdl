@@ -2,4 +2,4 @@
 
 source ../../../envsetup.sh
 
-simulate test.vhdl -d run.do
+simulate test.vhdl $@

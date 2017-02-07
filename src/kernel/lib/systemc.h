@@ -2,6 +2,7 @@
 #ifndef SYSTEMC_H
 #define SYSTEMC_H
 
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -33,14 +34,18 @@ std::mutex logMutex;
 
 typedef std::ofstream sc_trace_file;
 
-bool verbose = true;
+bool verbose = false;
 
 void log(sc_trace_file* handle, const std::string& msg) {
+  std::cout << "#Handle = " << handle << std::endl;
   if (handle) {
+    std::cout << "#Out" << std::endl;
     logMutex.lock();
+    std::cout << "#Lock" << std::endl;
     *handle << msg << std::endl;
     *handle << "#" << sc_now << std::endl;
     logMutex.unlock();
+    std::cout << "#Unlock" << std::endl; 
   }
 }
 
@@ -77,19 +82,31 @@ class sc_module {
 
 template<class T>
 class sc_signal {
-
+  sc_trace_file* fileHandle = NULL;
 public:
   std::string name;
-  sc_trace_file* fileHandle = NULL;
   T signal;
 
   sc_signal<T>() { }
 
-  sc_signal<T>(sc_signal<T>& s) {
+  sc_signal<T>(const sc_signal<T>& s) {
+    std::cout << "File handle = " << fileHandle << std::endl;
     signal = s.signal;
     log(fileHandle, signal.toString() + name);
   }
 
+  sc_signal<T>& operator=(const sc_signal<T>& s) {
+    std::cout << "File handle = " << fileHandle << std::endl;
+    signal = s.signal;
+    log(fileHandle, signal.toString() + name);
+    return *this;
+  }
+
+  void setFileHandle(sc_trace_file* fp) {
+    std::cout << "Setting file handle to " << fp << std::endl;
+    fileHandle = fp;
+  }
+  
   sc_signal<T> operator=(auto v) {
     signal = v;
     log(fileHandle, signal.toString() + name);
@@ -104,7 +121,12 @@ public:
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name) {
-  sc_trace_file* out = new sc_trace_file(name);
+  sc_trace_file* out = new sc_trace_file();
+  out->open(name, std::ios::out);
+  if (!out->is_open()) {
+    std::cerr << "Error: Cannot open file " << *name << std::endl;
+    exit(1);
+  }
   return out;
 };
 
@@ -118,29 +140,31 @@ void sc_trace(sc_trace_file* f, sc_signal<T>& s, const char* name) {
   *f << "$enddefinitions $end" << std::endl;
   *f << "$dumpvars" << std::endl;
   s.name = name;
-  s.fileHandle = f;
+  s.setFileHandle(f);
 }
 
-void sc_start(int i) {
-  {
-    if (verbose) {std::cout << "Starting" << std::endl;}
-    std::unique_lock<std::mutex> lk(m);
-    numberOfMethodsDone = 0;
-    if (verbose) {std::cout << "main() signals data ready for processing\n";}
-    sc_now++;
-    //      vhdl::STANDARD::NOW.value = sc_now;
-    methodWait.notify_all();
-  }
-  
-  {
-    if (verbose) {std::cout << "Main lock" << std::endl;}
-    std::unique_lock<std::mutex> lk(m);
-    while (numberOfMethodsDone != numberOfMethods) {
-      if (verbose) {std::cout << "Main sleep" << std::endl;}
-      masterWait.wait(lk);
-      if (verbose) {std::cout << "Main woke up" << std::endl;}
+void sc_start(int runs) {
+  for (int i=0; i<runs; i++) {
+    {
+      if (verbose) {std::cout << "Starting" << std::endl;}
+      std::unique_lock<std::mutex> lk(m);
+      numberOfMethodsDone = 0;
+      if (verbose) {std::cout << "main() signals data ready for processing\n";}
+      sc_now++;
+      //      vhdl::STANDARD::NOW.value = sc_now;
+      methodWait.notify_all();
     }
-    if (verbose) {std::cout << "All methods are done" << std::endl;}
+  
+    {
+      if (verbose) {std::cout << "Main lock" << std::endl;}
+      std::unique_lock<std::mutex> lk(m);
+      while (numberOfMethodsDone != numberOfMethods) {
+        if (verbose) {std::cout << "Main sleep" << std::endl;}
+        masterWait.wait(lk);
+        if (verbose) {std::cout << "Main woke up" << std::endl;}
+      }
+      if (verbose) {std::cout << "All methods are done" << std::endl;}
+    }
   }
 }
 

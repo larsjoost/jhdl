@@ -36,6 +36,9 @@ do
         o)
             VCD_FILENAME="$OPTARG"
             ;;
+        v)
+            VERBOSE="-v"
+            ;;
         ?)
             echo "Unknown option $OPTARG"
             usage
@@ -73,8 +76,11 @@ for i in $templatefiles; do
 done
 g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $targets
 if [ -n "$VCD_FILENAME" ]; then
-    mkfifo $VCD_FILENAME
-    ./$filebase $DO_FILENAME -o $VCD_FILENAME & shmidcat $VCD_FILENAME | gtkwave -v -I output.sav
+    if [ ! -e $VCD_FILENAME ]; then
+        mkfifo $VCD_FILENAME
+    fi
+    # ./$filebase $DO_FILENAME -o $VCD_FILENAME & shmidcat $VCD_FILENAME | gtkwave -v -I output.sav
+    ./$filebase $DO_FILENAME -o $VCD_FILENAME $VERBOSE 
 else
-    ./$filebase $DO_FILENAME
+    ./$filebase $DO_FILENAME $VERBOSE
 fi
