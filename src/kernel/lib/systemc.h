@@ -33,7 +33,7 @@ std::mutex logMutex;
 
 typedef std::ofstream sc_trace_file;
 
-bool verbose = false;
+bool verbose = true;
 
 void log(sc_trace_file* handle, const std::string& msg) {
   if (handle) {
@@ -113,7 +113,7 @@ void sc_close_vcd_trace_file(sc_trace_file* fp) {
 }
 
 template<class T>
-void sc_trace(sc_trace_file* f, sc_signal<T>& s, std::string& name) {
+void sc_trace(sc_trace_file* f, sc_signal<T>& s, const char* name) {
   *f << "$var wire 32 " << name << " " << name << "$end" << std::endl;
   *f << "$enddefinitions $end" << std::endl;
   *f << "$dumpvars" << std::endl;

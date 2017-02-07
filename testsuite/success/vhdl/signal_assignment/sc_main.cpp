@@ -37,21 +37,19 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  vhdl::TEST dut("DUT"); 
+  vhdl::TEST* dut = new vhdl::TEST("DUT"); 
 
   if (vcdFilename) {
   
     sc_trace_file* fp = sc_create_vcd_trace_file(vcdFilename);
 
-    sc_trace(fp, dut.A, "A");
+    sc_trace(fp, dut->A, "A");
 
-    /*
     for (int i=0; i<100; i++) {
       sc_start(1);
     }
 
     sc_close_vcd_trace_file(fp);
-    */
   }
     
 }
