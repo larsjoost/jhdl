@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include "systemc.h"
+
 namespace vhdl {
 
   namespace STD {
@@ -52,6 +54,10 @@ namespace vhdl {
       value = v;
     }
     
+    std::string toString() {
+      return std::to_string(value);
+    }
+
     static ::std::string IMAGE(Range<T> r) {
       return ::std::to_string(r.value);
     }
@@ -88,6 +94,11 @@ namespace vhdl {
     public:
       explicit INTEGER(int left=INT_MIN, int right=INT_MAX) : Range<int>(left, right) {};
       using Range<int>::operator=;
+
+      static ::std::string IMAGE(sc_signal<INTEGER> r) {
+        return ::std::to_string(r.signal.value);
+      }
+
     };
     
     static INTEGER operator+(INTEGER left, const int right) {

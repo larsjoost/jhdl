@@ -15,11 +15,12 @@ OPTIONS:
    -h           Show this message
    -f <name>    Filename
    -d <name>    Do filename
+   -o <name>    VCD output filename
    -v           Verbose 
 EOF
 }
 
-while getopts ":hd:f:v" OPTION
+while getopts ":hd:f:o:v" OPTION
 do
     case $OPTION in
         h)
@@ -31,6 +32,9 @@ do
             ;;
         d)
             DO_FILENAME="-d $OPTARG"
+            ;;
+        o)
+            VCD_FILENAME="$OPTARG"
             ;;
         ?)
             echo "Unknown option $OPTARG"
@@ -54,12 +58,23 @@ fi
 filebase="${FILENAME%.*}"
 sourcefile="$filebase.hpp"
 $SCRIPTPATH/hdlc -f $FILENAME > $sourcefile
-mainfile=$(dirname $FILENAME)/main.cpp
-if [ ! -e $mainfile ]; then
-    cp $SCRIPTPATH/sim.cpp $mainfile
-    MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
-    sed -i "s/%module%/${MODULE_NAME}/g" $mainfile
-    sed -i "s/%include%/$sourcefile/g" $mainfile
+targetdir=$(dirname $FILENAME)
+templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
+targets=""
+for i in $templatefiles; do
+    target=$targetdir/$(basename "$i")
+    targets="$targets $target"
+    if [ ! -e $target ]; then
+        cp $i $target
+        MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
+        sed -i "s/%module%/${MODULE_NAME}/g" $target
+        sed -i "s/%include%/$sourcefile/g" $target
+    fi
+done
+g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $targets
+if [ -n "$VCD_FILENAME" ]; then
+    mkfifo $VCD_FILENAME
+    ./$filebase $DO_FILENAME -o $VCD_FILENAME & shmidcat $VCD_FILENAME | gtkwave -v -I output.sav
+else
+    ./$filebase $DO_FILENAME
 fi
-g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $mainfile
-./$filebase $DO_FILENAME

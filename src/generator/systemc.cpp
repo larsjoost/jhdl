@@ -34,6 +34,7 @@ namespace generator {
 	std::cout << "using namespace STANDARD;" << std::endl;
         includes(indentSpace, designFile);
         std::cout << "SC_MODULE(" << name << ") {" << std::endl;
+        std::cout << "public:" << std::endl;
         implementation(indentSpace, designFile, it->module.interface->name);
         std::cout << "};" << std::endl;
         std::cout << "}" << std::endl;
@@ -138,7 +139,7 @@ namespace generator {
   void SystemC::signal_declarations(ast::SignalDeclaration* v) {
     if (v) {
       printSourceLine(v->identifier);
-      std::cout << toString(v->type) << " " << toString(v->identifier) << ";" << std::endl;
+      std::cout << "sc_signal<" << toString(v->type) << "> " << toString(v->identifier) << ";" << std::endl;
     }
   }
 
@@ -195,7 +196,7 @@ namespace generator {
             std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;
-          std::cout << toString(name) << "() {" << std::endl;
+          std::cout << "SC_CTOR(" << toString(name) << ") {" << std::endl;
           for (std::string s : methodNames) {
             std::cout << "  SC_METHOD(&" + toString(name) + "::" + s + ");" << std::endl;
           }
