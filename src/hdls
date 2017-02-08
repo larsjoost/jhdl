@@ -77,9 +77,9 @@ done
 g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $targets
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
-        mkfifo $VCD_FILENAME
+        mkfifo --mode=666 $VCD_FILENAME
     fi
-    # ./$filebase $DO_FILENAME -o $VCD_FILENAME & shmidcat $VCD_FILENAME | gtkwave -v -I output.sav
+    shmidcat $VCD_FILENAME | gtkwave -v -I output.sav &
     ./$filebase $DO_FILENAME -o $VCD_FILENAME $VERBOSE 
 else
     ./$filebase $DO_FILENAME $VERBOSE

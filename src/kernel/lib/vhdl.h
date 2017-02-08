@@ -58,6 +58,10 @@ namespace vhdl {
       return std::to_string(value);
     }
 
+    T getValue() {
+      return value;
+    }
+    
     static ::std::string IMAGE(Range<T> r) {
       return ::std::to_string(r.value);
     }

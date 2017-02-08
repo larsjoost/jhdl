@@ -22,6 +22,6 @@ print-%:
 .PHONY: clean
 
 clean:
-	rm jhdl
+	rm hdlc hdlf
 	find . -name "*.o" -type f -delete
 

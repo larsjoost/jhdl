@@ -36,16 +36,22 @@ typedef std::ofstream sc_trace_file;
 
 bool verbose = false;
 
-void log(sc_trace_file* handle, const std::string& msg) {
-  std::cout << "#Handle = " << handle << std::endl;
+std::string toBinary(int x, int binaryWidth) {
+  std::string s = "";
+  for (int i=0; i<binaryWidth; i++) {
+    char c = ((x % 2) == 0 ? '0' : '1');
+    s = c + s;
+    x >>= 1;
+  }
+  return s;
+}
+
+void log(sc_trace_file* handle, int value, int traceId) {
   if (handle) {
-    std::cout << "#Out" << std::endl;
     logMutex.lock();
-    std::cout << "#Lock" << std::endl;
-    *handle << msg << std::endl;
     *handle << "#" << sc_now << std::endl;
+    *handle << "b" << toBinary(value, 32) << " " << std::to_string(traceId) << std::endl;
     logMutex.unlock();
-    std::cout << "#Unlock" << std::endl; 
   }
 }
 
@@ -82,34 +88,28 @@ class sc_module {
 
 template<class T>
 class sc_signal {
-  sc_trace_file* fileHandle = NULL;
-public:
+ public:
   std::string name;
+  sc_trace_file* fileHandle = NULL;
+  int traceId;
   T signal;
 
   sc_signal<T>() { }
 
   sc_signal<T>(const sc_signal<T>& s) {
-    std::cout << "File handle = " << fileHandle << std::endl;
     signal = s.signal;
-    log(fileHandle, signal.toString() + name);
+    log(fileHandle, signal.getValue(), traceId);
   }
 
   sc_signal<T>& operator=(const sc_signal<T>& s) {
-    std::cout << "File handle = " << fileHandle << std::endl;
     signal = s.signal;
-    log(fileHandle, signal.toString() + name);
+    log(fileHandle, signal.getValue(), traceId);
     return *this;
   }
 
-  void setFileHandle(sc_trace_file* fp) {
-    std::cout << "Setting file handle to " << fp << std::endl;
-    fileHandle = fp;
-  }
-  
   sc_signal<T> operator=(auto v) {
     signal = v;
-    log(fileHandle, signal.toString() + name);
+    log(fileHandle, signal.getValue(), traceId);
     return *this;
   }
 
@@ -121,12 +121,9 @@ public:
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name) {
-  sc_trace_file* out = new sc_trace_file();
-  out->open(name, std::ios::out);
-  if (!out->is_open()) {
-    std::cerr << "Error: Cannot open file " << *name << std::endl;
-    exit(1);
-  }
+  sc_trace_file* out = new sc_trace_file(name);
+  *out << "$timescale 1ns $end" << std::endl;
+  *out << "$scope module top $end" << std::endl;
   return out;
 };
 
@@ -134,13 +131,17 @@ void sc_close_vcd_trace_file(sc_trace_file* fp) {
   
 }
 
+int traceId = 1;
+
 template<class T>
-void sc_trace(sc_trace_file* f, sc_signal<T>& s, const char* name) {
-  *f << "$var wire 32 " << name << " " << name << "$end" << std::endl;
-  *f << "$enddefinitions $end" << std::endl;
-  *f << "$dumpvars" << std::endl;
+void sc_trace(sc_trace_file* fh, sc_signal<T>& s, const char* name) {
+  *fh << "$var wire 32 " << traceId << " " << name << " $end" << std::endl;
+  *fh << "$upscope $end" << std::endl;
+  *fh << "$enddefinitions $end" << std::endl;
+  *fh << "$dumpvars" << std::endl;
+  s.traceId = traceId++;
   s.name = name;
-  s.setFileHandle(f);
+  s.fileHandle = fh;
 }
 
 void sc_start(int runs) {
