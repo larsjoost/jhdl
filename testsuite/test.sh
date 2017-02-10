@@ -27,6 +27,15 @@ function max {
     echo "$1" | sed 's/ /\n/g' | awk '{print length}' | sort -nr | head
 }
 
+SOURCE=(main.cpp sc_main.cpp)
+
+for i in ${SOURCE[@]}; do
+    a=$(find ./ -name $i)
+    if [ -n "$a" ]; then
+        rm $a
+    fi
+done
+
 for t in ${TEST[@]}; do
 
     cd $WORKDIR
@@ -52,7 +61,7 @@ for t in ${TEST[@]}; do
         MESSAGE=""
 	if [ "$t" == "success" ]; then
 	    if [ -n "$ERROR_MESSAGE" ]; then
-	       MESSAGE="(Unexpected error message)"
+	       MESSAGE="(Unexpected error message: $ERROR_MESSAGE)"
 	       RESULT=1
 	    fi
 	else

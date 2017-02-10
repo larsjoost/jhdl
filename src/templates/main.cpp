@@ -7,8 +7,6 @@ int main(int argc, char* argv[]) {
 
   sc_main(argc, argv);
 
-  std::cout << "Here" << std::endl;
-  
   run(argc, argv);
 
 }

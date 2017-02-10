@@ -21,7 +21,7 @@ else
         VERBOSE="-v"
     fi
 fi
-    
+
 function analyse {
     $OPTIONS $JHDL/hdlc -f $1 $VERBOSE
 }

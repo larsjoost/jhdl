@@ -15,7 +15,8 @@ namespace vhdl {
     namespace ENV {
 
       void FINISH(int x) {
-        exit(x);
+        std::cout << "Finish" << std::endl;
+        sc_exit(x);
       }
       
     }
@@ -62,7 +63,7 @@ namespace vhdl {
       return value;
     }
     
-    static ::std::string IMAGE(Range<T> r) {
+    static ::std::string IMAGE(Range<T>& r) {
       return ::std::to_string(r.value);
     }
     
@@ -86,7 +87,7 @@ namespace vhdl {
     Physical(T value, Units units) :
       value(value), units(units) { }
 
-    static ::std::string IMAGE(Physical<T, Units> r) {
+    static ::std::string IMAGE(Physical<T, Units>& r) {
       return std::to_string(r.value) + " " + toString(r.units);
     }
 
@@ -98,8 +99,8 @@ namespace vhdl {
     public:
       explicit INTEGER(int left=INT_MIN, int right=INT_MAX) : Range<int>(left, right) {};
       using Range<int>::operator=;
-
-      static ::std::string IMAGE(sc_signal<INTEGER> r) {
+      using Range<int>::IMAGE;
+      static ::std::string IMAGE(sc_signal<INTEGER>& r) {
         return ::std::to_string(r.signal.value);
       }
 

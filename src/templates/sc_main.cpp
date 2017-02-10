@@ -47,7 +47,7 @@ int sc_main(int argc, char* argv[]) {
     if (verbose) {std::cout << "Creating VCD file " << vcdFilename << std::endl;}
     sc_trace_file* fp = sc_create_vcd_trace_file(vcdFilename);
 
-    sc_trace(fp, dut->A, "A");
+    // sc_trace(fp, dut->A, "A");
 
     /*
     for (int i=0; i<100; i++) {
