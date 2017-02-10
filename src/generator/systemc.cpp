@@ -189,10 +189,8 @@ namespace generator {
             }
             methodNames.push_back(methodName);
             std::cout << "void " << methodName << "() {" << std::endl;
-            std::cout << "while(true) {" << std::endl;
             declarations(m.declarations);
             sequentialStatements(m.sequentialStatements);
-            std::cout << "}" << std::endl;
             std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;

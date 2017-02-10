@@ -7,6 +7,7 @@ int main(int argc, char* argv[]) {
 
   sc_main(argc, argv);
 
-  run(argc, argv);
+  int exitCode = run(argc, argv);
 
+  return exitCode;
 }

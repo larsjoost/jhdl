@@ -12,7 +12,7 @@ begin
   process is
   begin 
     report "Test is almost done" severity FAILURE;
-    finish(0);    
+    finish(0);
   end process;
 
 end architecture rtl;

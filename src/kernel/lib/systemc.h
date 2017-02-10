@@ -19,10 +19,11 @@
 
 enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
 
-int sc_now = 0;
+static int sc_now = 0;
 
-bool runThreads = false;
-bool terminateThreads = false;
+static bool runThreads = false;
+static bool terminateThreads = false;
+static int exitCode;
 
 std::mutex mMutex;
 
@@ -32,15 +33,15 @@ std::condition_variable methodWait;
 std::vector<std::thread*> methods;
 
 std::atomic<int> numberOfMethods;
-int numberOfMethodsDone = 0;
-int deltaCycle = 0;
-bool methodEvent = false;
+static int numberOfMethodsDone = 0;
+static int deltaCycle = 0;
+static bool methodEvent = false;
 
 std::mutex logMutex;
 
 typedef std::ofstream sc_trace_file;
 
-bool verbose = false;
+static bool verbose = false;
 
 std::string toBinary(int x, int binaryWidth) {
   std::string s = "";
@@ -61,14 +62,16 @@ void log(sc_trace_file* handle, int value, int traceId) {
   }
 }
 
+class TerminateThreads : std::exception {};
+
 void sc_exit(int i) {
   std::lock_guard<std::mutex> lk(mMutex);
+  exitCode = i;
   terminateThreads = true;
   masterWait.notify_all();
   methodWait.notify_all();
+  throw TerminateThreads();
 }
-
-class TerminateThreads : std::exception {};
 
 template<class T>
 class sc_thread {
@@ -92,7 +95,9 @@ class sc_thread {
     lk.unlock();
     if (verbose) {std::cout << "[METHOD] Starting" << std::endl;}
     try {
-      (*classContainer.*threadFunction)();
+      while (!terminateThreads) {
+        (*classContainer.*threadFunction)();
+      }
     } catch (TerminateThreads e) {
       if (verbose) {std::cout << "Catched TerminateThreads" << std::endl;}
     }
@@ -269,7 +274,7 @@ void usage() {
   std::cout << "-d <name> : Do filename" << std::endl;
 }
 
-void run(int argc, char* argv[]) {
+int run(int argc, char* argv[]) {
   const char* doFilename = NULL;
   const char* vcdFilename = NULL;
 
@@ -329,6 +334,8 @@ void run(int argc, char* argv[]) {
     getline(std::cin, command);
     continueRun = parseCommand(command);
   }
+
+  return exitCode;
   
 }
 
