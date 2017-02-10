@@ -6,6 +6,7 @@
 #include "basic_identifier.hpp"
 #include "process.hpp"
 #include "declaration.hpp"
+#include "concurrent_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -18,7 +19,7 @@ namespace vhdl {
       scanner->expect(scanner::Scanner::VHDL_IS);
       parseDeclarations(scanner);
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
-      parseBody(scanner);
+      while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_ARCHITECTURE);
       BasicIdentifier* i = scanner->expect<BasicIdentifier>();
@@ -36,14 +37,6 @@ namespace vhdl {
       do {
         match = false;
         match |= declarations.add(scanner->optional<Declaration>());
-      } while (match);
-    }
-    
-    void Architecture::parseBody(::ast::Scanner<scanner::Scanner>* scanner) {
-      bool match;
-      do {
-        match = false;
-        match |= methods.add(scanner->optional<Process>());
       } while (match);
     }
     

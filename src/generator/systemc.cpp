@@ -180,18 +180,20 @@ namespace generator {
       if (it->module.implementation) {
         if (name->equals(it->module.implementation->name)) {
           declarations(it->module.implementation->declarations);
-          for (ast::Method m : it->module.implementation->methods.list) {
-            std::string methodName;
-            if (m.name) {
-              methodName = toString(m.name);
-            } else {
-              methodName = "noname" + std::to_string(methodId++);
+          for (ast::ConcurrentStatement c : it->module.implementation->concurrentStatements.list) {
+            if (c.method) {
+              std::string methodName;
+              if (c.method->name) {
+                methodName = toString(c.method->name);
+              } else {
+                methodName = "noname" + std::to_string(methodId++);
+              }
+              methodNames.push_back(methodName);
+              std::cout << "void " << methodName << "() {" << std::endl;
+              declarations(c.method->declarations);
+              sequentialStatements(c.method->sequentialStatements);
+              std::cout << "}" << std::endl;
             }
-            methodNames.push_back(methodName);
-            std::cout << "void " << methodName << "() {" << std::endl;
-            declarations(m.declarations);
-            sequentialStatements(m.sequentialStatements);
-            std::cout << "}" << std::endl;
           }
           std::cout << "public:" << std::endl;
           std::cout << "SC_CTOR(" << toString(name) << ") {" << std::endl;

@@ -1,20 +1,23 @@
 
-#ifndef AST_IMPLEMENTATION_H_
-#define AST_IMPLEMENTATION_H_
+#ifndef AST_FORGENERATE_H_
+#define AST_FORGENERATE_H_
 
 #include "basic_identifier.hpp"
 #include "list.hpp"
-#include "declaration.hpp"
 #include "concurrent_statement.hpp"
+#include "range_type.hpp"
 
 namespace ast {
-    
-  class Implementation {
+
+  class ConcurrentStatement;
+  
+  class ForGenerateStatement {
     
   public:
 
     BasicIdentifier* name;
-    List<Declaration> declarations;
+    BasicIdentifier* identifier;
+    RangeType* range;
     List<ConcurrentStatement> concurrentStatements;
     
   };
