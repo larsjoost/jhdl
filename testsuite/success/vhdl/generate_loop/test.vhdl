@@ -14,8 +14,8 @@ begin
     process is
     begin
       for i in 0 to 3 loop
-        report "(" & integer'image(x) & ") now = " & time'image(now) severity note;
-        wait for 5 ns;
+        report "x = " & integer'image(x) & ", i = " & integer'image(i) severity note;
+        wait for 1 ns;
       end loop;
       finish(0);
     end process;

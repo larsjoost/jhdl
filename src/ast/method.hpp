@@ -2,6 +2,8 @@
 #ifndef AST_METHOD_H_
 #define AST_METHOD_H_
 
+#include <string>
+
 #include "basic_identifier.hpp"
 #include "list.hpp"
 #include "sequential_statement.hpp"
@@ -13,6 +15,7 @@ namespace ast {
     
   public:
     
+    std::string noname;
     BasicIdentifier* name;
     List<Declaration> declarations;
     List<SequentialStatement> sequentialStatements;

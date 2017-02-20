@@ -22,8 +22,18 @@
 
 namespace generator {
 
+  SystemC::parameters SystemC::incIndent(parameters parm) {
+    parm.indent += 2;
+    return parm;
+  }
+
+  void SystemC::println(parameters& parm, std::string text) {
+    std::cout << std::string(parm.indent, ' ') << text << std::endl;
+  }
+  
   SystemC::SystemC(ast::DesignFile& designFile) {
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
+    parameters parm;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
@@ -32,10 +42,10 @@ namespace generator {
         std::cout << "#include \"vhdl.h\"" << std::endl;
 	std::cout << "namespace vhdl {" << std::endl;
 	std::cout << "using namespace STANDARD;" << std::endl;
-        includes(indentSpace, designFile);
+        includes(designFile);
         std::cout << "SC_MODULE(" << name << ") {" << std::endl;
         std::cout << "public:" << std::endl;
-        implementation(indentSpace, designFile, it->module.interface->name);
+        implementation(designFile, it->module.interface->name);
         std::cout << "};" << std::endl;
         std::cout << "}" << std::endl;
       }
@@ -53,12 +63,12 @@ namespace generator {
     printSourceLine(t->text);
   }
 
-  void SystemC::includes(int indent, ast::DesignFile& designFile) {
+  void SystemC::includes(ast::DesignFile& designFile) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          std::cout << std::string(indent, ' ') << "using ";
+          std::cout << "using ";
 	  std::cout << toString((char *)"::", useClause.list);
           std::cout << ";" << std::endl;
         }
@@ -170,36 +180,106 @@ namespace generator {
       waitStatement(s.waitStatement);
     }
   }
+
+  template<typename Func>
+  std::string SystemC::toString(std::list<std::string>& t, std::string delimiter, Func lambda) {
+    std::string s;
+    std::string d;
+    for (std::string x : t) {
+      s += (d + lambda(x));
+      d = delimiter;
+    }
+    return s;
+  }
   
+  void SystemC::methodDefinition(ast::Method* method, std::list<std::string> forGenerateHierarchy) {
+      if (method) {
+        std::string methodName;
+        if (method->name) {
+          methodName = toString(method->name);
+        } else {
+          methodName = "noname" + std::to_string(methodId++);
+          method->noname = methodName;
+        }
+        std::cout << "class " << methodName << " : public sc_thread {" << std::endl;
+        if (forGenerateHierarchy.size() > 0) {
+          std::cout << "INTEGER " << toString(forGenerateHierarchy, ",", [&](std::string s){return s;}) << ";" << std::endl;
+        }
+        std::cout << "public:" << std::endl;
+        if (forGenerateHierarchy.size() > 0) {
+          std::string constructorArguments = toString(forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
+          std::cout << methodName << "(" << constructorArguments << ") : ";
+          std::string memberVariableAssignment = toString(forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
+          std::cout << memberVariableAssignment << " {};" << std::endl;
+        }
+        std::cout << "void run () {" << std::endl;
+        declarations(method->declarations);
+        sequentialStatements(method->sequentialStatements);
+        std::cout << "}" << std::endl;
+        std::cout << "};" << std::endl;
+      }
+  }
+
+  void SystemC::forGenerateStatementDefinition(ast::ForGenerateStatement* forGenerateStatement,
+                                               std::list<std::string> forGenerateHierarchy) {
+    if (forGenerateStatement) {
+      forGenerateHierarchy.push_back(toString(forGenerateStatement->identifier));
+      concurrentStatementsDefinition(forGenerateStatement->concurrentStatements, forGenerateHierarchy);
+    }
+  }
   
-  void SystemC::implementation(int indent, ast::DesignFile& designFile, ast::BasicIdentifier* name) {
-    int methodId = 0;
-    std::list<std::string> methodNames;
+  void SystemC::concurrentStatementsDefinition(ast::List<ast::ConcurrentStatement>& concurrentStatements,
+                                               std::list<std::string> forGenerateHierarchy) {
+    for (ast::ConcurrentStatement& c : concurrentStatements.list) {
+      methodDefinition(c.method, forGenerateHierarchy);
+      forGenerateStatementDefinition(c.forGenerateStatement, forGenerateHierarchy);
+    }
+  }
+  
+  void SystemC::methodInstantiation(ast::Method* method, std::list<std::string> forGenerateHierarchy) {
+    if (method) {
+      std::string methodName;
+      if (method->name) {
+        methodName = toString(method->name);
+      } else {
+        methodName = method->noname;
+      }
+      std::string constructorArguments = toString(forGenerateHierarchy, ",", [&](std::string s){return s;});
+      std::cout << "SC_THREAD(new " << methodName << "(" << constructorArguments << "));" << std::endl;
+    }
+  }
+
+  void SystemC::forGenerateStatementInstantiation(ast::ForGenerateStatement* forGenerateStatement,
+                                                  std::list<std::string> forGenerateHierarchy) {
+    
+    if (forGenerateStatement) {
+      std::string id = toString(forGenerateStatement->identifier);
+      forGenerateHierarchy.push_back(id);
+      std::cout << toString(forGenerateStatement->identifier, forGenerateStatement->range) << ") {" << std::endl;
+      concurrentStatementsInstantiation(forGenerateStatement->concurrentStatements, forGenerateHierarchy);
+      std::cout << "}" << std::endl;
+    }
+  }
+  
+  void SystemC::concurrentStatementsInstantiation(ast::List<ast::ConcurrentStatement>& concurrentStatements,
+                                                  std::list<std::string> forGenerateHierarchy) {
+    for (ast::ConcurrentStatement& c : concurrentStatements.list) {
+      methodInstantiation(c.method, forGenerateHierarchy);
+      forGenerateStatementInstantiation(c.forGenerateStatement, forGenerateHierarchy);
+    }
+  }
+
+  void SystemC::implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.implementation) {
         if (name->equals(it->module.implementation->name)) {
           declarations(it->module.implementation->declarations);
-          for (ast::ConcurrentStatement c : it->module.implementation->concurrentStatements.list) {
-            if (c.method) {
-              std::string methodName;
-              if (c.method->name) {
-                methodName = toString(c.method->name);
-              } else {
-                methodName = "noname" + std::to_string(methodId++);
-              }
-              methodNames.push_back(methodName);
-              std::cout << "void " << methodName << "() {" << std::endl;
-              declarations(c.method->declarations);
-              sequentialStatements(c.method->sequentialStatements);
-              std::cout << "}" << std::endl;
-            }
-          }
+          std::list<std::string> forGenerateHierarchy;
+          concurrentStatementsDefinition(it->module.implementation->concurrentStatements, forGenerateHierarchy);
           std::cout << "public:" << std::endl;
           std::cout << "SC_CTOR(" << toString(name) << ") {" << std::endl;
-          for (std::string s : methodNames) {
-            std::cout << "  SC_METHOD(&" + toString(name) + "::" + s + ");" << std::endl;
-          }
+          concurrentStatementsInstantiation(it->module.implementation->concurrentStatements, forGenerateHierarchy);
           std::cout << "}" << std::endl;
         }
       }
@@ -244,11 +324,14 @@ namespace generator {
     }
   }
 
+  std::string SystemC::toString(ast::BasicIdentifier* i, ast::RangeType* r) {
+    std::string s = "for (auto " + toString(i) + " : " + " INTEGER(" + toString(r->left) + ", " + toString(r->right) + ")";
+    return s;
+  }
+  
   void SystemC::forLoopStatement(ast::ForLoopStatement* p) {
     if (p) {
-      std::cout << "for (auto " << toString(p->identifier) << " : ";
-      std::cout << " INTEGER(" << toString(p->range->left) << ", ";
-      std::cout << toString(p->range->right) << ")) {" << std::endl;
+      std::cout << toString(p->identifier, p->range) << ") {" << std::endl;
       sequentialStatements(p->sequentialStatements);
       std::cout << "}" << std::endl;
     }

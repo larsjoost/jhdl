@@ -24,9 +24,9 @@ namespace vhdl {
   
   template<class T>
   class Range {
+  public:
     T left;
     T right;
-  public:
     T value;
 
     class iterator {
@@ -98,6 +98,9 @@ namespace vhdl {
     class INTEGER : public Range<int> {
     public:
       explicit INTEGER(int left=INT_MIN, int right=INT_MAX) : Range<int>(left, right) {};
+      explicit INTEGER(Range<int> r) : Range<int>(r.left, r.right) {
+        value = r.value;
+      };
       using Range<int>::operator=;
       using Range<int>::IMAGE;
       static ::std::string IMAGE(sc_signal<INTEGER>& r) {

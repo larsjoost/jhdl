@@ -73,20 +73,13 @@ void sc_exit(int i) {
   throw TerminateThreads();
 }
 
-template<class T>
 class sc_thread {
 
-  void (T::*threadFunction)() = NULL;
-
-  T* classContainer = NULL;
-  
  public:
-  sc_thread(void (T::*f)(), T* c) {
-    threadFunction = f;
-    classContainer = c;
-  }
 
-  void run() {
+  virtual void run() = 0;
+  
+  void threadLoop() {
     if (verbose) {std::cout << "[METHOD] Waiting on start" << std::endl;}
     std::unique_lock<std::mutex> lk(mMutex);
     if (!runThreads) {
@@ -96,29 +89,12 @@ class sc_thread {
     if (verbose) {std::cout << "[METHOD] Starting" << std::endl;}
     try {
       while (!terminateThreads) {
-        (*classContainer.*threadFunction)();
+        run();
       }
     } catch (TerminateThreads e) {
       if (verbose) {std::cout << "Catched TerminateThreads" << std::endl;}
     }
   }
-  
-};
-
-class sc_module {
-  
- public:
-  const char* name = NULL;
-
-  sc_module(const char* name) : name(name) {};
-  
-  template<class T>
-  void addMethod(auto f, T* c) {
-    auto* t = new sc_thread<T>(f, c);
-    std::thread* th = new std::thread(&sc_thread<T>::run, t);
-    methods.push_back(th);
-    numberOfMethods++;
-  };
   
   void wait(int i) {
     // Wait until main() sends data
@@ -142,6 +118,22 @@ class sc_module {
     lk.unlock();
     if (verbose) {std::cout << "[METHOD " << i << "] wait done!!!!!!!!" << std::endl;}
   }
+
+};
+
+class sc_module {
+  
+ public:
+  const char* name = NULL;
+
+  sc_module(const char* name) : name(name) {};
+  
+  void addMethod(sc_thread* c) {
+    std::thread* th = new std::thread(&sc_thread::threadLoop, c);
+    methods.push_back(th);
+    numberOfMethods++;
+  };
+  
   
 };
 
@@ -341,8 +333,8 @@ int run(int argc, char* argv[]) {
 
 #define SC_CTOR(x) x(const char* name) : sc_module(name)
 
-#define SC_MODULE(x) class x : public sc_module
+#define SC_MODULE(x) struct x : public sc_module
 
-#define SC_METHOD(x) addMethod(x, this)
+#define SC_THREAD(x) addMethod(x)
 
 #endif
