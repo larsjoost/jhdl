@@ -146,11 +146,10 @@ namespace generator {
   void SystemC::signal_declarations(parameters& parm, ast::SignalDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      parameters::SignalDeclaration s;
-      s.type = "sc_signal<" + toString(v->type) + "> ";
-      s.id = toString(v->identifier);
-      parm.signalDeclaration.push_back(s);
-      println(parm, s.type + " " + s.id + ";");
+      std::string type = "sc_signal<" + toString(v->type) + "> ";
+      std::string id = toString(v->identifier);
+      parm.signalDeclaration[id] = type;
+      println(parm, type + " " + id + ";");
     }
   }
 
@@ -182,11 +181,22 @@ namespace generator {
     }
   }
 
+  template<class Key, class Value, typename Func>
+  std::string SystemC::toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda) {
+    std::string s;
+    std::string d;
+    for (auto x : t) {
+      s += (d + lambda(x.first, x.second));
+      d = delimiter;
+    }
+    return s;
+  }
+
   template<class T, typename Func>
   std::string SystemC::toString(std::list<T>& t, std::string delimiter, Func lambda) {
     std::string s;
     std::string d;
-    for (T x : t) {
+    for (auto x : t) {
       s += (d + lambda(x));
       d = delimiter;
     }
@@ -204,8 +214,8 @@ namespace generator {
         }
         println(parm, "class " + methodName + " : public sc_thread {");
         parm.incIndent();
-        for (parameters::SignalDeclaration s : parm.signalDeclaration) {
-          println(parm, s.type + "& " + s.id + ";");
+        for (auto s : parm.signalDeclaration) {
+          println(parm, s.second + "& " + s.first + ";");
         }
         if (parm.forGenerateHierarchy.size() > 0) {
           println(parm, "INTEGER " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
@@ -226,7 +236,7 @@ namespace generator {
         std::string signalAssignment = "";
         if (parm.signalDeclaration.size() > 0) {
           colon = " : ";
-          signalAssignment = toString(parm.signalDeclaration, ",", [&](parameters::SignalDeclaration s){return s.id + "(p->" + s.id + ")";});
+          signalAssignment = toString(parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
         } else {
           comma = "";
         }

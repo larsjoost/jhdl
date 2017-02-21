@@ -2,6 +2,7 @@
 #define GENERATOR_SYSTEMC_HPP_
 
 #include <list>
+#include <unordered_map>
 #include <string>
 
 #include "../ast/text.hpp"
@@ -29,14 +30,10 @@ namespace generator {
   class SystemC { 
 
     struct parameters {
-      struct SignalDeclaration {
-        std::string type;
-        std::string id;
-      };
       int indent;
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
-      std::list<SignalDeclaration> signalDeclaration;
+      std::unordered_map<std::string, std::string> signalDeclaration;
       void incIndent() {
         indent += 2;
       }
@@ -87,6 +84,8 @@ namespace generator {
     void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
     void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
+    template<class Key, class Value, typename Func>
+    std::string toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
     template<class T, typename Func>
     std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
     void methodDefinition(parameters& parm, ast::Method* method);
