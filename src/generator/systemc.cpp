@@ -221,7 +221,7 @@ namespace generator {
           colon = " : ";
           comma = ", ";
           constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
-          memberVariableAssignment = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
+          memberVariableAssignment = toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
         }
         std::string signalAssignment = "";
         if (parm.signalDeclaration.size() > 0) {

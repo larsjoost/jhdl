@@ -4,10 +4,12 @@
 
 #include "method.hpp"
 #include "forgenerate_statement.hpp"
+#include "block_statement.hpp"
 
 namespace ast {
 
   class ForGenerateStatement;
+  class BlockStatement;
   
   class ConcurrentStatement {
     
@@ -15,7 +17,8 @@ namespace ast {
 
     Method* method;
     ForGenerateStatement* forGenerateStatement;
-
+    BlockStatement* blockStatement;
+    
   };
 
 }

@@ -53,6 +53,7 @@ namespace vhdl {
         VHDL_SIGNAL,
         VHDL_CONSTANT,
         VHDL_GENERATE,
+        VHDL_BLOCK,
         NUMBER_OF_KEYWORDS
       };
       
@@ -98,7 +99,8 @@ namespace vhdl {
           {VHDL_WAIT, (char *)"wait", VHDL_1987},
           {VHDL_SIGNAL, (char *)"signal", VHDL_1987},
           {VHDL_CONSTANT, (char *)"constant", VHDL_1987},
-          {VHDL_GENERATE, (char *)"generate", VHDL_1987}};
+          {VHDL_GENERATE, (char *)"generate", VHDL_1987},
+          {VHDL_BLOCK, (char *)"block", VHDL_1987}};
         return a;
       }
       
