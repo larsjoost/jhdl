@@ -77,7 +77,7 @@ class sc_thread {
 
  public:
 
-  virtual void run() = 0;
+  virtual void process() = 0;
   
   void threadLoop() {
     if (verbose) {std::cout << "[METHOD] Waiting on start" << std::endl;}
@@ -89,7 +89,7 @@ class sc_thread {
     if (verbose) {std::cout << "[METHOD] Starting" << std::endl;}
     try {
       while (!terminateThreads) {
-        run();
+        process();
       }
     } catch (TerminateThreads e) {
       if (verbose) {std::cout << "Catched TerminateThreads" << std::endl;}

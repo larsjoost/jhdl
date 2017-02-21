@@ -125,16 +125,28 @@ namespace ast {
     return 1;
   }
 
-  void Text::printCurrentLine(FILE* output) {
-   try {
+  std::string Text::getCurrentLine() {
+    std::string s = "";
+    try {
       char a;
+      bool done = false;
       int i = lineStart - position;
       do {
         a = lookAhead(i++);
-        fputc(a, output);
-      } while (a != '\n');
+        if (a == '\n') {
+          done = true;
+        } else {
+          s += a;
+        }
+      } while (!done);
     } catch (TextEof e) {
     }
+    return s;
+  }
+  
+  void Text::printCurrentLine(FILE* output) {
+    fprintf(output, getCurrentLine().c_str());
+    fprintf(output, "\n");
   }
 
   void Text::printCurrentLinePositionMarker(FILE* output) {

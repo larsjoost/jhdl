@@ -28,11 +28,32 @@ namespace generator {
   class SystemC { 
 
     struct parameters {
+      struct SignalDeclaration {
+        std::string type;
+        std::string id;
+      };
       int indent;
-      std::list<std::string> generateLoopHierarchy;
+      std::string parentName;
+      std::list<std::string> forGenerateHierarchy;
+      std::list<SignalDeclaration> signalDeclaration;
+      void incIndent() {
+        indent += 2;
+      }
+      void decIndent() {
+        indent -= 2;
+      }
+      parameters(const parameters& p) {
+        indent = p.indent;
+        incIndent();
+        forGenerateHierarchy = p.forGenerateHierarchy;
+        parentName = p.parentName;
+        signalDeclaration = p.signalDeclaration;
+      }
+      parameters() {
+        indent = 0;
+      }
     };
     
-    parameters incIndent(parameters parm);
     void println(parameters& parm, std::string text);
   
     int methodId = 0;
@@ -48,37 +69,36 @@ namespace generator {
     std::string toString(const char* separator, ast::BasicIdentifierList* list);
     void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
-    void sequentialStatements(ast::List<ast::SequentialStatement>& l);
-    void waitStatement(ast::WaitStatement* p);
-    void ifStatement(ast::IfStatement* p);
-    void forLoopStatement(ast::ForLoopStatement* p);
-    void reportStatement(ast::ReportStatement* p);
-    void procedureCallStatement(ast::ProcedureCallStatement* p);
-    void variableAssignment(ast::VariableAssignment* p);
-    void signalAssignment(ast::SignalAssignment* p);
-    void includes(ast::DesignFile& designFile);
+    void sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l);
+    void waitStatement(parameters& parm, ast::WaitStatement* p);
+    void ifStatement(parameters& parm, ast::IfStatement* p);
+    void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
+    void reportStatement(parameters& parm, ast::ReportStatement* p);
+    void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
+    void variableAssignment(parameters& parm, ast::VariableAssignment* p);
+    void signalAssignment(parameters& parm, ast::SignalAssignment* p);
+    void includes(parameters& parm, ast::DesignFile& designFile);
 
-    void numberType(ast::BasicIdentifier* identifier, ast::NumberType* t);
-    void enumerationType(ast::BasicIdentifier* identifier, ast::EnumerationType* t);
-    void type_declarations(ast::TypeDeclaration* t);
-
-    void variable_declarations(ast::VariableDeclaration* v);
-    void signal_declarations(ast::SignalDeclaration* v);
-    void constant_declarations(ast::ConstantDeclaration* v);
-    void declarations(ast::List<ast::Declaration>& d);
-    template<typename Func>
-    std::string toString(std::list<std::string>& t, std::string delimiter, Func lambda);
-    void methodDefinition(ast::Method* method, std::list<std::string> forGenerateHierarchy);
-    void methodInstantiation(ast::Method* method, std::list<std::string> forGenerateHierarchy);
-    void forGenerateStatementDefinition(ast::ForGenerateStatement* forGenerateStatement, std::list<std::string> forGenerateHierarchy);
-    void forGenerateStatementInstantiation(ast::ForGenerateStatement* forGenerateStatement, std::list<std::string> forGenerateHierarchy);
-    void concurrentStatementsDefinition(ast::List<ast::ConcurrentStatement>& concurrentStatements, std::list<std::string> forGenerateHierarchy);
-    void concurrentStatementsInstantiation(ast::List<ast::ConcurrentStatement>& concurrentStatements, std::list<std::string> forGenerateHierarchy);
+    void numberType(parameters parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
+    void enumerationType(parameters parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
+    void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void variable_declarations(parameters& parm, ast::VariableDeclaration* v);
+    void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
+    void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
+    void declarations(parameters& parm, ast::List<ast::Declaration>& d);
+    template<class T, typename Func>
+    std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
+    void methodDefinition(parameters& parm, ast::Method* method);
+    void methodInstantiation(parameters& parm, ast::Method* method);
+    void forGenerateStatementDefinition(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
+    void forGenerateStatementInstantiation(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
+    void concurrentStatementsDefinition(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void concurrentStatementsInstantiation(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
   
-    void implementation(ast::DesignFile& designFile, ast::BasicIdentifier* name);
+    void implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
-    void printSourceLine(ast::Text& t);
-    void printSourceLine(ast::BasicIdentifier* t);
+    void printSourceLine(parameters& parm, ast::Text& t);
+    void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
   public:
     SystemC(ast::DesignFile& designFile);
   };

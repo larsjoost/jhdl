@@ -46,6 +46,7 @@ namespace ast {
     int equals(Text& text);
     const std::string toString(bool setCase = false);
     
+    std::string getCurrentLine();
     void printLinePosition(FILE* output = stdout);
     void print(FILE* output = stdout);
     void debug(FILE* output = stdout);
