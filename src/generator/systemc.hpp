@@ -19,6 +19,7 @@
 #include "../ast/report_statement.hpp"
 #include "../ast/if_statement.hpp"
 #include "../ast/forloop_statement.hpp"
+#include "../ast/block_statement.hpp"
 #include "../ast/wait_statement.hpp"
 #include "../ast/sequential_statement.hpp"
 #include "../ast/concurrent_statement.hpp"
@@ -90,6 +91,8 @@ namespace generator {
     std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
     void methodDefinition(parameters& parm, ast::Method* method);
     void methodInstantiation(parameters& parm, ast::Method* method);
+    void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
+    void blockStatementInstantiation(parameters parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementDefinition(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
     void forGenerateStatementInstantiation(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsDefinition(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);

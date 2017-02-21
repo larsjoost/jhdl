@@ -243,6 +243,17 @@ namespace generator {
       }
   }
 
+  void SystemC::blockStatementDefinition(parameters& parm,
+                                         ast::BlockStatement* blockStatement) {
+    if (blockStatement) {
+      println(parm, "class " + toString(blockStatement->name) + " {");
+      declarations(parm, blockStatement->declarations);
+      println(parm, "public:");
+      concurrentStatementsDefinition(parm, blockStatement->concurrentStatements);
+      println(parm, "};");
+    }
+  }
+  
   void SystemC::forGenerateStatementDefinition(parameters parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
@@ -256,6 +267,7 @@ namespace generator {
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodDefinition(parm, c.method);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
+      blockStatementDefinition(parm, c.blockStatement);
     }
   }
   
@@ -272,6 +284,14 @@ namespace generator {
         constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;});
       }
       println(parm, "SC_THREAD(new " + methodName + "(this" + constructorArguments + "));");
+    }
+  }
+
+  void SystemC::blockStatementInstantiation(parameters parm,
+                                            ast::BlockStatement* blockStatement) {
+    
+    if (blockStatement) {
+      concurrentStatementsInstantiation(parm, blockStatement->concurrentStatements);
     }
   }
 
@@ -292,6 +312,7 @@ namespace generator {
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodInstantiation(parm, c.method);
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
+      blockStatementInstantiation(parm, c.blockStatement);
     }
   }
 
