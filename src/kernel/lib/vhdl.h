@@ -155,6 +155,19 @@ namespace vhdl {
       }
     };
 
+    class BOOLEAN : public Enumeration<bool> {
+    public:
+      using Enumeration<bool>::operator=;
+      using Enumeration<bool>::IMAGE;
+      
+      static ::std::string IMAGE(sc_signal<BOOLEAN>& r) {
+        return r.signal.value ? "true" : "false";
+      }
+    };
+
+    #define FALSE false;
+    #define TRUE true;
+    
     enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};
 
     static const std::string SEVERITY_LEVEL_STRINGS[] =
