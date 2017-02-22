@@ -20,7 +20,7 @@ main (int argc, char **argv)
   char *filename = NULL;
   char *expression = NULL;
   int c;
-  int verbose = 0;
+  bool verbose = false;
   
   opterr = 0;
   while ((c = getopt (argc, argv, "f:ve:")) != -1) {
@@ -33,7 +33,7 @@ main (int argc, char **argv)
         expression = optarg;
         break;
       case 'v':
-        verbose = 1;
+        verbose = true;
         break;
       case '?':
         if (optopt == 'c')

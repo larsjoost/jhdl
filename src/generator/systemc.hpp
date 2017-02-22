@@ -29,6 +29,10 @@ namespace generator {
   
   class SystemC { 
 
+    bool verbose = false;
+
+    void functionStart(std::string name);
+    
     struct parameters {
       int indent;
       std::string parentName;
@@ -39,16 +43,6 @@ namespace generator {
       }
       void decIndent() {
         indent -= 2;
-      }
-      parameters(const parameters& p) {
-        indent = p.indent;
-        incIndent();
-        forGenerateHierarchy = p.forGenerateHierarchy;
-        parentName = p.parentName;
-        signalDeclaration = p.signalDeclaration;
-      }
-      parameters() {
-        indent = 0;
       }
     };
     
@@ -88,21 +82,25 @@ namespace generator {
     std::string toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
     template<class T, typename Func>
     std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
+    std::string getConstructorDeclaration(parameters& parm, std::string& name);
     void methodDefinition(parameters& parm, ast::Method* method);
+    void instantiateType(parameters& parm, std::string type, std::string name);
     void methodInstantiation(parameters& parm, ast::Method* method);
-    void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
+    void blockStatementDefinition(parameters parm, ast::BlockStatement* blockStatement);
     void blockStatementInstantiation(parameters parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementDefinition(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
     void forGenerateStatementInstantiation(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsDefinition(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void concurrentStatementsInstantiation(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
   
+    void threadConstructor(parameters parm, ast::BasicIdentifier* name, 
+                           ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
   public:
-    SystemC(ast::DesignFile& designFile);
+    SystemC(ast::DesignFile& designFile, bool verbose = false);
   };
 }
 

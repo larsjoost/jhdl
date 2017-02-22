@@ -21,12 +21,10 @@ namespace ast {
   Text::Text() {
   };
 
-  Text::Text(int v) {
-    verbose = v;
+  Text::Text(bool verbose) : verbose(verbose) {
   };
 
-  Text::Text(char* text, bool caseSensitive, int v) {
-    verbose = v;
+  Text::Text(char* text, bool caseSensitive, bool verbose) : verbose(verbose) {
     set(text, caseSensitive);
   };
 

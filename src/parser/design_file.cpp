@@ -9,7 +9,7 @@
 
 namespace parser {
 
-  DesignFile::DesignFile(const char* f, int verbose) {
+  DesignFile::DesignFile(const char* f, bool verbose) {
     filename = f;
     if (filename == NULL) {
       fprintf(stderr, "File name is not specified\n");

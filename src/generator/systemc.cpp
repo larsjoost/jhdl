@@ -26,7 +26,14 @@ namespace generator {
     std::cout << std::string(parm.indent, ' ') << text << std::endl;
   }
   
-  SystemC::SystemC(ast::DesignFile& designFile) {
+  void SystemC::functionStart(std::string name) {
+    if (verbose) {
+      std::cout << name << std::endl;
+    }
+  }
+
+  SystemC::SystemC(ast::DesignFile& designFile, bool verbose) : verbose(verbose) {
+    functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
@@ -61,6 +68,7 @@ namespace generator {
   }
 
   void SystemC::includes(parameters& parm, ast::DesignFile& designFile) {
+    functionStart("includes");
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
@@ -202,64 +210,81 @@ namespace generator {
     }
     return s;
   }
+
+  std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name) {
+    std::string constructorArguments = "";
+    std::string memberVariableAssignment = "";
+    std::string colon = "";
+    std::string comma = "";
+    if (parm.forGenerateHierarchy.size() > 0) {
+      colon = " : ";
+      comma = ", ";
+      constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
+      memberVariableAssignment = toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
+    }
+    std::string signalAssignment = "";
+    if (parm.signalDeclaration.size() > 0) {
+      colon = " : ";
+      signalAssignment = toString(parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
+    } else {
+      comma = "";
+    }
+    std::string assignment = signalAssignment + comma + memberVariableAssignment;
+    return name + "(" + parm.parentName +"* p" + constructorArguments + ")" + colon + assignment;
+  }
   
   void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
-      if (method) {
-        std::string methodName;
-        if (method->name) {
-          methodName = toString(method->name);
-        } else {
-          methodName = "noname" + std::to_string(methodId++);
-          method->noname = methodName;
-        }
-        println(parm, "class " + methodName + " : public sc_thread {");
-        parm.incIndent();
-        for (auto s : parm.signalDeclaration) {
-          println(parm, s.second + "& " + s.first + ";");
-        }
-        if (parm.forGenerateHierarchy.size() > 0) {
-          println(parm, "INTEGER " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
-        }
-        parm.decIndent();
-        println(parm, "public:");
-        parm.incIndent();
-        std::string constructorArguments = "";
-        std::string memberVariableAssignment = "";
-        std::string colon = "";
-        std::string comma = "";
-        if (parm.forGenerateHierarchy.size() > 0) {
-          colon = " : ";
-          comma = ", ";
-          constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
-          memberVariableAssignment = toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
-        }
-        std::string signalAssignment = "";
-        if (parm.signalDeclaration.size() > 0) {
-          colon = " : ";
-          signalAssignment = toString(parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
-        } else {
-          comma = "";
-        }
-        std::string assignment = signalAssignment + comma + memberVariableAssignment;
-        println(parm, methodName + "(" + parm.parentName +"* p" + constructorArguments + ")" + colon + assignment + " {};");
-        println(parm, "void process() {");
-        parm.incIndent();
-        declarations(parm, method->declarations);
-        parm.decIndent();
-        sequentialStatements(parm, method->sequentialStatements);
-        println(parm, "}");
-        parm.decIndent();
-        println(parm, "};");
+    functionStart("methodDefinition");
+    if (method) {
+      std::string methodName;
+      if (method->name) {
+        methodName = toString(method->name);
+      } else {
+        methodName = "noname" + std::to_string(methodId++);
+        method->noname = methodName;
       }
+      println(parm, "class " + methodName + " : public sc_thread {");
+      parm.incIndent();
+      for (auto s : parm.signalDeclaration) {
+        println(parm, s.second + "& " + s.first + ";");
+      }
+      if (parm.forGenerateHierarchy.size() > 0) {
+        println(parm, "INTEGER " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
+      }
+      parm.decIndent();
+      println(parm, "public:");
+      parm.incIndent();
+      println(parm, getConstructorDeclaration(parm, methodName) +  + " {};");
+      println(parm, "void process() {");
+      parm.incIndent();
+      declarations(parm, method->declarations);
+      parm.decIndent();
+      sequentialStatements(parm, method->sequentialStatements);
+      println(parm, "}");
+      parm.decIndent();
+      println(parm, "};");
+    }
   }
 
-  void SystemC::blockStatementDefinition(parameters& parm,
+  void SystemC::blockStatementDefinition(parameters parm,
                                          ast::BlockStatement* blockStatement) {
+    functionStart("blockStatementDefinition");
     if (blockStatement) {
-      println(parm, "class " + toString(blockStatement->name) + " {");
-      declarations(parm, blockStatement->declarations);
-      println(parm, "public:");
-      concurrentStatementsDefinition(parm, blockStatement->concurrentStatements);
+      std::string name = toString(blockStatement->name);
+      printSourceLine(parm, blockStatement->name);
+      println(parm, "SC_BLOCK(" + toString(blockStatement->name) + ") {");
+      parm.incIndent();
+      {
+        parameters p = parm;
+        declarations(p, blockStatement->declarations);
+        println(parm, "public:");
+        p.parentName = name;
+        concurrentStatementsDefinition(p, blockStatement->concurrentStatements);
+      }
+      println(parm, getConstructorDeclaration(parm, name) + "{");
+      concurrentStatementsInstantiation(parm, blockStatement->concurrentStatements);
+      println(parm, "}");
+      parm.decIndent();
       println(parm, "};");
     }
   }
@@ -274,14 +299,25 @@ namespace generator {
   
   void SystemC::concurrentStatementsDefinition(parameters parm,
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
+    functionStart("concurrentStatementsDefinition");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodDefinition(parm, c.method);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
     }
   }
+
+  void SystemC::instantiateType(parameters& parm, std::string type, std::string name) {
+    functionStart("instantiateType");
+    std::string constructorArguments = "";
+    if (parm.forGenerateHierarchy.size() > 0) {
+      constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;});
+    }
+    println(parm, type + "(new " + name + "(this" + constructorArguments + "));");
+  }
   
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
+    functionStart("methodInstantiation");
     if (method) {
       std::string methodName;
       if (method->name) {
@@ -289,19 +325,15 @@ namespace generator {
       } else {
         methodName = method->noname;
       }
-      std::string constructorArguments = "";
-      if (parm.forGenerateHierarchy.size() > 0) {
-        constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;});
-      }
-      println(parm, "SC_THREAD(new " + methodName + "(this" + constructorArguments + "));");
+      instantiateType(parm, "SC_THREAD", methodName);
     }
   }
 
   void SystemC::blockStatementInstantiation(parameters parm,
                                             ast::BlockStatement* blockStatement) {
-    
+    functionStart("blockStatementInstantiation");
     if (blockStatement) {
-      concurrentStatementsInstantiation(parm, blockStatement->concurrentStatements);
+      instantiateType(parm, "SC_NEW_BLOCK", toString(blockStatement->name));
     }
   }
 
@@ -319,6 +351,7 @@ namespace generator {
   
   void SystemC::concurrentStatementsInstantiation(parameters parm,
                                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
+    functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodInstantiation(parm, c.method);
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
@@ -326,18 +359,22 @@ namespace generator {
     }
   }
 
+  void SystemC::threadConstructor(parameters parm, ast::BasicIdentifier* name, 
+                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
+    println(parm, "SC_CTOR(" + toString(name) + ") {");
+    concurrentStatementsInstantiation(parm, concurrentStatements);
+    println(parm, "}");
+  }
+  
   void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name) {
+    functionStart("implementation");
     for (ast::DesignUnit it : designFile.designUnits.list) {
       if (it.module.implementation) {
         if (name->equals(it.module.implementation->name)) {
           declarations(parm, it.module.implementation->declarations);
           concurrentStatementsDefinition(parm, it.module.implementation->concurrentStatements);
           println(parm, "public:");
-          parm.incIndent();
-          println(parm, "SC_CTOR(" + toString(name) + ") {");
-          concurrentStatementsInstantiation(parm, it.module.implementation->concurrentStatements);
-          println(parm, "}");
-          parm.decIndent();
+          threadConstructor(parm, name, it.module.implementation->concurrentStatements);
         }
       }
     }

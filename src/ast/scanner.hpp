@@ -42,7 +42,7 @@ namespace ast {
 
     void debug(const std::string &message);
 
-    int verbose;
+    bool verbose = false;
 
     int number_of_errors = 0;
     
@@ -50,7 +50,7 @@ namespace ast {
  
   public:
 
-    Scanner(int verbose = 0);
+    Scanner(bool verbose = false);
         
     int accept(const char *text);
     int optional(const char* text);
@@ -185,9 +185,8 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  Scanner<ApplicationSpecificScanner>::Scanner(int v) :
-    Scanner<ApplicationSpecificScanner>::TokenScanner(v){
-    verbose = v;
+  Scanner<ApplicationSpecificScanner>::Scanner(bool verbose) :
+    Scanner<ApplicationSpecificScanner>::TokenScanner(verbose), verbose(verbose) {
   }
 
   template <class ApplicationSpecificScanner>

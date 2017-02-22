@@ -82,7 +82,7 @@ namespace ast {
 #endif
     void debug(const std::string &message);
 
-    int verbose;
+    bool verbose = false;
 
     bool isKeyword(Text& t, Keyword& k);
     Token* acceptString();
@@ -103,7 +103,7 @@ namespace ast {
     
   public:
 
-    TokenScanner(int verbose = 0);
+    TokenScanner(bool verbose = false);
         
     int isWhiteSpace();
     int skipWhiteSpace();
@@ -142,9 +142,8 @@ namespace ast {
 
 
   template <class ApplicationSpecificScanner>
-  TokenScanner<ApplicationSpecificScanner>::TokenScanner(int v) {
-    verbose = v;
-    text.verbose = v;
+  TokenScanner<ApplicationSpecificScanner>::TokenScanner(bool verbose) : verbose(verbose) {
+    text.verbose = verbose;
   }
 
   template <class ApplicationSpecificScanner>

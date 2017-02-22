@@ -27,11 +27,11 @@ namespace ast {
     void printCurrentLinePositionMarker(FILE* output);
 
   public:
-    int verbose = 0;
+    bool verbose = false;
 
     Text();
-    Text(int verbose);
-    Text(char* text, bool caseSensitive = false, int verbose = 0);
+    Text(bool verbose);
+    Text(char* text, bool caseSensitive = false, bool verbose = false);
     
     void set(char* text, bool caseSensitive = false);
     char lookAhead(int number);

@@ -19,7 +19,7 @@ main (int argc, char **argv)
 {
   char *filename = NULL;
   int c;
-  int verbose = 0;
+  bool verbose = false;
   
   opterr = 0;
   while ((c = getopt (argc, argv, "f:v")) != -1) {
@@ -29,7 +29,7 @@ main (int argc, char **argv)
         filename = optarg;
         break;
       case 'v':
-        verbose = 1;
+        verbose = true;
         break;
       case '?':
         if (optopt == 'c')
@@ -48,7 +48,7 @@ main (int argc, char **argv)
 
   try {
     auto parserDesignFile = parser::DesignFile(filename, verbose);
-    auto systemC = generator::SystemC(parserDesignFile);
+    auto systemC = generator::SystemC(parserDesignFile, verbose);
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {

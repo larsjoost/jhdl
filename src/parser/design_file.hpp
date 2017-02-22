@@ -10,7 +10,7 @@ namespace parser {
 
   public:
     
-    DesignFile (const char* filename, int verbose = 0);
+    DesignFile (const char* filename, bool verbose = false);
 
   };
 

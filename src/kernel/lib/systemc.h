@@ -127,6 +127,7 @@ class sc_module {
   const char* name = NULL;
 
   sc_module(const char* name) : name(name) {};
+  sc_module() {};
   
   void addMethod(sc_thread* c) {
     std::thread* th = new std::thread(&sc_thread::threadLoop, c);
@@ -334,6 +335,10 @@ int run(int argc, char* argv[]) {
 #define SC_CTOR(x) x(const char* name) : sc_module(name)
 
 #define SC_MODULE(x) struct x : public sc_module
+
+#define SC_BLOCK(x) struct x : public sc_module
+
+#define SC_NEW_BLOCK(x) x
 
 #define SC_THREAD(x) addMethod(x)
 
