@@ -51,7 +51,8 @@ main (int argc, char **argv)
   }
 
   try {
-    auto parserDesignFile = parser::DesignFile(filename, verbose);
+    auto parserDesignFile = parser::DesignFile(verbose);
+    parserDesignFile.parse(filename);
     auto fileInfo = generator::FileInfo(parserDesignFile);
     return 0;
   } catch (const ast::SyntaxError &e) {

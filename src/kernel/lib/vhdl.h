@@ -92,6 +92,25 @@ namespace vhdl {
     }
 
   };
+
+  template <class T>
+  class Enumeration {
+  public:
+    T value;
+
+    T getValue() {
+      return value;
+    }
+    
+    void operator=(T v) {
+      value = v;
+    }
+
+    static ::std::string IMAGE(Enumeration<T>& r) {
+      return std::to_string(r.value);
+    }
+    
+  };
   
   namespace STANDARD {
   
@@ -124,6 +143,16 @@ namespace vhdl {
     public:
       explicit POSITIVE(int left=1, int right=INT_MAX) : INTEGER(left, right) {};
       using INTEGER::operator=;
+    };
+
+    class BIT : public Enumeration<char> {
+    public:
+      using Enumeration<char>::operator=;
+      using Enumeration<char>::IMAGE;
+      
+      static ::std::string IMAGE(sc_signal<BIT>& r) {
+        return "'" + std::string(1, r.signal.value) + "'";
+      }
     };
 
     enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};

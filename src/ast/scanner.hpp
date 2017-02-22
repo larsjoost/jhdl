@@ -42,16 +42,14 @@ namespace ast {
 
     void debug(const std::string &message);
 
-    bool verbose = false;
-
     int number_of_errors = 0;
     
     using Keyword = typename ApplicationSpecificScanner::Keyword;
- 
+
+    using TokenScanner<ApplicationSpecificScanner>::verbose;
+    
   public:
 
-    Scanner(bool verbose = false);
-        
     int accept(const char *text);
     int optional(const char* text);
     int expect(const char* text);
@@ -182,11 +180,6 @@ namespace ast {
   void Scanner<ApplicationSpecificScanner>::critical(const std::string &s) {
     print("critical", s);
     throw CriticalError();
-  }
-
-  template <class ApplicationSpecificScanner>
-  Scanner<ApplicationSpecificScanner>::Scanner(bool verbose) :
-    Scanner<ApplicationSpecificScanner>::TokenScanner(verbose), verbose(verbose) {
   }
 
   template <class ApplicationSpecificScanner>

@@ -28,11 +28,13 @@ namespace generator {
   
   void SystemC::functionStart(std::string name) {
     if (verbose) {
-      std::cout << name << std::endl;
+      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
     }
   }
 
-  SystemC::SystemC(ast::DesignFile& designFile, bool verbose) : verbose(verbose) {
+  SystemC::SystemC(bool verbose) : verbose(verbose) {}
+
+  void SystemC::generate(ast::DesignFile& designFile) {
     functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
@@ -49,13 +51,14 @@ namespace generator {
         println(parm, "");
         println(parm, "SC_MODULE(" + name + ") {");
         println(parm, "public:");
+        parm.incIndent();
         parm.parentName = name;
         implementation(parm, designFile, it->module.interface->name);
+        parm.decIndent();
         println(parm, "};");
         parm.decIndent();
         println(parm, "}");
       }
-      
     }
   }
 
@@ -258,8 +261,8 @@ namespace generator {
       println(parm, "void process() {");
       parm.incIndent();
       declarations(parm, method->declarations);
-      parm.decIndent();
       sequentialStatements(parm, method->sequentialStatements);
+      parm.decIndent();
       println(parm, "}");
       parm.decIndent();
       println(parm, "};");
@@ -477,6 +480,11 @@ namespace generator {
     return n->value.toString();
   }
   
+  std::string SystemC::toString(ast::Character* n) {
+    assert(n != NULL);
+    return n->value.toString();
+  }
+  
   std::string SystemC::toString(ast::ExpressionTerm& e) {
     if (e.physical) {
       return toString(e.physical);
@@ -489,6 +497,9 @@ namespace generator {
     }
     if (e.identifier) { 
       return toString(e.identifier);
+    }
+    if (e.character) {
+      return toString(e.character);
     }
   }
   
@@ -507,12 +518,6 @@ namespace generator {
       return op + "(" + term + ", " + expr + ")";
     } else {
       return toString(e->term);
-    }
-  }
-  
-  void SystemC::expression(ast::Expression* e) {
-    if (e) {
-      std::cout << toString(e);
     }
   }
   

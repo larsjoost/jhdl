@@ -72,6 +72,12 @@ namespace ast {
     
     void print(const std::string &severity, const std::string &message);
 
+  protected:
+    
+    bool verbose = false;
+
+  private:
+    
 #ifdef DEBUG_ENABLE
 #define DEBUG(x) do {						   \
       if (verbose) {						   \
@@ -81,8 +87,6 @@ namespace ast {
 #define DEBUG(x) 
 #endif
     void debug(const std::string &message);
-
-    bool verbose = false;
 
     bool isKeyword(Text& t, Keyword& k);
     Token* acceptString();
@@ -103,7 +107,7 @@ namespace ast {
     
   public:
 
-    TokenScanner(bool verbose = false);
+    void setVerbose(bool verbose);
         
     int isWhiteSpace();
     int skipWhiteSpace();
@@ -142,7 +146,8 @@ namespace ast {
 
 
   template <class ApplicationSpecificScanner>
-  TokenScanner<ApplicationSpecificScanner>::TokenScanner(bool verbose) : verbose(verbose) {
+  void TokenScanner<ApplicationSpecificScanner>::setVerbose(bool verbose) {
+    this->verbose = verbose;
     text.verbose = verbose;
   }
 

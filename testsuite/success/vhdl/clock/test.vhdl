@@ -12,10 +12,13 @@ begin
 
   process is
   begin  -- process
-    for i in 0 to 10 loop
+    for i in 0 to 4 loop
+      report "i = " & integer'image(i) severity note;
       clk <= '0';
+      report "x = " & bit'image(clk) severity note;
       wait for 5 ns;
       clk <= '1';
+      report "x = " & bit'image(clk) severity note;
       wait for 5 ns;
     end loop;  -- i
     finish(0);

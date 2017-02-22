@@ -15,6 +15,7 @@
 #include "../ast/constant_declaration.hpp"
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
+#include "../ast/character.hpp"
 #include "../ast/basic_identifier.hpp"
 #include "../ast/basic_identifier_list.hpp"
 #include "../ast/report_statement.hpp"
@@ -34,7 +35,7 @@ namespace generator {
     void functionStart(std::string name);
     
     struct parameters {
-      int indent;
+      int indent = 0;
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
       std::unordered_map<std::string, std::string> signalDeclaration;
@@ -52,9 +53,9 @@ namespace generator {
 
     std::string toString(ast::ExpressionTerm& e);
     std::string toString(ast::Expression* e);
-    void expression(ast::Expression* e);
     std::string toString(ast::Physical* p);
     std::string toString(ast::Number* i);
+    std::string toString(ast::Character* i);
     std::string toString(ast::BasicIdentifier* i);
     void basicIdentifier(ast::BasicIdentifier* i);
     std::string toString(ast::BasicIdentifier* i, ast::RangeType* r);
@@ -100,7 +101,8 @@ namespace generator {
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
   public:
-    SystemC(ast::DesignFile& designFile, bool verbose = false);
+    SystemC(bool verbose = false);
+    void generate(ast::DesignFile& designFile);
   };
 }
 

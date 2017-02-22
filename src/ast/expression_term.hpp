@@ -6,6 +6,7 @@
 #include "string.hpp"
 #include "basic_identifier.hpp"
 #include "physical.hpp"
+#include "character.hpp"
 
 namespace ast {
 
@@ -18,7 +19,8 @@ namespace ast {
     Number* number;
     String* text;
     BasicIdentifier* identifier;
-
+    Character* character;
+    
   };
 
 }
