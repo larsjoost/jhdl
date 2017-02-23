@@ -54,6 +54,12 @@ namespace vhdl {
         VHDL_CONSTANT,
         VHDL_GENERATE,
         VHDL_BLOCK,
+        VHDL_NOT,
+        VHDL_OR,
+        VHDL_AND,
+        VHDL_NOR,
+        VHDL_NAND,
+        VHDL_XOR,
         NUMBER_OF_KEYWORDS
       };
       
@@ -100,7 +106,13 @@ namespace vhdl {
           {VHDL_SIGNAL, (char *)"signal", VHDL_1987},
           {VHDL_CONSTANT, (char *)"constant", VHDL_1987},
           {VHDL_GENERATE, (char *)"generate", VHDL_1987},
-          {VHDL_BLOCK, (char *)"block", VHDL_1987}};
+          {VHDL_BLOCK, (char *)"block", VHDL_1987},
+          {VHDL_NOT, (char *)"not", VHDL_1987},
+          {VHDL_OR, (char *)"or", VHDL_1987},
+          {VHDL_AND, (char *)"and", VHDL_1987},
+          {VHDL_NOR, (char *)"nor", VHDL_1987},
+          {VHDL_NAND, (char *)"nand", VHDL_1987},
+          {VHDL_XOR, (char *)"xor", VHDL_1987}};
         return a;
       }
       

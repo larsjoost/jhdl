@@ -495,7 +495,9 @@ namespace generator {
   
   std::string SystemC::toString(ast::Expression* e) {
     assert(e != NULL);
-    if (e->op) {
+    if (e->parenthis) {
+      return "(" + toString(e->parenthis) + ")";
+    } else if (e->op) {
       std::string op;
       std::string term = toString(e->term);
       std::string expr = toString(e->expression);

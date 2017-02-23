@@ -13,11 +13,17 @@ begin
   process is
   begin  -- process
     a <= false;
-    report "a = " & boolean'image(a) severity note;
     wait for 5 ns;
+    report "A = " & boolean'image(a) severity note;
+    if (not a) then
+      report "A test failed" severity failure;
+    end if;
     a <= true;
-    report "a = " & boolean'image(a) severity note;
     wait for 5 ns;
+    report "A = " & boolean'image(a) severity note;
+    if (a) then
+      report "A test failed" severity failure;
+    end if;
     finish(0);
   end process;
 

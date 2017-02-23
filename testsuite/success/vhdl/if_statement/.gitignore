@@ -1,2 +1,4 @@
 /test
-/test.cpp
+/test.hpp
+/main.cpp
+/sc_main.cpp
