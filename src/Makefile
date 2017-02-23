@@ -1,7 +1,7 @@
 DIRS := ast parser generator vhdl verilog
 SOURCE := $(shell find $(DIRS) -type f -iname '*.cpp' -print)
 INCLUDE := $(shell find $(DIRS) -type f -iname '*.hpp' -print)
-CXXFLAGS := -std=c++14 -g
+CXXFLAGS := -std=c++14 -g # -Wall -ansi
 # CXX = g++
 
 # OBJ := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRC)))

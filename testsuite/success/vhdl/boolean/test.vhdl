@@ -15,13 +15,13 @@ begin
     a <= false;
     wait for 5 ns;
     report "A = " & boolean'image(a) severity note;
-    if (not a) then
+    if (a) then
       report "A test failed" severity failure;
     end if;
     a <= true;
     wait for 5 ns;
     report "A = " & boolean'image(a) severity note;
-    if (a) then
+    if (not a) then
       report "A test failed" severity failure;
     end if;
     finish(0);

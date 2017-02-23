@@ -3,7 +3,6 @@
 #include "../../ast/expression_operator.hpp"
 #include "../scanner/scanner.hpp"
 #include "expression_operator.hpp"
-#include "expression.hpp"
 
 namespace vhdl {
   namespace parser {

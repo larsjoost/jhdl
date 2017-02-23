@@ -148,7 +148,7 @@ class sc_signal {
 
   sc_signal<T>() { }
 
-  void assign(T& v) {
+  void assign(const T& v) {
     signal = v;
     log(fileHandle, signal.getValue(), signal.LENGTH(), traceId);
   }
@@ -163,10 +163,21 @@ class sc_signal {
   }
 
   sc_signal<T> operator=(auto v) {
-    assign(v);
+    signal = v;
+    log(fileHandle, signal.getValue(), signal.LENGTH(), traceId);
     return *this;
   }
+ 
+  sc_signal<T> operator!() {
+    sc_signal<T> x;
+    x.signal = !signal;
+    return x;
+  }
 
+  operator bool() const {
+    return bool(signal);
+  }
+  
   sc_signal<T> operator+(auto v) {
     signal = signal + v;
     return *this;

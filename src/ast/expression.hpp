@@ -5,6 +5,7 @@
 #include "number.hpp"
 #include "string.hpp"
 #include "expression_operator.hpp"
+#include "unary_operator.hpp"
 #include "expression_term.hpp"
 
 namespace ast {
@@ -16,6 +17,7 @@ namespace ast {
 
     ExpressionTerm term;
     ExpressionOperator* op;
+    UnaryOperator* unaryOperator;
     Expression* expression;
     Expression* parenthis;
     

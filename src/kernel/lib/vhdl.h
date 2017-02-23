@@ -98,7 +98,7 @@ namespace vhdl {
 
   };
 
-  template <class T>
+  template <typename T>
   class Enumeration {
   public:
     T value;
@@ -164,23 +164,31 @@ namespace vhdl {
       }
     };
 
-    class BOOLEAN : public Enumeration<bool> {
+    enum BOOLEAN_enum {TRUE, FALSE};
+    
+    class BOOLEAN : public Enumeration<enum BOOLEAN_enum> {
     public:
-      using Enumeration<bool>::operator=;
-      using Enumeration<bool>::IMAGE;
+      using Enumeration<enum BOOLEAN_enum>::operator=;
+      using Enumeration<enum BOOLEAN_enum>::IMAGE;
       
       static ::std::string IMAGE(sc_signal<BOOLEAN>& r) {
-        return r.signal.value ? "true" : "false";
+        return (r.signal.value == TRUE) ? "true" : "false";
       }
 
+      BOOLEAN operator!() {
+        BOOLEAN b;
+        b.value = (value == TRUE ? FALSE : TRUE);
+        return b;
+      }
+      
+      operator bool() const {
+        return value == TRUE;
+      }
       unsigned int LENGTH() {
         return 1;
       }
     };
 
-    #define FALSE false;
-    #define TRUE true;
-    
     enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};
 
     static const std::string SEVERITY_LEVEL_STRINGS[] =

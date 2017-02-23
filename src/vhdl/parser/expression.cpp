@@ -3,6 +3,7 @@
 #include "../scanner/scanner.hpp"
 #include "../scanner/defines.hpp"
 #include "expression_operator.hpp"
+#include "unary_operator.hpp"
 #include "expression.hpp"
 #include "basic_identifier.hpp"
 #include "number.hpp"
@@ -17,6 +18,8 @@ namespace vhdl {
       if (scanner->optional("(")) {
         parenthis = scanner->expect<Expression>();
         scanner->expect(")");
+      } else if (unaryOperator = scanner->optional<UnaryOperator>()) {
+        expression = scanner->expect<Expression>();
       } else {
         if ((term.physical = scanner->optional<Physical>()) ||
             (term.number = scanner->optional<Number>()) ||

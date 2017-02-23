@@ -497,6 +497,14 @@ namespace generator {
     assert(e != NULL);
     if (e->parenthis) {
       return "(" + toString(e->parenthis) + ")";
+    } else if (e->unaryOperator) {
+      std::string op;
+      std::string expr = toString(e->expression);
+      switch (e->unaryOperator->op) {
+      case ::ast::UnaryOperator::NOT: {op = "!"; break;}
+      default: {assert (false);}
+      }
+      return op + expr;
     } else if (e->op) {
       std::string op;
       std::string term = toString(e->term);
