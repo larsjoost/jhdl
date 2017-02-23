@@ -60,62 +60,74 @@ namespace vhdl {
         VHDL_NOR,
         VHDL_NAND,
         VHDL_XOR,
+        VHDL_XNOR,
+        VHDL_ABS,
+        VHDL_MOD,
+        VHDL_REM,
+        VHDL_SLL,
+        VHDL_SRL,
+        VHDL_SLA,
+        VHDL_SRA,
+        VHDL_ROL,
+        VHDL_ROR,
         NUMBER_OF_KEYWORDS
-      };
-      
-      enum Standard {
-        VHDL_1987,
-        VHDL_1993,
-        VHDL_2002,
-        VHDL_2008,
-        NUMBER_OF_STANDARDS
       };
       
       struct KeywordInfo {
         Keyword keyword;
         char* text;
-        Standard standard;
+        int standard;
       };
       
       static KeywordInfo* getKeywordInfo() { 
         static KeywordInfo a[NUMBER_OF_KEYWORDS] = {
-          {VHDL_LIBRARY, (char *)"library", VHDL_1987},
-          {VHDL_USE, (char *)"use", VHDL_1987},
-          {VHDL_ARCHITECTURE, (char *)"architecture", VHDL_1987},
-          {VHDL_OF, (char *)"of", VHDL_1987},
-          {VHDL_IS, (char *)"is", VHDL_1987},
-          {VHDL_BEGIN, (char *)"begin", VHDL_1987},
-          {VHDL_END, (char *)"end", VHDL_1987},
-          {VHDL_ENTITY, (char *)"entity", VHDL_1987},
-          {VHDL_PROCESS, (char *)"process", VHDL_1987},
-          {VHDL_TYPE, (char *)"type", VHDL_1987},
-          {VHDL_RANGE, (char *)"range", VHDL_1987},
-          {VHDL_TO, (char *)"to", VHDL_1987},
-          {VHDL_DOWNTO, (char *)"downto", VHDL_1987},
-          {VHDL_VARIABLE, (char *)"variable", VHDL_1987},
-          {VHDL_REPORT, (char *)"report", VHDL_1987},
-          {VHDL_SEVERITY, (char *)"severity", VHDL_1987},
-          {VHDL_IF, (char *)"if", VHDL_1987},
-          {VHDL_THEN, (char *)"then", VHDL_1987},
-          {VHDL_ELSIF, (char *)"elsif", VHDL_1987},
-          {VHDL_ELSE, (char *)"else", VHDL_1987},
-          {VHDL_FOR, (char *)"for", VHDL_1987},
-          {VHDL_IN, (char *)"in", VHDL_1987},
-          {VHDL_LOOP, (char *)"loop", VHDL_1987},
-          {VHDL_WAIT, (char *)"wait", VHDL_1987},
-          {VHDL_SIGNAL, (char *)"signal", VHDL_1987},
-          {VHDL_CONSTANT, (char *)"constant", VHDL_1987},
-          {VHDL_GENERATE, (char *)"generate", VHDL_1987},
-          {VHDL_BLOCK, (char *)"block", VHDL_1987},
-          {VHDL_NOT, (char *)"not", VHDL_1987},
-          {VHDL_OR, (char *)"or", VHDL_1987},
-          {VHDL_AND, (char *)"and", VHDL_1987},
-          {VHDL_NOR, (char *)"nor", VHDL_1987},
-          {VHDL_NAND, (char *)"nand", VHDL_1987},
-          {VHDL_XOR, (char *)"xor", VHDL_1987}};
+          {VHDL_LIBRARY, (char *)"library", 1987},
+          {VHDL_USE, (char *)"use", 1987},
+          {VHDL_ARCHITECTURE, (char *)"architecture", 1987},
+          {VHDL_OF, (char *)"of", 1987},
+          {VHDL_IS, (char *)"is", 1987},
+          {VHDL_BEGIN, (char *)"begin", 1987},
+          {VHDL_END, (char *)"end", 1987},
+          {VHDL_ENTITY, (char *)"entity", 1987},
+          {VHDL_PROCESS, (char *)"process", 1987},
+          {VHDL_TYPE, (char *)"type", 1987},
+          {VHDL_RANGE, (char *)"range", 1987},
+          {VHDL_TO, (char *)"to", 1987},
+          {VHDL_DOWNTO, (char *)"downto", 1987},
+          {VHDL_VARIABLE, (char *)"variable", 1987},
+          {VHDL_REPORT, (char *)"report", 1987},
+          {VHDL_SEVERITY, (char *)"severity", 1987},
+          {VHDL_IF, (char *)"if", 1987},
+          {VHDL_THEN, (char *)"then", 1987},
+          {VHDL_ELSIF, (char *)"elsif", 1987},
+          {VHDL_ELSE, (char *)"else", 1987},
+          {VHDL_FOR, (char *)"for", 1987},
+          {VHDL_IN, (char *)"in", 1987},
+          {VHDL_LOOP, (char *)"loop", 1987},
+          {VHDL_WAIT, (char *)"wait", 1987},
+          {VHDL_SIGNAL, (char *)"signal", 1987},
+          {VHDL_CONSTANT, (char *)"constant", 1987},
+          {VHDL_GENERATE, (char *)"generate", 1987},
+          {VHDL_BLOCK, (char *)"block", 1987},
+          {VHDL_NOT, (char *)"not", 1987},
+          {VHDL_OR, (char *)"or", 1987},
+          {VHDL_AND, (char *)"and", 1987},
+          {VHDL_NOR, (char *)"nor", 1987},
+          {VHDL_NAND, (char *)"nand", 1987},
+          {VHDL_XOR, (char *)"xor", 1987},
+          {VHDL_XNOR, (char *)"xnor", 1994},
+          {VHDL_ABS, (char *)"abs", 1987},
+          {VHDL_MOD, (char *)"mod", 1987},
+          {VHDL_REM, (char *)"rem", 1987},
+          {VHDL_SLL, (char *)"sll", 1993},
+          {VHDL_SRL, (char *)"srl", 1993},
+          {VHDL_SLA, (char *)"sla", 1993},
+          {VHDL_SRA, (char *)"sra", 1993},
+          {VHDL_ROL, (char *)"rol", 1993},
+          {VHDL_ROR, (char *)"ror", 1993}};
         return a;
       }
-      
+
       int skipWhiteSpaceAndComments(::ast::TokenScanner<Scanner>* scanner);
 
     };
