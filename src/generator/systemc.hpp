@@ -57,10 +57,8 @@ namespace generator {
     std::string toString(ast::Number* i);
     std::string toString(ast::Character* i);
     std::string toString(ast::BasicIdentifier* i);
-    void basicIdentifier(ast::BasicIdentifier* i);
     std::string toString(ast::BasicIdentifier* i, ast::RangeType* r);
     std::string toString(const char* separator, ast::BasicIdentifierList* list);
-    void basicIdentifierList(const char* separator, ast::BasicIdentifierList* list);
 
     void sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);

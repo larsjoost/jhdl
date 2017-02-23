@@ -18,15 +18,11 @@ namespace ast {
   char* Text::text = NULL;
   int Text::textSize = 0;
 
-  Text::Text() {
-  };
-
-  Text::Text(bool verbose) : verbose(verbose) {
-  };
+  Text::Text(bool verbose) : verbose(verbose) {}
 
   Text::Text(char* text, bool caseSensitive, bool verbose) : verbose(verbose) {
     set(text, caseSensitive);
-  };
+  }
 
   void Text::debug(const char* msg, char a) {
     if (verbose) {
@@ -52,18 +48,13 @@ namespace ast {
     }
   }
 
-  void Text::subString(Text& t, int s) {
-    assert(s <= remainingSize());
+  void Text::subString(Text& t, int size) {
+    int s = remainingSize();
+    assert(size <= s);
     t = *this;
-    t.size = t.position + s;
+    t.size = t.position + size;
   }
   
-  void Text::advancePosition(int n) {
-    for (int i = 0; i < n; i++) {
-      incrementPosition();
-    }
-  }
-
   void Text::set(char* t, bool c) {
     text = t;
     position = 0;
@@ -126,11 +117,10 @@ namespace ast {
   std::string Text::getCurrentLine() {
     std::string s = "";
     try {
-      char a;
       bool done = false;
       int i = lineStart - position;
       do {
-        a = lookAhead(i++);
+        char a = lookAhead(i++);
         if (a == '\n') {
           done = true;
         } else {
@@ -166,8 +156,8 @@ namespace ast {
   }
 
   void Text::debug(FILE* output) {
-    fprintf(output, "Text::position = %u\n", position);
-    fprintf(output, "Text::size = %u\n", size);
+    fprintf(output, "Text::position = %i\n", position);
+    fprintf(output, "Text::size = %i\n", size);
   }
 
   const std::string Text::toString(bool setCase) {

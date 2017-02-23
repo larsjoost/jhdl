@@ -53,11 +53,11 @@ std::string toBinary(int x, int binaryWidth) {
   return s;
 }
 
-void log(sc_trace_file* handle, int value, int traceId) {
+void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId) {
   if (handle) {
     logMutex.lock();
     *handle << "#" << sc_now << std::endl;
-    *handle << "b" << toBinary(value, 32) << " " << std::to_string(traceId) << std::endl;
+    *handle << "b" << toBinary(value, dataWidth) << " " << std::to_string(traceId) << std::endl;
     logMutex.unlock();
   }
 }
@@ -150,18 +150,18 @@ class sc_signal {
 
   sc_signal<T>(const sc_signal<T>& s) {
     signal = s.signal;
-    log(fileHandle, signal.getValue(), traceId);
+    log(fileHandle, signal.getValue(), signal.LENGTH(), traceId);
   }
 
   sc_signal<T>& operator=(const sc_signal<T>& s) {
     signal = s.signal;
-    log(fileHandle, signal.getValue(), traceId);
+    log(fileHandle, signal.getValue(), signal.LENGTH(), traceId);
     return *this;
   }
 
   sc_signal<T> operator=(auto v) {
     signal = v;
-    log(fileHandle, signal.getValue(), traceId);
+    log(fileHandle, signal.getValue(), signal.LENGTH(), traceId);
     return *this;
   }
 
@@ -170,6 +170,10 @@ class sc_signal {
     return *this;
   }
 
+  unsigned int LENGTH() {
+    return signal.LENGTH();
+  }
+  
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name) {
@@ -187,7 +191,8 @@ int traceId = 1;
 
 template<class T>
 void sc_trace(sc_trace_file* fh, sc_signal<T>& s, const char* name) {
-  *fh << "$var wire 32 " << traceId << " " << name << " $end" << std::endl;
+  int dataWidth = s.LENGTH();
+  *fh << "$var wire " << dataWidth << " " << traceId << " " << name << " $end" << std::endl;
   *fh << "$upscope $end" << std::endl;
   *fh << "$enddefinitions $end" << std::endl;
   *fh << "$dumpvars" << std::endl;

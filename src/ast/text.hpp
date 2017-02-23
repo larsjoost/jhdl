@@ -12,12 +12,12 @@ namespace ast {
   class Text {
     static char* text;
     static int textSize;
-    int position;
-    int size;
-    int lineNumber;
-    int lineStart;
-    int columnNumber;
-    bool caseSensitive;
+    int position = 0;
+    int size = 0;
+    int lineNumber = 0;
+    int lineStart = 0;
+    int columnNumber = 0;
+    bool caseSensitive = false;
 
     char toLower(char c);
 
@@ -29,8 +29,8 @@ namespace ast {
   public:
     bool verbose = false;
 
-    Text();
-    Text(bool verbose);
+    explicit Text() {};
+    explicit Text(bool verbose);
     Text(char* text, bool caseSensitive = false, bool verbose = false);
     
     void set(char* text, bool caseSensitive = false);
@@ -38,7 +38,6 @@ namespace ast {
     void incrementPosition(int size = 1);
     void subString(Text& t, int size);
     int remainingSize();
-    void advancePosition(int size);
     int getLine();
     int getColumn();
     int getPosition();

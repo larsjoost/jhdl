@@ -66,9 +66,14 @@ namespace vhdl {
     static ::std::string IMAGE(Range<T>& r) {
       return ::std::to_string(r.value);
     }
+
+    unsigned int LENGTH() {
+      return 32;
+    }
     
     iterator begin() const { return begin_; }
     iterator end() const { return end_; }
+
   private:
     iterator begin_;
     iterator end_;
@@ -153,6 +158,10 @@ namespace vhdl {
       static ::std::string IMAGE(sc_signal<BIT>& r) {
         return "'" + std::string(1, r.signal.value) + "'";
       }
+
+      unsigned int LENGTH() {
+        return 1;
+      }
     };
 
     class BOOLEAN : public Enumeration<bool> {
@@ -162,6 +171,10 @@ namespace vhdl {
       
       static ::std::string IMAGE(sc_signal<BOOLEAN>& r) {
         return r.signal.value ? "true" : "false";
+      }
+
+      unsigned int LENGTH() {
+        return 1;
       }
     };
 

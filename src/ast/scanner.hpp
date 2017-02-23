@@ -129,12 +129,12 @@ namespace ast {
     
     template<typename T>
     List<T*>* zeroOrMore() {
-      List<T> list = new List<T>();
+      List<T>* list = new List<T>();
       T* a;
       while(a = optional<T>()) {
-        list.add(a);
+        list->add(a);
       }
-      return &list;
+      return list;
     }
     
     template<typename T>

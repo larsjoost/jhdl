@@ -92,10 +92,6 @@ namespace generator {
     return s;
   }
 
-  void SystemC::basicIdentifierList(const char* separator, ast::BasicIdentifierList* list) {
-    std::cout << toString(separator, list);
-  }
-  
   void SystemC::enumerationType(parameters parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
       std::string name = toString(identifier);
@@ -467,12 +463,6 @@ namespace generator {
       }
     }
     return s;
-  }
-
-  void SystemC::basicIdentifier(ast::BasicIdentifier* i) {
-    if (i) {      
-      std::cout << toString(i) << std::endl;
-    }
   }
 
   std::string SystemC::toString(ast::Number* n) {

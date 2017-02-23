@@ -40,6 +40,7 @@ main (int argc, char **argv)
           fprintf (stderr,
                    "Unknown option character `\\x%x'.\n",
                    optopt);
+        usage();
         return 1;
       default:
         abort ();

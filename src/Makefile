@@ -16,6 +16,9 @@ hdlc: $(SOURCE) $(INCLUDE)
 hdlf: $(SOURCE) $(INCLUDE)
 	$(CXX) $(CXXFLAGS) -o $@ $^ hdlf.cpp $(FLAGS)
 
+cppcheck:
+	cppcheck --quiet --enable=all ./
+
 print-%:
 	@echo '$*=$($*)'
 
