@@ -58,7 +58,6 @@ namespace generator {
     std::string toString(ast::Character* i);
     std::string toString(ast::BasicIdentifier* i);
     std::string toString(ast::BasicIdentifier* i, ast::RangeType* r);
-    std::string toString(const char* separator, ast::BasicIdentifierList* list);
 
     void sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -77,10 +76,14 @@ namespace generator {
     void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
     void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
+
     template<class Key, class Value, typename Func>
     std::string toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
     template<class T, typename Func>
     std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
+    template<typename Func>
+    std::string toString(ast::BasicIdentifierList* list, std::string delimiter, Func lambda);
+
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
     void methodDefinition(parameters& parm, ast::Method* method);
     void instantiateType(parameters& parm, std::string type, std::string name);

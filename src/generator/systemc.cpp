@@ -76,20 +76,10 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          println(parm, "using " + toString((char *)"::", useClause.list) + ";");
+          println(parm, "using " + toString(useClause.list, "::", [&](std::string s){return s;}) + ";");
         }
       }
     }    
-  }
-
-  std::string SystemC::toString(const char* separator, ast::BasicIdentifierList* list) {
-    std::string s = "";
-    std::string delimiter = "";
-    for (ast::BasicIdentifier t : list->textList.list) {
-      s += delimiter + toString(&t);
-      delimiter = separator;
-    }
-    return s;
   }
 
   void SystemC::enumerationType(parameters parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
@@ -97,7 +87,7 @@ namespace generator {
       std::string name = toString(identifier);
       printSourceLine(parm, identifier);
       std::string enumName = name + "_enum";
-      std::string basicIdentifierList = toString(", ", t->enumerations);
+      std::string basicIdentifierList = toString(t->enumerations, ", ", [&](std::string s){return s;});
       println(parm, "enum " + enumName + " { " + basicIdentifierList + "};");
       println(parm, "class " + name + " : public Enumeration<" + enumName + "> {");
       println(parm, "public:"); 
@@ -210,6 +200,19 @@ namespace generator {
     return s;
   }
 
+  template<typename Func>
+  std::string SystemC::toString(ast::BasicIdentifierList* list, std::string delimiter, Func lambda) {
+    std::string s = "";
+    if (list) {
+      std::string d = "";
+      for (ast::BasicIdentifier t : list->textList.list) {
+        s += (d + lambda(toString(&t)));
+        d = delimiter;
+      }
+    }
+    return s;
+  }
+  
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name) {
     std::string constructorArguments = "";
     std::string memberVariableAssignment = "";
@@ -256,6 +259,10 @@ namespace generator {
       println(parm, getConstructorDeclaration(parm, methodName) +  + " {};");
       println(parm, "void process() {");
       parm.incIndent();
+      if (method->sensitivity) {
+        std::string s = toString(method->sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
+        println(parm, "wait([&](){return " + s + ";});");
+      }
       declarations(parm, method->declarations);
       sequentialStatements(parm, method->sequentialStatements);
       parm.decIndent();
@@ -373,7 +380,9 @@ namespace generator {
           declarations(parm, it.module.implementation->declarations);
           concurrentStatementsDefinition(parm, it.module.implementation->concurrentStatements);
           println(parm, "public:");
+          parm.incIndent();
           threadConstructor(parm, name, it.module.implementation->concurrentStatements);
+          parm.decIndent();
         }
       }
     }
@@ -457,10 +466,8 @@ namespace generator {
     assert (i != NULL);
     std::string s = i->text.toString(true);
     if (i->attribute) {
-      s += "::" + i->attribute->toString(true);
-      if (i->arguments) {
-        s += "(" + toString((char *)",", i->arguments) + ")";
-      }
+      s += "." + i->attribute->toString(true);
+      s += "(" + toString(i->arguments, ",", [&](std::string s){return s;}) + ")";
     }
     return s;
   }
