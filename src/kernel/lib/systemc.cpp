@@ -82,29 +82,7 @@ void sc_thread::threadLoop() {
   }
 }
 
-template<typename Func>
-void sc_thread::wait(Func waitUntil) {
-  // Wait until main() sends data
-  if (terminateThreads) {
-    throw TerminateThreads();
-  }
-  std::unique_lock<std::mutex> lk(mMutex);
-  methodEvent = true;
-  do {
-    if (terminateThreads) {
-      lk.unlock();
-      throw TerminateThreads();
-    }
-    int currentDeltaCycle = deltaCycle;
-    numberOfMethodsDone++;
-    masterWait.notify_all();
-    if (verbose) {std::cout << "[METHOD] waiting on delta cycle " << deltaCycle << std::endl;}
-    methodWait.wait(lk, [&]() {return (currentDeltaCycle != deltaCycle) || terminateThreads;});
-  } while (!waitUntil());
-  lk.unlock();
-  if (verbose) {std::cout << "[METHOD] wait done!!!!!!!!" << std::endl;}
-}
-  
+ 
 void sc_thread::wait(int i) {
   int n = sc_now + i;
   wait([&](){return sc_now >= n;});
@@ -117,75 +95,7 @@ void sc_module::addMethod(sc_thread* c) {
   numberOfMethods++;
 }
 
-template<class T>
-class sc_signal : public sc_signal_base {
- public:
-  std::string name;
-  sc_trace_file* fileHandle = NULL;
-  int traceId;
-  T currentValue;
-  T nextValue;
-  bool event = false;
-  
-template<class T>
-explicit sc_signal<T>::sc_signal<T>() {
-  signals.push_back(this);
-}
-
-template<class T>
-void sc_signal<T>::latchValue() {
-  event = (currentValue == nextValue) ? false : true;
-  currentValue = nextValue;
-  if (event) {
-    log(fileHandle, currentValue.getValue(), currentValue.LENGTH(), traceId);
-  }
-}
-  
-template<class T>
-sc_signal<T>::sc_signal<T>(const sc_signal<T>& s) {
-  nextValue = s.currentValue;
-}
-
-template<class T>
-sc_signal<T>& sc_signal<T>::operator=(const sc_signal<T>& s) {
-  nextValue = s.currentValue;
-  return *this;
-}
-
-template<class T>
-sc_signal<T> sc_signal<T>::operator=(auto v) {
-  nextValue = v;
-  return *this;
-}
  
-template<class T>
-sc_signal<T> sc_signal<T>::operator!() {
-    sc_signal<T> x;
-    x.nextValue = !currentValue;
-    return x;
-  }
-
-template<class T>
-sc_signal<T>::operator bool() const {
-  return bool(currentValue);
-}
-  
-template<class T>
-sc_signal<T> sc_signal<T>::operator+(auto v) {
-  nextValue = currentValue + v;
-  return *this;
-}
-
-template<class T>
-unsigned int sc_signal<T>::LENGTH() {
-  return currentValue.LENGTH();
-}
-
-template<class T>
-vhdl::STANDARD::BOOLEAN sc_signal<T>::EVENT() {
-  return vhdl::STANDARD::BOOLEAN(event);
-}
-
 sc_trace_file* sc_create_vcd_trace_file(const char* name) {
   sc_trace_file* out = new sc_trace_file(name);
   *out << "$timescale 1ns $end" << std::endl;

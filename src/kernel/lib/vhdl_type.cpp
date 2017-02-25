@@ -27,11 +27,6 @@ namespace vhdl {
   }
     
   template <typename T>
-  T Enumeration<T>::getValue() {
-    return value;
-  }
-    
-  template <typename T>
   void Enumeration<T>::operator=(T v) {
     value = v;
   }

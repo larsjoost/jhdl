@@ -15,8 +15,6 @@
 #include <unistd.h>
 #include <exception>
 
-#include "vhdl_standard.hpp"
-
 enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
 
 extern int sc_now;
@@ -69,7 +67,27 @@ class sc_thread {
   void threadLoop();
 
   template<typename Func>
-  void wait(Func waitUntil);
+  void wait(Func waitUntil) {
+    // Wait until main() sends data
+    if (terminateThreads) {
+      throw TerminateThreads();
+    }
+    std::unique_lock<std::mutex> lk(mMutex);
+    methodEvent = true;
+    do {
+      if (terminateThreads) {
+        lk.unlock();
+        throw TerminateThreads();
+      }
+      int currentDeltaCycle = deltaCycle;
+      numberOfMethodsDone++;
+      masterWait.notify_all();
+      if (verbose) {std::cout << "[METHOD] waiting on delta cycle " << deltaCycle << std::endl;}
+      methodWait.wait(lk, [&]() {return (currentDeltaCycle != deltaCycle) || terminateThreads;});
+    } while (!waitUntil());
+    lk.unlock();
+    if (verbose) {std::cout << "[METHOD] wait done!!!!!!!!" << std::endl;}
+  }
   
   void wait(int i);
 
@@ -97,26 +115,55 @@ class sc_signal : public sc_signal_base {
   T nextValue;
   bool event = false;
   
-  explicit sc_signal<T>();
+  explicit sc_signal<T>() {
+      signals.push_back(this);
+  }
 
-  void latchValue();
+  void latchValue() {
+    event = (currentValue == nextValue) ? false : true;
+    currentValue = nextValue;
+    if (event) {
+      log(fileHandle, currentValue.getValue(), currentValue.LENGTH(), traceId);
+    }
+  }
   
-  sc_signal<T>(const sc_signal<T>& s);
+  sc_signal<T>(const sc_signal<T>& s) {
+      nextValue = s.currentValue;
+  }
 
-  sc_signal<T>& operator=(const sc_signal<T>& s);
-  
-  sc_signal<T> operator=(auto v);
+  sc_signal<T>& operator=(const sc_signal<T>& s) {
+    nextValue = s.currentValue;
+    return *this;
+  }
+
+  sc_signal<T> operator=(auto v) {
+    nextValue = v;
+    return *this;
+  }
  
-  sc_signal<T> operator!();
+  sc_signal<T> operator!() {
+    sc_signal<T> x;
+    x.nextValue = !currentValue;
+    return x;
+  }
 
-  operator bool() const;
+  operator bool() const {
+    return bool(currentValue);
+  }
   
-  sc_signal<T> operator+(auto v);
+  sc_signal<T> operator+(auto v) {
+    nextValue = currentValue + v;
+    return *this;
+  }
 
-  unsigned int LENGTH();
+  unsigned int LENGTH() {
+    return currentValue.LENGTH();
+  }
 
-  vhdl::STANDARD::BOOLEAN EVENT();
-  
+  bool EVENT() {
+    return event;
+  }
+
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name);

@@ -10,8 +10,6 @@
 #include "systemc.h"
 #include "vhdl_type.hpp"
 
-template<class T> class sc_signal;
-
 namespace vhdl {
 
   namespace STANDARD {
@@ -24,7 +22,10 @@ namespace vhdl {
       };
       using Range<int>::operator=;
       using Range<int>::IMAGE;
-      static ::std::string IMAGE(sc_signal<INTEGER>& r);
+
+      static ::std::string IMAGE(sc_signal<INTEGER>& r) {
+        return ::std::to_string(r.currentValue.value);
+      }
 
     };
     
@@ -47,7 +48,9 @@ namespace vhdl {
       using Enumeration<char>::operator=;
       using Enumeration<char>::IMAGE;
       
-      static ::std::string IMAGE(sc_signal<BIT>& r);
+      static ::std::string IMAGE(sc_signal<BIT>& r) {
+        return "'" + std::string(1, r.currentValue.value) + "'";
+      }
 
       unsigned int LENGTH();
     };
@@ -59,7 +62,13 @@ namespace vhdl {
       using Enumeration<enum BOOLEAN_enum>::operator=;
       using Enumeration<enum BOOLEAN_enum>::IMAGE;
       
-      static ::std::string IMAGE(sc_signal<BOOLEAN>& r);
+      static ::std::string IMAGE(bool r) {
+        return r ? "true" : "false";
+      }
+
+      static ::std::string IMAGE(sc_signal<BOOLEAN>& r) {
+        return IMAGE(r.currentValue.value == TRUE);
+      }
 
       BOOLEAN();
       
@@ -75,9 +84,6 @@ namespace vhdl {
 
     enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};
 
-    static const std::string SEVERITY_LEVEL_STRINGS[] =
-      {"NOTE", "WARNING", "ERROR", "FAILURE"};
-    
     ::std::string toString(SEVERITY_LEVEL severity);
     
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
@@ -91,7 +97,7 @@ namespace vhdl {
 
     typedef Physical<int, TIME_UNITS> TIME;
 
-    static TIME NOW;
+    extern TIME NOW;
 
     static TIME operator+(TIME left, const TIME& right);
     

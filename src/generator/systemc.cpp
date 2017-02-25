@@ -41,7 +41,7 @@ namespace generator {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
-        std::string name = toString(it->module.interface->name);
+        std::string name = basicIdentifierToString(parm, it->module.interface->name);
         println(parm, "#include \"systemc.h\"");
         println(parm, "#include \"vhdl.h\"");
         println(parm, "namespace vhdl {");
@@ -76,18 +76,19 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          println(parm, "using " + toString(useClause.list, "::", [&](std::string s){return s;}) + ";");
+          println(parm, "using " + listToString(parm, useClause.list, "::", [&](std::string s){return s;}) + ";");
         }
       }
     }    
   }
 
-  void SystemC::enumerationType(parameters parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
+  void SystemC::enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
-      std::string name = toString(identifier);
+      std::string name = basicIdentifierToString(parm, identifier);
       printSourceLine(parm, identifier);
       std::string enumName = name + "_enum";
-      std::string basicIdentifierList = toString(t->enumerations, ", ", [&](std::string s){return s;});
+      std::string basicIdentifierList = listToString(parm, t->enumerations, ", ",
+                                                     [&](std::string s){return s;});
       println(parm, "enum " + enumName + " { " + basicIdentifierList + "};");
       println(parm, "class " + name + " : public Enumeration<" + enumName + "> {");
       println(parm, "public:"); 
@@ -105,11 +106,11 @@ namespace generator {
   };
   */
 
-  void SystemC::numberType(parameters parm, ast::BasicIdentifier* identifier, ast::NumberType* t) {
+  void SystemC::numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t) {
     if (t) {
-      std::string name = toString(identifier);
-      std::string left = toString(t->range->left);
-      std::string right = toString(t->range->right);
+      std::string name = basicIdentifierToString(parm, identifier);
+      std::string left = expressionToString(parm, t->range->left);
+      std::string right = expressionToString(parm, t->range->right);
       std::string templateType = "decltype(" + left + ")"; 
       printSourceLine(parm, identifier);
       println(parm, "class " + name + " : public Range<" + templateType + "> {");
@@ -122,6 +123,7 @@ namespace generator {
       println(parm, "using Range<" + templateType + ">::operator=;");
       parm.decIndent();
       println(parm, "};");
+      parm.decIndent();
     }
   }
 
@@ -136,15 +138,15 @@ namespace generator {
   void SystemC::variable_declarations(parameters& parm, ast::VariableDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, toString(v->type) + " " + toString(v->identifier) + ";");
+      println(parm, basicIdentifierToString(parm, v->type) + " " + basicIdentifierToString(parm, v->identifier) + ";");
     }
   }
 
   void SystemC::signal_declarations(parameters& parm, ast::SignalDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      std::string type = "sc_signal<" + toString(v->type) + "> ";
-      std::string id = toString(v->identifier);
+      std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + "> ";
+      std::string id = basicIdentifierToString(parm, v->identifier);
       parm.signalDeclaration[id] = type;
       println(parm, type + " " + id + ";");
     }
@@ -153,7 +155,8 @@ namespace generator {
   void SystemC::constant_declarations(parameters& parm, ast::ConstantDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, "const " + toString(v->type) + " " + toString(v->identifier) + ";");
+      println(parm, "const " + basicIdentifierToString(parm, v->type) + " " +
+              basicIdentifierToString(parm, v->identifier) + ";");
     }
   }
 
@@ -179,7 +182,7 @@ namespace generator {
   }
 
   template<class Key, class Value, typename Func>
-  std::string SystemC::toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda) {
     std::string s;
     std::string d;
     for (auto x : t) {
@@ -190,7 +193,7 @@ namespace generator {
   }
 
   template<class T, typename Func>
-  std::string SystemC::toString(std::list<T>& t, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func lambda) {
     std::string s;
     std::string d;
     for (auto x : t) {
@@ -201,12 +204,12 @@ namespace generator {
   }
 
   template<typename Func>
-  std::string SystemC::toString(ast::BasicIdentifierList* list, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func lambda) {
     std::string s = "";
     if (list) {
       std::string d = "";
       for (ast::BasicIdentifier t : list->textList.list) {
-        s += (d + lambda(toString(&t)));
+        s += (d + lambda(basicIdentifierToString(parm, &t)));
         d = delimiter;
       }
     }
@@ -221,13 +224,13 @@ namespace generator {
     if (parm.forGenerateHierarchy.size() > 0) {
       colon = " : ";
       comma = ", ";
-      constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
-      memberVariableAssignment = toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
+      constructorArguments = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
+      memberVariableAssignment = listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
     }
     std::string signalAssignment = "";
     if (parm.signalDeclaration.size() > 0) {
       colon = " : ";
-      signalAssignment = toString(parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
+      signalAssignment = listToString(parm, parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
     } else {
       comma = "";
     }
@@ -240,7 +243,7 @@ namespace generator {
     if (method) {
       std::string methodName;
       if (method->name) {
-        methodName = toString(method->name);
+        methodName = basicIdentifierToString(parm, method->name);
       } else {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
@@ -251,7 +254,7 @@ namespace generator {
         println(parm, s.second + "& " + s.first + ";");
       }
       if (parm.forGenerateHierarchy.size() > 0) {
-        println(parm, "INTEGER " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
+        println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
       }
       parm.decIndent();
       println(parm, "public:");
@@ -260,7 +263,7 @@ namespace generator {
       println(parm, "void process() {");
       parm.incIndent();
       if (method->sensitivity) {
-        std::string s = toString(method->sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
+        std::string s = listToString(parm, method->sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
         println(parm, "wait([&](){return " + s + ";});");
       }
       declarations(parm, method->declarations);
@@ -276,9 +279,9 @@ namespace generator {
                                          ast::BlockStatement* blockStatement) {
     functionStart("blockStatementDefinition");
     if (blockStatement) {
-      std::string name = toString(blockStatement->name);
+      std::string name = basicIdentifierToString(parm, blockStatement->name);
       printSourceLine(parm, blockStatement->name);
-      println(parm, "SC_BLOCK(" + toString(blockStatement->name) + ") {");
+      println(parm, "SC_BLOCK(" + basicIdentifierToString(parm, blockStatement->name) + ") {");
       parm.incIndent();
       {
         parameters p = parm;
@@ -298,7 +301,7 @@ namespace generator {
   void SystemC::forGenerateStatementDefinition(parameters parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
-      parm.forGenerateHierarchy.push_back(toString(forGenerateStatement->identifier));
+      parm.forGenerateHierarchy.push_back(basicIdentifierToString(parm, forGenerateStatement->identifier));
       concurrentStatementsDefinition(parm, forGenerateStatement->concurrentStatements);
     }
   }
@@ -317,7 +320,7 @@ namespace generator {
     functionStart("instantiateType");
     std::string constructorArguments = "";
     if (parm.forGenerateHierarchy.size() > 0) {
-      constructorArguments = ", " + toString(parm.forGenerateHierarchy, ",", [&](std::string s){return s;});
+      constructorArguments = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;});
     }
     println(parm, type + "(new " + name + "(this" + constructorArguments + "));");
   }
@@ -327,7 +330,7 @@ namespace generator {
     if (method) {
       std::string methodName;
       if (method->name) {
-        methodName = toString(method->name);
+        methodName = basicIdentifierToString(parm, method->name);
       } else {
         methodName = method->noname;
       }
@@ -339,7 +342,7 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     functionStart("blockStatementInstantiation");
     if (blockStatement) {
-      instantiateType(parm, "SC_NEW_BLOCK", toString(blockStatement->name));
+      instantiateType(parm, "SC_NEW_BLOCK", basicIdentifierToString(parm, blockStatement->name));
     }
   }
 
@@ -347,9 +350,9 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      std::string id = toString(forGenerateStatement->identifier);
+      std::string id = basicIdentifierToString(parm, forGenerateStatement->identifier);
       parm.forGenerateHierarchy.push_back(id);
-      println(parm, toString(forGenerateStatement->identifier, forGenerateStatement->range) + ") {");
+      println(parm, rangeTypeToString(parm, forGenerateStatement->identifier, forGenerateStatement->range) + ") {");
       concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
       println(parm, "}");
     }
@@ -367,7 +370,7 @@ namespace generator {
 
   void SystemC::threadConstructor(parameters parm, ast::BasicIdentifier* name, 
                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    println(parm, "SC_CTOR(" + toString(name) + ") {");
+    println(parm, "SC_CTOR(" + basicIdentifierToString(parm, name) + ") {");
     concurrentStatementsInstantiation(parm, concurrentStatements);
     println(parm, "}");
   }
@@ -394,16 +397,17 @@ namespace generator {
       if (p->associationList) {
         for (ast::AssociationElement e :
                p->associationList->associationElements.list) {
-          s += toString(e.expression);
+          s += expressionToString(parm, e.expression);
         }
       }
-      println(parm, toString(p->name) + "(" + s + ");");
+      println(parm, basicIdentifierToString(parm, p->name) + "(" + s + ");");
     }
   }
   
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
-      println(parm, "report(" + toString(p->message) + ", " + toString(p->severity) + ");");
+      println(parm, "report(" + expressionToString(parm, p->message) + ", " +
+              basicIdentifierToString(parm, p->severity) + ");");
     }
   }
 
@@ -412,7 +416,7 @@ namespace generator {
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-	  println(parm, command + " (" + toString(c.condition) + ") {");
+	  println(parm, command + " (" + expressionToString(parm, c.condition) + ") {");
 	} else {
 	  println(parm, "} else {");
 	}
@@ -423,90 +427,99 @@ namespace generator {
     }
   }
 
-  std::string SystemC::toString(ast::BasicIdentifier* i, ast::RangeType* r) {
-    std::string s = "for (auto " + toString(i) + " : " + " INTEGER(" + toString(r->left) + ", " + toString(r->right) + ")";
+  std::string SystemC::rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r) {
+    std::string s = "for (auto " + basicIdentifierToString(parm, i) + " : " +
+      " INTEGER(" + expressionToString(parm, r->left) + ", " +
+      expressionToString(parm, r->right) + ")";
     return s;
   }
   
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
     if (p) {
-      println(parm, toString(p->identifier, p->range) + ") {");
+      println(parm, rangeTypeToString(parm, p->identifier, p->range) + ") {");
       sequentialStatements(parm, p->sequentialStatements);
       println(parm, "}");
     }
   }
 
-  std::string SystemC::toString(ast::Physical* p) {
+  std::string SystemC::physicalToString(parameters& parm, ast::Physical* p) {
     assert (p != NULL);
-    return "physical(" + toString(p->number) + ", " +
-      toString(p->unit) + ")";
+    return "physical(" + numberToString(parm, p->number) + ", " +
+      basicIdentifierToString(parm, p->unit) + ")";
   }
   
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
     if (p) {
-      println(parm, "wait(" + toString(p->physical->number) + ");");
+      println(parm, "wait(" + numberToString(parm, p->physical->number) + ");");
     }
   }
 
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
-      println(parm, toString(p->identifier) + " = " + toString(p->expression) + ";");
+      println(parm, basicIdentifierToString(parm, p->identifier) + " = " +
+              expressionToString(parm, p->expression) + ";");
     }
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
-      println(parm, toString(p->identifier) + " = " + toString(p->expression) + ";");
+      println(parm, basicIdentifierToString(parm, p->identifier) + " = " +
+              expressionToString(parm, p->expression) + ";");
     }
   }
 
-  std::string SystemC::toString(ast::BasicIdentifier* i) {
+  bool SystemC::isSignal(parameters& parm, std::string name) {
+    return (parm.signalDeclaration.find(name) != parm.signalDeclaration.end());
+  }
+  
+  std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
     assert (i != NULL);
     std::string s = i->text.toString(true);
     if (i->attribute) {
-      s += "." + i->attribute->toString(true);
-      s += "(" + toString(i->arguments, ",", [&](std::string s){return s;}) + ")";
+      std::string seperator = isSignal(parm, s) ? "." : "::";
+      s += seperator + i->attribute->toString(true);
+      s += "(" + listToString(parm, i->arguments, ",", [&](std::string s){return s;}) + ")";
     }
     return s;
   }
 
-  std::string SystemC::toString(ast::Number* n) {
+  std::string SystemC::numberToString(parameters& parm, ast::Number* n) {
     assert(n != NULL);
     return n->value.toString();
   }
   
-  std::string SystemC::toString(ast::Character* n) {
+  std::string SystemC::characterToString(parameters& parm, ast::Character* n) {
     assert(n != NULL);
     return n->value.toString();
   }
   
-  std::string SystemC::toString(ast::ExpressionTerm& e) {
+  std::string SystemC::expressionTermToString(parameters& parm, ast::ExpressionTerm& e) {
     if (e.physical) {
-      return toString(e.physical);
+      return physicalToString(parm, e.physical);
     }
     if (e.number) {
-      return toString(e.number);
+      return numberToString(parm, e.number);
     }
     if (e.text) {
       return e.text->text.toString();
     }
     if (e.identifier) { 
-      return toString(e.identifier);
+      return basicIdentifierToString(parm, e.identifier);
     }
     if (e.character) {
-      return toString(e.character);
+      return characterToString(parm, e.character);
     }
   }
   
-  std::string SystemC::toString(ast::Expression* e) {
+  std::string SystemC::expressionToString(parameters& parm, ast::Expression* e) {
     assert(e != NULL);
     if (e->parenthis) {
-      return "(" + toString(e->parenthis) + ")";
+      return "(" + expressionToString(parm, e->parenthis) + ")";
     } else if (e->unaryOperator) {
       std::string op;
-      std::string expr = toString(e->expression);
+      std::string expr = expressionToString(parm, e->expression);
       switch (e->unaryOperator->op) {
       case ::ast::UnaryOperator::NOT: {op = "!"; break;}
       default: {assert (false);}
@@ -514,8 +527,8 @@ namespace generator {
       return op + expr;
     } else if (e->op) {
       std::string op;
-      std::string term = toString(e->term);
-      std::string expr = toString(e->expression);
+      std::string term = expressionTermToString(parm, e->term);
+      std::string expr = expressionToString(parm, e->expression);
       switch (e->op->op) {
       case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
       case ::ast::ExpressionOperator::ADD: {return term + " + " + expr;}
@@ -524,7 +537,7 @@ namespace generator {
       }
       return op + "(" + term + ", " + expr + ")";
     } else {
-      return toString(e->term);
+      return expressionTermToString(parm, e->term);
     }
   }
   

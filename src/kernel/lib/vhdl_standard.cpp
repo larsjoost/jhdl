@@ -4,31 +4,18 @@
 #include <string>
 
 #include "vhdl_standard.hpp"
+#include "vhdl_std_env.hpp"
 
 namespace vhdl {
   namespace STANDARD {
   
-    static ::std::string INTEGER::IMAGE(sc_signal<INTEGER>& r) {
-      return ::std::to_string(r.currentValue.value);
-    }
-    
     static INTEGER operator+(INTEGER left, const int right) {
       left.value += right;
       return left;
     }
 
-    static ::std::string BIT::IMAGE(sc_signal<BIT>& r) {
-      return "'" + std::string(1, r.currentValue.value) + "'";
-    }
-
     unsigned int BIT::LENGTH() {
       return 1;
-    }
-
-    enum BOOLEAN_enum {FALSE, TRUE};
-    
-    static ::std::string BOOLEAN::IMAGE(sc_signal<BOOLEAN>& r) {
-      return (r.currentValue.value == TRUE) ? "true" : "false";
     }
 
     BOOLEAN::BOOLEAN() {
@@ -52,11 +39,10 @@ namespace vhdl {
     unsigned int BOOLEAN::LENGTH() {
       return 1;
     }
-
-    static const std::string SEVERITY_LEVEL_STRINGS[] =
-      {"NOTE", "WARNING", "ERROR", "FAILURE"};
     
-    ::std::string toString(SEVERITY_LEVEL severity); {
+    ::std::string toString(SEVERITY_LEVEL severity) {
+      static const std::string SEVERITY_LEVEL_STRINGS[] =
+        {"NOTE", "WARNING", "ERROR", "FAILURE"};
       return SEVERITY_LEVEL_STRINGS[severity];
     }
     
@@ -67,7 +53,7 @@ namespace vhdl {
     };
     */
 
-    static TIME NOW = TIME(0, NS);
+    TIME NOW = TIME(0, NS);
 
     static TIME operator+(TIME left, const TIME& right) {
       left.value += right.value;

@@ -133,7 +133,8 @@ namespace ast {
   }
   
   void Text::printCurrentLine(FILE* output) {
-    fprintf(output, getCurrentLine().c_str());
+    const char* c = getCurrentLine().c_str();
+    fprintf(output, c);
     fprintf(output, "\n");
   }
 

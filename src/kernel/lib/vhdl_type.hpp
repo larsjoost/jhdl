@@ -81,7 +81,9 @@ namespace vhdl {
   public:
     T value;
 
-    T getValue();
+    T getValue() {
+      return value;
+    }
     
     void operator=(T v);
     

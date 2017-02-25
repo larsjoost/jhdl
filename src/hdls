@@ -58,6 +58,10 @@ if [ -z "$FILENAME" ]; then
     exit 1
 fi
 
+KERNEL=$SCRIPTPATH/kernel/lib
+
+make -C $KERNEL > /dev/null
+
 filebase="${FILENAME%.*}"
 sourcefile="$filebase.hpp"
 $SCRIPTPATH/hdlc -f $FILENAME > $sourcefile
@@ -74,7 +78,7 @@ for i in $templatefiles; do
         sed -i "s/%include%/$sourcefile/g" $target
     fi
 done
-g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $targets
+g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -o $filebase $sourcefile $targets $KERNEL/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

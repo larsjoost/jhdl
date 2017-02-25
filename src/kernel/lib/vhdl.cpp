@@ -22,13 +22,4 @@ namespace vhdl {
     Expression operator functions
    */
   
-  static ::std::string concat(::std::string left, ::std::string right) {
-    return left + right;
-  }
-
-  template<typename T1, typename T2>
-  static auto physical(T1 value, T2 units) -> Physical<T1, T2> {
-    return Physical<T1, T2>(value, units);
-  }
-
 }

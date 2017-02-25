@@ -51,13 +51,15 @@ namespace generator {
   
     int methodId = 0;
 
-    std::string toString(ast::ExpressionTerm& e);
-    std::string toString(ast::Expression* e);
-    std::string toString(ast::Physical* p);
-    std::string toString(ast::Number* i);
-    std::string toString(ast::Character* i);
-    std::string toString(ast::BasicIdentifier* i);
-    std::string toString(ast::BasicIdentifier* i, ast::RangeType* r);
+    bool isSignal(parameters& parm, std::string name);
+    
+    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm& e);
+    std::string expressionToString(parameters& parm, ast::Expression* e);
+    std::string physicalToString(parameters& parm, ast::Physical* p);
+    std::string numberToString(parameters& parm, ast::Number* i);
+    std::string characterToString(parameters& parm, ast::Character* i);
+    std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
+    std::string rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r);
 
     void sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -69,8 +71,8 @@ namespace generator {
     void signalAssignment(parameters& parm, ast::SignalAssignment* p);
     void includes(parameters& parm, ast::DesignFile& designFile);
 
-    void numberType(parameters parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
-    void enumerationType(parameters parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
+    void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
+    void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void variable_declarations(parameters& parm, ast::VariableDeclaration* v);
     void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
@@ -78,11 +80,11 @@ namespace generator {
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     template<class Key, class Value, typename Func>
-    std::string toString(std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
     template<class T, typename Func>
-    std::string toString(std::list<T>& t, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func lambda);
     template<typename Func>
-    std::string toString(ast::BasicIdentifierList* list, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func lambda);
 
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
     void methodDefinition(parameters& parm, ast::Method* method);
