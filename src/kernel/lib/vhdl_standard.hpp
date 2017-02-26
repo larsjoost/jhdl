@@ -21,8 +21,14 @@ namespace vhdl {
         value = r.value;
       };
       using Range<int>::operator=;
+      using Range<int>::operator==;
+      using Range<int>::operator!=;
       using Range<int>::IMAGE;
 
+      std::string toString() {
+        return ::std::to_string(value);
+      }
+      
       static ::std::string IMAGE(sc_signal<INTEGER>& r) {
         return ::std::to_string(r.currentValue.value);
       }
@@ -60,7 +66,13 @@ namespace vhdl {
     struct BOOLEAN : public Enumeration<enum BOOLEAN_enum> {
     public:
       using Enumeration<enum BOOLEAN_enum>::operator=;
+      using Enumeration<enum BOOLEAN_enum>::operator==;
+      using Enumeration<enum BOOLEAN_enum>::operator!=;
       using Enumeration<enum BOOLEAN_enum>::IMAGE;
+      
+      std::string toString() {
+        return (value == TRUE) ? "true" : "false";
+      }
       
       static ::std::string IMAGE(bool r) {
         return r ? "true" : "false";

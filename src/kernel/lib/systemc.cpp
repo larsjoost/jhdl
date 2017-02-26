@@ -146,8 +146,13 @@ bool sc_start(int runs) {
     if (verbose) {std::cout << "[MAIN] wait" << std::endl;}
     methodWait.notify_all();
     masterWait.wait(lk, []() {return (numberOfMethodsDone == numberOfMethods) || terminateThreads;});
-    for (auto i : signals) {
-      i->latchValue();
+    if (verbose) {std::cout << "[MAIN] woke up" << std::endl;}
+    if (!terminateThreads) {
+      if (verbose) {std::cout << "[MAIN] latch values" << std::endl;}
+      for (auto i : signals) {
+        i->latchValue();
+      }
+      if (verbose) {std::cout << "[MAIN] latch values done" << std::endl;}
     }
     if (verbose) {std::cout << "[MAIN] woke up" << std::endl;}
   }

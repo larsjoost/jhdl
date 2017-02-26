@@ -26,9 +26,5 @@ namespace vhdl {
     return 32;
   }
     
-  template <typename T>
-  void Enumeration<T>::operator=(T v) {
-    value = v;
-  }
-  
+
 }

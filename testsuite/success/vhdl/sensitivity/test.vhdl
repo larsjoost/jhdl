@@ -19,12 +19,12 @@ begin
 
   process is
   begin
-    report "No event expected" severity note;
-    wait for 5 ns;
-    report "a.event() = " & boolean'image(a'event()) severity note;
-    a <= not a;
-    wait for 5 ns;
-    report "a.event() = " & boolean'image(a'event()) severity note;
+    for i in 0 to 4 loop
+      wait for 5 ns;
+      a <= false;
+      wait for 5 ns;
+      a <= true;
+    end loop;  -- i
     report "Event not received" severity failure;
   end process;
 

@@ -15,6 +15,7 @@ if [ -n "$VALGRIND" ]; then
 else
     if [ -n "$DEBUG" ]; then
         OPTIONS="gdb --args"
+        HDLS_DEBUG="-x"
     fi
 
     if [ -n "$VERBOSE" ]; then
@@ -27,5 +28,5 @@ function analyse {
 }
 
 function simulate {
-    $JHDL/hdls -f $@
+    $JHDL/hdls -f $@ $HDLS_DEBUG
 }

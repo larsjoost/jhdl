@@ -38,6 +38,8 @@ namespace vhdl {
       begin_(this, left), end_(this, right + 1) { }
     
     void operator=(T v);
+    bool operator ==(const Range<T> &other) const { return value == other.value; }
+    bool operator !=(const Range<T> &other) const { return value != other.value; }
     
     std::string toString();
 
@@ -85,12 +87,16 @@ namespace vhdl {
       return value;
     }
     
-    void operator=(T v);
-    
+    void operator=(T v) {
+      value = v;
+    }
+  
     static ::std::string IMAGE(Enumeration<T>& r) {
       return std::to_string(r.value);
     }
   
+    bool operator ==(const Enumeration<T> &other) const { return value == other.value; }
+    bool operator !=(const Enumeration<T> &other) const { return value != other.value; }
   };
   
 }

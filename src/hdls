@@ -16,11 +16,12 @@ OPTIONS:
    -f <name>    Filename
    -d <name>    Do filename
    -o <name>    VCD output filename
+   -x           Debug
    -v           Verbose 
 EOF
 }
 
-while getopts ":hd:f:o:v" OPTION
+while getopts ":hd:f:o:vx" OPTION
 do
     case $OPTION in
         h)
@@ -38,6 +39,9 @@ do
             ;;
         v)
             VERBOSE="-v"
+            ;;
+        x)
+            DEBUG="gdb --args"
             ;;
         ?)
             echo "Unknown option $OPTARG"
@@ -84,7 +88,7 @@ if [ -n "$VCD_FILENAME" ]; then
         mkfifo --mode=666 $VCD_FILENAME
     fi
     shmidcat $VCD_FILENAME | gtkwave -v -I output.sav &
-    ./$filebase $DO_FILENAME -o $VCD_FILENAME $VERBOSE 
+    $DEBUG ./$filebase $DO_FILENAME -o $VCD_FILENAME $VERBOSE 
 else
-    ./$filebase $DO_FILENAME $VERBOSE
+    $DEBUG ./$filebase $DO_FILENAME $VERBOSE
 fi

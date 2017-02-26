@@ -33,6 +33,7 @@ class sc_thread;
 class sc_signal_base {
 public:
   virtual void latchValue() = 0;
+  virtual std::string toString() = 0; 
 };
 
 extern std::vector<std::thread*> threads;
@@ -164,6 +165,10 @@ class sc_signal : public sc_signal_base {
     return event;
   }
 
+  std::string toString() {
+    return currentValue.toString();
+  }
+  
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name);
