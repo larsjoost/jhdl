@@ -9,11 +9,6 @@
 namespace vhdl {
   namespace STANDARD {
   
-    static INTEGER operator+(INTEGER left, const int right) {
-      left.value += right;
-      return left;
-    }
-
     unsigned int BIT::LENGTH() {
       return 1;
     }
@@ -80,10 +75,5 @@ namespace vhdl {
       STD::ENV::FINISH(1);
     } 
   }
-
-  static bool equal(STANDARD::INTEGER left, int right) {
-    return left.value == right;
-  }
-
 
 }

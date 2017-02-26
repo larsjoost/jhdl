@@ -37,20 +37,29 @@ namespace vhdl {
       value(left), left(left), right(right),
       begin_(this, left), end_(this, right + 1) { }
     
-    void operator=(T v);
+    void operator=(T v) {
+      value = v;
+    }
+    
     bool operator ==(const Range<T> &other) const { return value == other.value; }
     bool operator !=(const Range<T> &other) const { return value != other.value; }
     
-    std::string toString();
+    std::string toString() {
+      return std::to_string(value);
+    }
 
-    T getValue();
+    T getValue() {
+      return value;
+    }
+    
+    unsigned int LENGTH() {
+      return 32;
+    }
     
     static ::std::string IMAGE(Range<T>& r) {
       return ::std::to_string(r.value);
     }
 
-    unsigned int LENGTH();
-    
     iterator begin() const { return begin_; }
     iterator end() const { return end_; }
 
@@ -91,6 +100,10 @@ namespace vhdl {
       value = v;
     }
   
+    std::string toString() {
+      return std::to_string(value);
+    }
+
     static ::std::string IMAGE(Enumeration<T>& r) {
       return std::to_string(r.value);
     }

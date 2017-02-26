@@ -35,7 +35,10 @@ namespace vhdl {
 
     };
     
-    static INTEGER operator+(INTEGER left, const int right);
+    static INTEGER operator+(INTEGER left, const int right) {
+      left.value += right;
+      return left;
+    }
 
     class NATURAL : public INTEGER {
     public:
@@ -119,7 +122,9 @@ namespace vhdl {
 
   void report(::std::string message, STANDARD::SEVERITY_LEVEL severity);
 
-  static bool equal(STANDARD::INTEGER left, int right);
+  static bool equal(STANDARD::INTEGER left, int right) {
+    return left.value == right;
+  }
 
 }
 
