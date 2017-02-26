@@ -4,6 +4,7 @@
 #include "variable_declaration.hpp"
 #include "signal_declaration.hpp"
 #include "constant_declaration.hpp"
+#include "function_declaration.hpp"
 #include "declaration.hpp"
 
 namespace vhdl {
@@ -14,6 +15,7 @@ namespace vhdl {
       variable = scanner->optional<VariableDeclaration>();
       signal = scanner->optional<SignalDeclaration>();
       constant = scanner->optional<ConstantDeclaration>();
+      function = scanner->optional<FunctionDeclaration>();
       return this;
     }
 
