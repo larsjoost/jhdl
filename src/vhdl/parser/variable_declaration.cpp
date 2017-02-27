@@ -7,13 +7,6 @@
 namespace vhdl {
   namespace parser {
   
-    VariableDeclaration* VariableDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->accept(scanner::Scanner::VHDL_VARIABLE);
-      identifier = scanner->expect<BasicIdentifier>();
-      scanner->expect(":");
-      type = scanner->expect<BasicIdentifier>();
-      return this;
-    }
 
   }
 }

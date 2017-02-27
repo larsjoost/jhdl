@@ -2,6 +2,7 @@
 #include "../../ast/text.hpp"
 #include "../scanner/scanner.hpp"
 #include "basic_identifier_list.hpp"
+#include "expression.hpp"
 
 namespace vhdl {
   namespace parser {

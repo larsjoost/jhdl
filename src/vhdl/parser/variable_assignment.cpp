@@ -11,7 +11,6 @@ namespace vhdl {
       identifier = scanner->accept<BasicIdentifier>();
       scanner->accept(":=");
       expression = scanner->expect<Expression>();
-      scanner->expect(";");
       return this;
     }
 

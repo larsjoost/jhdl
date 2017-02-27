@@ -11,6 +11,7 @@
 #include "../ast/expression.hpp"
 #include "../ast/procedure_call_statement.hpp"
 #include "../ast/variable_assignment.hpp"
+#include "../ast/return_statement.hpp"
 #include "../ast/signal_declaration.hpp"
 #include "../ast/constant_declaration.hpp"
 #include "../ast/enumeration_type.hpp"
@@ -35,12 +36,19 @@ namespace generator {
     bool verbose = false;
 
     void functionStart(std::string name);
+
+    enum DeclarationID {SIGNAL, FUNCTION};
+    
+    struct DeclarationInfo {
+      DeclarationID id;
+      std::string type;
+    };
     
     struct parameters {
       int indent = 0;
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
-      std::unordered_map<std::string, std::string> signalDeclaration;
+      std::unordered_map<std::string, DeclarationInfo> declaration;
       void incIndent() {
         indent += 2;
       }
@@ -53,9 +61,9 @@ namespace generator {
   
     int methodId = 0;
 
-    bool isSignal(parameters& parm, std::string name);
+    bool matchDeclarationID(parameters& parm, std::string name, DeclarationID id);
     
-    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm& e);
+    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e);
     std::string expressionToString(parameters& parm, ast::Expression* e);
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
@@ -68,7 +76,9 @@ namespace generator {
     void ifStatement(parameters& parm, ast::IfStatement* p);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
+    std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
+    void returnStatement(parameters& parm, ast::ReturnStatement* r);
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
     void signalAssignment(parameters& parm, ast::SignalAssignment* p);
     void includes(parameters& parm, ast::DesignFile& designFile);
@@ -76,10 +86,13 @@ namespace generator {
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    std::string variableDeclarationToString(parameters& parm, ast::VariableDeclaration* v);
     void variable_declarations(parameters& parm, ast::VariableDeclaration* v);
+    std::string signalDeclarationToString(parameters& parm, ast::SignalDeclaration* v);
     void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
+    std::string constantDeclarationToString(parameters& parm, ast::ConstantDeclaration* v);
     void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
-    void interfaceListToString(parameters& parm, ast::InterfaceList* l);
+    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 

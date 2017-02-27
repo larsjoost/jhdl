@@ -6,7 +6,9 @@
 #include "association_element.hpp"
 
 namespace ast {
-    
+
+  class AssociationElement;
+  
   class AssociationList {
     
   public:

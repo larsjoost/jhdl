@@ -6,14 +6,9 @@
 #include "interface_element.hpp"
 
 namespace vhdl {
-  namespace parser {
   
-    InterfaceElement* InterfaceElement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      ((variable = scanner->optional<VariableDeclaration>()) || 
-       (signal = scanner->optional<SignalDeclaration>()) || 
-       (constant = scanner->optional<ConstantDeclaration>()));
-      return this;
-    }
+  namespace parser {
+    
 
   }
 }

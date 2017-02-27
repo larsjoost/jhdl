@@ -12,18 +12,22 @@
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
 #include "wait_statement.hpp"
+#include "return_statement.hpp"
 
 namespace vhdl {
   namespace parser {
   
     SequentialStatement* SequentialStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      (variableAssignment = scanner->optional<VariableAssignment>()) ||
-        (signalAssignment = scanner->optional<SignalAssignment>()) ||
-	(reportStatement = scanner->optional<ReportStatement>()) ||
-        (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
-	(ifStatement = scanner->optional<IfStatement>()) ||
-	(forLoopStatement = scanner->optional<ForLoopStatement>()) ||
-	(waitStatement = scanner->optional<WaitStatement>());
+      if ((variableAssignment = scanner->optional<VariableAssignment>()) ||
+          (signalAssignment = scanner->optional<SignalAssignment>()) ||
+          (reportStatement = scanner->optional<ReportStatement>()) ||
+          (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
+          (ifStatement = scanner->optional<IfStatement>()) ||
+          (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
+          (waitStatement = scanner->optional<WaitStatement>()) ||
+          (returnStatement = scanner->optional<ReturnStatement>())) {
+        scanner->expect(";");
+      }
       return this;
     }
     

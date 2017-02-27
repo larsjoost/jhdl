@@ -6,6 +6,8 @@
 
 namespace ast {
     
+  class Expression;
+
   class AssociationElement {
     
   public:

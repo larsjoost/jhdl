@@ -9,7 +9,7 @@ namespace vhdl {
   namespace parser {
   
     AssociationElement* AssociationElement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      expression = scanner->expect<Expression>();
+      expression = scanner->accept<Expression>();
       return this;
     }
 

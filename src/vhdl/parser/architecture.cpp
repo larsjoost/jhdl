@@ -16,7 +16,7 @@ namespace vhdl {
       scanner->expect(scanner::Scanner::VHDL_OF);
       name = scanner->expect<BasicIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
-      parseDeclarations(scanner);
+      while (declarations.add(scanner->optional<Declaration>())) {}
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
@@ -29,14 +29,6 @@ namespace vhdl {
       }
       scanner->expect(";");
       return this;
-    }
-
-    void Architecture::parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner) {
-      bool match;
-      do {
-        match = false;
-        match |= declarations.add(scanner->optional<Declaration>());
-      } while (match);
     }
     
   }

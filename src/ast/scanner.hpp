@@ -203,6 +203,9 @@ namespace ast {
   int Scanner<ApplicationSpecificScanner>::optional(const char* t) {
     int len = match(t);
     DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
+    if (verbose) {
+      printTextLinePosition(stdout, tokenLookAhead(0)->text);
+    }
     if (len > 0) {
       nextToken(len);
     }
@@ -211,7 +214,7 @@ namespace ast {
   
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::accept(const char* t) {
-    DEBUG("accept" + std::string(t));
+    DEBUG("accept '" + std::string(t) + "'");
     int len = optional(t);
     if (len == 0) {
       throw TokenNotAccepted();
@@ -253,7 +256,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::expect(const char* t) {
-    DEBUG("expect" + std::string(t));
+    DEBUG("expect '" + std::string(t) + "'");
     int len = optional(t);
     if (len == 0) {
       error("Expected '" + std::string(t) + "'");

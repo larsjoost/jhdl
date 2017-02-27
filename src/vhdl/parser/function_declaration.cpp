@@ -13,7 +13,7 @@ namespace vhdl {
     FunctionDeclaration* FunctionDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_FUNCTION);
       name = scanner->expect<BasicIdentifier>();
-      interface = scanner->expect<InterfaceList>();
+      interface = scanner->expect<InterfaceList<scanner::Scanner::VHDL_VARIABLE>>();
       scanner->expect(scanner::Scanner::VHDL_RETURN);
       returnType = scanner->expect<BasicIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
@@ -28,7 +28,6 @@ namespace vhdl {
                        "' does not match function name '" +
                        name->toString() + "'");
       }
-      scanner->expect(";");
       return this;
     }
     

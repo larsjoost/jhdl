@@ -7,13 +7,6 @@
 namespace vhdl {
   namespace parser {
   
-    SignalDeclaration* SignalDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->optional(scanner::Scanner::VHDL_SIGNAL);
-      identifier = scanner->expect<BasicIdentifier>();
-      scanner->expect(":");
-      type = scanner->expect<BasicIdentifier>();
-      return this;
-    }
 
   }
 }

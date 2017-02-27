@@ -12,11 +12,6 @@ namespace vhdl {
     class Architecture :
       public ::ast::Implementation  {
 
-    protected:
-      
-      void parseDeclarations(::ast::Scanner<scanner::Scanner>* scanner);
-      void parseBody(::ast::Scanner<scanner::Scanner>* scanner);
-      
     public:
 
       Architecture* parse(::ast::Scanner<scanner::Scanner>* scanner);

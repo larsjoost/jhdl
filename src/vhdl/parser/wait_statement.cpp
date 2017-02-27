@@ -10,7 +10,6 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_WAIT);
       scanner->expect(scanner::Scanner::VHDL_FOR);
       physical = scanner->expect<Physical>();
-      scanner->expect(";");
       return this;
     }
 

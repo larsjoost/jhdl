@@ -1,15 +1,10 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../scanner/defines.hpp"
 #include "expression_operator.hpp"
 #include "unary_operator.hpp"
 #include "expression.hpp"
-#include "basic_identifier.hpp"
-#include "number.hpp"
-#include "character.hpp"
-#include "string.hpp"
-#include "physical.hpp"
+#include "expression_term.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -20,15 +15,9 @@ namespace vhdl {
         scanner->expect(")");
       } else if (unaryOperator = scanner->optional<UnaryOperator>()) {
         expression = scanner->expect<Expression>();
-      } else {
-        if ((term.physical = scanner->optional<Physical>()) ||
-            (term.number = scanner->optional<Number>()) ||
-            (term.character = scanner->optional<Character>()) ||
-            (term.text = scanner->optional<String>()) ||
-            (term.identifier = scanner->optional<BasicIdentifier>())) {
-          if (op = scanner->optional<ExpressionOperator>()) {
-            expression = scanner->expect<Expression>();
-          }
+      } else if (term = scanner->optional<ExpressionTerm>()) {
+        if (op = scanner->optional<ExpressionOperator>()) {
+          expression = scanner->expect<Expression>();
         }
       }
       return this;

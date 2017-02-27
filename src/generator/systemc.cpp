@@ -136,39 +136,73 @@ namespace generator {
     }
   }
 
+  std::string SystemC::variableDeclarationToString(parameters& parm, ast::VariableDeclaration* v) {
+    std::string s = "";
+    if (v) {
+      s = basicIdentifierToString(parm, v->type) + " " + basicIdentifierToString(parm, v->identifier);
+    }
+    return s;
+  }
+
   void SystemC::variable_declarations(parameters& parm, ast::VariableDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, basicIdentifierToString(parm, v->type) + " " + basicIdentifierToString(parm, v->identifier) + ";");
+      println(parm, variableDeclarationToString(parm, v) + ";");
     }
+  }
+
+  std::string SystemC::signalDeclarationToString(parameters& parm, ast::SignalDeclaration* v) {
+    std::string s = "";
+    if (v) {
+      printSourceLine(parm, v->identifier);
+      DeclarationInfo i;
+      std::string name = basicIdentifierToString(parm, v->identifier);
+      std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + ">"; 
+      i.type = type + "& " + name;
+      i.id = SIGNAL;
+      parm.declaration[name] = i;
+      println(parm, type + " " + name + ";");
+    }
+    return s;
   }
 
   void SystemC::signal_declarations(parameters& parm, ast::SignalDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + "> ";
-      std::string id = basicIdentifierToString(parm, v->identifier);
-      parm.signalDeclaration[id] = type;
-      println(parm, type + " " + id + ";");
+      println(parm, signalDeclarationToString(parm, v) + ";");
     }
+  }
+
+  std::string SystemC::constantDeclarationToString(parameters& parm, ast::ConstantDeclaration* v) {
+    std::string s = "";
+    if (v) {
+      s = "const " + basicIdentifierToString(parm, v->type) + " " +
+        basicIdentifierToString(parm, v->identifier);
+    }
+    return s;
   }
 
   void SystemC::constant_declarations(parameters& parm, ast::ConstantDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, "const " + basicIdentifierToString(parm, v->type) + " " +
-              basicIdentifierToString(parm, v->identifier) + ";");
+      println(parm, constantDeclarationToString(parm, v) + ";");
     }
   }
 
-  void SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l) {
+  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l) {
+    std::string s;
     if (l) {
+      std::string x = "";
+      std::string delimiter = "";
       for (ast::InterfaceElement i : l->interfaceElements.list) {
-        variable_declarations(parm, i.variable);
-        signal_declarations(parm, i.signal);
-        constant_declarations(parm, i.constant);
+        if (i.variable) {x = variableDeclarationToString(parm, i.variable);}
+        if (i.signal) {x = signalDeclarationToString(parm, i.signal);}
+        if (i.constant) {x = constantDeclarationToString(parm, i.constant);}
+        s += delimiter + x;
+        delimiter = ", ";
       }
     }
+    return s;
   }
 
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
@@ -176,11 +210,12 @@ namespace generator {
       printSourceLine(parm, f->name);
       std::string name = basicIdentifierToString(parm, f->name);
       std::string returnType = basicIdentifierToString(parm, f->returnType);
-      println(parm, returnType + " " + name + "(");
-      parm.incIndent();
-      interfaceListToString(parm, f->interface);
-      parm.decIndent();
-      println(parm, ") {");
+      std::string interface = "(" + interfaceListToString(parm, f->interface) + ")";
+      DeclarationInfo i;
+      i.type = returnType + " (*" + name  + ")" + interface;
+      i.id = FUNCTION;
+      parm.declaration[name] = i;
+      println(parm, returnType + " " + name + interface + "{");
       parm.incIndent();
       declarations(parm, f->declarations);
       sequentialStatements(parm, f->sequentialStatements);
@@ -208,6 +243,7 @@ namespace generator {
       ifStatement(parm, s.ifStatement);
       forLoopStatement(parm, s.forLoopStatement);
       waitStatement(parm, s.waitStatement);
+      returnStatement(parm, s.returnStatement);
     }
   }
 
@@ -258,9 +294,9 @@ namespace generator {
       memberVariableAssignment = listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
     }
     std::string signalAssignment = "";
-    if (parm.signalDeclaration.size() > 0) {
+    if (parm.declaration.size() > 0) {
       colon = " : ";
-      signalAssignment = listToString(parm, parm.signalDeclaration, ",", [&](std::string key, std::string value){return key + "(p->" + key + ")";});
+      signalAssignment = listToString(parm, parm.declaration, ",", [&](std::string key, DeclarationInfo value){return key + "(p->" + key + ")";});
     } else {
       comma = "";
     }
@@ -280,8 +316,8 @@ namespace generator {
       }
       println(parm, "class " + methodName + " : public sc_thread {");
       parm.incIndent();
-      for (auto s : parm.signalDeclaration) {
-        println(parm, s.second + "& " + s.first + ";");
+      for (auto s : parm.declaration) {
+        println(parm, s.second.type + ";");
       }
       if (parm.forGenerateHierarchy.size() > 0) {
         println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
@@ -421,16 +457,23 @@ namespace generator {
     }
   }
 
-  void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
+  std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
+    std::string s = "";
     if (p) {
-      std::string s = "";
       if (p->associationList) {
         for (ast::AssociationElement e :
                p->associationList->associationElements.list) {
           s += expressionToString(parm, e.expression);
         }
       }
-      println(parm, basicIdentifierToString(parm, p->name) + "(" + s + ");");
+      s = basicIdentifierToString(parm, p->name) + "(" + s + ");";
+    }
+    return s;
+  }
+
+  void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
+    if (p) {
+      println(parm, procedureCallStatementToString(parm, p));
     }
   }
   
@@ -492,6 +535,12 @@ namespace generator {
     }
   }
 
+  void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
+    if (r) {
+      println(parm, "return " + expressionToString(parm, r->value) + ";");
+    }
+  }
+
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
@@ -500,15 +549,19 @@ namespace generator {
     }
   }
 
-  bool SystemC::isSignal(parameters& parm, std::string name) {
-    return (parm.signalDeclaration.find(name) != parm.signalDeclaration.end());
+  bool SystemC::matchDeclarationID(parameters& parm, std::string name, DeclarationID id) {
+    auto t = parm.declaration.find(name); 
+    if (t == parm.declaration.end()) {
+      return false;
+    }
+    return t->second.id == id;
   }
   
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
     assert (i != NULL);
     std::string s = i->text.toString(true);
     if (i->attribute) {
-      std::string seperator = isSignal(parm, s) ? "." : "::";
+      std::string seperator = matchDeclarationID(parm, s, SIGNAL) ? "." : "::";
       s += seperator + i->attribute->toString(true);
       s += "(" + listToString(parm, i->arguments, ",", [&](std::string s){return s;}) + ")";
     }
@@ -525,22 +578,28 @@ namespace generator {
     return n->value.toString();
   }
   
-  std::string SystemC::expressionTermToString(parameters& parm, ast::ExpressionTerm& e) {
-    if (e.physical) {
-      return physicalToString(parm, e.physical);
+  std::string SystemC::expressionTermToString(parameters& parm, ast::ExpressionTerm* e) {
+    if (e) {
+      if (e->physical) {
+        return physicalToString(parm, e->physical);
+      }
+      if (e->number) {
+        return numberToString(parm, e->number);
+      }
+      if (e->text) {
+        return e->text->text.toString();
+      }
+      if (e->identifier) { 
+        return basicIdentifierToString(parm, e->identifier);
+      }
+      if (e->character) {
+        return characterToString(parm, e->character);
+      }
+      if (e->procedureCall) {
+        return procedureCallStatementToString(parm, e->procedureCall);
+      }
     }
-    if (e.number) {
-      return numberToString(parm, e.number);
-    }
-    if (e.text) {
-      return e.text->text.toString();
-    }
-    if (e.identifier) { 
-      return basicIdentifierToString(parm, e.identifier);
-    }
-    if (e.character) {
-      return characterToString(parm, e.character);
-    }
+    return "";
   }
   
   std::string SystemC::expressionToString(parameters& parm, ast::Expression* e) {

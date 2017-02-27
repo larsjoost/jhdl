@@ -18,7 +18,6 @@ namespace vhdl {
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->expect(scanner::Scanner::VHDL_LOOP);
-      scanner->expect(";");
       return this;
     }
 

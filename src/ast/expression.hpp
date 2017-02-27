@@ -10,12 +10,13 @@
 
 namespace ast {
 
+  class ExpressionTerm;
   
   class Expression {
     
   public:
 
-    ExpressionTerm term;
+    ExpressionTerm* term;
     ExpressionOperator* op;
     UnaryOperator* unaryOperator;
     Expression* expression;

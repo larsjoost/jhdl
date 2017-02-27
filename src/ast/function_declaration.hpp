@@ -8,6 +8,7 @@
 #include "interface_list.hpp"
 #include "sequential_statement.hpp"
 #include "declaration.hpp"
+#include "expression.hpp"
 
 namespace ast {
 
@@ -19,6 +20,7 @@ namespace ast {
     
     BasicIdentifier* name;
     BasicIdentifier* returnType;
+    Expression* returnValue;
     InterfaceList* interface;
     List<Declaration> declarations;
     List<SequentialStatement> sequentialStatements;

@@ -30,7 +30,6 @@ namespace vhdl {
       }
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->expect(scanner::Scanner::VHDL_IF);
-      scanner->expect(";");
       return this;
     }
 

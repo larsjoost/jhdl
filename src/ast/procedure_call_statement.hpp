@@ -7,7 +7,9 @@
 #include "association_list.hpp"
 
 namespace ast {
-    
+
+  class AssociationList;
+  
   class ProcedureCallStatement {
     
   public:

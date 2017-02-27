@@ -14,7 +14,7 @@ namespace ast {
     Text text;
     Text* attribute;
     BasicIdentifierList* arguments; 
-
+    
     bool equals(BasicIdentifier* b) {
       if (b) {
 	return text.equals(b->text);

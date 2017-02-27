@@ -12,7 +12,6 @@ namespace vhdl {
       message = scanner->expect<Expression>();
       scanner->expect(scanner::Scanner::VHDL_SEVERITY);
       severity = scanner->expect<BasicIdentifier>();
-      scanner->expect(";");
       return this;
     }
 

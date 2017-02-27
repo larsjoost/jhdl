@@ -4,17 +4,29 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
+#include "basic_identifier.hpp"
 #include "../../ast/signal_declaration.hpp"
 
 namespace vhdl {
   namespace parser {
 
+    template<bool defaultType = false>
     class SignalDeclaration :
       public ::ast::SignalDeclaration  {
 
     public:
 
-      SignalDeclaration* parse(::ast::Scanner<scanner::Scanner>* scanner);
+      SignalDeclaration<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
+        if (defaultType) {
+          scanner->optional(scanner::Scanner::VHDL_SIGNAL);
+        } else {
+          scanner->accept(scanner::Scanner::VHDL_SIGNAL);
+        }
+        identifier = scanner->accept<BasicIdentifier>();
+        scanner->expect(":");
+        type = scanner->expect<BasicIdentifier>();
+        return this;
+      }
       
     };
 
