@@ -3,8 +3,7 @@
 #define AST_INTERFACE_H_
 
 #include "basic_identifier.hpp"
-#include "list.hpp"
-#include "declaration.hpp"
+#include "interface_list.hpp"
 
 namespace ast {
     
@@ -13,8 +12,8 @@ namespace ast {
   public:
 
     BasicIdentifier* name;
-    List<Declaration> generics;
-    List<Declaration> ports;
+    InterfaceList* generics;
+    InterfaceList* ports;
     
   };
 

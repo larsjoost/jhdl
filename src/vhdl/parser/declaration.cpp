@@ -11,11 +11,13 @@ namespace vhdl {
   namespace parser {
   
     Declaration* Declaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      type = scanner->optional<TypeDeclaration>();
-      variable = scanner->optional<VariableDeclaration>();
-      signal = scanner->optional<SignalDeclaration>();
-      constant = scanner->optional<ConstantDeclaration>();
-      function = scanner->optional<FunctionDeclaration>();
+      if ((type = scanner->optional<TypeDeclaration>()) || 
+          (variable = scanner->optional<VariableDeclaration>()) || 
+          (signal = scanner->optional<SignalDeclaration>()) || 
+          (constant = scanner->optional<ConstantDeclaration>()) || 
+          (function = scanner->optional<FunctionDeclaration>())) {
+        scanner->expect(";");
+      }
       return this;
     }
 

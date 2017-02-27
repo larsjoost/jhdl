@@ -13,7 +13,6 @@ namespace vhdl {
       identifier = scanner->expect<BasicIdentifier>();
       scanner->accept(scanner::Scanner::VHDL_IS);
       typeDefinition = scanner->expect<TypeDefinition>();
-      scanner->expect(";");
       return this;
     }
 

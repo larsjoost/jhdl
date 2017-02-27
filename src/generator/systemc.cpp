@@ -14,6 +14,7 @@
 #include "../ast/variable_declaration.hpp"
 #include "../ast/signal_declaration.hpp"
 #include "../ast/constant_declaration.hpp"
+#include "../ast/function_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
 #include "../ast/signal_assignment.hpp"
 #include "../ast/report_statement.hpp"
@@ -160,12 +161,41 @@ namespace generator {
     }
   }
 
+  void SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l) {
+    if (l) {
+      for (ast::InterfaceElement i : l->interfaceElements.list) {
+        variable_declarations(parm, i.variable);
+        signal_declarations(parm, i.signal);
+        constant_declarations(parm, i.constant);
+      }
+    }
+  }
+
+  void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
+    if (f) {
+      printSourceLine(parm, f->name);
+      std::string name = basicIdentifierToString(parm, f->name);
+      std::string returnType = basicIdentifierToString(parm, f->returnType);
+      println(parm, returnType + " " + name + "(");
+      parm.incIndent();
+      interfaceListToString(parm, f->interface);
+      parm.decIndent();
+      println(parm, ") {");
+      parm.incIndent();
+      declarations(parm, f->declarations);
+      sequentialStatements(parm, f->sequentialStatements);
+      parm.decIndent();
+      println(parm, "}");
+    }
+  }
+
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       variable_declarations(parm, i.variable);
       signal_declarations(parm, i.signal);
       constant_declarations(parm, i.constant);
+      function_declarations(parm, i.function);
     }
   }
 
@@ -532,7 +562,10 @@ namespace generator {
       switch (e->op->op) {
       case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
       case ::ast::ExpressionOperator::ADD: {return term + " + " + expr;}
-      case ::ast::ExpressionOperator::EQUAL: {op = "equal"; break;}
+      case ::ast::ExpressionOperator::EQUAL: {return term + " == " + expr;}
+      case ::ast::ExpressionOperator::NOT_EQUAL: {return term + " != " + expr;}
+      case ::ast::ExpressionOperator::LARGER_OR_EQUAL: {return term + " >= " + expr;}
+      case ::ast::ExpressionOperator::SMALLER_OR_EQUAL: {return term + " <= " + expr;}
       default: {assert (false);}
       }
       return op + "(" + term + ", " + expr + ")";

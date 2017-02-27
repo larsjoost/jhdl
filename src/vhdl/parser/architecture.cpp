@@ -1,7 +1,6 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../scanner/defines.hpp"
 #include "architecture.hpp"
 #include "basic_identifier.hpp"
 #include "process.hpp"

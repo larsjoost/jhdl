@@ -13,7 +13,10 @@ namespace ast {
     enum operators {
       CONCAT,
       ADD,
-      EQUAL};
+      EQUAL,
+      NOT_EQUAL,
+      LARGER_OR_EQUAL,
+      SMALLER_OR_EQUAL};
     
     operators op;
     

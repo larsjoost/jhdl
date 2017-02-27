@@ -25,6 +25,8 @@
 #include "../ast/wait_statement.hpp"
 #include "../ast/sequential_statement.hpp"
 #include "../ast/concurrent_statement.hpp"
+#include "../ast/interface_element.hpp"
+#include "../ast/interface_list.hpp"
 
 namespace generator {
   
@@ -77,6 +79,8 @@ namespace generator {
     void variable_declarations(parameters& parm, ast::VariableDeclaration* v);
     void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
     void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
+    void interfaceListToString(parameters& parm, ast::InterfaceList* l);
+    void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     template<class Key, class Value, typename Func>
