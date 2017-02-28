@@ -23,6 +23,8 @@ begin
     if (a /= 1) then
       report "a = " & integer'image(a) & ", but expected 1"
         severity failure;
+    else
+      report "a = " & integer'image(a) severity note;
     end if;
     finish(0);
   end process;

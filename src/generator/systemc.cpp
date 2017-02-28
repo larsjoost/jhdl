@@ -33,6 +33,12 @@ namespace generator {
     }
   }
 
+  void SystemC::functionEnd(std::string name) {
+    if (verbose) {
+      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
+    }
+  }
+
   SystemC::SystemC(bool verbose) : verbose(verbose) {}
 
   void SystemC::generate(ast::DesignFile& designFile) {
@@ -61,6 +67,20 @@ namespace generator {
         println(parm, "}");
       }
     }
+  }
+
+  void SystemC::printDeclaration(parameters& parm) {
+    for (auto i : parm.declaration) {
+      std::cout << "name = " << i.first << ", hierarchy level = " << i.second.hierarchyLevel << std::endl;
+    }
+  }
+  
+  SystemC::parameters SystemC::descendHierarchy(parameters& parm) {
+    parameters p = parm;
+    for (auto it = p.declaration.begin(); it != p.declaration.end(); it++) {
+      it->second.hierarchyLevel++;
+    }
+    return p;
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text& t) {
@@ -158,7 +178,6 @@ namespace generator {
       DeclarationInfo i;
       std::string name = basicIdentifierToString(parm, v->identifier);
       std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + ">"; 
-      i.type = type + "& " + name;
       i.id = SIGNAL;
       parm.declaration[name] = i;
       println(parm, type + " " + name + ";");
@@ -212,7 +231,6 @@ namespace generator {
       std::string returnType = basicIdentifierToString(parm, f->returnType);
       std::string interface = "(" + interfaceListToString(parm, f->interface) + ")";
       DeclarationInfo i;
-      i.type = returnType + " (*" + name  + ")" + interface;
       i.id = FUNCTION;
       parm.declaration[name] = i;
       println(parm, returnType + " " + name + interface + "{");
@@ -225,6 +243,7 @@ namespace generator {
   }
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
+    functionStart("declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       variable_declarations(parm, i.variable);
@@ -232,9 +251,10 @@ namespace generator {
       constant_declarations(parm, i.constant);
       function_declarations(parm, i.function);
     }
+    functionEnd("declarations");
   }
 
-  void SystemC::sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l) {
+  void SystemC::sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l) {
     for (ast::SequentialStatement s : l.list) {
       procedureCallStatement(parm, s.procedureCallStatement);
       variableAssignment(parm, s.variableAssignment);
@@ -284,41 +304,26 @@ namespace generator {
   
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name) {
     std::string constructorArguments = "";
-    std::string memberVariableAssignment = "";
-    std::string colon = "";
-    std::string comma = "";
     if (parm.forGenerateHierarchy.size() > 0) {
-      colon = " : ";
-      comma = ", ";
       constructorArguments = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
-      memberVariableAssignment = listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
     }
-    std::string signalAssignment = "";
-    if (parm.declaration.size() > 0) {
-      colon = " : ";
-      signalAssignment = listToString(parm, parm.declaration, ",", [&](std::string key, DeclarationInfo value){return key + "(p->" + key + ")";});
-    } else {
-      comma = "";
-    }
-    std::string assignment = signalAssignment + comma + memberVariableAssignment;
-    return name + "(" + parm.parentName +"* p" + constructorArguments + ")" + colon + assignment;
+    return name + "(" + parm.parentName +"* parent" + constructorArguments + ") : p(parent)";
   }
   
-  void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
+  void SystemC::methodDefinition(parameters& p, ast::Method* method) {
     functionStart("methodDefinition");
     if (method) {
+      parameters parm = descendHierarchy(p);
       std::string methodName;
       if (method->name) {
-        methodName = basicIdentifierToString(parm, method->name);
+        methodName = basicIdentifierToString(p, method->name);
       } else {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
       }
       println(parm, "class " + methodName + " : public sc_thread {");
       parm.incIndent();
-      for (auto s : parm.declaration) {
-        println(parm, s.second.type + ";");
-      }
+      println(parm, parm.parentName + "* p;");
       if (parm.forGenerateHierarchy.size() > 0) {
         println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
       }
@@ -339,9 +344,10 @@ namespace generator {
       parm.decIndent();
       println(parm, "};");
     }
+    functionEnd("methodDefinition");
   }
 
-  void SystemC::blockStatementDefinition(parameters parm,
+  void SystemC::blockStatementDefinition(parameters& parm,
                                          ast::BlockStatement* blockStatement) {
     functionStart("blockStatementDefinition");
     if (blockStatement) {
@@ -349,13 +355,9 @@ namespace generator {
       printSourceLine(parm, blockStatement->name);
       println(parm, "SC_BLOCK(" + basicIdentifierToString(parm, blockStatement->name) + ") {");
       parm.incIndent();
-      {
-        parameters p = parm;
-        declarations(p, blockStatement->declarations);
-        println(parm, "public:");
-        p.parentName = name;
-        concurrentStatementsDefinition(p, blockStatement->concurrentStatements);
-      }
+      declarations(parm, blockStatement->declarations);
+      println(parm, "public:");
+      concurrentStatementsDefinition(parm, blockStatement->concurrentStatements);
       println(parm, getConstructorDeclaration(parm, name) + "{");
       concurrentStatementsInstantiation(parm, blockStatement->concurrentStatements);
       println(parm, "}");
@@ -364,7 +366,7 @@ namespace generator {
     }
   }
   
-  void SystemC::forGenerateStatementDefinition(parameters parm,
+  void SystemC::forGenerateStatementDefinition(parameters& parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
       parm.forGenerateHierarchy.push_back(basicIdentifierToString(parm, forGenerateStatement->identifier));
@@ -372,7 +374,7 @@ namespace generator {
     }
   }
   
-  void SystemC::concurrentStatementsDefinition(parameters parm,
+  void SystemC::concurrentStatementsDefinition(parameters& parm,
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     functionStart("concurrentStatementsDefinition");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
@@ -380,6 +382,7 @@ namespace generator {
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
     }
+    functionEnd("concurrentStatementsDefinition");
   }
 
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name) {
@@ -404,7 +407,7 @@ namespace generator {
     }
   }
 
-  void SystemC::blockStatementInstantiation(parameters parm,
+  void SystemC::blockStatementInstantiation(parameters& parm,
                                             ast::BlockStatement* blockStatement) {
     functionStart("blockStatementInstantiation");
     if (blockStatement) {
@@ -412,7 +415,7 @@ namespace generator {
     }
   }
 
-  void SystemC::forGenerateStatementInstantiation(parameters parm,
+  void SystemC::forGenerateStatementInstantiation(parameters& parm,
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
@@ -424,7 +427,7 @@ namespace generator {
     }
   }
   
-  void SystemC::concurrentStatementsInstantiation(parameters parm,
+  void SystemC::concurrentStatementsInstantiation(parameters& parm,
                                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
@@ -434,7 +437,7 @@ namespace generator {
     }
   }
 
-  void SystemC::threadConstructor(parameters parm, ast::BasicIdentifier* name, 
+  void SystemC::threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     println(parm, "SC_CTOR(" + basicIdentifierToString(parm, name) + ") {");
     concurrentStatementsInstantiation(parm, concurrentStatements);
@@ -455,6 +458,7 @@ namespace generator {
         }
       }
     }
+    functionEnd("implementation");
   }
 
   std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
@@ -549,17 +553,30 @@ namespace generator {
     }
   }
 
-  bool SystemC::matchDeclarationID(parameters& parm, std::string name, DeclarationID id) {
+  bool SystemC::matchDeclarationID(parameters& parm, std::string& name, DeclarationID id) {
     auto t = parm.declaration.find(name); 
     if (t == parm.declaration.end()) {
       return false;
     }
     return t->second.id == id;
   }
+
+  int SystemC::getHierarchyLevel(parameters& parm, std::string& name) {
+    auto t = parm.declaration.find(name); 
+    if (t != parm.declaration.end()) {
+      return t->second.hierarchyLevel;
+    }
+    return 0;
+  }
   
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
     assert (i != NULL);
-    std::string s = i->text.toString(true);
+    std::string name = i->text.toString(true);
+    std::string s = "";
+    for (int i=0; i<getHierarchyLevel(parm, name); i++) {
+      s += "p->";
+    }
+    s += name;
     if (i->attribute) {
       std::string seperator = matchDeclarationID(parm, s, SIGNAL) ? "." : "::";
       s += seperator + i->attribute->toString(true);

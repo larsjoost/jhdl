@@ -36,12 +36,13 @@ namespace generator {
     bool verbose = false;
 
     void functionStart(std::string name);
+    void functionEnd(std::string name);
 
     enum DeclarationID {SIGNAL, FUNCTION};
     
     struct DeclarationInfo {
       DeclarationID id;
-      std::string type;
+      int hierarchyLevel = 0;
     };
     
     struct parameters {
@@ -57,11 +58,16 @@ namespace generator {
       }
     };
     
+    void printDeclaration(parameters& parm);
+    
     void println(parameters& parm, std::string text);
   
     int methodId = 0;
 
-    bool matchDeclarationID(parameters& parm, std::string name, DeclarationID id);
+    bool matchDeclarationID(parameters& parm, std::string& name, DeclarationID id);
+    int getHierarchyLevel(parameters& parm, std::string& name);
+
+    parameters descendHierarchy(parameters& parm);
     
     std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e);
     std::string expressionToString(parameters& parm, ast::Expression* e);
@@ -71,7 +77,7 @@ namespace generator {
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r);
 
-    void sequentialStatements(parameters parm, ast::List<ast::SequentialStatement>& l);
+    void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
@@ -107,14 +113,14 @@ namespace generator {
     void methodDefinition(parameters& parm, ast::Method* method);
     void instantiateType(parameters& parm, std::string type, std::string name);
     void methodInstantiation(parameters& parm, ast::Method* method);
-    void blockStatementDefinition(parameters parm, ast::BlockStatement* blockStatement);
-    void blockStatementInstantiation(parameters parm, ast::BlockStatement* blockStatement);
-    void forGenerateStatementDefinition(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
-    void forGenerateStatementInstantiation(parameters parm, ast::ForGenerateStatement* forGenerateStatement);
-    void concurrentStatementsDefinition(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
-    void concurrentStatementsInstantiation(parameters parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
+    void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
+    void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
   
-    void threadConstructor(parameters parm, ast::BasicIdentifier* name, 
+    void threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
