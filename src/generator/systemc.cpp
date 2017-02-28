@@ -180,7 +180,7 @@ namespace generator {
       std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + ">"; 
       i.id = SIGNAL;
       parm.declaration[name] = i;
-      println(parm, type + " " + name + ";");
+      s = type + " " + name;
     }
     return s;
   }
@@ -304,10 +304,12 @@ namespace generator {
   
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name) {
     std::string constructorArguments = "";
+    std::string memberVariableAssignment = "";
     if (parm.forGenerateHierarchy.size() > 0) {
       constructorArguments = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
+      memberVariableAssignment = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
     }
-    return name + "(" + parm.parentName +"* parent" + constructorArguments + ") : p(parent)";
+    return name + "(" + parm.parentName +"* parent" + constructorArguments + ") : p(parent)" + memberVariableAssignment;
   }
   
   void SystemC::methodDefinition(parameters& p, ast::Method* method) {
@@ -353,11 +355,16 @@ namespace generator {
     if (blockStatement) {
       std::string name = basicIdentifierToString(parm, blockStatement->name);
       printSourceLine(parm, blockStatement->name);
-      println(parm, "SC_BLOCK(" + basicIdentifierToString(parm, blockStatement->name) + ") {");
+      println(parm, "SC_BLOCK(" + name + ") {");
       parm.incIndent();
+      println(parm, parm.parentName + "* p;");
       declarations(parm, blockStatement->declarations);
       println(parm, "public:");
-      concurrentStatementsDefinition(parm, blockStatement->concurrentStatements);
+      {
+        parameters p = parm;
+        p.parentName = name;
+        concurrentStatementsDefinition(p, blockStatement->concurrentStatements);
+      }
       println(parm, getConstructorDeclaration(parm, name) + "{");
       concurrentStatementsInstantiation(parm, blockStatement->concurrentStatements);
       println(parm, "}");
@@ -419,10 +426,10 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      std::string id = basicIdentifierToString(parm, forGenerateStatement->identifier);
-      parm.forGenerateHierarchy.push_back(id);
       println(parm, rangeTypeToString(parm, forGenerateStatement->identifier, forGenerateStatement->range) + ") {");
+      parm.incIndent();
       concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
+      parm.decIndent();
       println(parm, "}");
     }
   }
