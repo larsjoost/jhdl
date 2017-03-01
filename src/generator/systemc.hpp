@@ -12,8 +12,7 @@
 #include "../ast/procedure_call_statement.hpp"
 #include "../ast/variable_assignment.hpp"
 #include "../ast/return_statement.hpp"
-#include "../ast/signal_declaration.hpp"
-#include "../ast/constant_declaration.hpp"
+#include "../ast/object_declaration.hpp"
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
 #include "../ast/character.hpp"
@@ -92,12 +91,8 @@ namespace generator {
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
-    std::string variableDeclarationToString(parameters& parm, ast::VariableDeclaration* v);
-    void variable_declarations(parameters& parm, ast::VariableDeclaration* v);
-    std::string signalDeclarationToString(parameters& parm, ast::SignalDeclaration* v);
-    void signal_declarations(parameters& parm, ast::SignalDeclaration* v);
-    std::string constantDeclarationToString(parameters& parm, ast::ConstantDeclaration* v);
-    void constant_declarations(parameters& parm, ast::ConstantDeclaration* v);
+    std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v);
+    void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);

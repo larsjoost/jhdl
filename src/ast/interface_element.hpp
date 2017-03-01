@@ -3,9 +3,7 @@
 #define AST_INTERFACEELEMENT_H_
 
 #include "list.hpp"
-#include "variable_declaration.hpp"
-#include "signal_declaration.hpp"
-#include "constant_declaration.hpp"
+#include "object_declaration.hpp"
 
 namespace ast {
     
@@ -13,9 +11,9 @@ namespace ast {
     
   public:
 
-    VariableDeclaration* variable;
-    SignalDeclaration* signal;
-    ConstantDeclaration* constant;
+    ObjectDeclaration* variable;
+    ObjectDeclaration* signal;
+    ObjectDeclaration* constant;
     
   };
 

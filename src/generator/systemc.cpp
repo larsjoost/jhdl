@@ -11,9 +11,7 @@
 #include "../ast/expression.hpp"
 #include "../ast/expression_term.hpp"
 #include "../ast/declaration.hpp"
-#include "../ast/variable_declaration.hpp"
-#include "../ast/signal_declaration.hpp"
-#include "../ast/constant_declaration.hpp"
+#include "../ast/object_declaration.hpp"
 #include "../ast/function_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
 #include "../ast/signal_assignment.hpp"
@@ -156,28 +154,16 @@ namespace generator {
     }
   }
 
-  std::string SystemC::variableDeclarationToString(parameters& parm, ast::VariableDeclaration* v) {
-    std::string s = "";
-    if (v) {
-      s = basicIdentifierToString(parm, v->type) + " " + basicIdentifierToString(parm, v->identifier);
-    }
-    return s;
-  }
-
-  void SystemC::variable_declarations(parameters& parm, ast::VariableDeclaration* v) {
-    if (v) {
-      printSourceLine(parm, v->identifier);
-      println(parm, variableDeclarationToString(parm, v) + ";");
-    }
-  }
-
-  std::string SystemC::signalDeclarationToString(parameters& parm, ast::SignalDeclaration* v) {
+  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v) {
     std::string s = "";
     if (v) {
       printSourceLine(parm, v->identifier);
       DeclarationInfo i;
       std::string name = basicIdentifierToString(parm, v->identifier);
-      std::string type = "sc_signal<" + basicIdentifierToString(parm, v->type) + ">"; 
+      std::string type = basicIdentifierToString(parm, v->type);
+      if (v->objectType == ast::ObjectDeclaration::SIGNAL) {
+        type = "sc_signal<" + type + ">";
+      }
       i.id = SIGNAL;
       parm.declaration[name] = i;
       s = type + " " + name;
@@ -185,26 +171,10 @@ namespace generator {
     return s;
   }
 
-  void SystemC::signal_declarations(parameters& parm, ast::SignalDeclaration* v) {
+  void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, signalDeclarationToString(parm, v) + ";");
-    }
-  }
-
-  std::string SystemC::constantDeclarationToString(parameters& parm, ast::ConstantDeclaration* v) {
-    std::string s = "";
-    if (v) {
-      s = "const " + basicIdentifierToString(parm, v->type) + " " +
-        basicIdentifierToString(parm, v->identifier);
-    }
-    return s;
-  }
-
-  void SystemC::constant_declarations(parameters& parm, ast::ConstantDeclaration* v) {
-    if (v) {
-      printSourceLine(parm, v->identifier);
-      println(parm, constantDeclarationToString(parm, v) + ";");
+      println(parm, objectDeclarationToString(parm, v) + ";");
     }
   }
 
@@ -214,9 +184,9 @@ namespace generator {
       std::string x = "";
       std::string delimiter = "";
       for (ast::InterfaceElement i : l->interfaceElements.list) {
-        if (i.variable) {x = variableDeclarationToString(parm, i.variable);}
-        if (i.signal) {x = signalDeclarationToString(parm, i.signal);}
-        if (i.constant) {x = constantDeclarationToString(parm, i.constant);}
+        if (i.variable) {x = objectDeclarationToString(parm, i.variable);}
+        if (i.signal) {x = objectDeclarationToString(parm, i.signal);}
+        if (i.constant) {x = objectDeclarationToString(parm, i.constant);}
         s += delimiter + x;
         delimiter = ", ";
       }
@@ -246,9 +216,9 @@ namespace generator {
     functionStart("declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
-      variable_declarations(parm, i.variable);
-      signal_declarations(parm, i.signal);
-      constant_declarations(parm, i.constant);
+      object_declarations(parm, i.variable);
+      object_declarations(parm, i.signal);
+      object_declarations(parm, i.constant);
       function_declarations(parm, i.function);
     }
     functionEnd("declarations");

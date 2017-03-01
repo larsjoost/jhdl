@@ -4,9 +4,7 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "variable_declaration.hpp"
-#include "signal_declaration.hpp"
-#include "constant_declaration.hpp"
+#include "object_declaration.hpp"
 #include "../../ast/interface_element.hpp"
 
 namespace vhdl {
@@ -19,9 +17,9 @@ namespace vhdl {
     public:
       
       InterfaceElement<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
-        ((variable = scanner->optional<VariableDeclaration<defaultType == scanner::Scanner::VHDL_VARIABLE>>()) || 
-         (signal = scanner->optional<SignalDeclaration<defaultType == scanner::Scanner::VHDL_SIGNAL>>()) || 
-         (constant = scanner->optional<ConstantDeclaration<defaultType == scanner::Scanner::VHDL_CONSTANT>>()));
+        ((variable = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_VARIABLE, defaultType == scanner::Scanner::VHDL_VARIABLE>>()) || 
+         (signal = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL, defaultType == scanner::Scanner::VHDL_SIGNAL>>()) || 
+         (constant = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT, defaultType == scanner::Scanner::VHDL_CONSTANT>>()));
         return this;
       }
 
