@@ -7,13 +7,5 @@
 namespace vhdl {
   namespace parser {
   
-    ConstantDeclaration* ConstantDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->accept(scanner::Scanner::VHDL_CONSTANT);
-      identifier = scanner->expect<BasicIdentifier>();
-      scanner->expect(":");
-      type = scanner->expect<BasicIdentifier>();
-      return this;
-    }
-
   }
 }

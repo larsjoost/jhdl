@@ -3,6 +3,7 @@
 #define AST_SIGNAL_DECLARATION_H_
 
 #include "basic_identifier.hpp"
+#include "declaration_initialization.hpp"
 
 namespace ast {
     
@@ -12,6 +13,7 @@ namespace ast {
 
     BasicIdentifier* identifier;
     BasicIdentifier* type;
+    DeclarationInitialization* initialization;
     
   };
 

@@ -6,6 +6,7 @@
 #include "../scanner/scanner.hpp"
 #include "basic_identifier.hpp"
 #include "../../ast/signal_declaration.hpp"
+#include "declaration_initialization.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -25,6 +26,7 @@ namespace vhdl {
         identifier = scanner->accept<BasicIdentifier>();
         scanner->expect(":");
         type = scanner->expect<BasicIdentifier>();
+        initialization = scanner->optional<DeclarationInitialization>();
         return this;
       }
       

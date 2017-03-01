@@ -14,7 +14,7 @@ namespace vhdl {
       if ((type = scanner->optional<TypeDeclaration>()) || 
           (variable = scanner->optional<VariableDeclaration<>>()) || 
           (signal = scanner->optional<SignalDeclaration<>>()) || 
-          (constant = scanner->optional<ConstantDeclaration>()) || 
+          (constant = scanner->optional<ConstantDeclaration<>>()) || 
           (function = scanner->optional<FunctionDeclaration>())) {
         scanner->expect(";");
       }

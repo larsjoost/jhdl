@@ -21,7 +21,7 @@ namespace vhdl {
       InterfaceElement<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
         ((variable = scanner->optional<VariableDeclaration<defaultType == scanner::Scanner::VHDL_VARIABLE>>()) || 
          (signal = scanner->optional<SignalDeclaration<defaultType == scanner::Scanner::VHDL_SIGNAL>>()) || 
-         (constant = scanner->optional<ConstantDeclaration>()));
+         (constant = scanner->optional<ConstantDeclaration<defaultType == scanner::Scanner::VHDL_CONSTANT>>()));
         return this;
       }
 
