@@ -27,6 +27,7 @@
 #include "../ast/concurrent_statement.hpp"
 #include "../ast/interface_element.hpp"
 #include "../ast/interface_list.hpp"
+#include "../ast/interface.hpp"
 
 namespace generator {
   
@@ -93,7 +94,7 @@ namespace generator {
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
-    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l);
+    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter = ", ");
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
@@ -117,6 +118,7 @@ namespace generator {
   
     void threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void interface(parameters& parm, ast::Interface* intf);
     void implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name);
 
     void printSourceLine(parameters& parm, ast::Text& t);

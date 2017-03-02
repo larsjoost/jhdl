@@ -47,6 +47,7 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
         std::string name = basicIdentifierToString(parm, it->module.interface->name);
+        parm.parentName = name;
         println(parm, "#include \"systemc.h\"");
         println(parm, "#include \"vhdl.h\"");
         println(parm, "namespace vhdl {");
@@ -57,7 +58,7 @@ namespace generator {
         println(parm, "SC_MODULE(" + name + ") {");
         println(parm, "public:");
         parm.incIndent();
-        parm.parentName = name;
+        interface(parm, it->module.interface);
         implementation(parm, designFile, it->module.interface->name);
         parm.decIndent();
         println(parm, "};");
@@ -167,6 +168,9 @@ namespace generator {
       i.id = SIGNAL;
       parm.declaration[name] = i;
       s = type + " " + name;
+      if (v->initialization) {
+        s += " = " + expressionToString(parm, v->initialization->value);
+      }
     }
     return s;
   }
@@ -178,17 +182,17 @@ namespace generator {
     }
   }
 
-  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l) {
+  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter) {
     std::string s;
     if (l) {
       std::string x = "";
-      std::string delimiter = "";
+      std::string d = "";
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.variable) {x = objectDeclarationToString(parm, i.variable);}
         if (i.signal) {x = objectDeclarationToString(parm, i.signal);}
         if (i.constant) {x = objectDeclarationToString(parm, i.constant);}
-        s += delimiter + x;
-        delimiter = ", ";
+        s += d + x;
+        d = delimiter;
       }
     }
     return s;
@@ -421,16 +425,26 @@ namespace generator {
     println(parm, "}");
   }
   
+  void SystemC::interface(parameters& parm, ast::Interface* intf) {
+    if (intf->generics) {
+      println(parm, interfaceListToString(parm, intf->generics, "; ") + ";");
+    }
+    if (intf->ports) {
+      println(parm, interfaceListToString(parm, intf->ports, "; ") + ";");
+    }
+  }
+
   void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name) {
     functionStart("implementation");
-    for (ast::DesignUnit it : designFile.designUnits.list) {
-      if (it.module.implementation) {
-        if (name->equals(it.module.implementation->name)) {
-          declarations(parm, it.module.implementation->declarations);
-          concurrentStatementsDefinition(parm, it.module.implementation->concurrentStatements);
+    for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
+         it != designFile.designUnits.list.end(); it++) {
+      if (it->module.implementation) {
+        if (name->equals(it->module.implementation->name)) {
+          declarations(parm, it->module.implementation->declarations);
+          concurrentStatementsDefinition(parm, it->module.implementation->concurrentStatements);
           println(parm, "public:");
           parm.incIndent();
-          threadConstructor(parm, name, it.module.implementation->concurrentStatements);
+          threadConstructor(parm, name, it->module.implementation->concurrentStatements);
           parm.decIndent();
         }
       }

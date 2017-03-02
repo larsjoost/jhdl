@@ -84,7 +84,7 @@ namespace ast {
       T* p = new T();
       int position = getTokenPosition();
       if (verbose) {
-        std::cout << "Optional[" << position << "]: " << typeid(p).name() << std::endl;
+        std::cout << "[START]Optional[" << position << "]: " << typeid(p).name() << std::endl;
       }
       try {
         p->parse(this);
@@ -96,7 +96,7 @@ namespace ast {
         p = NULL;
       }
       if (verbose) {
-        std::cout << "Optional[" << getTokenPosition() << "]: " << typeid(p).name() << " : ";
+        std::cout << "[END]Optional[" << getTokenPosition() << "]: " << typeid(p).name() << " : ";
         std::cout << (p ? "[FOUND]" : "[MISSED]");
         std::cout << " Token = " + currentTokenToString() << std::endl;
       }

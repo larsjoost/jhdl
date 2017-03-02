@@ -17,10 +17,10 @@ subdirs:
 	$(MAKE) -C $$m; \
 	done
 
-hdlc: $(SOURCE) $(INCLUDE)
+hdlc: $(SOURCE) $(INCLUDE) hdlc.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(shell find $(DIRS) -type f -iname '*.o' -print) hdlc.cpp $(FLAGS)
 
-hdlf: $(SOURCE) $(INCLUDE)
+hdlf: $(SOURCE) $(INCLUDE) hdlf.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(shell find $(DIRS) -type f -iname '*.o' -print) hdlf.cpp $(FLAGS)
 
 cppcheck:

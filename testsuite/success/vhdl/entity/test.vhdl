@@ -7,3 +7,4 @@ entity test is
     a   : in  integer;
     q   : out integer);
 end entity test; 
+

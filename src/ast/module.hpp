@@ -15,8 +15,8 @@ namespace ast {
   public:
     
     ContextClause* contextClause = NULL;
-    Interface* interface;
-    Implementation* implementation;
+    Interface* interface = NULL;
+    Implementation* implementation = NULL;
     
   };
 
