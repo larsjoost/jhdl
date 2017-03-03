@@ -1,10 +1,12 @@
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
-DEPS := $(wildcard *.c*)
-CXXFLAGS := -std=c++14 -g # -Wall -ansi
+DEPS := $(OBJS:.o=.d)
+CXXFLAGS := -std=c++14 -g -MMD # -Wall -ansi
 
-%.o: %.cpp $(DEPS)
+%.o: %.cpp 
 	g++ $(CXXFLAGS) -c $< -o $@  
+
+-include $(DEPS)
 
 all: $(OBJS)
 

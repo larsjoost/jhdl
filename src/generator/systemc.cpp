@@ -59,7 +59,7 @@ namespace generator {
         println(parm, "public:");
         parm.incIndent();
         interface(parm, it->module.interface);
-        implementation(parm, designFile, it->module.interface->name);
+        implementation(parm, designFile, it->module.interface);
         parm.decIndent();
         println(parm, "};");
         parm.decIndent();
