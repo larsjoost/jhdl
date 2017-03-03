@@ -434,8 +434,9 @@ namespace generator {
     }
   }
 
-  void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name) {
+  void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface) {
     functionStart("implementation");
+    ast::BasicIdentifier* name = interface->name;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.implementation) {

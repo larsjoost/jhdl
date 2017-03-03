@@ -119,7 +119,7 @@ namespace generator {
     void threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void interface(parameters& parm, ast::Interface* intf);
-    void implementation(parameters& parm, ast::DesignFile& designFile, ast::BasicIdentifier* name);
+    void implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface);
 
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
