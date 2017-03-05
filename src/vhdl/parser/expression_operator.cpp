@@ -23,12 +23,13 @@ namespace vhdl {
         }
       }
       {
-        static const int SIZE = 3;
+        static const int SIZE = 4;
         static const ::ast::ExpressionOperator::operators o[SIZE] = {
           ::ast::ExpressionOperator::CONCAT,
           ::ast::ExpressionOperator::ADD,
+          ::ast::ExpressionOperator::SUB,
           ::ast::ExpressionOperator::EQUAL};
-        static const char* c[SIZE] = {"&", "+", "="};
+        static const char* c[SIZE] = {"&", "+", "-", "="};
         for (int i=0; i<SIZE; i++) {
           if (scanner->optional(c[i])) {
             op = o[i];

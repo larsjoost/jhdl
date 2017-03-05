@@ -29,6 +29,11 @@ namespace vhdl {
       using Range<int>::operator!=;
       using Range<int>::IMAGE;
 
+      INTEGER operator +(int other) { value += other; return *this;}
+      INTEGER operator -(int other) { value -= other; return *this;}
+      INTEGER operator +(INTEGER other) { value += other.value; return *this;}
+      INTEGER operator -(INTEGER other) { value -= other.value; return *this;}
+
       std::string toString() {
         return ::std::to_string(value);
       }
@@ -39,11 +44,6 @@ namespace vhdl {
 
     };
     
-    static INTEGER operator+(INTEGER left, const int right) {
-      left.value += right;
-      return left;
-    }
-
     class NATURAL : public INTEGER {
     public:
       explicit NATURAL(int left=0, int right=INT_MAX) : INTEGER(left, right) {};

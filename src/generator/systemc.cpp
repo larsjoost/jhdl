@@ -739,6 +739,7 @@ namespace generator {
       switch (e->op->op) {
       case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
       case ::ast::ExpressionOperator::ADD: {return term + " + " + expr;}
+      case ::ast::ExpressionOperator::SUB: {return term + " - " + expr;}
       case ::ast::ExpressionOperator::EQUAL: {return term + " == " + expr;}
       case ::ast::ExpressionOperator::NOT_EQUAL: {return term + " != " + expr;}
       case ::ast::ExpressionOperator::LARGER_OR_EQUAL: {return term + " >= " + expr;}

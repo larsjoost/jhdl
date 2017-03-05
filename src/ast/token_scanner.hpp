@@ -348,7 +348,6 @@ namespace ast {
         assignRange(0, LUT_SIZE-1, false);
         assignRange('0', '9', true);
         assignRange('.', '.', true);
-        assignRange(VALID_FIRST_CHAR, '-', '-', true);
       }
     } BASIC_IDENTIFIER;
     char a = text.lookAhead(0);

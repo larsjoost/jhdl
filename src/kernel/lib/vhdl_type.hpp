@@ -45,6 +45,10 @@ namespace vhdl {
     bool operator !=(const Range<T> &other) const { return value != other.value; }
     bool operator ==(T other) const { return value == other; }
     bool operator !=(T other) const { return value != other; }
+    Range<T> operator +(T other) { value += other; return *this;}
+    Range<T> operator -(T other) { value -= other; return *this;}
+    Range<T> operator +(Range<T> other) { value += other.value; return *this;}
+    Range<T> operator -(Range<T> other) { value -= other.value; return *this;}
     
     std::string toString() {
       return std::to_string(value);
