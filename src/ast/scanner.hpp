@@ -197,7 +197,7 @@ namespace ast {
     int len = match(t);
     DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
     if (verbose) {
-      tokenLookAhead(0)->text.printLinePosition(stdout);
+      tokenLookAhead(0)->text.printLinePosition(std::cout);
     }
     if (len > 0) {
       nextToken(len);

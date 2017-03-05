@@ -7,11 +7,11 @@ namespace ast {
     return text.equals(i.text);
   }
 
-  void Identifier::print(FILE* output) {
+  void Identifier::print(std::ostream& output) {
     text.print(output);
   }
   
-  void Identifier::debug(FILE* output) {
+  void Identifier::debug(std::ostream& output) {
     text.debug(output);
   }
   

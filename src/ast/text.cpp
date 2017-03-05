@@ -135,43 +135,40 @@ namespace ast {
     return s;
   }
   
-  void Text::printCurrentLine(FILE* output, std::string head) {
-    const char* c = getCurrentLine().c_str();
-    fprintf(output, head.c_str());
-    fprintf(output, c);
-    fprintf(output, "\n");
+  void Text::printCurrentLine(std::ostream& output, std::string head) {
+    output << head << getCurrentLine() << std::endl;
   }
 
-  void Text::printCurrentLinePositionMarker(FILE* output, std::string head) {
-    fprintf(output, head.c_str());
+  void Text::printCurrentLinePositionMarker(std::ostream& output, std::string head) {
+    output << head;
     for (int i = 0; i < (position - lineStart); i++) {
-      fputc(' ', output);
+      output << ' ';
     }
-    fprintf(output, "^\n");
+    output << "^" << std::endl;
   }
   
-  void Text::printLinePosition(FILE* output, std::string head) {
+  void Text::printLinePosition(std::ostream& output, std::string head) {
     printCurrentLine(output, head);
     printCurrentLinePositionMarker(output, head);
   }
   
-  void Text::printException(const std::string &severity, const std::string &message, FILE* output, std::string head) {
-    std::cerr << head << severity << " in file " << filename << " at "
-              << std::to_string(getLine()) << ", "
-              << std::to_string(getColumn()) << ": "
-              << message << std::endl;
+  void Text::printException(const std::string &severity, const std::string &message, std::ostream& output, std::string head) {
+    output << head << severity << " in file " << filename << " at "
+           << std::to_string(getLine()) << ", "
+           << std::to_string(getColumn()) << ": "
+           << message << std::endl;
     printLinePosition(output, head);
   }
 
-  void Text::print(FILE* output) {
+  void Text::print(std::ostream& output) {
     for (int i = 0; i < (size - position); i++) {
-      fputc(lookAhead(i), output);
+      output << lookAhead(i);
     }
   }
 
-  void Text::debug(FILE* output) {
-    fprintf(output, "Text::position = %i\n", position);
-    fprintf(output, "Text::size = %i\n", size);
+  void Text::debug(std::ostream& output) {
+    output << "Text::position = " << position << std::endl;
+    output << "Text::size = " << size << std::endl;
   }
 
   const std::string Text::toString(bool setCase) {

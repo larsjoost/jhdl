@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 namespace ast {
 
@@ -24,8 +25,8 @@ namespace ast {
 
     void debug(const char* msg, char c = ' ');
 
-    void printCurrentLine(FILE* output, std::string head = "");
-    void printCurrentLinePositionMarker(FILE* output, std::string head = "");
+    void printCurrentLine(std::ostream& output, std::string head = "");
+    void printCurrentLinePositionMarker(std::ostream& output, std::string head = "");
 
   public:
     bool verbose = false;
@@ -47,10 +48,11 @@ namespace ast {
     const std::string toString(bool setCase = false);
     
     std::string getCurrentLine();
-    void printException(const std::string &severity, const std::string &message, FILE* output = stderr, std::string head = "");
-    void printLinePosition(FILE* output = stdout, std::string head = "");
-    void print(FILE* output = stdout);
-    void debug(FILE* output = stdout);
+    void printException(const std::string &severity, const std::string &message,
+                        std::ostream& output = std::cerr, std::string head = "");
+    void printLinePosition(std::ostream& output = std::cout, std::string head = "");
+    void print(std::ostream& output = std::cout);
+    void debug(std::ostream& output = std::cout);
   };
   
 }

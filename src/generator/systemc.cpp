@@ -30,7 +30,7 @@ namespace generator {
   }
   
   void SystemC::printWarning(ast::Text& t, std::string message) {
-    t.printException("warning", message, stdout, "// ");
+    t.printException("warning", message, std::cout, "// ");
   }
 
   void SystemC::functionStart(std::string name) {
