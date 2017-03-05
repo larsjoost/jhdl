@@ -18,22 +18,23 @@ namespace ast {
     int lineStart = 0;
     int columnNumber = 0;
     bool caseSensitive = false;
-
+    const char* filename;
+    
     char toLower(char c);
 
     void debug(const char* msg, char c = ' ');
 
-    void printCurrentLine(FILE* output);
-    void printCurrentLinePositionMarker(FILE* output);
+    void printCurrentLine(FILE* output, std::string head = "");
+    void printCurrentLinePositionMarker(FILE* output, std::string head = "");
 
   public:
     bool verbose = false;
 
     explicit Text() {};
     explicit Text(bool verbose);
-    Text(char* text, bool caseSensitive = false, bool verbose = false);
+    Text(const char* filename, char* text, bool caseSensitive = false, bool verbose = false);
     
-    void set(char* text, bool caseSensitive = false);
+    void set(const char* filename, char* text, bool caseSensitive = false);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
     void subString(Text& t, int size);
@@ -46,7 +47,8 @@ namespace ast {
     const std::string toString(bool setCase = false);
     
     std::string getCurrentLine();
-    void printLinePosition(FILE* output = stdout);
+    void printException(const std::string &severity, const std::string &message, FILE* output = stderr, std::string head = "");
+    void printLinePosition(FILE* output = stdout, std::string head = "");
     void print(FILE* output = stdout);
     void debug(FILE* output = stdout);
   };

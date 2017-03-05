@@ -36,7 +36,7 @@ namespace vhdl {
     Range(T left, T right) :
       value(left), left(left), right(right),
       begin_(this, left), end_(this, right + 1) { }
-    
+
     void operator=(T v) {
       value = v;
     }

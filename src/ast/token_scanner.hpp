@@ -115,7 +115,7 @@ namespace ast {
 
     bool accept(const char* c);
     
-    void setText(char* s);
+    void setText(const char* filename, char* s);
     void loadFile(const char* filename);
     
     void getText(Text& t);
@@ -134,8 +134,6 @@ namespace ast {
     
     std::string& getFilename();
     
-    void printTextLinePosition(FILE* output, Text& t);
-
     std::string toString(Token* t);
     std::string toString(Keyword k);
     std::string toString(TokenType k);
@@ -394,8 +392,8 @@ namespace ast {
   }
   
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::setText(char* s) {
-    text.set(s, ApplicationSpecificScanner::CASE_SENSITIVE);
+  void TokenScanner<ApplicationSpecificScanner>::setText(const char* filename, char* s) {
+    text.set(filename, s, ApplicationSpecificScanner::CASE_SENSITIVE);
     tokenize();
     if (verbose) {
       std::cout << "TOKENLIST:" << std::endl;
@@ -429,7 +427,7 @@ namespace ast {
       fclose(f);
 
       string[fsize] = 0;
-      setText(string);
+      setText(filename, string);
     } else {
       throw FileNotFound();
     }
@@ -492,17 +490,8 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::printTextLinePosition(FILE* output, Text& t) {
-    t.printLinePosition(output);
-  }
-
-  template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::print(const std::string &severity, const std::string &text) {
-    std::cerr << severity << " in file " << filename << " at "
-              << std::to_string(this->text.getLine()) << ", "
-              << std::to_string(this->text.getColumn()) << ": "
-              << text << std::endl;
-    printTextLinePosition(stderr, this->text);
+    this->text.printException(severity, text);
   }
   
   template <class ApplicationSpecificScanner>

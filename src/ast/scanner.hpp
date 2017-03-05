@@ -75,7 +75,6 @@ namespace ast {
     using TokenScanner<ApplicationSpecificScanner>::nextToken;
     using TokenScanner<ApplicationSpecificScanner>::loadFile;
     using TokenScanner<ApplicationSpecificScanner>::getFilename;
-    using TokenScanner<ApplicationSpecificScanner>::printTextLinePosition;
     using TokenScanner<ApplicationSpecificScanner>::toString;
     using TokenScanner<ApplicationSpecificScanner>::currentTokenToString;
     
@@ -150,17 +149,11 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   void Scanner<ApplicationSpecificScanner>::print(const std::string &severity, const std::string &text) {
     Token* t = tokenLookAhead(0);
-    std::cerr << severity << " in file " << getFilename() << " at "
-	      << std::to_string(t->text.getLine()) << ", "
-	      << std::to_string(t->text.getColumn()) << ": "
-	      << text
-              << ". Found ";
+    std::string message = "Found " + toString(t);
     if (verbose) {
-      std::cerr << "[" << getTokenPosition() << "]";
+      message += "[" + std::to_string(getTokenPosition()) + "]";
     }
-    std::cerr << toString(t) + "." << std::endl;
-    
-    printTextLinePosition(stderr, t->text);
+    t->text.printException(severity, message);
   }
 
   template <class ApplicationSpecificScanner>
@@ -204,7 +197,7 @@ namespace ast {
     int len = match(t);
     DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
     if (verbose) {
-      printTextLinePosition(stdout, tokenLookAhead(0)->text);
+      tokenLookAhead(0)->text.printLinePosition(stdout);
     }
     if (len > 0) {
       nextToken(len);

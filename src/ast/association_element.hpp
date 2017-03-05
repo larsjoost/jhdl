@@ -3,6 +3,7 @@
 #define AST_ASSOCIATION_ELEMENT_H_
 
 #include "expression.hpp"
+#include "association_element_formal_part.hpp"
 
 namespace ast {
     
@@ -11,8 +12,9 @@ namespace ast {
   class AssociationElement {
     
   public:
-    
-    Expression* expression = NULL;
+
+    AssociationElementFormalPart* formalPart;
+    Expression* actualPart = NULL;
     
   };
 

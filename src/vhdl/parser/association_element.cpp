@@ -4,12 +4,14 @@
 #include "../scanner/defines.hpp"
 #include "expression.hpp"
 #include "association_element.hpp"
+#include "association_element_formal_part.hpp"
 
 namespace vhdl {
   namespace parser {
   
     AssociationElement* AssociationElement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      expression = scanner->accept<Expression>();
+      formalPart = scanner->optional<AssociationElementFormalPart>();
+      actualPart = scanner->accept<Expression>();
       return this;
     }
 

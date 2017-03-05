@@ -24,16 +24,24 @@ namespace generator {
   void SystemC::println(parameters& parm, std::string text) {
     std::cout << std::string(parm.indent, ' ') << text << std::endl;
   }
+
+  void SystemC::printError(ast::Text& t, std::string message) {
+    t.printException("error", message);
+  }
   
+  void SystemC::printWarning(ast::Text& t, std::string message) {
+    t.printException("warning", message, stdout, "// ");
+  }
+
   void SystemC::functionStart(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
+      std::cerr << std::endl << "[FUNCTION START] " << name << std::endl;
     }
   }
 
   void SystemC::functionEnd(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
+      std::cerr << std::endl << "[FUNCTION END] " << name << std::endl;
     }
   }
 
@@ -155,22 +163,57 @@ namespace generator {
     }
   }
 
-  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v) {
+  template<typename Func>
+  void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback) {
+    if (v) {
+      std::string name = basicIdentifierToString(parm, v->identifier);
+      std::string type = basicIdentifierToString(parm, v->type);
+      std::string init = "";
+      if (v->initialization) {
+        init = expressionToString(parm, v->initialization->value);
+      }
+      DeclarationID id;
+      switch (v->objectType) {
+      case ast::ObjectDeclaration::SIGNAL: id = SIGNAL; break;
+      case ast::ObjectDeclaration::VARIABLE: id = VARIABLE; break;
+      case ast::ObjectDeclaration::CONSTANT: id = CONSTANT; break;
+      default: assert(false);
+      }
+      callback(name, type, init, id);
+    }
+  }
+
+  template<typename Func>
+  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback) {
+    functionStart("traverseInterfaceList");
+    if (l) {
+      for (ast::InterfaceElement i : l->interfaceElements.list) {
+        if (i.variable) {objectDeclaration(parm, i.variable, callback);}
+        if (i.signal) {objectDeclaration(parm, i.signal, callback);}
+        if (i.constant) {objectDeclaration(parm, i.constant, callback);}
+      }
+    }
+    functionEnd("traverseInterfaceList");
+  }
+
+  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
+                                                 bool initialization) {
     std::string s = "";
     if (v) {
       printSourceLine(parm, v->identifier);
-      DeclarationInfo i;
-      std::string name = basicIdentifierToString(parm, v->identifier);
-      std::string type = basicIdentifierToString(parm, v->type);
-      if (v->objectType == ast::ObjectDeclaration::SIGNAL) {
-        type = "sc_signal<" + type + ">";
-      }
-      i.id = SIGNAL;
-      parm.declaration[name] = i;
-      s = type + " " + name;
-      if (v->initialization) {
-        s += " = " + expressionToString(parm, v->initialization->value);
-      }
+      objectDeclaration(parm, v, [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
+          DeclarationInfo i;
+          if (id == SIGNAL) {
+            type = "sc_signal<" + type + ">";
+          }
+          i.id = SIGNAL;
+          parm.declaration[name] = i;
+          s = type + " " + name;
+          if (initialization && init.size() > 0) {
+            s += " = " + init;
+          }
+        }
+        );
     }
     return s;
   }
@@ -178,22 +221,21 @@ namespace generator {
   void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      println(parm, objectDeclarationToString(parm, v) + ";");
+      println(parm, objectDeclarationToString(parm, v, true) + ";");
     }
   }
-
-  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter) {
+  
+  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
+                                             bool initialization) {
     std::string s;
     if (l) {
       std::string x = "";
       std::string d = "";
-      for (ast::InterfaceElement i : l->interfaceElements.list) {
-        if (i.variable) {x = objectDeclarationToString(parm, i.variable);}
-        if (i.signal) {x = objectDeclarationToString(parm, i.signal);}
-        if (i.constant) {x = objectDeclarationToString(parm, i.constant);}
-        s += d + x;
-        d = delimiter;
-      }
+      traverseInterfaceList(parm, l, [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
+          s += d + type + " " + name;
+          d = delimiter;
+        }
+        );
     }
     return s;
   }
@@ -203,10 +245,11 @@ namespace generator {
       printSourceLine(parm, f->name);
       std::string name = basicIdentifierToString(parm, f->name);
       std::string returnType = basicIdentifierToString(parm, f->returnType);
-      std::string interface = "(" + interfaceListToString(parm, f->interface) + ")";
+      std::string interface = "(" + interfaceListToString(parm, f->interface, ", ", false) + ")";
       DeclarationInfo i;
       i.id = FUNCTION;
       parm.declaration[name] = i;
+      parm.functions[name] = f;
       println(parm, returnType + " " + name + interface + "{");
       parm.incIndent();
       declarations(parm, f->declarations);
@@ -242,34 +285,34 @@ namespace generator {
   }
 
   template<class Key, class Value, typename Func>
-  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func callback) {
     std::string s;
     std::string d;
     for (auto x : t) {
-      s += (d + lambda(x.first, x.second));
+      s += (d + callback(x.first, x.second));
       d = delimiter;
     }
     return s;
   }
 
   template<class T, typename Func>
-  std::string SystemC::listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback) {
     std::string s;
     std::string d;
     for (auto x : t) {
-      s += (d + lambda(x));
+      s += (d + callback(x));
       d = delimiter;
     }
     return s;
   }
 
   template<typename Func>
-  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func lambda) {
+  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback) {
     std::string s = "";
     if (list) {
       std::string d = "";
       for (ast::BasicIdentifier t : list->textList.list) {
-        s += (d + lambda(basicIdentifierToString(parm, &t)));
+        s += (d + callback(basicIdentifierToString(parm, &t)));
         d = delimiter;
       }
     }
@@ -427,10 +470,10 @@ namespace generator {
   
   void SystemC::interface(parameters& parm, ast::Interface* intf) {
     if (intf->generics) {
-      println(parm, interfaceListToString(parm, intf->generics, "; ") + ";");
+      println(parm, interfaceListToString(parm, intf->generics, "; ", false) + ";");
     }
     if (intf->ports) {
-      println(parm, interfaceListToString(parm, intf->ports, "; ") + ";");
+      println(parm, interfaceListToString(parm, intf->ports, "; ", false) + ";");
     }
   }
 
@@ -453,23 +496,76 @@ namespace generator {
     functionEnd("implementation");
   }
 
+  std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l) { 
+    functionStart("associateArgument");
+    std::string argument = init;
+    if (l) {
+      int associationElementNumber = 0;
+      for (ast::AssociationElement e : l->associationElements.list) {
+        std::string actualPart = expressionToString(parm, e.actualPart);
+        if (e.formalPart) {
+          std::string formalPart = getName(parm, e.formalPart->name);
+          if (formalPart == name) {
+            return actualPart;
+          }
+        } else if (associationElementNumber == argumentNumber) {
+          return actualPart;
+        }
+        associationElementNumber++;
+      }
+    }
+    functionEnd("associateArgument");
+    return argument;
+  }
+
+  std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
+    std::string s = "";
+    std::string basisName = getName(parm, functionName);
+    auto x = parm.functions.find(basisName);
+    if (x != parm.functions.end()) {
+      ast::FunctionDeclaration* f = x->second;
+      /*
+        Association list can either be:
+        func(formalPart => actualPart, a => w, b => x, c => y)
+        or
+        func(actualPart, w, x, y)
+      */
+      std::string delimiter = "";
+      int argumentNumber = 0;
+      traverseInterfaceList(parm, f->interface,
+                            [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
+                              std::string argument = associateArgument(parm, name, init, argumentNumber, l);
+                              if (argument.size() == 0) {
+                                printError(functionName->text, "No argument associated element " + std::to_string(argumentNumber));
+                              }
+                              s += delimiter + argument;
+                              delimiter = ", ";
+                              argumentNumber++;
+                            }
+                            );
+    } else {
+      printWarning(functionName->text, "Could not find function " + basisName + " declaration. Cannot associate arguments.");
+      if (l) {
+        s = listToString(parm, l->associationElements.list, ",", [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
+      }
+    }
+    return s;
+  }
+  
   std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
+    functionStart("procedureCallStatementToString");
     std::string s = "";
     if (p) {
-      if (p->associationList) {
-        for (ast::AssociationElement e :
-               p->associationList->associationElements.list) {
-          s += expressionToString(parm, e.expression);
-        }
-      }
-      s = basicIdentifierToString(parm, p->name) + "(" + s + ");";
+      std::string functionName = getName(parm, p->name, true);
+      s = functionName + "(" + parametersToString(parm, p->name, p->associationList) + ")";
     }
+    functionEnd("procedureCallStatementToString");
     return s;
   }
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
-      println(parm, procedureCallStatementToString(parm, p));
+      println(parm, procedureCallStatementToString(parm, p) + ";");
     }
   }
   
@@ -560,19 +656,32 @@ namespace generator {
     }
     return 0;
   }
-  
-  std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
+
+  std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy) {
     assert (i != NULL);
     std::string name = i->text.toString(true);
     std::string s = "";
-    for (int i=0; i<getHierarchyLevel(parm, name); i++) {
-      s += "p->";
+    if (hierarchy) {
+      for (int i=0; i<getHierarchyLevel(parm, name); i++) {
+        s += "p->";
+      }
     }
     s += name;
+    return s;
+  }
+  
+  std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
+    assert (i != NULL);
+    std::string name = getName(parm, i);
+    std::string s = getName(parm, i, true);
+    if (matchDeclarationID(parm, name, FUNCTION)) {
+      std::string parameters = parametersToString(parm, i);
+      s += "(" + parameters + ")";
+    }
     if (i->attribute) {
-      std::string seperator = matchDeclarationID(parm, s, SIGNAL) ? "." : "::";
+      std::string seperator = matchDeclarationID(parm, name, SIGNAL) ? "." : "::";
       s += seperator + i->attribute->toString(true);
-      s += "(" + listToString(parm, i->arguments, ",", [&](std::string s){return s;}) + ")";
+      s += "(" + listToString(parm, i->arguments, ",", [&](std::string a){return a;}) + ")";
     }
     return s;
   }

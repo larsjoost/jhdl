@@ -38,8 +38,8 @@ namespace generator {
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    enum DeclarationID {SIGNAL, FUNCTION};
-    
+    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION};
+
     struct DeclarationInfo {
       DeclarationID id;
       int hierarchyLevel = 0;
@@ -50,6 +50,7 @@ namespace generator {
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
       std::unordered_map<std::string, DeclarationInfo> declaration;
+      std::unordered_map<std::string, ast::FunctionDeclaration*> functions;
       void incIndent() {
         indent += 2;
       }
@@ -61,7 +62,10 @@ namespace generator {
     void printDeclaration(parameters& parm);
     
     void println(parameters& parm, std::string text);
-  
+
+    void printError(ast::Text& t, std::string message);
+    void printWarning(ast::Text& t, std::string message);
+
     int methodId = 0;
 
     bool matchDeclarationID(parameters& parm, std::string& name, DeclarationID id);
@@ -74,6 +78,7 @@ namespace generator {
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
+    std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r);
 
@@ -83,6 +88,8 @@ namespace generator {
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
+    std::string parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l = NULL);
+    std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
     void returnStatement(parameters& parm, ast::ReturnStatement* r);
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
@@ -92,18 +99,24 @@ namespace generator {
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
-    std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v);
+    template<typename Func>
+    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback);
+    std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
+                                          bool initialization);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
-    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter = ", ");
+    template<typename Func>
+    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback);
+    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
+                                      bool initialization);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     template<class Key, class Value, typename Func>
-    std::string listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func callback);
     template<class T, typename Func>
-    std::string listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback);
     template<typename Func>
-    std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func lambda);
+    std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback);
 
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
     void methodDefinition(parameters& parm, ast::Method* method);

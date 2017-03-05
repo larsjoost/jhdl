@@ -10,6 +10,7 @@
 #include <cassert>
 #include <stdio.h>
 #include <algorithm>
+#include <iostream>
 
 #include "text.hpp"
 
@@ -20,8 +21,9 @@ namespace ast {
 
   Text::Text(bool verbose) : verbose(verbose) {}
 
-  Text::Text(char* text, bool caseSensitive, bool verbose) : verbose(verbose) {
-    set(text, caseSensitive);
+  Text::Text(const char* filename, char* text, bool caseSensitive, bool verbose) :
+    verbose(verbose) {
+    set(filename, text, caseSensitive);
   }
 
   void Text::debug(const char* msg, char a) {
@@ -55,7 +57,8 @@ namespace ast {
     t.size = t.position + size;
   }
   
-  void Text::set(char* t, bool c) {
+  void Text::set(const char* filename, char* t, bool c) {
+    this->filename = filename;
     text = t;
     position = 0;
     size = textSize = strlen(t);
@@ -132,22 +135,32 @@ namespace ast {
     return s;
   }
   
-  void Text::printCurrentLine(FILE* output) {
+  void Text::printCurrentLine(FILE* output, std::string head) {
     const char* c = getCurrentLine().c_str();
+    fprintf(output, head.c_str());
     fprintf(output, c);
     fprintf(output, "\n");
   }
 
-  void Text::printCurrentLinePositionMarker(FILE* output) {
+  void Text::printCurrentLinePositionMarker(FILE* output, std::string head) {
+    fprintf(output, head.c_str());
     for (int i = 0; i < (position - lineStart); i++) {
       fputc(' ', output);
     }
     fprintf(output, "^\n");
   }
   
-  void Text::printLinePosition(FILE* output) {
-    printCurrentLine(output);
-    printCurrentLinePositionMarker(output);
+  void Text::printLinePosition(FILE* output, std::string head) {
+    printCurrentLine(output, head);
+    printCurrentLinePositionMarker(output, head);
+  }
+  
+  void Text::printException(const std::string &severity, const std::string &message, FILE* output, std::string head) {
+    std::cerr << head << severity << " in file " << filename << " at "
+              << std::to_string(getLine()) << ", "
+              << std::to_string(getColumn()) << ": "
+              << message << std::endl;
+    printLinePosition(output, head);
   }
 
   void Text::print(FILE* output) {

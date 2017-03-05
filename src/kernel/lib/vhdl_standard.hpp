@@ -20,6 +20,10 @@ namespace vhdl {
       explicit INTEGER(Range<int> r) : Range<int>(r.left, r.right) {
         value = r.value;
       };
+      INTEGER(int v) : Range<int>(INT_MIN, INT_MAX) {
+        value = v;
+      }
+      
       using Range<int>::operator=;
       using Range<int>::operator==;
       using Range<int>::operator!=;
