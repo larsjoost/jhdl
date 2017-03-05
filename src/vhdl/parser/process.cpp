@@ -24,7 +24,6 @@ namespace vhdl {
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_PROCESS);
-      scanner->expect(";");
       return this;
     }
    

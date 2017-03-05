@@ -26,7 +26,6 @@ namespace vhdl {
                        "' does not match generate name '" +
                        name->toString() + "'");
       }
-      scanner->expect(";");
       return this;
     }
 

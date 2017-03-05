@@ -72,8 +72,11 @@ namespace generator {
     int getHierarchyLevel(parameters& parm, std::string& name);
 
     parameters descendHierarchy(parameters& parm);
-    
-    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e);
+
+    template <typename Func>
+    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e, Func basicIdentifierCallback);
+    template <typename Func>
+    std::string expressionToString(parameters& parm, ast::Expression* e, Func basicIdentifierCallback);
     std::string expressionToString(parameters& parm, ast::Expression* e);
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
@@ -115,17 +118,23 @@ namespace generator {
     std::string listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func callback);
     template<class T, typename Func>
     std::string listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback);
+    template<class T, typename Func>
+    std::string listToString(parameters& parm, std::list<T>* t, std::string delimiter, Func callback);
     template<typename Func>
     std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback);
 
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
+    template <class T, typename Func>
+    void scThreadShell(parameters& parm, std::string& name, T sensitivity, Func body);
     void methodDefinition(parameters& parm, ast::Method* method);
     void instantiateType(parameters& parm, std::string type, std::string name);
+    void signalInstantiation(parameters& parm, ast::SignalAssignment* s);
     void methodInstantiation(parameters& parm, ast::Method* method);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
   

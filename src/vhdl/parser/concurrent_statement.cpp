@@ -7,14 +7,18 @@
 #include "process.hpp"
 #include "forgenerate_statement.hpp"
 #include "block_statement.hpp"
+#include "signal_assignment.hpp"
 
 namespace vhdl {
   namespace parser {
   
     ConcurrentStatement* ConcurrentStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      (method = scanner->optional<Process>()) ||
-	(forGenerateStatement = scanner->optional<ForGenerateStatement>()) ||
-        (blockStatement = scanner->optional<BlockStatement>());
+      if ((signalAssignment = scanner->optional<SignalAssignment>()) ||
+          (method = scanner->optional<Process>()) ||
+          (forGenerateStatement = scanner->optional<ForGenerateStatement>()) ||
+          (blockStatement = scanner->optional<BlockStatement>())) {
+        scanner->expect(";");
+      }
       return this;
     }
     

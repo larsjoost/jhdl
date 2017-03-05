@@ -297,9 +297,14 @@ namespace generator {
 
   template<class T, typename Func>
   std::string SystemC::listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback) {
+    return listToString(parm, &t, delimiter, callback);
+  }
+  
+  template<class T, typename Func>
+  std::string SystemC::listToString(parameters& parm, std::list<T>* t, std::string delimiter, Func callback) {
     std::string s;
     std::string d;
-    for (auto x : t) {
+    for (auto x : *t) {
       s += (d + callback(x));
       d = delimiter;
     }
@@ -328,40 +333,47 @@ namespace generator {
     }
     return name + "(" + parm.parentName +"* parent" + constructorArguments + ") : p(parent)" + memberVariableAssignment;
   }
+
+  template <class T, typename Func>
+  void SystemC::scThreadShell(parameters& p, std::string& name, T sensitivity, Func body) {  
+    parameters parm = descendHierarchy(p);
+    println(parm, "class " + name + " : public sc_thread {");
+    parm.incIndent();
+    println(parm, parm.parentName + "* p;");
+    if (parm.forGenerateHierarchy.size() > 0) {
+      println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
+    }
+    parm.decIndent();
+    println(parm, "public:");
+    parm.incIndent();
+    println(parm, getConstructorDeclaration(parm, name) +  + " {};");
+    println(parm, "void process() {");
+    parm.incIndent();
+    if (sensitivity) {
+      std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
+      println(parm, "wait([&](){return " + s + ";});");
+    }
+    body(parm);
+    parm.decIndent();
+    println(parm, "}");
+    parm.decIndent();
+    println(parm, "};");
+  }
   
-  void SystemC::methodDefinition(parameters& p, ast::Method* method) {
+  void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
     functionStart("methodDefinition");
     if (method) {
-      parameters parm = descendHierarchy(p);
       std::string methodName;
       if (method->name) {
-        methodName = basicIdentifierToString(p, method->name);
+        methodName = basicIdentifierToString(parm, method->name);
       } else {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
       }
-      println(parm, "class " + methodName + " : public sc_thread {");
-      parm.incIndent();
-      println(parm, parm.parentName + "* p;");
-      if (parm.forGenerateHierarchy.size() > 0) {
-        println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
-      }
-      parm.decIndent();
-      println(parm, "public:");
-      parm.incIndent();
-      println(parm, getConstructorDeclaration(parm, methodName) +  + " {};");
-      println(parm, "void process() {");
-      parm.incIndent();
-      if (method->sensitivity) {
-        std::string s = listToString(parm, method->sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
-        println(parm, "wait([&](){return " + s + ";});");
-      }
-      declarations(parm, method->declarations);
-      sequentialStatements(parm, method->sequentialStatements);
-      parm.decIndent();
-      println(parm, "}");
-      parm.decIndent();
-      println(parm, "};");
+      scThreadShell(parm, methodName, method->sensitivity, [&](parameters& parm) {
+          declarations(parm, method->declarations);
+          sequentialStatements(parm, method->sequentialStatements);
+        });
     }
     functionEnd("methodDefinition");
   }
@@ -397,6 +409,20 @@ namespace generator {
       concurrentStatementsDefinition(parm, forGenerateStatement->concurrentStatements);
     }
   }
+
+  void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
+    if (s) {
+      std::string name = "line" + std::to_string(s->identifier->text.getLine());
+      s->name = name;
+      std::list<std::string> sensitivity;
+      expressionToString(parm, s->expression, [&](std::string s) {
+          sensitivity.push_back(s);
+        });
+      scThreadShell(parm, name, &sensitivity, [&](parameters& parm) {
+          signalAssignment(parm, s);
+        });
+    }
+  }
   
   void SystemC::concurrentStatementsDefinition(parameters& parm,
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
@@ -405,6 +431,7 @@ namespace generator {
       methodDefinition(parm, c.method);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
+      concurrentSignalAssignment(parm, c.signalAssignment);
     }
     functionEnd("concurrentStatementsDefinition");
   }
@@ -429,6 +456,15 @@ namespace generator {
       }
       instantiateType(parm, "SC_THREAD", methodName);
     }
+    functionEnd("methodInstantiation");
+  }
+
+  void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
+    functionStart("signalInstantiation");
+    if (s) {
+      instantiateType(parm, "SC_THREAD", s->name);
+    }
+    functionEnd("signalInstantiation");
   }
 
   void SystemC::blockStatementInstantiation(parameters& parm,
@@ -458,6 +494,7 @@ namespace generator {
       methodInstantiation(parm, c.method);
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
       blockStatementInstantiation(parm, c.blockStatement);
+      signalInstantiation(parm, c.signalAssignment);
     }
   }
 
@@ -695,8 +732,9 @@ namespace generator {
     assert(n != NULL);
     return n->value.toString();
   }
-  
-  std::string SystemC::expressionTermToString(parameters& parm, ast::ExpressionTerm* e) {
+
+  template <typename Func>
+  std::string SystemC::expressionTermToString(parameters& parm, ast::ExpressionTerm* e, Func basicIdentifierCallback) {
     if (e) {
       if (e->physical) {
         return physicalToString(parm, e->physical);
@@ -707,26 +745,33 @@ namespace generator {
       if (e->text) {
         return e->text->text.toString();
       }
-      if (e->identifier) { 
+      if (e->identifier) {
+        basicIdentifierCallback(getName(parm, e->identifier));
         return basicIdentifierToString(parm, e->identifier);
       }
       if (e->character) {
         return characterToString(parm, e->character);
       }
       if (e->procedureCall) {
+        // TODO: Should also get basicIdentifierCallback as argument
         return procedureCallStatementToString(parm, e->procedureCall);
       }
     }
     return "";
   }
-  
+
   std::string SystemC::expressionToString(parameters& parm, ast::Expression* e) {
+    return expressionToString(parm, e, [](std::string s) {});
+  }
+  
+  template <typename Func>
+  std::string SystemC::expressionToString(parameters& parm, ast::Expression* e, Func basicIdentifierCallback) {
     assert(e != NULL);
     if (e->parenthis) {
-      return "(" + expressionToString(parm, e->parenthis) + ")";
+      return "(" + expressionToString(parm, e->parenthis, basicIdentifierCallback) + ")";
     } else if (e->unaryOperator) {
       std::string op;
-      std::string expr = expressionToString(parm, e->expression);
+      std::string expr = expressionToString(parm, e->expression, basicIdentifierCallback);
       switch (e->unaryOperator->op) {
       case ::ast::UnaryOperator::NOT: {op = "!"; break;}
       default: {assert (false);}
@@ -734,8 +779,8 @@ namespace generator {
       return op + expr;
     } else if (e->op) {
       std::string op;
-      std::string term = expressionTermToString(parm, e->term);
-      std::string expr = expressionToString(parm, e->expression);
+      std::string term = expressionTermToString(parm, e->term, basicIdentifierCallback);
+      std::string expr = expressionToString(parm, e->expression, basicIdentifierCallback);
       switch (e->op->op) {
       case ::ast::ExpressionOperator::CONCAT: {op = "concat"; break;}
       case ::ast::ExpressionOperator::ADD: {return term + " + " + expr;}
@@ -748,7 +793,7 @@ namespace generator {
       }
       return op + "(" + term + ", " + expr + ")";
     } else {
-      return expressionTermToString(parm, e->term);
+      return expressionTermToString(parm, e->term, basicIdentifierCallback);
     }
   }
   

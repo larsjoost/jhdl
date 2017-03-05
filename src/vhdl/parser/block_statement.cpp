@@ -26,7 +26,6 @@ namespace vhdl {
                        "' does not match block name '" +
                        name->toString() + "'");
       }
-      scanner->expect(";");
       return this;
     }
    

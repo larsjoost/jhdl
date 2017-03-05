@@ -11,6 +11,7 @@ namespace ast {
     
   public:
 
+    std::string name = "";
     BasicIdentifier* identifier;
     Expression* expression;
     

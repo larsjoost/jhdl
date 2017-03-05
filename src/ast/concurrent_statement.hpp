@@ -5,6 +5,7 @@
 #include "method.hpp"
 #include "forgenerate_statement.hpp"
 #include "block_statement.hpp"
+#include "signal_assignment.hpp"
 
 namespace ast {
 
@@ -15,6 +16,7 @@ namespace ast {
     
   public:
 
+    SignalAssignment* signalAssignment;
     Method* method;
     ForGenerateStatement* forGenerateStatement;
     BlockStatement* blockStatement;
