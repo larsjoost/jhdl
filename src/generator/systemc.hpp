@@ -28,6 +28,7 @@
 #include "../ast/interface_element.hpp"
 #include "../ast/interface_list.hpp"
 #include "../ast/interface.hpp"
+#include "../ast/component_instance.hpp"
 
 namespace generator {
   
@@ -137,6 +138,8 @@ namespace generator {
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l);
+    void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);

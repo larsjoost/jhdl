@@ -16,6 +16,7 @@
 #include "../ast/variable_assignment.hpp"
 #include "../ast/signal_assignment.hpp"
 #include "../ast/report_statement.hpp"
+#include "../ast/component_instance.hpp"
 
 #include "systemc.hpp"
 
@@ -502,6 +503,35 @@ namespace generator {
       println(parm, "}");
     }
   }
+
+  void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l) {
+    if (l) {
+      println(parm, listToString(parm, l->associationElements.list, "; ",
+                                 [&](ast::AssociationElement a){
+                                   return instanceName + "." + getName(parm, a.formalPart->name) +
+                                     "(" + expressionToString(parm, a.actualPart) + ")";
+                                 }));
+    }
+  }
+  
+  void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
+    if (c) {
+      printSourceLine(parm, c->instanceName);
+      std::string instanceName = getName(parm, c->instanceName);
+      std::string componentName = "";
+      std::string delimiter = "";
+      for (ast::BasicIdentifier i : c->componentName->textList.list) {
+        std::string n = basicIdentifierToString(parm, &i);
+        if (n != "WORK") {
+          componentName += delimiter + n;
+          delimiter = "::";
+        }
+      }
+      println(parm , componentName + " " + instanceName + ";");
+      componentAssociation(parm, instanceName, c->generics);
+      componentAssociation(parm, instanceName, c->ports);
+    }
+  }
   
   void SystemC::concurrentStatementsInstantiation(parameters& parm,
                                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
@@ -511,6 +541,7 @@ namespace generator {
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
       blockStatementInstantiation(parm, c.blockStatement);
       signalInstantiation(parm, c.signalAssignment);
+      componentInstantiation(parm, c.componentInstance);
     }
   }
 
