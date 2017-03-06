@@ -174,14 +174,17 @@ class sc_signal : public sc_signal_base {
 template<class T>
 struct sc_in {
 
-  sc_signal<T>* s;
+  sc_signal<T>* s = NULL;
 
   void bind(sc_signal<T>& s) {
     this->s = &s;
   }
   
   bool EVENT() {
-    return s->EVENT();
+    if (s) {
+      return s->EVENT();
+    }
+    return false;
   }
 
   sc_signal<T> operator+(sc_in<T>& v) {
@@ -194,10 +197,12 @@ struct sc_in {
 template<class T>
 struct sc_out {
 
-  sc_signal<T>* s;
+  sc_signal<T>* s = NULL;
 
-  void bind(sc_signal<T>& s) {
-    this->s = &s;
+  explicit sc_out<T>() {}
+
+  void bind(sc_signal<T>& other) {
+    s = &other;
   }
   
   sc_signal<T> operator=(const sc_signal<T>& v) {
