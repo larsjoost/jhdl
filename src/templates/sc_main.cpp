@@ -40,7 +40,7 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  auto* dut = new vhdl::%module%("DUT"); 
+  auto* dut = new vhdl::TEST("DUT"); 
 
   if (vcdFilename) {
 

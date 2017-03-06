@@ -508,7 +508,7 @@ namespace generator {
     if (l) {
       println(parm, listToString(parm, l->associationElements.list, "; ",
                                  [&](ast::AssociationElement a){
-                                   return instanceName + "." + getName(parm, a.formalPart->name) +
+                                   return instanceName + "->" + getName(parm, a.formalPart->name) +
                                      ".bind(" + expressionToString(parm, a.actualPart) + ")";
                                  }) + ";"
               );
@@ -528,7 +528,7 @@ namespace generator {
           delimiter = "::";
         }
       }
-      println(parm , "auto " + instanceName + " = " + componentName + "(\"" + instanceName + "\");");
+      println(parm , "auto " + instanceName + " = new " + componentName + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics);
       componentAssociation(parm, instanceName, c->ports);
     }
@@ -549,7 +549,9 @@ namespace generator {
   void SystemC::threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     println(parm, "SC_CTOR(" + basicIdentifierToString(parm, name) + ") {");
+    parm.incIndent();
     concurrentStatementsInstantiation(parm, concurrentStatements);
+    parm.decIndent();
     println(parm, "}");
   }
   

@@ -33,22 +33,27 @@ namespace vhdl {
     
   public:
       
-    Range(T left, T right) :
+    Range<T>(T left, T right) :
       value(left), left(left), right(right),
       begin_(this, left), end_(this, right + 1) { }
 
-    void operator=(T v) {
-      value = v;
+    
+    void operator=(T other) {
+      value = other;
+    }
+
+    void operator=(const Range<T>& other) {
+      value = other.value;
     }
     
-    bool operator ==(const Range<T> &other) const { return value == other.value; }
-    bool operator !=(const Range<T> &other) const { return value != other.value; }
-    bool operator ==(T other) const { return value == other; }
-    bool operator !=(T other) const { return value != other; }
-    Range<T> operator +(T other) { value += other; return *this;}
-    Range<T> operator -(T other) { value -= other; return *this;}
-    Range<T> operator +(Range<T> other) { value += other.value; return *this;}
-    Range<T> operator -(Range<T> other) { value -= other.value; return *this;}
+    bool operator ==(const Range<T> &other) { return value == other.value; }
+    bool operator !=(const Range<T> &other) { return value != other.value; }
+    bool operator ==(T other) { return value == other; }
+    bool operator !=(T other) { return value != other; }
+    T operator +(T other) { return value + other; }
+    T operator -(T other) { return value - other; }
+    T operator +(const Range<T>& other) { return value + other.value; }
+    T operator -(const Range<T>& other) { return value - other.value; }
     
     operator bool() const {
       return value != 0;
@@ -64,6 +69,10 @@ namespace vhdl {
     
     unsigned int LENGTH() {
       return 32;
+    }
+
+    std::string STATUS() {
+      return toString();
     }
     
     static ::std::string IMAGE(Range<T>& r) {

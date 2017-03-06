@@ -17,7 +17,7 @@ namespace vhdl {
     class INTEGER : public Range<int> {
     public:
       explicit INTEGER(int left=INT_MIN, int right=INT_MAX) : Range<int>(left, right) {};
-      explicit INTEGER(Range<int> r) : Range<int>(r.left, r.right) {
+      explicit INTEGER(const Range<int>& r) : Range<int>(r.left, r.right) {
         value = r.value;
       };
       INTEGER(int v) : Range<int>(INT_MIN, INT_MAX) {
@@ -25,14 +25,11 @@ namespace vhdl {
       }
       
       using Range<int>::operator=;
+      using Range<int>::operator+;
+      using Range<int>::operator-;
       using Range<int>::operator==;
       using Range<int>::operator!=;
       using Range<int>::IMAGE;
-
-      INTEGER operator +(int other) { value += other; return *this;}
-      INTEGER operator -(int other) { value -= other; return *this;}
-      INTEGER operator +(INTEGER other) { value += other.value; return *this;}
-      INTEGER operator -(INTEGER other) { value -= other.value; return *this;}
 
       std::string toString() {
         return ::std::to_string(value);

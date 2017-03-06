@@ -2,6 +2,7 @@
 #ifndef SYSTEMC_H
 #define SYSTEMC_H
 
+#include <cassert>
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -122,6 +123,7 @@ class sc_signal : public sc_signal_base {
 
   void latchValue() {
     event = (currentValue == nextValue) ? false : true;
+    // std::cerr << "LatchValue of " << name << ", current " << currentValue.toString() << ", next = " << nextValue.toString() << ", event = " << event << std::endl;
     currentValue = nextValue;
     if (event) {
       log(fileHandle, currentValue.getValue(), currentValue.LENGTH(), traceId);
@@ -141,7 +143,23 @@ class sc_signal : public sc_signal_base {
     nextValue = v;
     return *this;
   }
- 
+
+  bool operator!=(sc_signal<T>& other) {
+    return currentValue != other.currentValue;
+  }
+
+  bool operator!=(T& other) {
+    return currentValue != other;
+  }
+
+  bool operator==(sc_signal<T>& other) {
+    return currentValue == other.currentValue;
+  }
+
+  bool operator==(T& other) {
+    return currentValue == other;
+  }
+
   sc_signal<T> operator!() {
     sc_signal<T> x;
     x.nextValue = !currentValue;
@@ -152,9 +170,9 @@ class sc_signal : public sc_signal_base {
     return bool(currentValue);
   }
   
-  sc_signal<T> operator+(auto v) {
-    nextValue = currentValue + v;
-    return *this;
+  T operator+(sc_signal<T>& other) {
+    T r = currentValue + other.currentValue;
+    return r;
   }
 
   unsigned int LENGTH() {
@@ -168,16 +186,24 @@ class sc_signal : public sc_signal_base {
   std::string toString() {
     return currentValue.toString();
   }
+
+  std::string STATUS() {
+    return "Current = " + currentValue.STATUS() +
+      ", Next = " + nextValue.STATUS() +
+      ", event = " + std::to_string(event);
+  }
   
 };
 
 template<class T>
-struct sc_in {
+class sc_in {
 
   sc_signal<T>* s = NULL;
 
-  void bind(sc_signal<T>& s) {
-    this->s = &s;
+ public:
+  
+  void bind(sc_signal<T>& other) {
+    s = &other;
   }
   
   bool EVENT() {
@@ -187,29 +213,61 @@ struct sc_in {
     return false;
   }
 
-  sc_signal<T> operator+(sc_in<T>& v) {
-    return *s + *v.s;
+  T operator+(sc_in<T>& v) {
+    T r = *s + *(v.s);
+    return r;
   }
 
+  std::string STATUS() {
+    if (s) {
+      return s->STATUS();
+    }
+    return "s is 0";
+  }
+  
 
 };
 
 template<class T>
-struct sc_out {
+class sc_out {
 
   sc_signal<T>* s = NULL;
 
-  explicit sc_out<T>() {}
+  sc_out<T>(const sc_out<T>& other) {}
+
+public:
+  
+  sc_out<T>() {}
+
 
   void bind(sc_signal<T>& other) {
     s = &other;
   }
   
-  sc_signal<T> operator=(const sc_signal<T>& v) {
-    *s = v;
+  sc_out<T>& operator=(const sc_out<T>& other) {
+    *s = *other.s;
+    return this;
+  }
+
+  sc_signal<T> operator=(const sc_signal<T>& other) {
+    assert(s);
+    *s = other;
     return *s;
   }
 
+  sc_signal<T> operator=(const T other) {
+    assert(s);
+    *s = other;
+    return *s;
+  }
+
+  std::string STATUS() {
+    if (s) {
+      return s->STATUS();
+    }
+    return "s is 0";
+  }
+  
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name);
