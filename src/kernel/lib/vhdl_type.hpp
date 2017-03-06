@@ -50,6 +50,10 @@ namespace vhdl {
     Range<T> operator +(Range<T> other) { value += other.value; return *this;}
     Range<T> operator -(Range<T> other) { value -= other.value; return *this;}
     
+    operator bool() const {
+      return value != 0;
+    }
+    
     std::string toString() {
       return std::to_string(value);
     }

@@ -171,6 +171,42 @@ class sc_signal : public sc_signal_base {
   
 };
 
+template<class T>
+struct sc_in {
+
+  sc_signal<T>* s;
+
+  void bind(sc_signal<T>& s) {
+    this->s = &s;
+  }
+  
+  bool EVENT() {
+    return s->EVENT();
+  }
+
+  sc_signal<T> operator+(sc_in<T>& v) {
+    return *s + *v.s;
+  }
+
+
+};
+
+template<class T>
+struct sc_out {
+
+  sc_signal<T>* s;
+
+  void bind(sc_signal<T>& s) {
+    this->s = &s;
+  }
+  
+  sc_signal<T> operator=(const sc_signal<T>& v) {
+    *s = v;
+    return *s;
+  }
+
+};
+
 sc_trace_file* sc_create_vcd_trace_file(const char* name);
 
 void sc_close_vcd_trace_file(sc_trace_file* fp);

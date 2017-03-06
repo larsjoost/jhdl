@@ -509,8 +509,9 @@ namespace generator {
       println(parm, listToString(parm, l->associationElements.list, "; ",
                                  [&](ast::AssociationElement a){
                                    return instanceName + "." + getName(parm, a.formalPart->name) +
-                                     "(" + expressionToString(parm, a.actualPart) + ")";
-                                 }));
+                                     ".bind(" + expressionToString(parm, a.actualPart) + ")";
+                                 }) + ";"
+              );
     }
   }
   
@@ -527,7 +528,7 @@ namespace generator {
           delimiter = "::";
         }
       }
-      println(parm , componentName + " " + instanceName + ";");
+      println(parm , "auto " + instanceName + " = " + componentName + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics);
       componentAssociation(parm, instanceName, c->ports);
     }
