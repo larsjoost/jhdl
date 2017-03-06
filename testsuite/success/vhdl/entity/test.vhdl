@@ -28,7 +28,7 @@ architecture rtl of test2 is
   
 begin
 
-  test_1: entity work.test
+  test_1: entity work.test(rtl)
     port map (
       a => a,
       b => b,

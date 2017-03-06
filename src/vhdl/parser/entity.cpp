@@ -1,6 +1,4 @@
-#include <cassert>
 #include "../../ast/scanner.hpp"
-#include "../scanner/defines.hpp"
 #include "../scanner/scanner.hpp"
 #include "entity.hpp"
 #include "basic_identifier.hpp"

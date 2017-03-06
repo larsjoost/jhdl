@@ -6,6 +6,7 @@
 #include "forgenerate_statement.hpp"
 #include "block_statement.hpp"
 #include "signal_assignment.hpp"
+#include "component_instance.hpp"
 
 namespace ast {
 
@@ -20,6 +21,7 @@ namespace ast {
     Method* method;
     ForGenerateStatement* forGenerateStatement;
     BlockStatement* blockStatement;
+    ComponentInstance* componentInstance;
     
   };
 
