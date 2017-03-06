@@ -38,7 +38,7 @@ namespace generator {
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION};
+    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PORT};
 
     struct DeclarationInfo {
       DeclarationID id;
@@ -109,6 +109,9 @@ namespace generator {
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
     void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback);
+    template<typename Func>
+    std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
+                                      bool initialization, Func typeConverter);
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                       bool initialization);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);

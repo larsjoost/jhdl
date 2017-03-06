@@ -179,7 +179,10 @@ namespace generator {
       case ast::ObjectDeclaration::CONSTANT: id = CONSTANT; break;
       default: assert(false);
       }
-      callback(name, type, init, id);
+      DeclarationInfo i;
+      i.id = id;
+      parm.declaration[name] = i;
+      callback(name, type, init, id, v->direction);
     }
   }
 
@@ -201,13 +204,11 @@ namespace generator {
     std::string s = "";
     if (v) {
       printSourceLine(parm, v->identifier);
-      objectDeclaration(parm, v, [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
-          DeclarationInfo i;
+      objectDeclaration(parm, v, [&](std::string& name, std::string& type, std::string& init,
+                                     DeclarationID id, ast::ObjectDeclaration::Direction direction) {
           if (id == SIGNAL) {
             type = "sc_signal<" + type + ">";
           }
-          i.id = SIGNAL;
-          parm.declaration[name] = i;
           s = type + " " + name;
           if (initialization && init.size() > 0) {
             s += " = " + init;
@@ -224,15 +225,25 @@ namespace generator {
       println(parm, objectDeclarationToString(parm, v, true) + ";");
     }
   }
-  
+
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                              bool initialization) {
+    return interfaceListToString(parm, l, delimiter, initialization,
+                                 [](std::string& type, DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                                   return type;
+                                 });
+  }
+
+  template <typename Func>
+  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
+                                             bool initialization, Func typeConverter) {
     std::string s;
     if (l) {
       std::string x = "";
       std::string d = "";
-      traverseInterfaceList(parm, l, [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
-          s += d + type + " " + name;
+      traverseInterfaceList(parm, l, [&](std::string& name, std::string& type, std::string& init,
+                                         DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                              s += d + typeConverter(type, id, direction) + " " + name;
           d = delimiter;
         }
         );
@@ -335,8 +346,7 @@ namespace generator {
   }
 
   template <class T, typename Func>
-  void SystemC::scThreadShell(parameters& p, std::string& name, T sensitivity, Func body) {  
-    parameters parm = descendHierarchy(p);
+  void SystemC::scThreadShell(parameters& parm, std::string& name, T sensitivity, Func body) {  
     println(parm, "class " + name + " : public sc_thread {");
     parm.incIndent();
     println(parm, parm.parentName + "* p;");
@@ -370,10 +380,13 @@ namespace generator {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
       }
-      scThreadShell(parm, methodName, method->sensitivity, [&](parameters& parm) {
-          declarations(parm, method->declarations);
-          sequentialStatements(parm, method->sequentialStatements);
-        });
+      {
+        parameters p = descendHierarchy(parm);
+        scThreadShell(p, methodName, method->sensitivity, [&](parameters& parm) {
+            declarations(parm, method->declarations);
+            sequentialStatements(parm, method->sequentialStatements);
+          });
+      }
     }
     functionEnd("methodDefinition");
   }
@@ -415,12 +428,15 @@ namespace generator {
       std::string name = "line" + std::to_string(s->identifier->text.getLine());
       s->name = name;
       std::list<std::string> sensitivity;
-      expressionToString(parm, s->expression, [&](std::string s) {
-          sensitivity.push_back(s);
-        });
-      scThreadShell(parm, name, &sensitivity, [&](parameters& parm) {
-          signalAssignment(parm, s);
-        });
+      {
+        parameters p = descendHierarchy(parm);
+        expressionToString(p, s->expression, [&](std::string baseName, std::string hierarchyName) {
+            sensitivity.push_back(hierarchyName);
+          });
+        scThreadShell(p, name, &sensitivity, [&](parameters& parm) {
+            signalAssignment(parm, s);
+          });
+      }
     }
   }
   
@@ -510,7 +526,17 @@ namespace generator {
       println(parm, interfaceListToString(parm, intf->generics, "; ", false) + ";");
     }
     if (intf->ports) {
-      println(parm, interfaceListToString(parm, intf->ports, "; ", false) + ";");
+      println(parm, interfaceListToString(parm, intf->ports, "; ", false,
+                                          [&](std::string& type, DeclarationID id,
+                                              ast::ObjectDeclaration::Direction direction) {
+                                            switch (direction) {
+                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
+                                            case ast::ObjectDeclaration::OUT: 
+                                            case ast::ObjectDeclaration::INOUT: 
+                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+                                            }
+                                            return type;
+                                          }) + ";");
     }
   }
 
@@ -570,7 +596,8 @@ namespace generator {
       std::string delimiter = "";
       int argumentNumber = 0;
       traverseInterfaceList(parm, f->interface,
-                            [&](std::string& name, std::string& type, std::string& init, DeclarationID id) {
+                            [&](std::string& name, std::string& type, std::string& init, DeclarationID id,
+                                ast::ObjectDeclaration::Direction direction) {
                               std::string argument = associateArgument(parm, name, init, argumentNumber, l);
                               if (argument.size() == 0) {
                                 printError(functionName->text, "No argument associated element " + std::to_string(argumentNumber));
@@ -583,7 +610,8 @@ namespace generator {
     } else {
       printWarning(functionName->text, "Could not find function " + basisName + " declaration. Cannot associate arguments.");
       if (l) {
-        s = listToString(parm, l->associationElements.list, ",", [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
+        s = listToString(parm, l->associationElements.list, ",",
+                         [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
       }
     }
     return s;
@@ -623,7 +651,9 @@ namespace generator {
 	  println(parm, "} else {");
 	}
 	command = "} elsif";
+        parm.incIndent();
         sequentialStatements(parm, c.sequentialStatements);
+        parm.decIndent();
       }
       println(parm, "}");
     }
@@ -746,7 +776,7 @@ namespace generator {
         return e->text->text.toString();
       }
       if (e->identifier) {
-        basicIdentifierCallback(getName(parm, e->identifier));
+        basicIdentifierCallback(getName(parm, e->identifier), getName(parm, e->identifier, true));
         return basicIdentifierToString(parm, e->identifier);
       }
       if (e->character) {
@@ -761,7 +791,7 @@ namespace generator {
   }
 
   std::string SystemC::expressionToString(parameters& parm, ast::Expression* e) {
-    return expressionToString(parm, e, [](std::string s) {});
+    return expressionToString(parm, e, [](std::string baseName, std::string hierarchyName) {});
   }
   
   template <typename Func>
