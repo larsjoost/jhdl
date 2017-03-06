@@ -254,20 +254,23 @@ namespace generator {
 
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
-      printSourceLine(parm, f->name);
-      std::string name = basicIdentifierToString(parm, f->name);
-      std::string returnType = basicIdentifierToString(parm, f->returnType);
-      std::string interface = "(" + interfaceListToString(parm, f->interface, ", ", false) + ")";
       DeclarationInfo i;
+      std::string name = basicIdentifierToString(parm, f->name);
       i.id = FUNCTION;
       parm.declaration[name] = i;
       parm.functions[name] = f;
-      println(parm, returnType + " " + name + interface + "{");
-      parm.incIndent();
-      declarations(parm, f->declarations);
-      sequentialStatements(parm, f->sequentialStatements);
-      parm.decIndent();
-      println(parm, "}");
+      {
+        parameters p = parm;
+        printSourceLine(p, f->name);
+        std::string returnType = basicIdentifierToString(p, f->returnType);
+        std::string interface = "(" + interfaceListToString(p, f->interface, ", ", false) + ")";
+        println(p, returnType + " " + name + interface + "{");
+        p.incIndent();
+        declarations(p, f->declarations);
+        sequentialStatements(p, f->sequentialStatements);
+        p.decIndent();
+        println(p, "}");
+      }
     }
   }
 
