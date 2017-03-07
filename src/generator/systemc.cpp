@@ -143,17 +143,14 @@ namespace generator {
       std::string right = expressionToString(parm, t->range->right);
       std::string templateType = "decltype(" + left + ")"; 
       printSourceLine(parm, identifier);
-      println(parm, "class " + name + " : public Range<" + templateType + "> {");
-      println(parm, "public:"); 
-      parm.incIndent();
-      println(parm, "explicit " + name + "(" + templateType + " left=" + left +
-              ", " + templateType + " right=" + right +
-              ") : Range<" + templateType + ">(left, right) {};");
-      parm.incIndent();
-      println(parm, "using Range<" + templateType + ">::operator=;");
-      parm.decIndent();
-      println(parm, "};");
-      parm.decIndent();
+      std::string typeName = name + "_type";
+      println(parm, "using " + typeName + " = " + templateType + ";");
+      std::string rangeName = name + "_range";
+      println(parm, "struct " + rangeName + " { " +
+              typeName + " left = " + left + "; " +
+              typeName + " right = " + right + "; };"); 
+      println(parm, "template<class RANGE = " + rangeName + ">");
+      println(parm, "using " + name + " = " + "Range<" + templateType + ", RANGE>;");
     }
   }
 
@@ -206,17 +203,19 @@ namespace generator {
     std::string s = "";
     if (v) {
       printSourceLine(parm, v->identifier);
-      objectDeclaration(parm, v, [&](std::string& name, std::string& type, std::string& init,
-                                     DeclarationID id, ast::ObjectDeclaration::Direction direction) {
-          if (id == SIGNAL) {
-            type = "sc_signal<" + type + ">";
-          }
-          s = type + " " + name;
-          if (initialization && init.size() > 0) {
-            s += " = " + init;
-          }
-        }
-        );
+      objectDeclaration(parm, v,
+                        [&](std::string& name, std::string& type, std::string& init,
+                            DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                          type += "<>";
+                          if (id == SIGNAL) {
+                            type = "sc_signal<" + type + ">";
+                          }
+                          s = type + " " + name;
+                          if (initialization && init.size() > 0) {
+                            s += " = " + init;
+                          }
+                        }
+                        );
     }
     return s;
   }
@@ -713,15 +712,18 @@ namespace generator {
   }
 
   std::string SystemC::rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r) {
-    std::string s = "for (auto " + basicIdentifierToString(parm, i) + " : " +
-      " INTEGER(" + expressionToString(parm, r->left) + ", " +
-      expressionToString(parm, r->right) + ")";
+    std::string name = basicIdentifierToString(parm, i);
+    std::string left = expressionToString(parm, r->left);
+    std::string right = expressionToString(parm, r->right);
+    std::string rangeName = name + "_range";
+    std::string s = "struct " + rangeName + " { int left = " + left + "; int right = " + right + "; }; " +
+      "for (auto " + name + " : INTEGER<" + rangeName + ">())";
     return s;
   }
   
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
     if (p) {
-      println(parm, rangeTypeToString(parm, p->identifier, p->range) + ") {");
+      println(parm, rangeTypeToString(parm, p->identifier, p->range) + " {");
       sequentialStatements(parm, p->sequentialStatements);
       println(parm, "}");
     }
@@ -819,7 +821,7 @@ namespace generator {
       s += "(" + parameters + ")";
     }
     if (i->attribute) {
-      std::string seperator = matchDeclarationID(parm, name, SIGNAL) ? "." : "::";
+      std::string seperator = matchDeclarationID(parm, name, SIGNAL) ? "." : "<>::";
       s += seperator + i->attribute->toString(true);
       s += "(" + listToString(parm, i->arguments, ",", [&](std::string a){return a;}) + ")";
     }

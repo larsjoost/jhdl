@@ -6,6 +6,7 @@
 #include <climits>
 #include <iostream>
 #include <string>
+#include <limits>
 
 #include "systemc.h"
 #include "vhdl_type.hpp"
@@ -13,95 +14,48 @@
 namespace vhdl {
 
   namespace STANDARD {
-  
-    class INTEGER : public Range<int> {
-    public:
-      explicit INTEGER(int left=INT_MIN, int right=INT_MAX) : Range<int>(left, right) {};
-      explicit INTEGER(const Range<int>& r) : Range<int>(r.left, r.right) {
-        value = r.value;
-      };
-      INTEGER(int v) : Range<int>(INT_MIN, INT_MAX) {
-        value = v;
-      }
-      
-      using Range<int>::operator=;
-      using Range<int>::operator+;
-      using Range<int>::operator-;
-      using Range<int>::operator==;
-      using Range<int>::operator!=;
-      using Range<int>::IMAGE;
 
-      std::string toString() {
-        return ::std::to_string(value);
-      }
-      
-      static ::std::string IMAGE(sc_signal<INTEGER>& r) {
-        return ::std::to_string(r.currentValue.value);
-      }
-
+    struct INTEGER_range {
+      int left = std::numeric_limits<int>::min();
+      int right = std::numeric_limits<int>::max();
     };
+
+    template <class RANGE = INTEGER_range>
+    using INTEGER = Range<int, RANGE>;
     
-    class NATURAL : public INTEGER {
-    public:
-      explicit NATURAL(int left=0, int right=INT_MAX) : INTEGER(left, right) {};
-      using INTEGER::operator=;
+    struct NATURAL_range {
+      int left = 0;
+      int right = std::numeric_limits<int>::max();
     };
-
-    class POSITIVE : public INTEGER {
-    public:
-      explicit POSITIVE(int left=1, int right=INT_MAX) : INTEGER(left, right) {};
-      using INTEGER::operator=;
+    template <class RANGE = NATURAL_range>
+    using NATURAL = INTEGER<RANGE>;
+    
+    struct POSITIVE_range {
+      int left = 1;
+      int right = std::numeric_limits<int>::max();
     };
+    template <class RANGE = POSITIVE_range>
+    using POSITIVE = INTEGER<RANGE>;
 
-    class BIT : public Enumeration<char> {
-    public:
-      using Enumeration<char>::operator=;
-      using Enumeration<char>::IMAGE;
-      
-      static ::std::string IMAGE(sc_signal<BIT>& r) {
-        return "'" + std::string(1, r.currentValue.value) + "'";
-      }
-
-      unsigned int LENGTH();
+    struct REAL_range {
+      double left = std::numeric_limits<double>::max();
+      double right = std::numeric_limits<double>::max();
     };
+    template <class RANGE = REAL_range>
+    using REAL = Range<double, RANGE>;
+    
+    char BIT_char[] = {'0', '1'};
+    using BIT = CharArray<BIT_char>;
 
     enum BOOLEAN_enum {FALSE, TRUE};
-    
-    struct BOOLEAN : public Enumeration<enum BOOLEAN_enum> {
-    public:
-      using Enumeration<enum BOOLEAN_enum>::operator=;
-      using Enumeration<enum BOOLEAN_enum>::operator==;
-      using Enumeration<enum BOOLEAN_enum>::operator!=;
-      using Enumeration<enum BOOLEAN_enum>::IMAGE;
-      
-      std::string toString() {
-        return (value == TRUE) ? "true" : "false";
-      }
-      
-      static ::std::string IMAGE(bool r) {
-        return r ? "true" : "false";
-      }
+    char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
+    template<typename T = BOOLEAN_enum, char* p[] = BOOLEAN_string>
+    using BOOLEAN = Enumeration<T, p>;
 
-      static ::std::string IMAGE(sc_signal<BOOLEAN>& r) {
-        return IMAGE(r.currentValue.value == TRUE);
-      }
+    enum SEVERITY_LEVEL_enum {NOTE, WARNING, ERROR, FAILURE};
+    char* SEVERITY_LEVEL_string[] = {(char *)"note", (char *)"warning", (char *)"error", (char *)"failure"};
+    using SEVERITY_LEVEL = Enumeration<enum SEVERITY_LEVEL_enum, SEVERITY_LEVEL_string>;
 
-      BOOLEAN();
-      
-      BOOLEAN(bool v);
-
-      BOOLEAN operator!();
-      
-      operator bool() const;
-      
-      unsigned int LENGTH();
-      
-    };
-
-    enum SEVERITY_LEVEL {NOTE, WARNING, ERROR, FAILURE};
-
-    ::std::string toString(SEVERITY_LEVEL severity);
-    
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
 
     /*
@@ -121,11 +75,7 @@ namespace vhdl {
     
   }
 
-  void report(::std::string message, STANDARD::SEVERITY_LEVEL severity);
-
-  static bool equal(STANDARD::INTEGER left, int right) {
-    return left.value == right;
-  }
+  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity);
 
 }
 

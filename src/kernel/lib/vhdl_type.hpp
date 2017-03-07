@@ -8,62 +8,60 @@
 
 namespace vhdl {
   
-  template<class T>
+  template<class TYPE, class RANGE>
   class Range {
   public:
-    T left;
-    T right;
-    T value;
+    RANGE range;
+    TYPE value;
 
     class iterator {
       friend class Range;
-      Range<T>* parent;
-      T index;
+      Range<TYPE, RANGE>* parent;
+      TYPE index;
     public:
-      Range<T> operator *() const { parent->value = index; return *parent; }
+      Range<TYPE, RANGE> operator *() const { parent->value = index; return *parent; }
       const iterator &operator ++() { ++index; return *this; }
-      Range<T> operator ++(T) { iterator copy(*this); ++index; return copy; }
+      Range<TYPE, RANGE> operator ++(TYPE) { iterator copy(*this); ++index; return copy; }
       
       bool operator ==(const iterator &other) const { return index == other.index; }
       bool operator !=(const iterator &other) const { return index != other.index; }
 
     protected:
-      iterator(Range<T>* parent, T start) : parent(parent), index(start) { }
+      iterator(Range<TYPE, RANGE>* parent, TYPE start) : parent(parent), index(start) { }
     };
     
   public:
-      
-    Range<T>(T left, T right) :
-      value(left), left(left), right(right),
-      begin_(this, left), end_(this, right + 1) { }
 
+    explicit Range<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
+    explicit Range<TYPE, RANGE>(TYPE v) :
+    value(v), begin_(this, range.left), end_(this, range.right + 1) { }
     
-    void operator=(T other) {
-      value = other;
-    }
+    void operator=(const TYPE other) { value = other; }
+    template <class T>
+    void operator=(const Range<TYPE, T>& other) { value = other.value; }
 
-    void operator=(const Range<T>& other) {
-      value = other.value;
-    }
-    
-    bool operator ==(const Range<T> &other) { return value == other.value; }
-    bool operator !=(const Range<T> &other) { return value != other.value; }
-    bool operator ==(T other) { return value == other; }
-    bool operator !=(T other) { return value != other; }
-    T operator +(T other) { return value + other; }
-    T operator -(T other) { return value - other; }
-    T operator +(const Range<T>& other) { return value + other.value; }
-    T operator -(const Range<T>& other) { return value - other.value; }
+    template <class T>
+    bool operator ==(const Range<TYPE, T> &other) { return value == other.value; }
+    template <class T>
+    bool operator !=(const Range<TYPE, T> &other) { return value != other.value; }
+    bool operator ==(TYPE other) { return value == other; }
+    bool operator !=(TYPE other) { return value != other; }
+    TYPE operator +(TYPE other) { return value + other; }
+    TYPE operator -(TYPE other) { return value - other; }
+    template <class T>
+    TYPE operator +(const Range<TYPE, T>& other) { return value + other.value; }
+    template <class T>
+    TYPE operator -(const Range<TYPE, T>& other) { return value - other.value; }
     
     operator bool() const {
-      return value != 0;
+      return value != TYPE(0);
     }
     
     std::string toString() {
       return std::to_string(value);
     }
 
-    T getValue() {
+    TYPE getValue() {
       return value;
     }
     
@@ -75,8 +73,9 @@ namespace vhdl {
       return toString();
     }
     
-    static ::std::string IMAGE(Range<T>& r) {
-      return ::std::to_string(r.value);
+    template <class T>
+    static ::std::string IMAGE(T& r) {
+      return r.toString();
     }
 
     iterator begin() const { return begin_; }
@@ -106,7 +105,7 @@ namespace vhdl {
 
   };
 
-  template <typename T>
+  template <typename T, char* p[]>
   struct Enumeration {
   public:
     T value;
@@ -119,17 +118,49 @@ namespace vhdl {
       value = v;
     }
   
-    std::string toString() {
-      return std::to_string(value);
+    void operator=(bool v) {
+      value = v ? 1 : 0;
     }
 
-    static ::std::string IMAGE(Enumeration<T>& r) {
-      return std::to_string(r.value);
+    bool operator!() {
+      return value != 0;
+    }
+      
+    operator bool() const {
+      return value != 0;
+    }
+
+    std::string toString() {
+      return p[value];
+    }
+
+    static ::std::string IMAGE(Enumeration<T, p>& r) {
+      return r.toString();
     }
   
-    bool operator ==(const Enumeration<T> &other) const { return value == other.value; }
-    bool operator !=(const Enumeration<T> &other) const { return value != other.value; }
+    static ::std::string IMAGE(T r) {
+      return p[r];
+    }
+
+    int LENGTH() { return 1; }
+    
+    bool operator ==(const Enumeration<T, p> &other) const { return value == other.value; }
+    bool operator !=(const Enumeration<T, p> &other) const { return value != other.value; }
   };
+
+  template <char p[]>
+  struct CharArray {
+    public:
+    char value;
+
+    std::string toString() {
+      return std::string(1, value);
+    }
+
+    int LENGTH() { return 1; }
+    
+  };
+
   
 }
 

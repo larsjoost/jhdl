@@ -14,6 +14,10 @@ begin
     variable test_i : test_t;
   begin 
     test_i := 10;
+    if (test_i /= 10) then
+      report "test_i = " & integer'image(test_i) &
+        ", but expected = 10" severity failure;
+    end if;     
     finish(0);    
   end process;
 

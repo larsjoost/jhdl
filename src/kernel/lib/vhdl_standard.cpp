@@ -8,39 +8,7 @@
 
 namespace vhdl {
   namespace STANDARD {
-  
-    unsigned int BIT::LENGTH() {
-      return 1;
-    }
 
-    BOOLEAN::BOOLEAN() {
-      value = FALSE;
-    }
-      
-    BOOLEAN::BOOLEAN(bool v) {
-      value = v ? TRUE : FALSE;
-    }
-
-    BOOLEAN BOOLEAN::operator!() {
-      BOOLEAN b;
-      b.value = (value == TRUE ? FALSE : TRUE);
-      return b;
-    }
-      
-    BOOLEAN::operator bool() const {
-      return value == TRUE;
-    }
-
-    unsigned int BOOLEAN::LENGTH() {
-      return 1;
-    }
-    
-    ::std::string toString(SEVERITY_LEVEL severity) {
-      static const std::string SEVERITY_LEVEL_STRINGS[] =
-        {"NOTE", "WARNING", "ERROR", "FAILURE"};
-      return SEVERITY_LEVEL_STRINGS[severity];
-    }
-    
     /*
     class TIME : public Physical<int, TIME_UNITS> {
     public:
@@ -63,14 +31,14 @@ namespace vhdl {
     
   }
 
-  void report(::std::string message, STANDARD::SEVERITY_LEVEL severity) {
+  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity) {
     std::ostream* o;
     if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
       o = &std::cerr;
     } else {
       o = &std::cout;
     } 
-    *o << STANDARD::toString(severity) << ": " << message << ::std::endl;
+    *o << STANDARD::SEVERITY_LEVEL::IMAGE(severity) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
       STD::ENV::FINISH(1);
     } 

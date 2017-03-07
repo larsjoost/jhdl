@@ -172,7 +172,8 @@ class sc_signal : public sc_signal_base {
   }
   
   T operator+(sc_signal<T>& other) {
-    T r = currentValue + other.currentValue;
+    T r;
+    r = currentValue + other.currentValue;
     return r;
   }
 
