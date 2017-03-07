@@ -52,9 +52,10 @@ namespace ast {
 
     int accept(const char *text);
     int optional(const char* text);
+    bool lookAhead(const char* text, int n);
     int expect(const char* text);
     int expect(Text& text);
-    int match(const char* text);
+    int match(const char* text, int lookAhead = 0);
 
     Text* optional(Keyword keyword);
     Text* optional(TokenType type);
@@ -176,12 +177,12 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  int Scanner<ApplicationSpecificScanner>::match(const char* a) {
+  int Scanner<ApplicationSpecificScanner>::match(const char* a, int lookAhead) {
     DEBUG("match '" + std::string(a) + "'");
     int len = strlen(a);
     try {
       for (int i=0; i<len; i++) {
-        Token* t = tokenLookAhead(i);
+        Token* t = tokenLookAhead(i + lookAhead);
         DEBUG("Token = " + toString(t));
         if ((t->type != TOKEN_SPECIAL_CHARACTER) ||
             (t->text.lookAhead(0) != a[i])) {
@@ -190,6 +191,12 @@ namespace ast {
       }
     } catch (...) {return 0;}
     return len;
+  }
+
+  template <class ApplicationSpecificScanner>
+  bool Scanner<ApplicationSpecificScanner>::lookAhead(const char* t, int n) {
+    int len = match(t, n);
+    return len > 0;
   }
 
   template <class ApplicationSpecificScanner>

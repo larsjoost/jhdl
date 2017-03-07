@@ -15,6 +15,7 @@
 #include "../ast/function_declaration.hpp"
 #include "../ast/variable_assignment.hpp"
 #include "../ast/signal_assignment.hpp"
+#include "../ast/signal_assignment_condition.hpp"
 #include "../ast/report_statement.hpp"
 #include "../ast/component_instance.hpp"
 
@@ -363,11 +364,14 @@ namespace generator {
     println(parm, getConstructorDeclaration(parm, name) +  + " {};");
     println(parm, "void process() {");
     parm.incIndent();
+    body(parm);
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
+      if (s.size() == 0) {
+        s = "false";
+      }
       println(parm, "wait([&](){return " + s + ";});");
     }
-    body(parm);
     parm.decIndent();
     println(parm, "}");
     parm.decIndent();
@@ -429,14 +433,25 @@ namespace generator {
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
-      std::string name = "line" + std::to_string(s->identifier->text.getLine());
+      std::string name;
+      if (s->label) {
+        name = getName(parm, s->label);
+      } else {
+        name = "line" + std::to_string(s->identifier->text.getLine());
+      }
       s->name = name;
       std::list<std::string> sensitivity;
       {
         parameters p = descendHierarchy(parm);
-        expressionToString(p, s->expression, [&](std::string baseName, std::string hierarchyName) {
-            sensitivity.push_back(hierarchyName);
-          });
+        auto callback = [&](std::string baseName, std::string hierarchyName) {
+          sensitivity.push_back(hierarchyName);
+        };
+        for (ast::SignalAssignmentCondition c : s->signalAssignmentConditions.list) {
+          if (c.condition) {
+            expressionToString(p, c.condition, callback);
+          }
+          expressionToString(p, c.expression, callback);
+        }
         scThreadShell(p, name, &sensitivity, [&](parameters& parm) {
             signalAssignment(parm, s);
           });
@@ -740,8 +755,28 @@ namespace generator {
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
-      println(parm, basicIdentifierToString(parm, p->identifier) + " = " +
-              expressionToString(parm, p->expression) + ";");
+      std::string name = basicIdentifierToString(parm, p->identifier);
+      std::string command = "if";
+      std::string noConditionCommand = "";
+      std::string noConditionDelimiter = "";
+      for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
+        if (s.condition) {
+          println(parm, command + " (" + expressionToString(parm, s.condition) + ") {");
+          command = "else if";
+          noConditionCommand = "else {";
+          noConditionDelimiter = "}";
+        } else {
+          println(parm, noConditionCommand);
+        }
+        parm.incIndent();
+        println(parm, name + " = " + expressionToString(parm, s.expression) + ";");
+        parm.decIndent();
+        if (s.condition) {
+          println(parm, "}");
+        } else {
+          println(parm, noConditionDelimiter);
+        }
+      }
     }
   }
 
