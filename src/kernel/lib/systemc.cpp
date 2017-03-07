@@ -81,11 +81,14 @@ void sc_thread::threadLoop() {
     if (verbose) {std::cout << "Catched TerminateThreads" << std::endl;}
   }
 }
-
  
 void sc_thread::wait(int i) {
   int n = sc_now + i;
   wait([&](){return sc_now >= n;});
+}
+
+void sc_thread::wait() {
+  wait([&](){return false;});
 }
 
 void sc_module::addMethod(sc_thread* c) {

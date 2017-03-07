@@ -368,9 +368,10 @@ namespace generator {
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
       if (s.size() == 0) {
-        s = "false";
+        println(parm, "wait();");
+      } else {
+        println(parm, "wait([&](){return " + s + ";});");
       }
-      println(parm, "wait([&](){return " + s + ";});");
     }
     parm.decIndent();
     println(parm, "}");

@@ -92,6 +92,7 @@ class sc_thread {
   }
   
   void wait(int i);
+  void wait();
 
 };
 
