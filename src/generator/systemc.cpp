@@ -262,8 +262,11 @@ namespace generator {
       {
         parameters p = parm;
         printSourceLine(p, f->name);
-        std::string returnType = basicIdentifierToString(p, f->returnType);
-        std::string interface = "(" + interfaceListToString(p, f->interface, ", ", false) + ")";
+        std::string returnType = basicIdentifierToString(p, f->returnType) + "<>";
+        std::string interface = "(" + interfaceListToString(p, f->interface, ", ", false,
+                                                            [](std::string& type, DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                                                              return type + "<>";
+                                                            }) + ")";
         println(p, returnType + " " + name + interface + "{");
         p.incIndent();
         declarations(p, f->declarations);
@@ -355,7 +358,7 @@ namespace generator {
     parm.incIndent();
     println(parm, parm.parentName + "* p;");
     if (parm.forGenerateHierarchy.size() > 0) {
-      println(parm, "INTEGER " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
+      println(parm, "INTEGER<> " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
     }
     parm.decIndent();
     println(parm, "public:");
@@ -514,7 +517,7 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      println(parm, rangeTypeToString(parm, forGenerateStatement->identifier, forGenerateStatement->range) + ") {");
+      println(parm, rangeTypeToString(parm, forGenerateStatement->identifier, forGenerateStatement->range) + " {");
       parm.incIndent();
       concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
       parm.decIndent();
@@ -582,10 +585,10 @@ namespace generator {
                                           [&](std::string& type, DeclarationID id,
                                               ast::ObjectDeclaration::Direction direction) {
                                             switch (direction) {
-                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
+                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + "<>>";
                                             case ast::ObjectDeclaration::OUT: 
                                             case ast::ObjectDeclaration::INOUT: 
-                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + "<>>";
                                             }
                                             return type;
                                           }) + ";");
@@ -731,7 +734,7 @@ namespace generator {
 
   std::string SystemC::physicalToString(parameters& parm, ast::Physical* p) {
     assert (p != NULL);
-    return "physical(" + numberToString(parm, p->number) + ", " +
+    return "TIME<>(" + numberToString(parm, p->number) + ", " +
       basicIdentifierToString(parm, p->unit) + ")";
   }
   

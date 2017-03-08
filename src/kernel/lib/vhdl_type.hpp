@@ -33,7 +33,7 @@ namespace vhdl {
   public:
 
     explicit Range<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
-    explicit Range<TYPE, RANGE>(TYPE v) :
+    Range<TYPE, RANGE>(TYPE v) :
     value(v), begin_(this, range.left), end_(this, range.right + 1) { }
     
     void operator=(const TYPE other) { value = other; }
@@ -61,12 +61,12 @@ namespace vhdl {
       return std::to_string(value);
     }
 
-    TYPE getValue() {
-      return value;
-    }
-    
     unsigned int LENGTH() {
       return 32;
+    }
+
+    int getValue() {
+      return value;
     }
 
     std::string STATUS() {
@@ -99,6 +99,12 @@ namespace vhdl {
     Physical(T value, Units units) :
       value(value), units(units) { }
 
+    Physical<T, Units, p> operator+(const Physical<T, Units, p>& other) {
+      Physical<T, Units, p> r;
+      r.value = value + other.value;
+      return r;
+    }
+    
     static ::std::string IMAGE(Physical<T, Units, p>& r) {
       return std::to_string(r.value) + " " + p[r.units];
     }
@@ -110,10 +116,6 @@ namespace vhdl {
   public:
     T value;
 
-    T getValue() {
-      return value;
-    }
-    
     void operator=(T v) {
       value = v;
     }
@@ -134,6 +136,10 @@ namespace vhdl {
       return p[value];
     }
 
+    int getValue() {
+      return (int)value;
+    }
+    
     template <class X>
     static ::std::string IMAGE(X& r) {
       return r.toString();
@@ -154,8 +160,16 @@ namespace vhdl {
       return std::string(1, value);
     }
 
+    void operator=(char c) { value = c; }
+    bool operator ==(const CharArray<p> &other) const { return value == other.value; }
+    bool operator !=(const CharArray<p> &other) const { return value != other.value; }
+    
     int LENGTH() { return 1; }
     
+    int getValue() {
+      return value - '0';
+    }
+
     template <class T>
     static ::std::string IMAGE(T& r) {
       return r.toString();

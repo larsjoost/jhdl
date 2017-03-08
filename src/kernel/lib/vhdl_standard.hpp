@@ -45,7 +45,8 @@ namespace vhdl {
     using REAL = Range<double, RANGE>;
     
     char BIT_char[] = {'0', '1'};
-    using BIT = CharArray<BIT_char>;
+    template <char* p = BIT_char>
+    using BIT = CharArray<p>;
 
     enum BOOLEAN_enum {FALSE, TRUE};
     char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
@@ -59,7 +60,8 @@ namespace vhdl {
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
     char* TIME_UNITS_string[] =
       {(char *)"FS", (char *)"PS", (char *)"NS", (char *)"US", (char *)"MS", (char *)"SEC", (char *)"MIN", (char *)"HR"};
-    using TIME = Physical<int, TIME_UNITS, TIME_UNITS_string>;
+    template <typename Units = TIME_UNITS, char* p[] = TIME_UNITS_string>
+    using TIME = Physical<int, Units, p>;
 
     /*
     class TIME : public Physical<int, TIME_UNITS> {
@@ -68,13 +70,8 @@ namespace vhdl {
     };
     */
 
-    TIME NOW = TIME(0, NS);
+    TIME<> NOW(0, NS);
 
-    static TIME operator+(TIME left, const TIME& right) {
-      left.value += right.value;
-      return left;
-    }
-    
   }
 
   void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity) {
