@@ -119,27 +119,24 @@ namespace vhdl {
     }
   
     void operator=(bool v) {
-      value = v ? 1 : 0;
+      value = v ? (T)1 : (T)0;
     }
 
     bool operator!() {
-      return value != 0;
+      return value != (T)0;
     }
       
     operator bool() const {
-      return value != 0;
+      return value != (T)0;
     }
 
     std::string toString() {
       return p[value];
     }
 
-    static ::std::string IMAGE(Enumeration<T, p>& r) {
+    template <class X>
+    static ::std::string IMAGE(X& r) {
       return r.toString();
-    }
-  
-    static ::std::string IMAGE(T r) {
-      return p[r];
     }
 
     int LENGTH() { return 1; }
@@ -159,6 +156,11 @@ namespace vhdl {
 
     int LENGTH() { return 1; }
     
+    template <class T>
+    static ::std::string IMAGE(T& r) {
+      return r.toString();
+    }
+
   };
 
   

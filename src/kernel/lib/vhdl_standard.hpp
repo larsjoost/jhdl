@@ -82,7 +82,9 @@ namespace vhdl {
     if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
       o = &std::cerr;
     } 
-    *o << STANDARD::SEVERITY_LEVEL::IMAGE(severity) << ": " << message << ::std::endl;
+    STANDARD::SEVERITY_LEVEL s;
+    s = severity;
+    *o << STANDARD::SEVERITY_LEVEL::IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
       STD::ENV::FINISH(1);
     } 
