@@ -57,6 +57,9 @@ namespace vhdl {
     using SEVERITY_LEVEL = Enumeration<enum SEVERITY_LEVEL_enum, SEVERITY_LEVEL_string>;
 
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};
+    char* TIME_UNITS_string[] =
+      {(char *)"FS", (char *)"PS", (char *)"NS", (char *)"US", (char *)"MS", (char *)"SEC", (char *)"MIN", (char *)"HR"};
+    using TIME = Physical<int, TIME_UNITS, TIME_UNITS_string>;
 
     /*
     class TIME : public Physical<int, TIME_UNITS> {
@@ -65,17 +68,25 @@ namespace vhdl {
     };
     */
 
-    typedef Physical<int, TIME_UNITS> TIME;
+    TIME NOW = TIME(0, NS);
 
-    extern TIME NOW;
-
-    static TIME operator+(TIME left, const TIME& right);
-    
-    ::std::string toString(TIME_UNITS units);
+    static TIME operator+(TIME left, const TIME& right) {
+      left.value += right.value;
+      return left;
+    }
     
   }
 
-  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity);
+  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity) {
+    std::ostream* o = &std::cout;
+    if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
+      o = &std::cerr;
+    } 
+    *o << STANDARD::SEVERITY_LEVEL::IMAGE(severity) << ": " << message << ::std::endl;
+    if (severity == STANDARD::FAILURE) {
+      STD::ENV::FINISH(1);
+    } 
+  }
 
 }
 

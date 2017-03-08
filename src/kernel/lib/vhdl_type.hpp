@@ -87,7 +87,7 @@ namespace vhdl {
 
   };
 
-  template <class T, typename Units>
+  template <class T, typename Units, char* p[]>
   class Physical {
   protected:
   public:
@@ -99,8 +99,8 @@ namespace vhdl {
     Physical(T value, Units units) :
       value(value), units(units) { }
 
-    static ::std::string IMAGE(Physical<T, Units>& r) {
-      return std::to_string(r.value) + " " + toString(r.units);
+    static ::std::string IMAGE(Physical<T, Units, p>& r) {
+      return std::to_string(r.value) + " " + p[r.units];
     }
 
   };
