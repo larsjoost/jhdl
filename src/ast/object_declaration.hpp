@@ -4,6 +4,7 @@
 
 #include "basic_identifier.hpp"
 #include "declaration_initialization.hpp"
+#include "subtype_indication.hpp"
 
 namespace ast {
     
@@ -19,6 +20,7 @@ namespace ast {
     BasicIdentifier* identifier;
     Direction direction = NONE;
     BasicIdentifier* type;
+    SubtypeIndication* subtype;
     DeclarationInitialization* initialization;
     
   };

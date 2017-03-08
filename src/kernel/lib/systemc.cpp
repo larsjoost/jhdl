@@ -205,19 +205,15 @@ void usage() {
 
 int run(int argc, char* argv[]) {
   const char* doFilename = NULL;
-  const char* vcdFilename = NULL;
 
   opterr = 0;
   optind = 1;
   char c;
-  while ((c = getopt (argc, argv, "d:o:vh")) != -1) {
+  while ((c = getopt (argc, argv, "d:vh")) != -1) {
     switch (c)
       {
       case 'd':
         doFilename = optarg;
-        break;
-      case 'o':
-        vcdFilename = optarg;
         break;
       case 'v':
         verbose = true;

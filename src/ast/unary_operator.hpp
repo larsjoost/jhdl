@@ -9,7 +9,7 @@ namespace ast {
   public:
 
     enum operators {
-      NOT};
+      NOT, MINUS};
     
     operators op;
     

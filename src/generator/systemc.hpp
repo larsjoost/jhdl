@@ -29,6 +29,7 @@
 #include "../ast/interface_list.hpp"
 #include "../ast/interface.hpp"
 #include "../ast/component_instance.hpp"
+#include "../ast/subtype_indication.hpp"
 
 namespace generator {
   
@@ -84,7 +85,8 @@ namespace generator {
     std::string characterToString(parameters& parm, ast::Character* i);
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
-    std::string rangeTypeToString(parameters& parm, ast::BasicIdentifier* i, ast::RangeType* r);
+    std::string rangeStruct(std::string& name, std::string& left, std::string& right);
+    std::string rangeTypeToString(parameters& parm, std::string& name, ast::RangeType* r, std::string& rangeName);
 
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -103,10 +105,13 @@ namespace generator {
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
+                                   std::string& name, std::string& type,
+                                   std::string& preDefinition);
     template<typename Func>
     void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback);
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                          bool initialization);
+                                          bool initialization, std::string& p);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
     void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback);

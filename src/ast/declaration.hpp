@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "type_declaration.hpp"
+#include "subtype_declaration.hpp"
 #include "object_declaration.hpp"
 #include "function_declaration.hpp"
 
@@ -17,6 +18,7 @@ namespace ast {
   public:
 
     TypeDeclaration* type;
+    SubtypeDeclaration* subtype;
     ObjectDeclaration* variable;
     ObjectDeclaration* signal;
     ObjectDeclaration* constant;

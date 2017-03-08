@@ -11,7 +11,7 @@ namespace vhdl {
     TypeDeclaration* TypeDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_TYPE);
       identifier = scanner->expect<BasicIdentifier>();
-      scanner->accept(scanner::Scanner::VHDL_IS);
+      scanner->expect(scanner::Scanner::VHDL_IS);
       typeDefinition = scanner->expect<TypeDefinition>();
       return this;
     }

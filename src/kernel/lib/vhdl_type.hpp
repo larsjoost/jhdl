@@ -65,6 +65,11 @@ namespace vhdl {
       return 32;
     }
 
+    TYPE HIGH() { return (range.left > range.right ? range.left : range.right); }
+    TYPE LOW() { return (range.left < range.right ? range.left : range.right); }
+    TYPE LEFT() { return range.left; }
+    TYPE RIGHT() { return range.right; }
+    
     int getValue() {
       return value;
     }
@@ -76,6 +81,10 @@ namespace vhdl {
     template <class T>
     static ::std::string IMAGE(T& r) {
       return r.toString();
+    }
+
+    static ::std::string IMAGE(TYPE r) {
+      return std::to_string(r);
     }
 
     iterator begin() const { return begin_; }

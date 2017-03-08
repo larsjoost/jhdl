@@ -9,6 +9,7 @@
 #include "../../ast/object_declaration.hpp"
 #include "basic_identifier.hpp"
 #include "declaration_initialization.hpp"
+#include "subtype_indication.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -53,6 +54,7 @@ namespace vhdl {
           }
         }
         type = scanner->expect<BasicIdentifier>();
+        subtype = scanner->optional<SubtypeIndication>();
         initialization = scanner->optional<DeclarationInitialization>();
         return this;
       }
