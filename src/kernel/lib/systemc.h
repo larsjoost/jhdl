@@ -140,8 +140,8 @@ class sc_signal : public sc_signal_base {
     return *this;
   }
 
-  sc_signal<T> operator=(auto v) {
-    nextValue = v;
+  sc_signal<T> operator=(auto other) {
+    nextValue = other;
     return *this;
   }
 
@@ -149,7 +149,7 @@ class sc_signal : public sc_signal_base {
     return currentValue != other.currentValue;
   }
 
-  bool operator!=(T& other) {
+  bool operator!=(auto other) {
     return currentValue != other;
   }
 
@@ -157,7 +157,7 @@ class sc_signal : public sc_signal_base {
     return currentValue == other.currentValue;
   }
 
-  bool operator==(T& other) {
+  bool operator==(auto other) {
     return currentValue == other;
   }
 
