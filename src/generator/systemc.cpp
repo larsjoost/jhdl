@@ -140,19 +140,15 @@ namespace generator {
   */
   void SystemC::numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t) {
     if (t) {
-      std::string name = basicIdentifierToString(parm, identifier);
-      std::string left = expressionToString(parm, t->range->left);
-      std::string right = expressionToString(parm, t->range->right);
-      std::string templateType = "decltype(" + left + ")"; 
       printSourceLine(parm, identifier);
-      std::string typeName = name + "_type";
-      println(parm, "using " + typeName + " = " + templateType + ";");
-      std::string rangeName = name + "_range";
-      println(parm, "struct " + rangeName + " { " +
-              typeName + " left = " + left + "; " +
-              typeName + " right = " + right + "; };"); 
-      println(parm, "template<class RANGE = " + rangeName + ">");
-      println(parm, "using " + name + " = " + "Range<" + templateType + ", RANGE>;");
+      std::string name = basicIdentifierToString(parm, identifier);
+      std::string type = name + "_type";
+      std::string left = expressionToString(parm, t->range->left);
+      std::string templateType = "decltype(" + left + ")"; 
+      println(parm, "using " + type + " = " + templateType + ";");
+      std::string typeName = printRangeType(parm, name, type, t->range, "range");
+      println(parm, "template<class RANGE = " + typeName + ">");
+      println(parm, "using " + name + " = " + "Range<" + type + ", RANGE>;");
     }
   }
 
@@ -174,8 +170,8 @@ namespace generator {
     if (t) {
       printSourceLine(parm, identifier);
       std::string name = basicIdentifierToString(parm, identifier);
-      std::string subtypeName = subtype_declaration(parm, t->type);
-      printSubtype(parm, name, t->range);
+      std::string subtypeName = subtypeIndication(parm, name, t->type);
+      printSubtype(parm, name, t->range, "Array");
     }
   }
 
@@ -194,19 +190,18 @@ namespace generator {
   systemc:
   struct [NAME]_range { <[TYPE] left = 1; [TYPE] right = 20; };
   */
-  std::string SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r,
-                                      std::string& postfix) {
+  std::string SystemC::printRangeType(parameters& parm, std::string& name, std::string type,
+                                      ast::RangeType* r, std::string postfix) {
     std::string left = expressionToString(parm, r->left);
     std::string right = expressionToString(parm, r->right);
     std::string rangeName = name + "_" + "range";
-    println(parm, "struct " + name + " { int left = " + left + "; int right = " + right + "; };");
+    println(parm, "struct " + rangeName + " { " + type + " left = " + left + "; " + type + " right = " + right + "; };");
     return rangeName;
   }
 
-  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r) {
+  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
     assert(r);
-    std::string typeName = basicIdentifierToString(parm, r->name);
-    std::string subtypeName = printRangeType(parm, r->range, name, "range");
+    std::string subtypeName = printRangeType(parm, name, typeName, r, "range");
     println(parm, "template<class T = " + subtypeName + ">");
     println(parm, "using " + name + " = " + typeName + "<T>;");
   }
@@ -219,12 +214,27 @@ namespace generator {
     template<class T = TYPE_T_range>
     using TYPE_T = INTEGER<T>;
   */
-  std::string SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
+  std::string SystemC::subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t) {
+    assert(t);
+    std::string typeName = basicIdentifierToString(parm, t->name);
+    printSubtype(parm, name, t->range, typeName);
+    return name;
+  }
+    
+    /*
+  vhdl:
+    subtype type_t is integer range 0 to 10;
+  systemc:
+    struct TYPE_T_range { int left = 0; int right = 4; };
+    template<class T = TYPE_T_range>
+    using TYPE_T = INTEGER<T>;
+  */
+  void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
       printSourceLine(parm, t->identifier);
       std::string name = basicIdentifierToString(parm, t->identifier);
-      printSubtype(parm, name, t->type);
-      return name;
+      subtypeIndication(parm, name, t->type);
+    }
   }
 
   template<typename Func>
@@ -232,9 +242,9 @@ namespace generator {
     if (v) {
       std::string name = basicIdentifierToString(parm, v->identifier);
       std::string type = basicIdentifierToString(parm, v->type);
-      std::string subtype = "";
+      std::string subtype = "<>";
       if (v->subtype) {
-        subtype = subtype_declarations(parm, v->subtype)
+        subtype = subtypeIndication(parm, name, v->subtype);
       }
       type += subtype;
       std::string init = "";
@@ -269,7 +279,7 @@ namespace generator {
   }
 
   std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                                 bool initialization, std::string& p) {
+                                                 bool initialization) {
     std::string s = "";
     if (v) {
       printSourceLine(parm, v->identifier);
@@ -277,7 +287,6 @@ namespace generator {
                         [&](std::string& name,
                             std::string& type, std::string& init,
                             DeclarationID id, ast::ObjectDeclaration::Direction direction) {
-                          p = preDefinition;
                           if (id == SIGNAL) {
                             type = "sc_signal<" + type + ">";
                           }
@@ -294,9 +303,7 @@ namespace generator {
   void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       printSourceLine(parm, v->identifier);
-      std::string preDefinition;
-      std::string s = objectDeclarationToString(parm, v, true, preDefinition);
-      println(parm, preDefinition + ";");
+      std::string s = objectDeclarationToString(parm, v, true);
       println(parm, s + ";");
     }
   }
@@ -316,7 +323,7 @@ namespace generator {
     if (l) {
       std::string x = "";
       std::string d = "";
-      traverseInterfaceList(parm, l, [&](std::string& preDefinition, std::string& name,
+      traverseInterfaceList(parm, l, [&](std::string& name,
                                          std::string& type, std::string& init,
                                          DeclarationID id, ast::ObjectDeclaration::Direction direction) {
                               s += d + typeConverter(type, id, direction) + " " + name;
@@ -726,7 +733,7 @@ namespace generator {
       std::string delimiter = "";
       int argumentNumber = 0;
       traverseInterfaceList(parm, f->interface,
-                            [&](std::string& preDefinition, std::string& name,
+                            [&](std::string& name,
                                 std::string& type, std::string& init, DeclarationID id,
                                 ast::ObjectDeclaration::Direction direction) {
                               std::string argument = associateArgument(parm, name, init, argumentNumber, l);
@@ -792,8 +799,8 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
-    std::string rangeName = printRangeType(parm, name, r, "range");
-    println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
+    std::string rangeName = printRangeType(parm, name, "int", r, "range");
+    println(parm, "for (auto " + name + " : " + "INTEGER<" + rangeName + ">()) {");
     parm.incIndent();
     callback(parm);
     parm.decIndent();

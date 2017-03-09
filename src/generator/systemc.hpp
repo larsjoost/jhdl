@@ -88,7 +88,8 @@ namespace generator {
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
-    std::string printRangeType(parameters& parm, std::string& name, ast::RangeType* r, std::string& postfix);
+    std::string printRangeType(parameters& parm, std::string& name, std::string type,
+                               ast::RangeType* r, std::string postfix);
 
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -110,6 +111,8 @@ namespace generator {
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
+    std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
@@ -117,7 +120,7 @@ namespace generator {
     template<typename Func>
     void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback);
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                          bool initialization, std::string& p);
+                                          bool initialization);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
     void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback);
