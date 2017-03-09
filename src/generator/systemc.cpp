@@ -285,7 +285,7 @@ namespace generator {
         std::string returnType = basicIdentifierToString(p, f->returnType) + "<>";
         std::string interface = "(" + interfaceListToString(p, f->interface, ", ", false,
                                                             [](std::string& type, DeclarationID id, ast::ObjectDeclaration::Direction direction) {
-                                                              return type + "<>";
+                                                              return type;
                                                             }) + ")";
         println(p, returnType + " " + name + interface + "{");
         p.incIndent();
@@ -537,13 +537,10 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      std::string rangeName;
       std::string name = basicIdentifierToString(parm, forGenerateStatement->identifier);
-      println(parm, rangeTypeToString(parm, name, forGenerateStatement->range, rangeName) + " {");
-      parm.incIndent();
-      concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
-      parm.decIndent();
-      println(parm, "}");
+      forLoop(parm, name, forGenerateStatement->range, [&](parameters& parm) {
+          concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
+        });
     }
   }
 
@@ -607,10 +604,10 @@ namespace generator {
                                           [&](std::string& type, DeclarationID id,
                                               ast::ObjectDeclaration::Direction direction) {
                                             switch (direction) {
-                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + "<>>";
+                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
                                             case ast::ObjectDeclaration::OUT: 
                                             case ast::ObjectDeclaration::INOUT: 
-                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + "<>>";
+                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
                                             }
                                             return type;
                                           }) + ";");
@@ -749,15 +746,24 @@ namespace generator {
     std::string s = rangeStruct(rangeName, left, right);
     return s;
   }
+
+  template<typename Func>
+  void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
+    std::string rangeName;
+    println(parm, rangeTypeToString(parm, name, r, rangeName) + ";");
+    println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
+    parm.incIndent();
+    callback(parm);
+    parm.decIndent();
+    println(parm, "}");
+  }
   
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
     if (p) {
       std::string name = basicIdentifierToString(parm, p->identifier);
-      std::string rangeName;
-      println(parm, rangeTypeToString(parm, name, p->range, rangeName) + ";");
-      println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
-      sequentialStatements(parm, p->sequentialStatements);
-      println(parm, "}");
+      forLoop(parm, name, p->range, [&](parameters& parm) {
+          sequentialStatements(parm, p->sequentialStatements);
+        });
     }
   }
 

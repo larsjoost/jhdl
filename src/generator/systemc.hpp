@@ -91,6 +91,8 @@ namespace generator {
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
+    template<typename Func>
+    void forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
