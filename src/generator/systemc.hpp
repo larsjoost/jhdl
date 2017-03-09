@@ -88,8 +88,7 @@ namespace generator {
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
-    std::string printRangeType(parameters& parm, std::string& name, std::string type,
-                               ast::RangeType* r, std::string postfix);
+    std::string printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
 
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -112,7 +111,7 @@ namespace generator {
     void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
-    std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
+    void subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,

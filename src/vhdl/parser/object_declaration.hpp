@@ -53,8 +53,7 @@ namespace vhdl {
             break;
           }
         }
-        type = scanner->expect<BasicIdentifier>();
-        subtype = scanner->optional<SubtypeIndication>();
+        type = scanner->optional<SubtypeIndication>();
         initialization = scanner->optional<DeclarationInitialization>();
         return this;
       }

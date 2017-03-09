@@ -19,8 +19,7 @@ namespace ast {
     ObjectType objectType;
     BasicIdentifier* identifier;
     Direction direction = NONE;
-    BasicIdentifier* type;
-    SubtypeIndication* subtype;
+    SubtypeIndication* type;
     DeclarationInitialization* initialization;
     
   };

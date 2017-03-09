@@ -13,6 +13,7 @@ begin
   process is
     variable a : integer range -4 to 20;
     variable b : integer range 10 downto 0;
+    variable c : integer;
   begin  -- process
     a := 3;
     if (a /= 3) then
