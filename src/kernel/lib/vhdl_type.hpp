@@ -186,6 +186,93 @@ namespace vhdl {
 
   };
 
+  template<class TYPE, class RANGE>
+  class Array {
+  public:
+    RANGE range;
+    TYPE value[];
+
+    class iterator {
+      friend class Array;
+      Array<TYPE, RANGE>* parent;
+      TYPE index;
+    public:
+      Array<TYPE, RANGE> operator *() const { parent->value = index; return *parent; }
+      const iterator &operator ++() { ++index; return *this; }
+      Array<TYPE, RANGE> operator ++(TYPE) { iterator copy(*this); ++index; return copy; }
+      
+      bool operator ==(const iterator &other) const { return index == other.index; }
+      bool operator !=(const iterator &other) const { return index != other.index; }
+
+    protected:
+      iterator(Array<TYPE, RANGE>* parent, TYPE start) : parent(parent), index(start) { }
+    };
+    
+  public:
+
+    explicit Array<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
+    Array<TYPE, RANGE>(TYPE v) :
+    value(v), begin_(this, range.left), end_(this, range.right + 1) { }
+    
+    void operator=(const TYPE other) { value = other; }
+    template <class T>
+    void operator=(const Array<TYPE, T>& other) { value = other.value; }
+
+    template <class T>
+    bool operator ==(const Array<TYPE, T> &other) { return value == other.value; }
+    template <class T>
+    bool operator !=(const Array<TYPE, T> &other) { return value != other.value; }
+    bool operator ==(TYPE other) { return value == other; }
+    bool operator !=(TYPE other) { return value != other; }
+    TYPE operator +(TYPE other) { return value + other; }
+    TYPE operator -(TYPE other) { return value - other; }
+    template <class T>
+    TYPE operator +(const Array<TYPE, T>& other) { return value + other.value; }
+    template <class T>
+    TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
+    
+    operator bool() const {
+      return value != TYPE(0);
+    }
+    
+    std::string toString() {
+      return std::to_string(value);
+    }
+
+    unsigned int LENGTH() {
+      return 32;
+    }
+
+    TYPE HIGH() { return (range.left > range.right ? range.left : range.right); }
+    TYPE LOW() { return (range.left < range.right ? range.left : range.right); }
+    TYPE LEFT() { return range.left; }
+    TYPE RIGHT() { return range.right; }
+    
+    int getValue() {
+      return value;
+    }
+
+    std::string STATUS() {
+      return toString();
+    }
+    
+    template <class T>
+    static ::std::string IMAGE(T& r) {
+      return r.toString();
+    }
+
+    static ::std::string IMAGE(TYPE r) {
+      return std::to_string(r);
+    }
+
+    iterator begin() const { return begin_; }
+    iterator end() const { return end_; }
+
+  private:
+    iterator begin_;
+    iterator end_;
+
+  };
   
 }
 

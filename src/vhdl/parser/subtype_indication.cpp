@@ -8,8 +8,10 @@ namespace vhdl {
   namespace parser {
   
     SubtypeIndication* SubtypeIndication::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      scanner->accept(scanner::Scanner::VHDL_RANGE);
-      range = scanner->accept<RangeType>();
+      name = scanner->accept<BasicIdentifier>();
+      if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {
+        range = scanner->accept<RangeType>();
+      }
       return this;
     }
 

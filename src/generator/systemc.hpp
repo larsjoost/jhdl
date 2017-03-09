@@ -15,6 +15,7 @@
 #include "../ast/object_declaration.hpp"
 #include "../ast/enumeration_type.hpp"
 #include "../ast/number_type.hpp"
+#include "../ast/array_type.hpp"
 #include "../ast/character.hpp"
 #include "../ast/basic_identifier.hpp"
 #include "../ast/basic_identifier_list.hpp"
@@ -30,6 +31,7 @@
 #include "../ast/interface.hpp"
 #include "../ast/component_instance.hpp"
 #include "../ast/subtype_indication.hpp"
+#include "../ast/subtype_declaration.hpp"
 
 namespace generator {
   
@@ -86,7 +88,7 @@ namespace generator {
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
-    std::string rangeTypeToString(parameters& parm, std::string& name, ast::RangeType* r, std::string& rangeName);
+    std::string printRangeType(parameters& parm, std::string& name, ast::RangeType* r, std::string& postfix);
 
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -106,7 +108,9 @@ namespace generator {
 
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
+    void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);

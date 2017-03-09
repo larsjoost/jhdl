@@ -3,13 +3,15 @@
 #include "type_definition.hpp"
 #include "number_type.hpp"
 #include "enumeration_type.hpp"
+#include "array_type.hpp"
 
 namespace vhdl {
   namespace parser {
 
     TypeDefinition* TypeDefinition::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       ((numberType = scanner->optional<NumberType>()) ||
-       (enumerationType = scanner->optional<EnumerationType>()));
+       (enumerationType = scanner->optional<EnumerationType>()) ||
+       (arrayType = scanner->optional<ArrayType>()));
       return this;
     }
 
