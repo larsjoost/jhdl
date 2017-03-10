@@ -7,6 +7,13 @@
 #include <string>
 
 namespace vhdl {
+
+  /*
+   * Range examples:
+   *     
+   * type INTEGER is range -2147483647 to 2147483647;
+   * type REAL is range -1.7014111e+308 to 1.7014111e+308;
+   */
   
   template<class TYPE, class RANGE>
   class Range {
@@ -95,7 +102,12 @@ namespace vhdl {
     iterator end_;
 
   };
-  
+  /*
+   * vhdl_range_type examples:
+   *
+   * type INTEGER is range -2147483647 to 2147483647;
+   * type REAL is range -1.7014111e+308 to 1.7014111e+308;
+   */
 #define vhdl_range_type(name, leftValue, rightValue)              \
   using type_##name = decltype(leftValue);                        \
   struct range_##name {                                           \
@@ -104,6 +116,12 @@ namespace vhdl {
   };                                                              \
   template <class RANGE = range_##name>                           \
   using name = Range<type_##name, RANGE>
+
+  /*
+   * vhdl_range_subtype examples:
+   *
+   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
+   */
   
 #define vhdl_range_subtype(name, subtype, leftValue, rightValue)  \
   using type_##name = decltype(leftValue);                        \
@@ -111,8 +129,14 @@ namespace vhdl {
     type_##name left = leftValue;                                 \
     type_##name right = rightValue;                               \
   };                                                              \
-  template <class RANGE = range_##name> \
+  template <class RANGE = range_##name>                           \
   using name = subtype<RANGE>
+
+  /*
+   * Physical example:
+   * 
+   * 10 ns
+   */
   
   template <class T, typename Units, char* p[]>
   class Physical {
@@ -138,6 +162,12 @@ namespace vhdl {
 
   };
 
+  /*
+   * Enumeration example:
+   *
+   * type SEVERITY_LEVEL is (NOTE, WARNING, ERROR, FAILURE);
+   */
+  
   template <typename T, char* p[]>
   struct Enumeration {
   public:
@@ -204,6 +234,12 @@ namespace vhdl {
 
   };
 
+  /*
+   * Array example:
+   *
+   * type BIT_VECTOR is array (NATURAL range <>) of BIT;
+   */
+  
   template<class TYPE, class RANGE>
   class Array {
   public:
