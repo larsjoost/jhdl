@@ -164,10 +164,8 @@ namespace generator {
     if (t) {
       printSourceLine(parm, identifier);
       std::string name = basicIdentifierToString(parm, identifier);
-      std::string subtypeName = basicIdentifierToString(parm, t->type->name);
-      std::string subtypeIdentifier = name + "_subtype";
-      printSubtype(parm, subtypeIdentifier, t->type->range, name);
-      printArrayType(parm, name, t->range, "Array", subtypeIdentifier);
+      std::string subtypeName = subtypeIndication(parm, name, t->type) + "<>";
+      printArrayType(parm, name, t->range, subtypeName);
     }
   }
 
@@ -203,11 +201,11 @@ namespace generator {
     }
   }
   
-  void SystemC::printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, std::string& subtype) {
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string& subtype) {
     assert(r);
     std::string left = expressionToString(parm, r->left);
     std::string right = expressionToString(parm, r->right);
-    println(parm, "vhdl_array_type(" + name + ", " + typeName + ", " + left + ", " + right + ", " + subtype + ");");
+    println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
   }
   
   /*

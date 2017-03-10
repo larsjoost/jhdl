@@ -261,12 +261,20 @@ namespace vhdl {
     protected:
       iterator(Array<TYPE, RANGE>* parent, TYPE start) : parent(parent), index(start) { }
     };
+
+    void init() {
+      value = new TYPE[LENGTH()];
+    }
     
   public:
 
-    explicit Array<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
+    explicit Array<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) {
+      init();
+    }
     Array<TYPE, RANGE>(TYPE v) :
-    value(v), begin_(this, range.left), end_(this, range.right + 1) { }
+    value(v), begin_(this, range.left), end_(this, range.right + 1) {
+      init();
+    }
     
     void operator=(const TYPE other) { value = other; }
     template <class T>
@@ -284,6 +292,9 @@ namespace vhdl {
     TYPE operator +(const Array<TYPE, T>& other) { return value + other.value; }
     template <class T>
     TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
+    TYPE operator (int index) {
+      return value[index - LOW()];
+    }
     
     operator bool() const {
       return value != TYPE(0);
@@ -293,10 +304,7 @@ namespace vhdl {
       return std::to_string(value);
     }
 
-    unsigned int LENGTH() {
-      return 32;
-    }
-
+    unsigned int LENGTH() { return HIGH() - LOW(); }
     TYPE HIGH() { return (range.left > range.right ? range.left : range.right); }
     TYPE LOW() { return (range.left < range.right ? range.left : range.right); }
     TYPE LEFT() { return range.left; }
@@ -328,6 +336,20 @@ namespace vhdl {
 
   };
   
+  /*
+   * vhdl_array_type examples:
+   *
+   * type a_t is array (0 to 4) of bit;
+   */
+  
+#define vhdl_array_type(name, leftValue, rightValue, type)        \
+  struct range_##name {                                           \
+    int left = leftValue;                                         \
+    int right = rightValue;                                       \
+  };                                                              \
+  template <class RANGE = range_##name>                           \
+  using name = Array<type, RANGE>
+
 }
 
 #endif
