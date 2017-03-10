@@ -15,35 +15,11 @@ namespace vhdl {
 
   namespace STANDARD {
 
-    struct INTEGER_range {
-      int left = std::numeric_limits<int>::min();
-      int right = std::numeric_limits<int>::max();
-    };
+    vhdl_range_subtype(INTEGER, Range, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+    vhdl_range_subtype(NATURAL, Range, 0, std::numeric_limits<int>::max());
+    vhdl_range_subtype(POSITIVE, Range, 1, std::numeric_limits<int>::max());
+    vhdl_range_subtype(REAL, Range, std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
 
-    template <class RANGE = INTEGER_range>
-    using INTEGER = Range<int, RANGE>;
-    
-    struct NATURAL_range {
-      int left = 0;
-      int right = std::numeric_limits<int>::max();
-    };
-    template <class RANGE = NATURAL_range>
-    using NATURAL = INTEGER<RANGE>;
-    
-    struct POSITIVE_range {
-      int left = 1;
-      int right = std::numeric_limits<int>::max();
-    };
-    template <class RANGE = POSITIVE_range>
-    using POSITIVE = INTEGER<RANGE>;
-
-    struct REAL_range {
-      double left = std::numeric_limits<double>::max();
-      double right = std::numeric_limits<double>::max();
-    };
-    template <class RANGE = REAL_range>
-    using REAL = Range<double, RANGE>;
-    
     char BIT_char[] = {'0', '1'};
     template <char* p = BIT_char>
     using BIT = CharArray<p>;

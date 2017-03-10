@@ -142,10 +142,7 @@ namespace generator {
     if (t) {
       printSourceLine(parm, identifier);
       std::string name = basicIdentifierToString(parm, identifier);
-      std::string type = name + "_type";
-      std::string typeName = printRangeType(parm, name, t->range);
-      println(parm, "template<class RANGE = " + typeName + ">");
-      println(parm, "using " + name + " = " + "Range<" + type + ", RANGE>;");
+      printSubtype(parm, name, t->range, "Range");
     }
   }
 
@@ -167,8 +164,10 @@ namespace generator {
     if (t) {
       printSourceLine(parm, identifier);
       std::string name = basicIdentifierToString(parm, identifier);
-      subtypeIndication(parm, name, t->type);
-      printSubtype(parm, name, t->range, "Array");
+      std::string subtypeName = basicIdentifierToString(parm, t->type->name);
+      std::string subtypeIdentifier = name + "_subtype";
+      printSubtype(parm, subtypeIdentifier, t->type->range, name);
+      printArrayType(parm, name, t->range, "Array", subtypeIdentifier);
     }
   }
 
@@ -182,31 +181,24 @@ namespace generator {
   }
 
   /*
-  vhdl:
-  range 1 to 20;
-  systemc:
-  struct [NAME]_range { <[TYPE] left = 1; [TYPE] right = 20; };
-  */
-  std::string SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    std::string left = expressionToString(parm, r->left);
-    std::string right = expressionToString(parm, r->right);
-    std::string type = name + "_type";
-    println(parm, "using " + type + " = decltype(" + left + ");");
-    std::string rangeName = name + "_" + "range";
-    println(parm, "struct " + rangeName + " { " + type + " left = " + left + "; " + type + " right = " + right + "; };");
-    return rangeName;
-  }
-
-  /*
       struct TYPE_T_range { int left = 0; int right = 4; };
       template<class T = TYPE_T_range>
       using TYPE_T = Array<TYPE_T_type, T>;
   */
   void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
+    if (parm.definesAllowed) {
+      assert(r);
+      std::string left = expressionToString(parm, r->left);
+      std::string right = expressionToString(parm, r->right);
+      println(parm, "vhdl_range_subtype(" + name + ", " + typeName + ", " + left + ", " + right + ");");
+    }
+  }
+  
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, std::string& subtype) {
     assert(r);
-    std::string subtypeName = printRangeType(parm, name, r);
-    println(parm, "template<class T = " + subtypeName + ">");
-    println(parm, "using " + name + " = " + typeName + "<T>;");
+    std::string left = expressionToString(parm, r->left);
+    std::string right = expressionToString(parm, r->right);
+    println(parm, "vhdl_array_type(" + name + ", " + typeName + ", " + left + ", " + right + ", " + subtype + ");");
   }
   
   /*
@@ -218,12 +210,14 @@ namespace generator {
     template<class T = TYPE_T_range>
     using TYPE_T = INTEGER<T>;
   */
-  void SystemC::subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t) {
+  std::string SystemC::subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t) {
     assert(t);
     std::string typeName = basicIdentifierToString(parm, t->name);
     if (t->range) {
       printSubtype(parm, name, t->range, typeName);
+      return name;
     }
+    return typeName;
   }
     
     /*
@@ -247,8 +241,7 @@ namespace generator {
     if (v) {
       std::string name = basicIdentifierToString(parm, v->identifier);
       std::string type = name + "_type";
-      subtypeIndication(parm, type, v->type);
-      type += "<>";
+      type = subtypeIndication(parm, type, v->type) + "<>";
       std::string init = "";
       if (v->initialization) {
         init = expressionToString(parm, v->initialization->value);
@@ -306,7 +299,9 @@ namespace generator {
     if (v) {
       printSourceLine(parm, v->identifier);
       std::string s = objectDeclarationToString(parm, v, true);
-      println(parm, s + ";");
+      if (parm.instanceAllowed) {
+        println(parm, s + ";");
+      }
     }
   }
 
@@ -347,10 +342,12 @@ namespace generator {
         parameters p = parm;
         printSourceLine(p, f->name);
         std::string returnType = basicIdentifierToString(p, f->returnType) + "<>";
-        std::string interface = "(" + interfaceListToString(p, f->interface, ", ", false,
-                                                            [](std::string& type, DeclarationID id, ast::ObjectDeclaration::Direction direction) {
-                                                              return type;
-                                                            }) + ")";
+        std::string interface = "(" +
+          interfaceListToString(p, f->interface, ", ", false,
+                                [](std::string& type, DeclarationID id,
+                                   ast::ObjectDeclaration::Direction direction) {
+                                  return type;
+                                }) + ")";
         println(p, returnType + " " + name + interface + "{");
         p.incIndent();
         declarations(p, f->declarations);
@@ -388,7 +385,8 @@ namespace generator {
   }
 
   template<class Key, class Value, typename Func>
-  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func callback) {
+  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t,
+                                    std::string delimiter, Func callback) {
     std::string s;
     std::string d;
     for (auto x : t) {
@@ -399,12 +397,14 @@ namespace generator {
   }
 
   template<class T, typename Func>
-  std::string SystemC::listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback) {
+  std::string SystemC::listToString(parameters& parm, std::list<T>& t,
+                                    std::string delimiter, Func callback) {
     return listToString(parm, &t, delimiter, callback);
   }
   
   template<class T, typename Func>
-  std::string SystemC::listToString(parameters& parm, std::list<T>* t, std::string delimiter, Func callback) {
+  std::string SystemC::listToString(parameters& parm, std::list<T>* t,
+                                    std::string delimiter, Func callback) {
     std::string s;
     std::string d;
     for (auto x : *t) {
@@ -415,7 +415,8 @@ namespace generator {
   }
 
   template<typename Func>
-  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback) {
+  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list,
+                                    std::string delimiter, Func callback) {
     std::string s = "";
     if (list) {
       std::string d = "";
@@ -431,27 +432,39 @@ namespace generator {
     std::string constructorArguments = "";
     std::string memberVariableAssignment = "";
     if (parm.forGenerateHierarchy.size() > 0) {
-      constructorArguments = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return "auto " + s;});
-      memberVariableAssignment = ", " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s + "(" + s + ")";});
+      constructorArguments = ", " +
+        listToString(parm, parm.forGenerateHierarchy, ",",
+                     [&](std::string s){return "auto " + s;});
+      memberVariableAssignment = ", " +
+        listToString(parm, parm.forGenerateHierarchy, ",",
+                     [&](std::string s){return s + "(" + s + ")";});
     }
-    return name + "(" + parm.parentName +"* parent" + constructorArguments + ") : p(parent)" + memberVariableAssignment;
+    return name + "(" + parm.parentName +"* parent" + constructorArguments +
+      ") : p(parent)" + memberVariableAssignment;
   }
 
-  template <class T, typename Func>
-  void SystemC::scThreadShell(parameters& parm, std::string& name, T sensitivity, Func body) {  
+  template <class T, typename DeclarationFunc, typename BodyFunc>
+  void SystemC::scThreadShell(parameters& parm, std::string& name, T sensitivity,
+                              DeclarationFunc declarations, BodyFunc body) {  
     println(parm, "class " + name + " : public sc_thread {");
     parm.incIndent();
     println(parm, parm.parentName + "* p;");
     if (parm.forGenerateHierarchy.size() > 0) {
-      println(parm, "INTEGER<> " + listToString(parm, parm.forGenerateHierarchy, ",", [&](std::string s){return s;}) + ";");
+      println(parm, "INTEGER<> " + listToString(parm, parm.forGenerateHierarchy,
+                                                ",", [&](std::string s){return s;}) + ";");
     }
     parm.decIndent();
     println(parm, "public:");
     parm.incIndent();
     println(parm, getConstructorDeclaration(parm, name) +  + " {};");
+    parm.instanceAllowed = false;
+    declarations(parm);
+    parm.instanceAllowed = true;
     println(parm, "void process() {");
     parm.incIndent();
+    parm.definesAllowed = false;
     body(parm);
+    parm.definesAllowed = true;
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
       if (s.size() == 0) {
@@ -478,10 +491,15 @@ namespace generator {
       }
       {
         parameters p = descendHierarchy(parm);
-        scThreadShell(p, methodName, method->sensitivity, [&](parameters& parm) {
-            declarations(parm, method->declarations);
-            sequentialStatements(parm, method->sequentialStatements);
-          });
+        scThreadShell(p, methodName, method->sensitivity,
+                      [&](parameters& parm) {
+                        declarations(parm, method->declarations);
+                      },
+                      [&](parameters& parm) {
+                        declarations(parm, method->declarations);
+                        sequentialStatements(parm, method->sequentialStatements);
+                      }
+                      );
       }
     }
     functionEnd("methodDefinition");
@@ -540,9 +558,13 @@ namespace generator {
           }
           expressionToString(p, c.expression, callback);
         }
-        scThreadShell(p, name, &sensitivity, [&](parameters& parm) {
-            signalAssignment(parm, s);
-          });
+        scThreadShell(p, name, &sensitivity,
+                      [&](parameters& parm) {
+                        
+                      },
+                      [&](parameters& parm) {
+                        signalAssignment(parm, s);
+                      });
       }
     }
   }
@@ -801,7 +823,10 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
-    std::string rangeName = printRangeType(parm, name, r);
+    std::string left = expressionToString(parm, r->left);
+    std::string right = expressionToString(parm, r->right);
+    std::string rangeName = name + "_range";
+    println(parm, "struct " + rangeName + "{ int left = " + left + ", int right = " + right + "};");
     println(parm, "for (auto " + name + " : " + "INTEGER<" + rangeName + ">()) {");
     parm.incIndent();
     callback(parm);

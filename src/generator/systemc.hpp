@@ -51,6 +51,8 @@ namespace generator {
     
     struct parameters {
       int indent = 0;
+      bool definesAllowed = true;
+      bool instanceAllowed = true;
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
       std::unordered_map<std::string, DeclarationInfo> declaration;
@@ -88,7 +90,6 @@ namespace generator {
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
-    std::string printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
 
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
@@ -110,8 +111,9 @@ namespace generator {
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
     void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, std::string& subtype);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
-    void subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
+    std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
@@ -141,8 +143,8 @@ namespace generator {
     std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback);
 
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
-    template <class T, typename Func>
-    void scThreadShell(parameters& parm, std::string& name, T sensitivity, Func body);
+    template <class T, typename DeclarationFunc, typename BodyFunc>
+    void scThreadShell(parameters& parm, std::string& name, T sensitivity, DeclarationFunc declarations, BodyFunc body); 
     void methodDefinition(parameters& parm, ast::Method* method);
     void instantiateType(parameters& parm, std::string type, std::string name);
     void signalInstantiation(parameters& parm, ast::SignalAssignment* s);

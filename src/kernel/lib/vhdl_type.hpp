@@ -95,7 +95,16 @@ namespace vhdl {
     iterator end_;
 
   };
-
+  
+#define vhdl_range_subtype(name, subtype, leftValue, rightValue)  \
+  using type_##name = decltype(leftValue);                        \
+  struct range_##name {                                           \
+    type_##name left = leftValue;                                 \
+    type_##name right = rightValue;                               \
+  };                                                              \
+  template <class TYPE = type_##name, class RANGE = range_##name> \
+  using name = subtype<TYPE, RANGE>
+  
   template <class T, typename Units, char* p[]>
   class Physical {
   protected:
