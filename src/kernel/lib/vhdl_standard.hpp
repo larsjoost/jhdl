@@ -15,10 +15,10 @@ namespace vhdl {
 
   namespace STANDARD {
 
-    vhdl_range_subtype(INTEGER, Range, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-    vhdl_range_subtype(NATURAL, Range, 0, std::numeric_limits<int>::max());
-    vhdl_range_subtype(POSITIVE, Range, 1, std::numeric_limits<int>::max());
-    vhdl_range_subtype(REAL, Range, std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+    vhdl_range_type(INTEGER, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+    vhdl_range_subtype(NATURAL, INTEGER, 0, std::numeric_limits<int>::max());
+    vhdl_range_subtype(POSITIVE, INTEGER, 1, std::numeric_limits<int>::max());
+    vhdl_range_type(REAL, std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
 
     char BIT_char[] = {'0', '1'};
     template <char* p = BIT_char>

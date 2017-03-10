@@ -142,7 +142,7 @@ namespace generator {
     if (t) {
       printSourceLine(parm, identifier);
       std::string name = basicIdentifierToString(parm, identifier);
-      printSubtype(parm, name, t->range, "Range");
+      printRangeType(parm, name, t->range);
     }
   }
 
@@ -177,6 +177,15 @@ namespace generator {
       numberType(parm, t->identifier, t->typeDefinition->numberType);
       enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
       arrayType(parm, t->identifier, t->typeDefinition->arrayType);
+    }
+  }
+
+  void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
+    if (parm.definesAllowed) {
+      assert(r);
+      std::string left = expressionToString(parm, r->left);
+      std::string right = expressionToString(parm, r->right);
+      println(parm, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
     }
   }
 
@@ -826,7 +835,7 @@ namespace generator {
     std::string left = expressionToString(parm, r->left);
     std::string right = expressionToString(parm, r->right);
     std::string rangeName = name + "_range";
-    println(parm, "struct " + rangeName + "{ int left = " + left + ", int right = " + right + "};");
+    println(parm, "struct " + rangeName + "{ int left = " + left + "; int right = " + right + "; };");
     println(parm, "for (auto " + name + " : " + "INTEGER<" + rangeName + ">()) {");
     parm.incIndent();
     callback(parm);

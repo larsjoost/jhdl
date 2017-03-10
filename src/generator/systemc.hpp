@@ -112,6 +112,7 @@ namespace generator {
     void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, std::string& subtype);
+    void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
     std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
