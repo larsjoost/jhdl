@@ -249,17 +249,17 @@ namespace vhdl {
     class iterator {
       friend class Array;
       Array<TYPE, RANGE>* parent;
-      TYPE index;
+      int index;
     public:
       Array<TYPE, RANGE> operator *() const { parent->value = index; return *parent; }
       const iterator &operator ++() { ++index; return *this; }
-      Array<TYPE, RANGE> operator ++(TYPE) { iterator copy(*this); ++index; return copy; }
+      Array<TYPE, RANGE> operator ++(int) { iterator copy(*this); ++index; return copy; }
       
       bool operator ==(const iterator &other) const { return index == other.index; }
       bool operator !=(const iterator &other) const { return index != other.index; }
 
     protected:
-      iterator(Array<TYPE, RANGE>* parent, TYPE start) : parent(parent), index(start) { }
+      iterator(Array<TYPE, RANGE>* parent, int start) : parent(parent), index(start) { }
     };
 
     void init() {
@@ -292,12 +292,8 @@ namespace vhdl {
     TYPE operator +(const Array<TYPE, T>& other) { return value + other.value; }
     template <class T>
     TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
-    TYPE operator (int index) {
+    TYPE operator ()(int index) {
       return value[index - LOW()];
-    }
-    
-    operator bool() const {
-      return value != TYPE(0);
     }
     
     std::string toString() {
@@ -310,10 +306,6 @@ namespace vhdl {
     TYPE LEFT() { return range.left; }
     TYPE RIGHT() { return range.right; }
     
-    int getValue() {
-      return value;
-    }
-
     std::string STATUS() {
       return toString();
     }
