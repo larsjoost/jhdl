@@ -23,11 +23,12 @@ begin
   begin  -- process
     a := "00001";
     wait for 10 ns;
-    --if (a(4) /= '1') then
-    --  report "a = " & integer'image(a) &
-    --    ", but expected = 2"
-    --    severity failure;
-    --end if;
+    if (a(4) /= '1') then
+      report "a failed" severity failure;
+    end if;
+    if (a(0) /= '0') then
+      report "a failed" severity failure;
+    end if;
     --for i in a'range loop
     --  report "a = " & bit'image(i) severity note;
     --end loop;  -- i

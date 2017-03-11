@@ -220,6 +220,8 @@ namespace vhdl {
     void operator=(char c) { value = c; }
     bool operator ==(const CharArray<p> &other) const { return value == other.value; }
     bool operator !=(const CharArray<p> &other) const { return value != other.value; }
+    bool operator ==(const char other) const { return value == other; }
+    bool operator !=(const char other) const { return value != other; }
     
     int LENGTH() { return 1; }
     
@@ -244,7 +246,7 @@ namespace vhdl {
   class Array {
   public:
     RANGE range;
-    TYPE value[];
+    TYPE* value;
 
     class iterator {
       friend class Array;
@@ -279,6 +281,14 @@ namespace vhdl {
     void operator=(const TYPE other) { value = other; }
     template <class T>
     void operator=(const Array<TYPE, T>& other) { value = other.value; }
+    void operator=(const char* other) {
+      std::string s(other);
+      assert(s.size() == LENGTH());
+      int i = 0;
+      for (auto c : s) {
+        value[i++] = c;
+      }
+    }
 
     template <class T>
     bool operator ==(const Array<TYPE, T> &other) { return value == other.value; }
@@ -293,18 +303,25 @@ namespace vhdl {
     template <class T>
     TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
     TYPE operator ()(int index) {
-      return value[index - LOW()];
+      int x = ASCENDING() ? 1 : -1;
+      int i = x * index - range.left;
+      assert(i >= 0 && i < LENGTH());
+      return value[i];
     }
     
     std::string toString() {
       return std::to_string(value);
     }
 
-    unsigned int LENGTH() { return HIGH() - LOW(); }
-    TYPE HIGH() { return (range.left > range.right ? range.left : range.right); }
-    TYPE LOW() { return (range.left < range.right ? range.left : range.right); }
-    TYPE LEFT() { return range.left; }
-    TYPE RIGHT() { return range.right; }
+    bool ASCENDING() {
+      return (range.right > range.left ? true : false);
+    }
+    
+    unsigned int LENGTH() { return abs(range.left - range.right) + 1; }
+    TYPE& HIGH() { return (range.left > range.right ? LEFT() : RIGHT()); }
+    TYPE& LOW() { return (range.left < range.right ? LEFT() : RIGHT()); }
+    TYPE& LEFT() { return value[0]; }
+    TYPE& RIGHT() { return value[LENGTH() - 1]; }
     
     std::string STATUS() {
       return toString();
