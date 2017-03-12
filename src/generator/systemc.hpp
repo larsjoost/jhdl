@@ -142,6 +142,8 @@ namespace generator {
     std::string listToString(parameters& parm, std::list<T>* t, std::string delimiter, Func callback);
     template<typename Func>
     std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback);
+    template<typename Func, class T>
+    std::string listToString(parameters& parm, ast::List<T>* list, std::string delimiter, Func callback);
 
     std::string getConstructorDeclaration(parameters& parm, std::string& name);
     template <class T, typename DeclarationFunc, typename BodyFunc>

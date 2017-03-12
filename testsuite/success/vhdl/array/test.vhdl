@@ -24,7 +24,7 @@ begin
     a := "00001";
     wait for 10 ns;
     if (a(4) /= '1') then
-      report "a failed" severity failure;
+      report "a = " & bit'image(a(4)) & ", but expected = '1'" severity failure;
     end if;
     if (a(0) /= '0') then
       report "a failed" severity failure;

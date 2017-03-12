@@ -12,6 +12,7 @@
 namespace ast {
 
   class ProcedureCallStatement;
+  class BasicIdentifier;
   
   class ExpressionTerm {
     

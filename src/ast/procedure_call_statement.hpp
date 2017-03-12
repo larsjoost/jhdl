@@ -9,6 +9,7 @@
 namespace ast {
 
   class AssociationList;
+  class BasicIdentifier;
   
   class ProcedureCallStatement {
     

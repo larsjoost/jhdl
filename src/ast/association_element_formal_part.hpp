@@ -5,7 +5,9 @@
 #include "basic_identifier.hpp"
 
 namespace ast {
-    
+
+  class BasicIdentifier;
+  
   class AssociationElementFormalPart {
     
   public:

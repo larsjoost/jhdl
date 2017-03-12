@@ -1,7 +1,8 @@
 #include "../../ast/scanner.hpp"
 #include "../../ast/text.hpp"
 #include "../scanner/scanner.hpp"
-#include "basic_identifier_list.hpp"
+#include "basic_identifier.hpp" 
+#include "list.hpp"
 #include "expression.hpp"
 
 namespace vhdl {
@@ -13,7 +14,8 @@ namespace vhdl {
       if (scanner->optional("'")) {
         attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
         if (scanner->optional("(")) {
-          arguments = scanner->optional<BasicIdentifierList<CommaSeparation>>();
+          ::ast::List<Expression> a = scanner->optional<List<Expression, ','>>();
+          arguments = a;
           scanner->expect(")");
         }
       }

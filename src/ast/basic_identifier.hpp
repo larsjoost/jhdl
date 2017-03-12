@@ -3,17 +3,18 @@
 #define AST_BASICINDETIFIER_H_
 
 #include "text.hpp"
-#include "basic_identifier.hpp"
+#include "list.hpp"
+#include "expression.hpp"
 
 namespace ast {
 
-  class BasicIdentifierList;
+  class Expression;
   
   class BasicIdentifier {
   public:
     Text text;
     Text* attribute;
-    BasicIdentifierList* arguments; 
+    List<Expression>* arguments; 
     
     bool equals(BasicIdentifier* b) {
       if (b) {

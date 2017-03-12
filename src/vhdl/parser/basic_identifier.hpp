@@ -11,7 +11,7 @@ namespace vhdl {
     
     class BasicIdentifier :
       public ::ast::BasicIdentifier {
-    
+      
     public:
 
       void parse(::ast::Scanner<scanner::Scanner>* scanner);

@@ -7,6 +7,7 @@
 
 namespace ast {
 
+  class BasicIdentifier;
   
   class Physical {
     

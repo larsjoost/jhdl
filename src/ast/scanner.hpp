@@ -52,9 +52,11 @@ namespace ast {
 
     int accept(const char *text);
     int optional(const char* text);
+    bool optional(const char text);
     bool lookAhead(const char* text, int n);
     int expect(const char* text);
     int expect(Text& text);
+    bool match(const char text, int lookAhead = 0);
     int match(const char* text, int lookAhead = 0);
 
     Text* optional(Keyword keyword);
@@ -177,19 +179,28 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
+  bool Scanner<ApplicationSpecificScanner>::match(const char a, int lookAhead) {
+    DEBUG("match '" + std::to_string(a) + "'");
+    try {
+      Token* t = tokenLookAhead(lookAhead);
+      DEBUG("Token = " + toString(t));
+      if ((t->type != TOKEN_SPECIAL_CHARACTER) ||
+          (t->text.lookAhead(0) != a)) {
+        return false;
+      }
+    } catch (...) {return false;}
+    return true;
+  }
+
+  template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::match(const char* a, int lookAhead) {
     DEBUG("match '" + std::string(a) + "'");
     int len = strlen(a);
-    try {
-      for (int i=0; i<len; i++) {
-        Token* t = tokenLookAhead(i + lookAhead);
-        DEBUG("Token = " + toString(t));
-        if ((t->type != TOKEN_SPECIAL_CHARACTER) ||
-            (t->text.lookAhead(0) != a[i])) {
-          return 0;
-        }
+    for (int i=0; i<len; i++) {
+      if (!match(a[i], i + lookAhead)) {
+        return 0;
       }
-    } catch (...) {return 0;}
+    }
     return len;
   }
 
@@ -210,6 +221,19 @@ namespace ast {
       nextToken(len);
     }
     return len;
+  }
+  
+  template <class ApplicationSpecificScanner>
+  bool Scanner<ApplicationSpecificScanner>::optional(const char t) {
+    bool m = match(t);
+    DEBUG("optional '" + std::to_string(t) + "'");
+    if (verbose) {
+      tokenLookAhead(0)->text.printLinePosition(std::cout);
+    }
+    if (m) {
+      nextToken();
+    }
+    return m;
   }
   
   template <class ApplicationSpecificScanner>

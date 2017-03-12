@@ -435,6 +435,20 @@ namespace generator {
     return s;
   }
   
+  template<typename Func, class T>
+  std::string SystemC::listToString(parameters& parm, ast::List<T>* list,
+                                    std::string delimiter, Func callback) {
+    std::string s = "";
+    if (list) {
+      std::string d = "";
+      for (auto t : list->list) {
+        s += (d + callback(t));
+        d = delimiter;
+      }
+    }
+    return s;
+  }
+
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name) {
     std::string constructorArguments = "";
     std::string memberVariableAssignment = "";
@@ -946,7 +960,7 @@ namespace generator {
         matchDeclarationID(parm, name, SIGNAL);
       std::string seperator = objectMatch ? "." : "<>::";
       s += seperator + i->attribute->toString(true);
-      s += "(" + listToString(parm, i->arguments, ",", [&](std::string a){return a;}) + ")";
+      s += "(" + listToString(parm, i->arguments, ",", [&](ast::Expression& e){return expressionToString(parm, &e);}) + ")";
     }
     return s;
   }
