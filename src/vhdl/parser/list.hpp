@@ -8,11 +8,11 @@
 namespace vhdl {
   namespace parser {
 
-    template <class Type, char separator>
+    template <class Type, class AstType, char separator>
     class List :
-      public ::ast::List<Type> {
+      public ::ast::List<AstType> {
 
-      using ::ast::List<Type>::add;
+      using ::ast::List<AstType>::add;
       
     public:
 

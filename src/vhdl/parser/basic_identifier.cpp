@@ -14,8 +14,7 @@ namespace vhdl {
       if (scanner->optional("'")) {
         attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
         if (scanner->optional("(")) {
-          ::ast::List<Expression> a = scanner->optional<List<Expression, ','>>();
-          arguments = a;
+          arguments = scanner->optional<List<Expression, ::ast::Expression, ','>>();
           scanner->expect(")");
         }
       }

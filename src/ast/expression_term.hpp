@@ -13,7 +13,8 @@ namespace ast {
 
   class ProcedureCallStatement;
   class BasicIdentifier;
-  
+  class Physical;
+
   class ExpressionTerm {
     
   public:
