@@ -74,6 +74,8 @@ namespace generator {
 
     int methodId = 0;
 
+    void addDeclarationType(parameters& parm, std::string name, DeclarationID id,
+                            int hierarchyLevel = 0);
     bool matchDeclarationID(parameters& parm, std::string& name, DeclarationID id);
     int getHierarchyLevel(parameters& parm, std::string& name);
 

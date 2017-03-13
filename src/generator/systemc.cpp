@@ -57,6 +57,9 @@ namespace generator {
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.interface) {
+        // TODO: Add known functions from std as a work-around
+        addDeclarationType(parm, "FINISH", FUNCTION, -1);
+        // /TODO
         std::string name = basicIdentifierToString(parm, it->module.interface->name);
         parm.parentName = name;
         println(parm, "#include \"systemc.h\"");
@@ -88,7 +91,9 @@ namespace generator {
   SystemC::parameters SystemC::descendHierarchy(parameters& parm) {
     parameters p = parm;
     for (auto it = p.declaration.begin(); it != p.declaration.end(); it++) {
-      it->second.hierarchyLevel++;
+      if (it->second.hierarchyLevel >= 0) {
+        it->second.hierarchyLevel++;
+      }
     }
     return p;
   }
@@ -107,7 +112,9 @@ namespace generator {
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.contextClause) {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          println(parm, "using " + listToString(parm, useClause.list, "::", [&](std::string s){return s;}) + ";");
+          println(parm, "using " +
+                  listToString(parm, useClause.list, "::",
+                               [&](ast::BasicIdentifier& b){return getName(parm, &b, false);}) + ";");
         }
       }
     }    
@@ -338,12 +345,18 @@ namespace generator {
     return s;
   }
 
+  void SystemC::addDeclarationType(parameters& parm, std::string name, DeclarationID id,
+                                   int hierarchyLevel) {
+      DeclarationInfo i;
+      i.id = id;
+      i.hierarchyLevel = hierarchyLevel;
+      parm.declaration[name] = i;
+  }
+  
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
-      DeclarationInfo i;
       std::string name = basicIdentifierToString(parm, f->name);
-      i.id = FUNCTION;
-      parm.declaration[name] = i;
+      addDeclarationType(parm, name, FUNCTION);
       parm.functions[name] = f;
       {
         parameters p = parm;
@@ -741,7 +754,8 @@ namespace generator {
     functionEnd("implementation");
   }
 
-  std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l) { 
+  std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init,
+                                         int argumentNumber, ast::AssociationList* l) { 
     functionStart("associateArgument");
     std::string argument = init;
     if (l) {
@@ -802,13 +816,11 @@ namespace generator {
   
   std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
     functionStart("procedureCallStatementToString");
-    std::string s = "";
     if (p) {
-      std::string functionName = getName(parm, p->name, true);
-      s = functionName + "(" + parametersToString(parm, p->name, p->associationList) + ")";
+      return basicIdentifierToString(parm, p->name);
     }
     functionEnd("procedureCallStatementToString");
-    return s;
+    return "";
   }
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
@@ -952,15 +964,22 @@ namespace generator {
     std::string name = getName(parm, i);
     std::string s = getName(parm, i, true);
     if (matchDeclarationID(parm, name, FUNCTION)) {
-      std::string parameters = parametersToString(parm, i);
+      std::string parameters = parametersToString(parm, i, i->arguments);
       s += "(" + parameters + ")";
-    }
-    if (i->attribute) {
-      bool objectMatch = matchDeclarationID(parm, name, VARIABLE) ||
-        matchDeclarationID(parm, name, SIGNAL);
-      std::string seperator = objectMatch ? "." : "<>::";
-      s += seperator + i->attribute->toString(true);
-      s += "(" + listToString(parm, i->arguments, ",", [&](ast::Expression& e){return expressionToString(parm, &e);}) + ")";
+    } else {
+      if (i->attribute) {
+        bool objectMatch = matchDeclarationID(parm, name, VARIABLE) ||
+          matchDeclarationID(parm, name, SIGNAL);
+        std::string seperator = objectMatch ? "." : "<>::";
+        s += seperator + i->attribute->toString(true);
+        if (i->arguments) {
+          s += "(" + listToString(parm, i->arguments->associationElements.list, ",",
+                                  [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);}) + ")";
+        }
+      } else if (i->arguments) {
+        s += listToString(parm, i->arguments->associationElements.list, ",",
+                          [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
+      }
     }
     return s;
   }

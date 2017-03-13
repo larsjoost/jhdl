@@ -231,7 +231,7 @@ namespace vhdl {
 
     template <class T>
     static ::std::string IMAGE(T& r) {
-      return r.toString();
+      return "'" + r.toString() + "'";
     }
 
   };
@@ -302,7 +302,7 @@ namespace vhdl {
     TYPE operator +(const Array<TYPE, T>& other) { return value + other.value; }
     template <class T>
     TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
-    TYPE operator ()(int index) {
+    TYPE& operator [](int index) {
       int x = ASCENDING() ? 1 : -1;
       int i = x * index - range.left;
       assert(i >= 0 && i < LENGTH());

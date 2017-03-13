@@ -2,6 +2,7 @@
 #include "../../ast/text.hpp"
 #include "../scanner/scanner.hpp"
 #include "basic_identifier.hpp" 
+#include "association_list.hpp" 
 #include "list.hpp"
 #include "expression.hpp"
 
@@ -13,10 +14,10 @@ namespace vhdl {
       text = *name;
       if (scanner->optional("'")) {
         attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
-        if (scanner->optional("(")) {
-          arguments = scanner->optional<List<Expression, ::ast::Expression, ','>>();
-          scanner->expect(")");
-        }
+      } 
+      if (scanner->optional("(")) {
+        arguments = scanner->optional<AssociationList>();
+        scanner->expect(")");
       }
     }
 

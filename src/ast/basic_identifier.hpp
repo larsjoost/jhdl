@@ -5,16 +5,18 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "expression.hpp"
+#include "association_list.hpp"
 
 namespace ast {
 
   class Expression;
+  class AssociationList;
   
   class BasicIdentifier {
   public:
     Text text;
-    Text* attribute;
-    List<Expression>* arguments; 
+    Text* attribute = NULL; 
+    AssociationList* arguments;
     
     bool equals(BasicIdentifier* b) {
       if (b) {
