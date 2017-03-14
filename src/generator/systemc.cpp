@@ -355,13 +355,13 @@ namespace generator {
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
-      std::string name = basicIdentifierToString(parm, f->name);
+      std::string name = f->name.toString(true);
       addDeclarationType(parm, name, FUNCTION);
       parm.functions[name] = f;
       {
         parameters p = parm;
         printSourceLine(p, f->name);
-        std::string returnType = basicIdentifierToString(p, f->returnType) + "<>";
+        std::string returnType = f->returnType.toString(true) + "<>";
         std::string interface = "(" +
           interfaceListToString(p, f->interface, ", ", false,
                                 [](std::string& type, DeclarationID id,

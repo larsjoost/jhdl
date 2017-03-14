@@ -10,8 +10,7 @@ namespace vhdl {
   namespace parser {
   
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      ::ast::Text* name = scanner->accept(::ast::TOKEN_IDENTIFIER);
-      text = *name;
+      text = *(scanner->accept(::ast::TOKEN_IDENTIFIER));
       if (scanner->optional("'")) {
         attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
       } 

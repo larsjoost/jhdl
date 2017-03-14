@@ -18,8 +18,8 @@ namespace ast {
     
   public:
     
-    BasicIdentifier* name;
-    BasicIdentifier* returnType;
+    Text name;
+    Text returnType;
     Expression* returnValue;
     InterfaceList* interface;
     List<Declaration> declarations;
