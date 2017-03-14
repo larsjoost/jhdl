@@ -7,10 +7,17 @@ end entity test2;
 
 architecture rtl of test2 is
 
+  signal q_i : integer;
+  
 begin
 
-  q <= a + b;
+  process (a, b) is
+  begin
+    q_i <= a + b;
+  end process;
 
+  q <= q_i;
+  
 end architecture rtl;
 
 entity test is
@@ -39,7 +46,7 @@ begin
     a_i <= 1;
     b_i <= 2;
     wait for 10 ns;
-    e := a_i + b_i;
+    e   := a_i + b_i;
     report "e = " & integer'image(e) severity note;
     wait for 100 ns;
     report "q = " & integer'image(q_i) severity note;

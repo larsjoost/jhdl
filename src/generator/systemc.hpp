@@ -39,6 +39,9 @@ namespace generator {
 
     bool verbose = false;
 
+    bool definesAllowed = true;
+    bool instanceAllowed = true;
+
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
@@ -51,8 +54,6 @@ namespace generator {
     
     struct parameters {
       int indent = 0;
-      bool definesAllowed = true;
-      bool instanceAllowed = true;
       std::string parentName;
       std::list<std::string> forGenerateHierarchy;
       std::unordered_map<std::string, DeclarationInfo> declaration;
