@@ -1,20 +1,20 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "component_instance.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "association_list.hpp"
-#include "basic_identifier_list.hpp"
+#include "list.hpp"
 
 namespace vhdl {
   namespace parser {
   
     ComponentInstance* ComponentInstance::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      instanceName = scanner->accept<BasicIdentifier>();
+      instanceName = scanner->accept<SimpleIdentifier>();
       scanner->accept(":");
       scanner->optional(scanner::Scanner::VHDL_ENTITY);
-      componentName = scanner->accept<BasicIdentifierList<PunctuationSeparation>>();
+      componentName = scanner->accept<List<SimpleIdentifier, ::ast::SimpleIdentifier, '.'>>();
       if (scanner->optional("(")) {
-        architectureName = scanner->expect<BasicIdentifier>();
+        architectureName = scanner->expect<SimpleIdentifier>();
         scanner->expect(")");
       }
       if (scanner->optional(scanner::Scanner::VHDL_GENERIC)) {

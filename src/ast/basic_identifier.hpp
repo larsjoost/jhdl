@@ -25,8 +25,8 @@ namespace ast {
       return false;
     }
 
-    std::string toString() {
-      return text.toString();
+    std::string toString(bool setCase = false) {
+      return text.toString(setCase);
     }
 
   };

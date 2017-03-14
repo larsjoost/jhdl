@@ -2,7 +2,7 @@
 #ifndef AST_INTERFACE_H_
 #define AST_INTERFACE_H_
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "interface_list.hpp"
 
 namespace ast {
@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    BasicIdentifier* name;
+    SimpleIdentifier* name;
     InterfaceList* generics;
     InterfaceList* ports;
     

@@ -3,6 +3,7 @@
 #include "../scanner/scanner.hpp"
 #include "module.hpp"
 #include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "basic_identifier_list.hpp"
 
 namespace verilog {
@@ -12,7 +13,7 @@ namespace verilog {
       scanner->accept(scanner::Scanner::VERILOG_MODULE);
       interface = new ::ast::Interface();
       implementation = new ::ast::Implementation();
-      interface->name = scanner->expect<BasicIdentifier>();
+      interface->name = scanner->expect<SimpleIdentifier>();
       if (scanner->optional("(")) {
         BasicIdentifierList* i = scanner->expect<BasicIdentifierList>();
         scanner->expect(")");

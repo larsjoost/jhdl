@@ -3,14 +3,14 @@
 #include "../scanner/defines.hpp"
 #include "use_clause.hpp"
 #include "list.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 
 namespace vhdl {
   namespace parser {
   
     UseClause* UseClause::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_USE);
-      list = scanner->expect<List<BasicIdentifier, ::ast::BasicIdentifier, '.'>>();
+      list = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, '.'>>();
       scanner->expect(";");
       return this;
     }

@@ -9,16 +9,10 @@
 
 namespace generator {
 
-  std::string FileInfo::toString(ast::BasicIdentifier* i) {
-    assert (i != NULL);
-    std::string s = i->text.toString(true);
-    return s;
-  }
-
   FileInfo::FileInfo(ast::DesignFile& designFile) {
     for (ast::DesignUnit& u : designFile.designUnits.list) {
-      if (u.module.interface) {
-        std::cout << toString(u.module.interface->name);
+      if (u.module.interface && u.module.interface->name) {
+        std::cout << u.module.interface->name->toString(true);
       }
       
     }

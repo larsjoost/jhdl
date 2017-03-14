@@ -2,7 +2,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "architecture.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "process.hpp"
 #include "declaration.hpp"
 #include "concurrent_statement.hpp"
@@ -12,16 +12,16 @@ namespace vhdl {
   
     Architecture* Architecture::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ARCHITECTURE);
-      BasicIdentifier* architectureName = scanner->expect<BasicIdentifier>();
+      SimpleIdentifier* architectureName = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_OF);
-      name = scanner->expect<BasicIdentifier>();
+      name = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       while (declarations.add(scanner->optional<Declaration>())) {}
       scanner->expect(scanner::Scanner::VHDL_BEGIN);
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_ARCHITECTURE);
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
       if (!architectureName->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match architecture name '" +

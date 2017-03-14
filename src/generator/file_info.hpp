@@ -7,7 +7,6 @@
 namespace generator {
   
   class FileInfo { 
-    std::string toString(ast::BasicIdentifier* i);
   public:
     FileInfo(ast::DesignFile& designFile);
   };

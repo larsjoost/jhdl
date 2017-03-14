@@ -60,7 +60,7 @@ namespace generator {
         // TODO: Add known functions from std as a work-around
         addDeclarationType(parm, "FINISH", FUNCTION, -1);
         // /TODO
-        std::string name = basicIdentifierToString(parm, it->module.interface->name);
+        std::string name = it->module.interface->name->toString(true);
         parm.parentName = name;
         println(parm, "#include \"systemc.h\"");
         println(parm, "#include \"vhdl.h\"");
@@ -114,7 +114,7 @@ namespace generator {
         for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
           println(parm, "using " +
                   listToString(parm, useClause.list, "::",
-                               [&](ast::BasicIdentifier& b){return getName(parm, &b, false);}) + ";");
+                               [&](ast::SimpleIdentifier& b){return b.toString(true);}) + ";");
         }
       }
     }    
@@ -678,12 +678,13 @@ namespace generator {
   
   void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
     if (c) {
-      printSourceLine(parm, c->instanceName);
-      std::string instanceName = getName(parm, c->instanceName);
+      assert(c->instanceName);
+      printSourceLine(parm, c->instanceName->text);
+      std::string instanceName = c->instanceName->toString(true);
       std::string componentName = "";
       std::string delimiter = "";
-      for (ast::BasicIdentifier i : c->componentName->textList.list) {
-        std::string n = basicIdentifierToString(parm, &i);
+      for (ast::SimpleIdentifier i : c->componentName->list) {
+        std::string n = i.toString(true);
         if (n != "WORK") {
           componentName += delimiter + n;
           delimiter = "::";
@@ -707,9 +708,10 @@ namespace generator {
     }
   }
 
-  void SystemC::threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
+  void SystemC::threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
                                   ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    println(parm, "SC_CTOR(" + basicIdentifierToString(parm, name) + ") {");
+    assert(name);
+    println(parm, "SC_CTOR(" + name->toString(true) + ") {");
     parm.incIndent();
     concurrentStatementsInstantiation(parm, concurrentStatements);
     parm.decIndent();
@@ -737,7 +739,7 @@ namespace generator {
 
   void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface) {
     functionStart("implementation");
-    ast::BasicIdentifier* name = interface->name;
+    ast::SimpleIdentifier* name = interface->name;
     for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
          it != designFile.designUnits.list.end(); it++) {
       if (it->module.implementation) {
@@ -972,10 +974,12 @@ namespace generator {
           matchDeclarationID(parm, name, SIGNAL);
         std::string seperator = objectMatch ? "." : "<>::";
         s += seperator + i->attribute->toString(true);
+        std::string arguments = "";
         if (i->arguments) {
-          s += "(" + listToString(parm, i->arguments->associationElements.list, ",",
-                                  [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);}) + ")";
+          arguments = listToString(parm, i->arguments->associationElements.list, ",",
+                                   [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
         }
+        s += "(" + arguments + ")";
       } else if (i->arguments) {
         s += listToString(parm, i->arguments->associationElements.list, ",",
                           [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});

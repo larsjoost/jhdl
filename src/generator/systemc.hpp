@@ -164,7 +164,7 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
   
-    void threadConstructor(parameters& parm, ast::BasicIdentifier* name, 
+    void threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void interface(parameters& parm, ast::Interface* intf);
     void implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface);
