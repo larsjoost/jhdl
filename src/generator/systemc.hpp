@@ -42,6 +42,8 @@ namespace generator {
     bool definesAllowed = true;
     bool instanceAllowed = true;
 
+    bool quiet = false;
+    
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
@@ -108,6 +110,8 @@ namespace generator {
     void returnStatement(parameters& parm, ast::ReturnStatement* r);
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
     void signalAssignment(parameters& parm, ast::SignalAssignment* p);
+    template<typename Func>
+    void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
     void includes(parameters& parm, ast::DesignFile& designFile);
 
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);

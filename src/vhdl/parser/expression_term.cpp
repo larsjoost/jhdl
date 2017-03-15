@@ -7,7 +7,6 @@
 #include "character.hpp"
 #include "string.hpp"
 #include "physical.hpp"
-#include "procedure_call_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -16,8 +15,7 @@ namespace vhdl {
       (physical = scanner->optional<Physical>()) ||
         (number = scanner->optional<Number>()) ||
         (character = scanner->optional<Character>()) ||
-        (text = scanner->optional<String>()) ||
-        (procedureCall = scanner->optional<ProcedureCallStatement>()) || 
+        (text = scanner->optional<String>()) || 
         (identifier = scanner->optional<BasicIdentifier>());
       return this;
     }

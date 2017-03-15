@@ -25,7 +25,9 @@
 namespace generator {
 
   void SystemC::println(parameters& parm, std::string text) {
-    std::cout << std::string(parm.indent, ' ') << text << std::endl;
+    if (!quiet) {
+      std::cout << std::string(parm.indent, ' ') << text << std::endl;
+    }
   }
 
   void SystemC::printError(ast::Text& t, std::string message) {
@@ -38,13 +40,13 @@ namespace generator {
 
   void SystemC::functionStart(std::string name) {
     if (verbose) {
-      std::cerr << std::endl << "[FUNCTION START] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
     }
   }
 
   void SystemC::functionEnd(std::string name) {
     if (verbose) {
-      std::cerr << std::endl << "[FUNCTION END] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
     }
   }
 
@@ -480,6 +482,7 @@ namespace generator {
   template <class T, typename DeclarationFunc, typename BodyFunc>
   void SystemC::scThreadShell(parameters& parm, std::string& name, T sensitivity,
                               DeclarationFunc declarations, BodyFunc body) {  
+    functionStart("scThreadShell");
     println(parm, "class " + name + " : public sc_thread {");
     parm.incIndent();
     println(parm, parm.parentName + "* p;");
@@ -511,6 +514,7 @@ namespace generator {
     println(parm, "}");
     parm.decIndent();
     println(parm, "};");
+    functionEnd("scThreadShell");
   }
   
   void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
@@ -572,7 +576,9 @@ namespace generator {
   }
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
+    
     if (s) {
+      functionStart("concurrentSignalAssignment");
       std::string name;
       if (s->label) {
         name = getName(parm, s->label);
@@ -580,26 +586,22 @@ namespace generator {
         name = "line" + std::to_string(s->identifier->text.getLine());
       }
       s->name = name;
-      std::list<std::string> sensitivity;
+      
       {
         parameters p = descendHierarchy(parm);
-        auto callback = [&](std::string baseName, std::string hierarchyName) {
-          sensitivity.push_back(hierarchyName);
-        };
-        for (ast::SignalAssignmentCondition c : s->signalAssignmentConditions.list) {
-          if (c.condition) {
-            expressionToString(p, c.condition, callback);
-          }
-          expressionToString(p, c.expression, callback);
-        }
+        std::list<std::string> sensitivity;
+        quiet = true;
+        signalAssignment(p, s, [&](std::string baseName, std::string hierarchyName) {
+            sensitivity.push_back(hierarchyName);
+          });
+        quiet = false;
         scThreadShell(p, name, &sensitivity,
-                      [&](parameters& parm) {
-                        
-                      },
+                      [&](parameters& parm) { },
                       [&](parameters& parm) {
                         signalAssignment(parm, s);
                       });
       }
+      functionEnd("concurrentSignalAssignment");
     }
   }
   
@@ -719,6 +721,7 @@ namespace generator {
   }
   
   void SystemC::interface(parameters& parm, ast::Interface* intf) {
+    functionStart("interface");
     if (intf->generics) {
       println(parm, interfaceListToString(parm, intf->generics, "; ", false) + ";");
     }
@@ -735,6 +738,7 @@ namespace generator {
                                             return type;
                                           }) + ";");
     }
+    functionEnd("interface");
   }
 
   void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface) {
@@ -817,12 +821,13 @@ namespace generator {
   }
   
   std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
-    functionStart("procedureCallStatementToString");
+    std::string s = "";
     if (p) {
-      return basicIdentifierToString(parm, p->name);
+      functionStart("procedureCallStatementToString");
+      s = basicIdentifierToString(parm, p->name);
+      functionEnd("procedureCallStatementToString");
     }
-    functionEnd("procedureCallStatementToString");
-    return "";
+    return s;
   }
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
@@ -905,6 +910,12 @@ namespace generator {
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
+    signalAssignment(parm, p,  [](std::string baseName, std::string hierarchyName) {});
+  }
+
+  template <typename Func>
+  void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
+    functionStart("signalAssignment");
     if (p) {
       printSourceLine(parm, p->identifier);
       std::string name = basicIdentifierToString(parm, p->identifier);
@@ -913,7 +924,7 @@ namespace generator {
       std::string noConditionDelimiter = "";
       for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
         if (s.condition) {
-          println(parm, command + " (" + expressionToString(parm, s.condition) + ") {");
+          println(parm, command + " (" + expressionToString(parm, s.condition, callback) + ") {");
           command = "else if";
           noConditionCommand = "else {";
           noConditionDelimiter = "}";
@@ -921,7 +932,7 @@ namespace generator {
           println(parm, noConditionCommand);
         }
         parm.incIndent();
-        println(parm, name + " = " + expressionToString(parm, s.expression) + ";");
+        println(parm, name + " = " + expressionToString(parm, s.expression, callback) + ";");
         parm.decIndent();
         if (s.condition) {
           println(parm, "}");
@@ -930,6 +941,7 @@ namespace generator {
         }
       }
     }
+    functionEnd("signalAssignment");
   }
 
   bool SystemC::matchDeclarationID(parameters& parm, std::string& name, DeclarationID id) {
@@ -1016,10 +1028,6 @@ namespace generator {
       }
       if (e->character) {
         return characterToString(parm, e->character);
-      }
-      if (e->procedureCall) {
-        // TODO: Should also get basicIdentifierCallback as argument
-        return procedureCallStatementToString(parm, e->procedureCall);
       }
     }
     return "";
