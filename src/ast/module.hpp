@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "list.hpp"
 #include "interface.hpp"
+#include "package.hpp"
 #include "implementation.hpp"
 #include "context_clause.hpp"
 
@@ -17,6 +18,7 @@ namespace ast {
     ContextClause* contextClause = NULL;
     Interface* interface = NULL;
     Implementation* implementation = NULL;
+    Package* package = NULL;
     
   };
 

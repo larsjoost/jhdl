@@ -28,6 +28,8 @@ namespace vhdl {
       enum Keyword {
         VHDL_LIBRARY,
         VHDL_USE,
+        VHDL_PACKAGE,
+        VHDL_BODY,
         VHDL_ARCHITECTURE,
         VHDL_OF,
         VHDL_IS,
@@ -94,6 +96,8 @@ namespace vhdl {
         static KeywordInfo a[NUMBER_OF_KEYWORDS] = {
           {VHDL_LIBRARY, (char *)"library", 1987},
           {VHDL_USE, (char *)"use", 1987},
+          {VHDL_PACKAGE, (char *)"package", 1987},
+          {VHDL_BODY, (char *)"body", 1987},
           {VHDL_ARCHITECTURE, (char *)"architecture", 1987},
           {VHDL_OF, (char *)"of", 1987},
           {VHDL_IS, (char *)"is", 1987},
