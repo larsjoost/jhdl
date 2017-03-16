@@ -114,7 +114,7 @@ namespace generator {
     void signalAssignment(parameters& parm, ast::SignalAssignment* p);
     template<typename Func>
     void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
-    void includes(parameters& parm, ast::DesignFile& designFile);
+    void includes(parameters& parm, ast::ContextClause* contextClause);
 
     void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
@@ -174,8 +174,9 @@ namespace generator {
   
     void threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
-    void interface(parameters& parm, ast::Interface* intf);
-    void implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface);
+    void packageDeclaration(parameters& parm, ast::Package* package);
+    void interfaceDeclaration(parameters& parm, ast::Interface* interface);
+    void implementationDeclaration(parameters& parm, ast::Implementation* implementation);
 
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);

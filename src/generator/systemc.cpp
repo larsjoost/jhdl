@@ -56,32 +56,22 @@ namespace generator {
     functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
-    for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
-         it != designFile.designUnits.list.end(); it++) {
-      if (it->module.interface) {
-        // TODO: Add known functions from std as a work-around
-        addDeclarationType(parm, "FINISH", FUNCTION, -1);
-        // /TODO
-        std::string name = it->module.interface->name->toString(true);
-        parm.parentName = name;
-        println(parm, "#include \"systemc.h\"");
-        println(parm, "#include \"vhdl.h\"");
-        println(parm, "namespace vhdl {");
-        parm.incIndent();
-	println(parm, "using namespace STANDARD;");
-        includes(parm, designFile);
-        println(parm, "");
-        println(parm, "SC_MODULE(" + name + ") {");
-        println(parm, "public:");
-        parm.incIndent();
-        interface(parm, it->module.interface);
-        implementation(parm, designFile, it->module.interface);
-        parm.decIndent();
-        println(parm, "};");
-        parm.decIndent();
-        println(parm, "}");
-      }
+    // TODO: Add known functions from std as a work-around
+    addDeclarationType(parm, "FINISH", FUNCTION, -1);
+    // /TODO
+    println(parm, "#include \"systemc.h\"");
+    println(parm, "#include \"vhdl.h\"");
+    println(parm, "namespace vhdl {");
+    parm.incIndent();
+    println(parm, "using namespace STANDARD;");
+    for (ast::DesignUnit& it : designFile.designUnits.list) {
+      includes(parm, it.module.contextClause);
+      packageDeclaration(parm, it.module.package);
+      interfaceDeclaration(parm, it.module.interface);
+      implementationDeclaration(parm, it.module.implementation);
     }
+    parm.decIndent();
+    println(parm, "}");
   }
 
   void SystemC::printDeclaration(parameters& parm) {
@@ -108,17 +98,15 @@ namespace generator {
     printSourceLine(parm, t->text);
   }
 
-  void SystemC::includes(parameters& parm, ast::DesignFile& designFile) {
-    functionStart("includes");
-    for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
-         it != designFile.designUnits.list.end(); it++) {
-      if (it->module.contextClause) {
-        for (ast::UseClause useClause : it->module.contextClause->useClauses.list) {
-          println(parm, "using " +
-                  listToString(parm, useClause.list, "::",
-                               [&](ast::SimpleIdentifier& b){return b.toString(true);}) + ";");
-        }
+  void SystemC::includes(parameters& parm, ast::ContextClause* contextClause) {
+    if (contextClause) {
+      functionStart("includes");
+      for (ast::UseClause& useClause : contextClause->useClauses.list) {
+        println(parm, "using " +
+                listToString(parm, useClause.list, "::",
+                             [&](ast::SimpleIdentifier& b){return b.toString(true);}) + ";");
       }
+      functionEnd("includes");
     }    
   }
 
@@ -370,13 +358,15 @@ namespace generator {
                                    ast::ObjectDeclaration::Direction direction) {
                                   return type;
                                 }) + ")";
-        println(p, returnType + " " + name + interface + "{");
         if (f->body) {
+          println(p, returnType + " " + p.parentName + "::" + name + interface + "{");
           p.incIndent();
           function_body(p, f->body);
           p.decIndent();
+          println(p, "}");
+        } else {
+          println(p, returnType + " " + name + interface + ";");
         }
-        println(p, "}");
       }
     }
   }
@@ -727,44 +717,77 @@ namespace generator {
     println(parm, "}");
   }
   
-  void SystemC::interface(parameters& parm, ast::Interface* intf) {
-    functionStart("interface");
-    if (intf->generics) {
-      println(parm, interfaceListToString(parm, intf->generics, "; ", false) + ";");
+  void SystemC::packageDeclaration(parameters& parm, ast::Package* package) {
+    if (package) {
+      functionStart("package");
+      std::string name = package->name->toString(true);
+      parm.parentName = name;
+      if (!package->body) {
+        println(parm, "");
+        println(parm, "SC_PACKAGE(" + name + ") {");
+        parm.incIndent();
+      } else {
+        println(parm, "// Package body of " + name);
+      }
+      declarations(parm, package->declarations);
+      if (!package->body) {
+        parm.decIndent();
+        println(parm, "};");
+      }
+      functionEnd("package");
     }
-    if (intf->ports) {
-      println(parm, interfaceListToString(parm, intf->ports, "; ", false,
-                                          [&](std::string& type, DeclarationID id,
-                                              ast::ObjectDeclaration::Direction direction) {
-                                            switch (direction) {
-                                            case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
-                                            case ast::ObjectDeclaration::OUT: 
-                                            case ast::ObjectDeclaration::INOUT: 
-                                            case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
-                                            }
-                                            return type;
-                                          }) + ";");
-    }
-    functionEnd("interface");
   }
 
-  void SystemC::implementation(parameters& parm, ast::DesignFile& designFile, ast::Interface* interface) {
-    functionStart("implementation");
-    ast::SimpleIdentifier* name = interface->name;
-    for (std::list<ast::DesignUnit>::iterator it = designFile.designUnits.list.begin();
-         it != designFile.designUnits.list.end(); it++) {
-      if (it->module.implementation) {
-        if (name->equals(it->module.implementation->name)) {
-          declarations(parm, it->module.implementation->declarations);
-          concurrentStatementsDefinition(parm, it->module.implementation->concurrentStatements);
-          println(parm, "public:");
-          parm.incIndent();
-          threadConstructor(parm, name, it->module.implementation->concurrentStatements);
-          parm.decIndent();
-        }
+  void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface) {
+    if (interface) {
+      functionStart("interface");
+      std::string name = interface->name->toString(true);
+      parm.parentName = name;
+      println(parm, "");
+      println(parm, "SC_INTERFACE(" + name + ") {");
+      println(parm, "public:");
+      parm.incIndent();
+      if (interface->generics) {
+        println(parm, interfaceListToString(parm, interface->generics, "; ", false) + ";");
       }
+      if (interface->ports) {
+        println(parm, interfaceListToString(parm, interface->ports, "; ", false,
+                                            [&](std::string& type, DeclarationID id,
+                                                ast::ObjectDeclaration::Direction direction) {
+                                              switch (direction) {
+                                              case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
+                                              case ast::ObjectDeclaration::OUT: 
+                                              case ast::ObjectDeclaration::INOUT: 
+                                              case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+                                              }
+                                              return type;
+                                            }) + ";");
+      }
+      parm.decIndent();
+      println(parm, "};");
+      functionEnd("interface");
     }
-    functionEnd("implementation");
+  }
+
+  void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation) {
+    if (implementation) {
+      functionStart("implementation");
+      std::string name = implementation->name->toString(true);
+      parm.parentName = name;
+      println(parm, "");
+      println(parm, "SC_MODULE(" + name + ") {");
+      println(parm, "public:");
+      parm.incIndent();
+      declarations(parm, implementation->declarations);
+      concurrentStatementsDefinition(parm, implementation->concurrentStatements);
+      println(parm, "public:");
+      parm.incIndent();
+      threadConstructor(parm, implementation->name, implementation->concurrentStatements);
+      parm.decIndent();
+      parm.decIndent();
+      println(parm, "};");
+      functionEnd("implementation");
+    }
   }
 
   std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init,

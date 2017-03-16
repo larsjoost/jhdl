@@ -13,6 +13,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* name;
+    bool body;
     List<Declaration> declarations;
     
   };

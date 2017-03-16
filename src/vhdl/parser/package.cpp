@@ -10,11 +10,16 @@ namespace vhdl {
   
     Package* Package::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_PACKAGE);
+      body = scanner->optional(scanner::Scanner::VHDL_BODY);
       name = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       while (declarations.add(scanner->optional<Declaration>())) {}
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_PACKAGE);
+      bool delimiterBody = scanner->optional(scanner::Scanner::VHDL_BODY);
+      if (delimiterBody != body) {
+        scanner->error("Unexpected package body termination");
+      }
       SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
       if (!name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
