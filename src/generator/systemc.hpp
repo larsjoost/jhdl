@@ -32,6 +32,8 @@
 #include "../ast/component_instance.hpp"
 #include "../ast/subtype_indication.hpp"
 #include "../ast/subtype_declaration.hpp"
+#include "../ast/function_declaration.hpp"
+#include "../ast/function_body.hpp"
 
 namespace generator {
   
@@ -139,6 +141,7 @@ namespace generator {
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                       bool initialization);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
+    void function_body(parameters& parm, ast::FunctionBody* f);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     template<class Key, class Value, typename Func>

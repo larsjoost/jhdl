@@ -2,28 +2,22 @@
 #ifndef AST_FUNCTIONDECLARATION_H_
 #define AST_FUNCTIONDECLARATION_H_
 
-#include "basic_identifier.hpp"
-#include "basic_identifier_list.hpp"
-#include "list.hpp"
+#include "simple_identifier.hpp"
 #include "interface_list.hpp"
-#include "sequential_statement.hpp"
-#include "declaration.hpp"
-#include "expression.hpp"
+#include "function_body.hpp"
 
 namespace ast {
 
-  class Declaration;
+  class FunctionBody;
   
   class FunctionDeclaration {
     
   public:
     
-    Text name;
-    Text returnType;
-    Expression* returnValue;
+    SimpleIdentifier* name;
+    SimpleIdentifier* returnType;
     InterfaceList* interface;
-    List<Declaration> declarations;
-    List<SequentialStatement> sequentialStatements;
+    FunctionBody* body;
     
   };
 

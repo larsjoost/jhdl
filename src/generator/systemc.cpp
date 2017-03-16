@@ -357,13 +357,13 @@ namespace generator {
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
-      std::string name = f->name.toString(true);
+      std::string name = f->name->toString(true);
       addDeclarationType(parm, name, FUNCTION);
       parm.functions[name] = f;
       {
         parameters p = parm;
-        printSourceLine(p, f->name);
-        std::string returnType = f->returnType.toString(true) + "<>";
+        printSourceLine(p, f->name->text);
+        std::string returnType = f->returnType->toString(true) + "<>";
         std::string interface = "(" +
           interfaceListToString(p, f->interface, ", ", false,
                                 [](std::string& type, DeclarationID id,
@@ -371,13 +371,20 @@ namespace generator {
                                   return type;
                                 }) + ")";
         println(p, returnType + " " + name + interface + "{");
-        p.incIndent();
-        declarations(p, f->declarations);
-        sequentialStatements(p, f->sequentialStatements);
-        p.decIndent();
+        if (f->body) {
+          p.incIndent();
+          function_body(p, f->body);
+          p.decIndent();
+        }
         println(p, "}");
       }
     }
+  }
+
+  void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
+    assert(f);
+    declarations(parm, f->declarations);
+    sequentialStatements(parm, f->sequentialStatements);
   }
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
