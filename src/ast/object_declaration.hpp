@@ -2,7 +2,7 @@
 #ifndef AST_OBJECT_DECLARATION_H_
 #define AST_OBJECT_DECLARATION_H_
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "declaration_initialization.hpp"
 #include "subtype_indication.hpp"
 
@@ -17,7 +17,7 @@ namespace ast {
     enum Direction {IN, OUT, INOUT, BUFFER, NONE};
     
     ObjectType objectType;
-    BasicIdentifier* identifier;
+    SimpleIdentifier* identifier;
     Direction direction = NONE;
     SubtypeIndication* type;
     DeclarationInitialization* initialization;

@@ -7,7 +7,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/object_declaration.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "declaration_initialization.hpp"
 #include "subtype_indication.hpp"
 
@@ -32,7 +32,7 @@ namespace vhdl {
           case scanner::Scanner::VHDL_VARIABLE: objectType = VARIABLE; break;
           default: assert(false);
         }
-        identifier = scanner->accept<BasicIdentifier>();
+        identifier = scanner->accept<SimpleIdentifier>();
         scanner->accept(":");
         static const int NUMBER_OF_DIRECTIONS = 4;
         static const scanner::Scanner::Keyword DIRECTIONS[NUMBER_OF_DIRECTIONS] =

@@ -102,6 +102,19 @@ namespace generator {
     if (contextClause) {
       functionStart("includes");
       for (ast::UseClause& useClause : contextClause->useClauses.list) {
+        int index = 0;
+        std::string library;
+        std::string package;
+        std::string identifier;
+        for (ast::SimpleIdentifier& i : useClause.list) {
+          std::string s = i.toString(true);
+          switch (index++) {
+          case 0: library = s; break;
+          case 1: package = s; break;
+          case 2: identifier = s; break;
+          default: printError(i, "Use statement contains to many elements");
+          }
+        }
         println(parm, "using " +
                 listToString(parm, useClause.list, "::",
                              [&](ast::SimpleIdentifier& b){return b.toString(true);}) + ";");
@@ -243,7 +256,8 @@ namespace generator {
   template<typename Func>
   void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback) {
     if (v) {
-      std::string name = basicIdentifierToString(parm, v->identifier);
+      assert(v->identifier);
+      std::string name = v->identifier->toString(true);
       std::string type = name + "_type";
       type = subtypeIndication(parm, type, v->type) + "<>";
       std::string init = "";
@@ -281,7 +295,7 @@ namespace generator {
                                                  bool initialization) {
     std::string s = "";
     if (v) {
-      printSourceLine(parm, v->identifier);
+      printSourceLine(parm, v->identifier->text);
       objectDeclaration(parm, v,
                         [&](std::string& name,
                             std::string& type, std::string& init,
@@ -301,7 +315,7 @@ namespace generator {
 
   void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
-      printSourceLine(parm, v->identifier);
+      printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
       if (instanceAllowed) {
         println(parm, s + ";");
@@ -716,6 +730,20 @@ namespace generator {
     parm.decIndent();
     println(parm, "}");
   }
+
+  void SystemC::savePackageInfo(parameters& parm, std::string& packageName) {
+    std::unordered_map<std::string, PackageInfo> m;
+    std::cout << "PACKAGE INFO of " << packageName << std::endl;
+    for (auto i : parm.declaration) {
+      PackageInfo p;
+      std::string objectName = i.first;
+      p.id = i.second.id;
+      p.name = packageName;
+      m[objectName] = (p);
+      std::cout << objectName << std::endl;
+    }
+    packageInfo[packageName] = m;
+  }
   
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package) {
     if (package) {
@@ -729,8 +757,10 @@ namespace generator {
       } else {
         println(parm, "// Package body of " + name);
       }
-      declarations(parm, package->declarations);
+      parameters p = parm;
+      declarations(p, package->declarations);
       if (!package->body) {
+        savePackageInfo(p, name);
         parm.decIndent();
         println(parm, "};");
       }
@@ -987,20 +1017,36 @@ namespace generator {
     if (t != parm.declaration.end()) {
       return t->second.hierarchyLevel;
     }
-    return 0;
+    return -1;
   }
 
   std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy) {
     assert (i != NULL);
-    std::string name = i->text.toString(true);
     std::string s = "";
+    std::string name = i->text.toString(true);
     if (hierarchy) {
-      for (int i=0; i<getHierarchyLevel(parm, name); i++) {
-        s += "p->";
+      int hierarchyLevel = getHierarchyLevel(parm, name); 
+      if (hierarchyLevel >= 0) {
+        for (int i=0; i<hierarchyLevel; i++) {
+          s += "p->";
+        }
+      } else {
+        auto t = visiblePackageInfo.find(name);
+        if (t != visiblePackageInfo.end()) {
+          s = t->second.name + ".";
+        } else {
+          std::string s = "";
+          for (auto i : packageInfo) {
+            auto x = i.second.find(name);
+            if (x != i.second.end()) {
+              s = ". Found " + name + " in package " + i.first + ". Maybe you forgot to declare it in an USE statement.";
+            }
+          }
+          printError(i->text, "Could not find declaration of identifier " + name + s);
+        }
       }
     }
-    s += name;
-    return s;
+    return s + name;
   }
   
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {

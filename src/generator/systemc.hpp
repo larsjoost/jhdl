@@ -55,7 +55,15 @@ namespace generator {
       DeclarationID id;
       int hierarchyLevel = 0;
     };
-    
+
+    struct PackageInfo {
+      DeclarationID id;
+      std::string name;
+    };
+
+    std::unordered_map<std::string, std::unordered_map<std::string, PackageInfo>> packageInfo;
+    std::unordered_map<std::string, PackageInfo> visiblePackageInfo;
+
     struct parameters {
       int indent = 0;
       std::string parentName;
@@ -174,6 +182,7 @@ namespace generator {
   
     void threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void savePackageInfo(parameters& parm, std::string& packageName);
     void packageDeclaration(parameters& parm, ast::Package* package);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation);

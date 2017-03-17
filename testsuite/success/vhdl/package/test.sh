@@ -2,6 +2,6 @@
 
 source ../../../envsetup.sh
 
-#analyse test.vhdl
+analyse test.vhdl
 
-simulate test.vhdl -d run.do $@
+# simulate test.vhdl -d run.do $@
