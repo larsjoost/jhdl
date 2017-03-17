@@ -61,6 +61,12 @@ namespace generator {
       std::string name;
     };
 
+    struct IdentifierInfo {
+      DeclarationID id;
+      std::string packageName;
+      int hierarchyLevel;
+    };
+    
     std::unordered_map<std::string, std::unordered_map<std::string, PackageInfo>> packageInfo;
     std::unordered_map<std::string, PackageInfo> visiblePackageInfo;
 
@@ -89,8 +95,7 @@ namespace generator {
 
     void addDeclarationType(parameters& parm, std::string name, DeclarationID id,
                             int hierarchyLevel = 0);
-    bool matchDeclarationID(parameters& parm, std::string& name, DeclarationID id);
-    int getHierarchyLevel(parameters& parm, std::string& name);
+    bool matchDeclarationID(parameters& parm, ast::BasicIdentifier* i, DeclarationID id);
 
     parameters descendHierarchy(parameters& parm);
 
@@ -102,6 +107,7 @@ namespace generator {
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
+    bool getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info);
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);

@@ -8,11 +8,13 @@
 namespace vhdl {
 
   namespace STD {
-    namespace ENV {
 
+    struct ENV {
       void FINISH(int x);
-      
-    }
+    };
+
+    extern ENV ENV;
+    
   }
   
 }

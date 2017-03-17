@@ -10,7 +10,11 @@ namespace vhdl {
   
     UseClause* UseClause::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_USE);
-      list = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, '.'>>();
+      library = scanner->expect<SimpleIdentifier>();
+      scanner->expect(".");
+      package = scanner->expect<SimpleIdentifier>();
+      scanner->expect(".");
+      identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(";");
       return this;
     }

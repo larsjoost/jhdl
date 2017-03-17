@@ -7,14 +7,14 @@
 namespace vhdl {
 
   namespace STD {
-    namespace ENV {
 
-      void FINISH(int x) {
-        std::cout << "Finish" << std::endl;
-        sc_exit(x);
-      }
-      
+    void ENV::FINISH(int x) {
+      std::cout << "Finish" << std::endl;
+      sc_exit(x);
     }
+
+    struct ENV ENV;
+    
   }
   
 }

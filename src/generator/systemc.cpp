@@ -57,7 +57,14 @@ namespace generator {
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
     // TODO: Add known functions from std as a work-around
-    addDeclarationType(parm, "FINISH", FUNCTION, -1);
+    {
+      PackageInfo p;
+      p.id = FUNCTION;
+      p.name = "ENV";
+      std::unordered_map<std::string, PackageInfo> m;
+      m["FINISH"] = p;
+      packageInfo[p.name] = m;
+    }
     // /TODO
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
@@ -102,22 +109,31 @@ namespace generator {
     if (contextClause) {
       functionStart("includes");
       for (ast::UseClause& useClause : contextClause->useClauses.list) {
-        int index = 0;
-        std::string library;
-        std::string package;
-        std::string identifier;
-        for (ast::SimpleIdentifier& i : useClause.list) {
-          std::string s = i.toString(true);
-          switch (index++) {
-          case 0: library = s; break;
-          case 1: package = s; break;
-          case 2: identifier = s; break;
-          default: printError(i, "Use statement contains to many elements");
-          }
+        assert (useClause.package);
+        assert (useClause.library);
+        std::string library = useClause.library->toString(true);
+        if ("WORK" != library) {
+          println(parm, "using namespace " + library + ";");
         }
-        println(parm, "using " +
-                listToString(parm, useClause.list, "::",
-                             [&](ast::SimpleIdentifier& b){return b.toString(true);}) + ";");
+        std::string package = useClause.package->toString(true);
+        auto i = packageInfo.find(package);
+        if (i != packageInfo.end()) {
+          std::string identifier = useClause.identifier->toString(true);
+          if ("ALL" == identifier) {
+            for (auto j : i->second) {
+              visiblePackageInfo[j.first] = j.second; 
+            }
+          } else {
+            auto j = i->second.find(identifier);
+            if (j != i->second.end()) {
+              visiblePackageInfo[j->first] = j->second;
+            } else {
+              printError(useClause.identifier->text, "Did not find " + identifier + " is package " + package);
+            }
+          }
+        } else {
+          printError(useClause.package->text, "Did not find package " + package);
+        }
       }
       functionEnd("includes");
     }    
@@ -733,14 +749,14 @@ namespace generator {
 
   void SystemC::savePackageInfo(parameters& parm, std::string& packageName) {
     std::unordered_map<std::string, PackageInfo> m;
-    std::cout << "PACKAGE INFO of " << packageName << std::endl;
+    // std::cout << "PACKAGE INFO of " << packageName << std::endl;
     for (auto i : parm.declaration) {
       PackageInfo p;
       std::string objectName = i.first;
       p.id = i.second.id;
       p.name = packageName;
       m[objectName] = (p);
-      std::cout << objectName << std::endl;
+      // std::cout << objectName << std::endl;
     }
     packageInfo[packageName] = m;
   }
@@ -762,8 +778,8 @@ namespace generator {
       if (!package->body) {
         savePackageInfo(p, name);
         parm.decIndent();
-        println(parm, "};");
-      }
+        println(parm, "} " + name + ";");
+      } 
       functionEnd("package");
     }
   }
@@ -1004,75 +1020,95 @@ namespace generator {
     functionEnd("signalAssignment");
   }
 
-  bool SystemC::matchDeclarationID(parameters& parm, std::string& name, DeclarationID id) {
+  bool SystemC::getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info) {
+    functionStart("getIdentifierInfo");
+    assert (identifier);
+    std::string name = identifier->text.toString(true);
     auto t = parm.declaration.find(name); 
-    if (t == parm.declaration.end()) {
-      return false;
-    }
-    return t->second.id == id;
-  }
-
-  int SystemC::getHierarchyLevel(parameters& parm, std::string& name) {
-    auto t = parm.declaration.find(name); 
+    bool result = true;
     if (t != parm.declaration.end()) {
-      return t->second.hierarchyLevel;
+      info.id = t->second.id;
+      info.packageName = "WORK";
+      info.hierarchyLevel = t->second.hierarchyLevel;
+    } else {
+      auto t = visiblePackageInfo.find(name);
+      if (t != visiblePackageInfo.end()) {
+        info.packageName = t->second.name;
+        info.id = t->second.id;
+        info.hierarchyLevel = -1;
+      } else {
+        result = false;
+        std::string s = "";
+        for (auto i : packageInfo) {
+          auto x = i.second.find(name);
+          if (x != i.second.end()) {
+            s = ". Found " + name + " in package " + i.first + ". Maybe you forgot to declare it in an USE statement.";
+          }
+        }
+        printError(identifier->text, "Could not find declaration of identifier " + name + s);
+      }
     }
-    return -1;
+    functionEnd("getIdentifierInfo");
+    return result;
+  }
+  
+  bool SystemC::matchDeclarationID(parameters& parm, ast::BasicIdentifier* identifier, DeclarationID id) {
+    functionStart("matchDeclarationID");
+    IdentifierInfo info;
+    bool result = false;
+    if (getIdentifierInfo(parm, identifier, info)) {
+      result = (info.id == id);
+    }
+    functionEnd("matchDeclarationID");
+    return result;
   }
 
-  std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy) {
-    assert (i != NULL);
+  std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* identifier, bool hierarchy) {
+    functionStart("getName");
+    assert (identifier != NULL);
     std::string s = "";
-    std::string name = i->text.toString(true);
+    std::string name = identifier->text.toString(true);
     if (hierarchy) {
-      int hierarchyLevel = getHierarchyLevel(parm, name); 
-      if (hierarchyLevel >= 0) {
-        for (int i=0; i<hierarchyLevel; i++) {
-          s += "p->";
-        }
-      } else {
-        auto t = visiblePackageInfo.find(name);
-        if (t != visiblePackageInfo.end()) {
-          s = t->second.name + ".";
-        } else {
-          std::string s = "";
-          for (auto i : packageInfo) {
-            auto x = i.second.find(name);
-            if (x != i.second.end()) {
-              s = ". Found " + name + " in package " + i.first + ". Maybe you forgot to declare it in an USE statement.";
-            }
+      IdentifierInfo info;
+      if (getIdentifierInfo(parm, identifier, info)) {
+        if (info.hierarchyLevel >= 0) {
+          for (int i=0; i<info.hierarchyLevel; i++) {
+            s += "p->";
           }
-          printError(i->text, "Could not find declaration of identifier " + name + s);
+        } else {
+          s = info.packageName + ".";
         }
       }
     }
+    functionEnd("getName");
     return s + name;
   }
   
-  std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i) {
-    assert (i != NULL);
-    std::string name = getName(parm, i);
-    std::string s = getName(parm, i, true);
-    if (matchDeclarationID(parm, name, FUNCTION)) {
-      std::string parameters = parametersToString(parm, i, i->arguments);
+  std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier) {
+    functionStart("basicIdentifierToString");
+    assert (identifier);
+    std::string s = getName(parm, identifier, true);
+    if (matchDeclarationID(parm, identifier, FUNCTION)) {
+      std::string parameters = parametersToString(parm, identifier, identifier->arguments);
       s += "(" + parameters + ")";
     } else {
-      if (i->attribute) {
-        bool objectMatch = matchDeclarationID(parm, name, VARIABLE) ||
-          matchDeclarationID(parm, name, SIGNAL);
+      if (identifier->attribute) {
+        bool objectMatch = matchDeclarationID(parm, identifier, VARIABLE) ||
+          matchDeclarationID(parm, identifier, SIGNAL);
         std::string seperator = objectMatch ? "." : "<>::";
-        s += seperator + i->attribute->toString(true);
+        s += seperator + identifier->attribute->toString(true);
         std::string arguments = "";
-        if (i->arguments) {
-          arguments = listToString(parm, i->arguments->associationElements.list, ",",
+        if (identifier->arguments) {
+          arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
                                    [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
         }
         s += "(" + arguments + ")";
-      } else if (i->arguments) {
-        s += listToString(parm, i->arguments->associationElements.list, ",",
+      } else if (identifier->arguments) {
+        s += listToString(parm, identifier->arguments->associationElements.list, ",",
                           [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
       }
     }
+    functionEnd("basicIdentifierToString");
     return s;
   }
 
