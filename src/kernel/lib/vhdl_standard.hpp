@@ -24,6 +24,8 @@ namespace vhdl {
     template <char* p = BIT_char>
     using BIT = CharArray<p>;
 
+    
+    //    vhdl_enum_type(BOOLEAN, vhdl_array({FALSE, TRUE}), vhdl_array({(char *)"false", (char *)"true"}));
     enum BOOLEAN_enum {FALSE, TRUE};
     char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
     template<typename T = BOOLEAN_enum, char* p[] = BOOLEAN_string>

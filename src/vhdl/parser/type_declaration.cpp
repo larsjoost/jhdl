@@ -2,7 +2,7 @@
 #include "../scanner/scanner.hpp"
 #include "type_declaration.hpp"
 #include "type_definition.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "expression.hpp"
 
 namespace vhdl {
@@ -10,7 +10,7 @@ namespace vhdl {
   
     TypeDeclaration* TypeDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_TYPE);
-      identifier = scanner->expect<BasicIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       typeDefinition = scanner->expect<TypeDefinition>();
       return this;

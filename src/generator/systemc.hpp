@@ -44,12 +44,14 @@ namespace generator {
     bool definesAllowed = true;
     bool instanceAllowed = true;
 
+    bool enableTypeDeclarations = true;
+    
     bool quiet = false;
     
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PORT};
+    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PORT, TYPE, ENUM};
 
     struct DeclarationInfo {
       DeclarationID id;
@@ -93,8 +95,7 @@ namespace generator {
 
     int methodId = 0;
 
-    void addDeclarationType(parameters& parm, std::string name, DeclarationID id,
-                            int hierarchyLevel = 0);
+    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id);
     bool matchDeclarationID(parameters& parm, ast::BasicIdentifier* i, DeclarationID id);
 
     parameters descendHierarchy(parameters& parm);
@@ -108,6 +109,7 @@ namespace generator {
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
     bool getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info);
+    std::string getNamePrefix(IdentifierInfo& info);
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
@@ -130,9 +132,9 @@ namespace generator {
     void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
     void includes(parameters& parm, ast::ContextClause* contextClause);
 
-    void numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t);
-    void enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t);
-    void arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t);
+    void numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
+    void enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
+    void arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string& subtype);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
@@ -188,6 +190,9 @@ namespace generator {
   
     void threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
                            ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
+                        std::string name, std::string packageName,
+                        DeclarationID id);
     void savePackageInfo(parameters& parm, std::string& packageName);
     void packageDeclaration(parameters& parm, ast::Package* package);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface);
@@ -195,6 +200,7 @@ namespace generator {
 
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
+    void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);
   public:
     SystemC(bool verbose = false);
     void generate(ast::DesignFile& designFile);

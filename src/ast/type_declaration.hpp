@@ -2,7 +2,7 @@
 #ifndef AST_TYPE_DECLARATION_H_
 #define AST_TYPE_DECLARATION_H_
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "type_definition.hpp"
 
 namespace ast {
@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    BasicIdentifier* identifier;
+    SimpleIdentifier* identifier;
     TypeDefinition* typeDefinition;
     
   };

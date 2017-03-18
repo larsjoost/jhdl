@@ -208,6 +208,24 @@ namespace vhdl {
     bool operator !=(const Enumeration<T, p> &other) const { return value != other.value; }
   };
 
+  /*
+   * vhdl_enum_type examples:
+   *
+   * TYPE boolean IS (FALSE, TRUE);
+   *
+   * enum enum_BOOLEAN {FALSE, TRUE};
+   * char* string_BOOLEAN[] = {(char *)"false", (char *)"true"};
+   * template<typename T = enum_BOOLEAN, char* p[] = string_BOOLEAN>
+   * using BOOLEAN = Enumeration<T, p>;
+   */
+
+#define vhdl_array(...) __VA_ARGS__
+#define vhdl_enum_type(name, enumArray, stringArray)              \
+  enum enum_##name enumArray ;                                    \
+  char* string_##name[] = stringArray ;                           \
+  template<typename T = enum_##name, char* p[] = string_##name >  \
+  using name = Enumeration<T, p>
+
   template <char p[]>
   struct CharArray {
     public:

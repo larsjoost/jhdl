@@ -58,12 +58,13 @@ namespace generator {
     parameters parm;
     // TODO: Add known functions from std as a work-around
     {
-      PackageInfo p;
-      p.id = FUNCTION;
-      p.name = "ENV";
       std::unordered_map<std::string, PackageInfo> m;
-      m["FINISH"] = p;
-      packageInfo[p.name] = m;
+      std::string packageName = "ENV";
+      addPackageInfo(m, "FINISH", packageName, FUNCTION);
+      packageInfo[packageName] = m;
+      addPackageInfo(visiblePackageInfo, "INTEGER", "STANDARD", TYPE);
+      addPackageInfo(visiblePackageInfo, "NOTE", "STANDARD", ENUM);
+      addPackageInfo(visiblePackageInfo, "FAILURE", "STANDARD", ENUM);
     }
     // /TODO
     println(parm, "#include \"systemc.h\"");
@@ -105,6 +106,10 @@ namespace generator {
     printSourceLine(parm, t->text);
   }
 
+  void SystemC::printSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
+    printSourceLine(parm, t->text);
+  }
+
   void SystemC::includes(parameters& parm, ast::ContextClause* contextClause) {
     if (contextClause) {
       functionStart("includes");
@@ -139,17 +144,29 @@ namespace generator {
     }    
   }
 
-  void SystemC::enumerationType(parameters& parm, ast::BasicIdentifier* identifier, ast::EnumerationType* t) {
+  void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
-      std::string name = basicIdentifierToString(parm, identifier);
-      printSourceLine(parm, identifier);
-      std::string enumName = name + "_enum";
-      std::string basicIdentifierList = listToString(parm, t->enumerations, ", ",
-                                                     [&](std::string s){return s;});
-      println(parm, "enum " + enumName + " { " + basicIdentifierList + "};");
-      println(parm, "class " + name + " : public Enumeration<" + enumName + "> {");
-      println(parm, "public:"); 
-      println(parm, "};");
+      std::string name = identifier->toString(true);
+      std::string enumList = listToString(parm, t->enumerations, ", ",
+                                          [&](ast::SimpleIdentifier& s){
+                                            addDeclarationType(parm, &s, ENUM);
+                                            return s.toString();
+                                          });
+      std::string stringList = listToString(parm, t->enumerations, ", ",
+                                          [&](ast::SimpleIdentifier& s){return "(char *)\"" + s.toString() + "\"";});
+      /*
+        vhdl_enum_type(name, enumArray, stringArray)
+        
+        enum BOOLEAN_enum {FALSE, TRUE};
+        char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
+        template<typename T = BOOLEAN_enum, char* p[] = BOOLEAN_string>
+        using BOOLEAN = Enumeration<T, p>;
+      */
+      //      println(parm, "vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
+      println(parm, "enum " + name + "_enum {" + enumList + "};");
+      println(parm, "char* " + name + "_string[] = {" + stringList + "};");
+      println(parm, "template<typename T = " + name + "_enum, char* p[] = " + name + "_string>");
+      println(parm, "using " + name + " = Enumeration<T, p>;");
     }
   }
 
@@ -164,10 +181,9 @@ namespace generator {
       template<class RANGE = TYPE_T_range>
       using TYPE_T = Range<TYPE_T_type, RANGE>;
   */
-  void SystemC::numberType(parameters& parm, ast::BasicIdentifier* identifier, ast::NumberType* t) {
+  void SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t) {
     if (t) {
-      printSourceLine(parm, identifier);
-      std::string name = basicIdentifierToString(parm, identifier);
+      std::string name = identifier->toString(true);
       printRangeType(parm, name, t->range);
     }
   }
@@ -186,10 +202,9 @@ namespace generator {
   vhdl:
     type b_t is array (3 downto -4) of bit;
   */
-  void SystemC::arrayType(parameters& parm, ast::BasicIdentifier* identifier, ast::ArrayType* t) {
+  void SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
     if (t) {
-      printSourceLine(parm, identifier);
-      std::string name = basicIdentifierToString(parm, identifier);
+      std::string name = identifier->toString(true);
       std::string subtypeName = subtypeIndication(parm, name, t->type) + "<>";
       printArrayType(parm, name, t->range, subtypeName);
     }
@@ -198,6 +213,7 @@ namespace generator {
   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
     if (t) {
       assert(t->typeDefinition);
+      addDeclarationType(parm, t->identifier, TYPE);
       numberType(parm, t->identifier, t->typeDefinition->numberType);
       enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
       arrayType(parm, t->identifier, t->typeDefinition->arrayType);
@@ -263,7 +279,6 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
-      printSourceLine(parm, t->identifier);
       std::string name = basicIdentifierToString(parm, t->identifier);
       subtypeIndication(parm, name, t->type);
     }
@@ -287,9 +302,7 @@ namespace generator {
       case ast::ObjectDeclaration::CONSTANT: id = CONSTANT; break;
       default: assert(false);
       }
-      DeclarationInfo i;
-      i.id = id;
-      parm.declaration[name] = i;
+      addDeclarationType(parm, v->identifier, id);
       callback(name, type, init, id, v->direction);
     }
   }
@@ -311,8 +324,7 @@ namespace generator {
                                                  bool initialization) {
     std::string s = "";
     if (v) {
-      printSourceLine(parm, v->identifier->text);
-      objectDeclaration(parm, v,
+       objectDeclaration(parm, v,
                         [&](std::string& name,
                             std::string& type, std::string& init,
                             DeclarationID id, ast::ObjectDeclaration::Direction direction) {
@@ -365,18 +377,18 @@ namespace generator {
     return s;
   }
 
-  void SystemC::addDeclarationType(parameters& parm, std::string name, DeclarationID id,
-                                   int hierarchyLevel) {
+  void SystemC::addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id) {
+      std::string name = identifier->toString(true);
       DeclarationInfo i;
       i.id = id;
-      i.hierarchyLevel = hierarchyLevel;
+      i.hierarchyLevel = 0;
       parm.declaration[name] = i;
   }
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
+      addDeclarationType(parm, f->name, FUNCTION);
       std::string name = f->name->toString(true);
-      addDeclarationType(parm, name, FUNCTION);
       parm.functions[name] = f;
       {
         parameters p = parm;
@@ -410,12 +422,15 @@ namespace generator {
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     functionStart("declarations");
     for (ast::Declaration i : d.list) {
-      type_declarations(parm, i.type);
-      subtype_declarations(parm, i.subtype);
-      object_declarations(parm, i.variable);
-      object_declarations(parm, i.signal);
-      object_declarations(parm, i.constant);
-      function_declarations(parm, i.function);
+      if (enableTypeDeclarations) {
+        type_declarations(parm, i.type);
+        subtype_declarations(parm, i.subtype);
+      } else {
+        object_declarations(parm, i.variable);
+        object_declarations(parm, i.signal);
+        object_declarations(parm, i.constant);
+        function_declarations(parm, i.function);
+      }
     }
     functionEnd("declarations");
   }
@@ -747,16 +762,20 @@ namespace generator {
     println(parm, "}");
   }
 
+  void SystemC::addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
+                               std::string name, std::string packageName,
+                               DeclarationID id) {
+    PackageInfo p;
+    p.id = id;
+    p.name = packageName;
+    m[name] = (p);
+  }
+  
   void SystemC::savePackageInfo(parameters& parm, std::string& packageName) {
     std::unordered_map<std::string, PackageInfo> m;
     // std::cout << "PACKAGE INFO of " << packageName << std::endl;
     for (auto i : parm.declaration) {
-      PackageInfo p;
-      std::string objectName = i.first;
-      p.id = i.second.id;
-      p.name = packageName;
-      m[objectName] = (p);
-      // std::cout << objectName << std::endl;
+      addPackageInfo(m, i.first, packageName, i.second.id);  
     }
     packageInfo[packageName] = m;
   }
@@ -766,6 +785,10 @@ namespace generator {
       functionStart("package");
       std::string name = package->name->toString(true);
       parm.parentName = name;
+      enableTypeDeclarations = true;
+      parameters p = parm;
+      declarations(p, package->declarations);
+      enableTypeDeclarations = false;
       if (!package->body) {
         println(parm, "");
         println(parm, "SC_PACKAGE(" + name + ") {");
@@ -773,13 +796,12 @@ namespace generator {
       } else {
         println(parm, "// Package body of " + name);
       }
-      parameters p = parm;
       declarations(p, package->declarations);
       if (!package->body) {
         savePackageInfo(p, name);
         parm.decIndent();
         println(parm, "} " + name + ";");
-      } 
+      }
       functionEnd("package");
     }
   }
@@ -820,6 +842,9 @@ namespace generator {
       functionStart("implementation");
       std::string name = implementation->name->toString(true);
       parm.parentName = name;
+      enableTypeDeclarations = true;
+      declarations(parm, implementation->declarations);
+      enableTypeDeclarations = false;
       println(parm, "");
       println(parm, "SC_MODULE(" + name + ") {");
       println(parm, "public:");
@@ -1063,6 +1088,23 @@ namespace generator {
     return result;
   }
 
+  std::string SystemC::getNamePrefix(IdentifierInfo& info) {
+    std::string s = "";
+    if (info.id == ENUM) {
+    } else if (info.id == TYPE) {
+      if ("WORK" != info.packageName) {
+        s = info.packageName + ".";
+      }  
+    } else if (info.hierarchyLevel >= 0) {
+      for (int i=0; i<info.hierarchyLevel; i++) {
+        s += "p->";
+      }
+    } else {
+      s = info.packageName + ".";
+    }
+    return s;
+  }
+  
   std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* identifier, bool hierarchy) {
     functionStart("getName");
     assert (identifier != NULL);
@@ -1071,13 +1113,7 @@ namespace generator {
     if (hierarchy) {
       IdentifierInfo info;
       if (getIdentifierInfo(parm, identifier, info)) {
-        if (info.hierarchyLevel >= 0) {
-          for (int i=0; i<info.hierarchyLevel; i++) {
-            s += "p->";
-          }
-        } else {
-          s = info.packageName + ".";
-        }
+        s = getNamePrefix(info);
       }
     }
     functionEnd("getName");
@@ -1087,29 +1123,32 @@ namespace generator {
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier) {
     functionStart("basicIdentifierToString");
     assert (identifier);
-    std::string s = getName(parm, identifier, true);
-    if (matchDeclarationID(parm, identifier, FUNCTION)) {
-      std::string parameters = parametersToString(parm, identifier, identifier->arguments);
-      s += "(" + parameters + ")";
-    } else {
-      if (identifier->attribute) {
-        bool objectMatch = matchDeclarationID(parm, identifier, VARIABLE) ||
-          matchDeclarationID(parm, identifier, SIGNAL);
-        std::string seperator = objectMatch ? "." : "<>::";
-        s += seperator + identifier->attribute->toString(true);
-        std::string arguments = "";
-        if (identifier->arguments) {
-          arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
-                                   [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
+    IdentifierInfo info;
+    std::string name = identifier->text.toString(true);
+    if (getIdentifierInfo(parm, identifier, info)) {
+      name = getNamePrefix(info) + name;
+      if (info.id == FUNCTION) {
+        std::string parameters = parametersToString(parm, identifier, identifier->arguments);
+        name += "(" + parameters + ")";
+      } else {
+        if (identifier->attribute) {
+          bool objectMatch = (info.id == VARIABLE) || (info.id == SIGNAL);
+          std::string seperator = objectMatch ? "." : "<>::";
+          name += seperator + identifier->attribute->toString(true);
+          std::string arguments = "";
+          if (identifier->arguments) {
+            arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
+                                     [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
+          }
+          name += "(" + arguments + ")";
+        } else if (identifier->arguments) {
+          name += listToString(parm, identifier->arguments->associationElements.list, ",",
+                            [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
         }
-        s += "(" + arguments + ")";
-      } else if (identifier->arguments) {
-        s += listToString(parm, identifier->arguments->associationElements.list, ",",
-                          [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
       }
     }
     functionEnd("basicIdentifierToString");
-    return s;
+    return name;
   }
 
   std::string SystemC::numberToString(parameters& parm, ast::Number* n) {
