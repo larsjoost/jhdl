@@ -62,6 +62,9 @@ namespace generator {
       std::string packageName = "ENV";
       addPackageInfo(m, "FINISH", packageName, FUNCTION);
       packageInfo[packageName] = m;
+      addPackageInfo(visiblePackageInfo, "BOOLEAN", "STANDARD", TYPE);
+      addPackageInfo(visiblePackageInfo, "TRUE", "STANDARD", ENUM);
+      addPackageInfo(visiblePackageInfo, "FALSE", "STANDARD", ENUM);
       addPackageInfo(visiblePackageInfo, "INTEGER", "STANDARD", TYPE);
       addPackageInfo(visiblePackageInfo, "NOTE", "STANDARD", ENUM);
       addPackageInfo(visiblePackageInfo, "FAILURE", "STANDARD", ENUM);
@@ -612,7 +615,7 @@ namespace generator {
   void SystemC::forGenerateStatementDefinition(parameters& parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
-      parm.forGenerateHierarchy.push_back(basicIdentifierToString(parm, forGenerateStatement->identifier));
+      parm.forGenerateHierarchy.push_back(forGenerateStatement->identifier->toString(true));
       concurrentStatementsDefinition(parm, forGenerateStatement->concurrentStatements);
     }
   }
@@ -702,8 +705,11 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      std::string name = basicIdentifierToString(parm, forGenerateStatement->identifier);
-      forLoop(parm, name, forGenerateStatement->range, [&](parameters& parm) {
+      assert(forGenerateStatement->identifier);
+      std::string name = forGenerateStatement->identifier->toString(true);
+      parameters p = parm;
+      addDeclarationType(p, forGenerateStatement->identifier, VARIABLE);
+      forLoop(p, name, forGenerateStatement->range, [&](parameters& parm) {
           concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
         });
     }
@@ -975,11 +981,14 @@ namespace generator {
     println(parm, "}");
   }
   
-  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
-    if (p) {
-      std::string name = basicIdentifierToString(parm, p->identifier);
-      forLoop(parm, name, p->range, [&](parameters& parm) {
-          sequentialStatements(parm, p->sequentialStatements);
+  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f) {
+    if (f) {
+      assert(f->identifier);
+      std::string name = f->identifier->toString(true);
+      parameters p = parm;
+      addDeclarationType(p, f->identifier, VARIABLE);
+      forLoop(p, name, f->range, [&](parameters& parm) {
+          sequentialStatements(parm, f->sequentialStatements);
         });
     }
   }
@@ -1090,11 +1099,7 @@ namespace generator {
 
   std::string SystemC::getNamePrefix(IdentifierInfo& info) {
     std::string s = "";
-    if (info.id == ENUM) {
-    } else if (info.id == TYPE) {
-      if ("WORK" != info.packageName) {
-        s = info.packageName + ".";
-      }  
+    if (info.id == ENUM || info.id == TYPE) {
     } else if (info.hierarchyLevel >= 0) {
       for (int i=0; i<info.hierarchyLevel; i++) {
         s += "p->";

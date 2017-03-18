@@ -2,7 +2,7 @@
 #include "../../ast/conditional_statement.hpp"
 #include "../scanner/scanner.hpp"
 #include "forloop_statement.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "sequential_statement.hpp"
 #include "range_type.hpp"
 
@@ -11,7 +11,7 @@ namespace vhdl {
   
     ForLoopStatement* ForLoopStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_FOR);
-      identifier = scanner->expect<BasicIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IN);
       range = scanner->expect<RangeType>();
       scanner->expect(scanner::Scanner::VHDL_LOOP);
