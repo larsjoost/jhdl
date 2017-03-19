@@ -224,7 +224,7 @@ namespace generator {
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    if (area == DEFINES) {
+    if (scope == DEFINITION || scope == INSTANTIATION) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -238,7 +238,7 @@ namespace generator {
       using TYPE_T = Array<TYPE_T_type, T>;
   */
   void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
-    if (area == DEFINES) {
+    if (scope == DEFINITION || scope == INSTANTIATION) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -348,7 +348,7 @@ namespace generator {
     if (v) {
       printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
-      if (area == INSTANCE) {
+      if (scope == INSTANTIATION) {
         println(parm, s + ";");
       }
     }
@@ -404,7 +404,8 @@ namespace generator {
                                   return type;
                                 }) + ")";
         if (f->body) {
-          println(p, returnType + " " + p.parentName + "::" + name + interface + "{");
+          std::string s = (scope == IMPLEMENTATION) ? p.parentName + "::" : "";
+          println(p, returnType + " " + s + name + interface + "{");
           p.incIndent();
           function_body(p, f->body);
           p.decIndent();
@@ -424,8 +425,9 @@ namespace generator {
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     functionStart("declarations");
+    println(parm, "// Declarations");
     for (ast::Declaration i : d.list) {
-      if (enableTypeDeclarations) {
+      if (scope == DEFINITION) {
         type_declarations(parm, i.type);
         subtype_declarations(parm, i.subtype);
       } else {
@@ -539,11 +541,11 @@ namespace generator {
     println(parm, "public:");
     parm.incIndent();
     println(parm, getConstructorDeclaration(parm, name) +  + " {};");
-    area = DEFINES;
+    scope = DEFINITION;
     declarations(parm);
     println(parm, "void process() {");
     parm.incIndent();
-    area = INSTANCE;
+    scope = INSTANTIATION;
     body(parm);
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
@@ -789,15 +791,16 @@ namespace generator {
       functionStart("package");
       std::string name = package->name->toString(true);
       parm.parentName = name;
-      enableTypeDeclarations = true;
+      scope = DEFINITION;
       parameters p = parm;
       declarations(p, package->declarations);
-      enableTypeDeclarations = false;
       if (!package->body) {
+        scope = INSTANTIATION;
         println(parm, "");
         println(parm, "SC_PACKAGE(" + name + ") {");
         parm.incIndent();
       } else {
+        scope = IMPLEMENTATION;
         println(parm, "// Package body of " + name);
       }
       declarations(p, package->declarations);
@@ -846,14 +849,15 @@ namespace generator {
       functionStart("implementation");
       std::string name = implementation->name->toString(true);
       parm.parentName = name;
-      enableTypeDeclarations = true;
+      scope = DEFINITION;
       declarations(parm, implementation->declarations);
-      enableTypeDeclarations = false;
       println(parm, "");
       println(parm, "SC_MODULE(" + name + ") {");
       println(parm, "public:");
       parm.incIndent();
+      scope = INSTANTIATION;
       declarations(parm, implementation->declarations);
+      scope = IMPLEMENTATION;
       concurrentStatementsDefinition(parm, implementation->concurrentStatements);
       println(parm, "public:");
       parm.incIndent();
