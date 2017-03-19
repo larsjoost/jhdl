@@ -7,7 +7,7 @@ use std.env.finish;
 architecture rtl of test is
 
   function func (
-    a : integer := 2;
+    a : integer range 2 to 4 := 2;
     b : integer := 1)
     return integer is
   begin

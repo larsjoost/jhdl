@@ -41,9 +41,8 @@ namespace generator {
 
     bool verbose = false;
 
-    bool definesAllowed = true;
-    bool instanceAllowed = true;
-
+    enum Area {DEFINES, INSTANCE, INITIALIZATION} area;
+    
     bool enableTypeDeclarations = true;
     
     bool quiet = false;

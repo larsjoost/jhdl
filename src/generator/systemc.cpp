@@ -224,7 +224,7 @@ namespace generator {
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    if (definesAllowed) {
+    if (area == DEFINES) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -238,7 +238,7 @@ namespace generator {
       using TYPE_T = Array<TYPE_T_type, T>;
   */
   void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
-    if (definesAllowed) {
+    if (area == DEFINES) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -348,7 +348,7 @@ namespace generator {
     if (v) {
       printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
-      if (instanceAllowed) {
+      if (area == INSTANCE) {
         println(parm, s + ";");
       }
     }
@@ -539,14 +539,12 @@ namespace generator {
     println(parm, "public:");
     parm.incIndent();
     println(parm, getConstructorDeclaration(parm, name) +  + " {};");
-    instanceAllowed = false;
+    area = DEFINES;
     declarations(parm);
-    instanceAllowed = true;
     println(parm, "void process() {");
     parm.incIndent();
-    definesAllowed = false;
+    area = INSTANCE;
     body(parm);
-    definesAllowed = true;
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
       if (s.size() == 0) {
