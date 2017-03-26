@@ -44,8 +44,6 @@ namespace generator {
     bool definesAllowed = true;
     bool instanceAllowed = true;
 
-    bool enableTypeDeclarations = true;
-    
     bool quiet = false;
     
     void functionStart(std::string name);

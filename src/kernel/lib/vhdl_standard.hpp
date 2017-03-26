@@ -27,12 +27,22 @@ namespace vhdl {
     
     //    vhdl_enum_type(BOOLEAN, vhdl_array({FALSE, TRUE}), vhdl_array({(char *)"false", (char *)"true"}));
     enum BOOLEAN_enum {FALSE, TRUE};
-    char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
-    template<typename T = BOOLEAN_enum, char* p[] = BOOLEAN_string>
+    struct BOOLEAN_string {
+      std::string toString(BOOLEAN_enum e) {
+        static std::string s[] = {"false", "true"};
+        return s[(int)e];
+      }
+    };
+    template<typename T = BOOLEAN_enum, class p = BOOLEAN_string>
     using BOOLEAN = Enumeration<T, p>;
 
     enum SEVERITY_LEVEL_enum {NOTE, WARNING, ERROR, FAILURE};
-    char* SEVERITY_LEVEL_string[] = {(char *)"note", (char *)"warning", (char *)"error", (char *)"failure"};
+    struct SEVERITY_LEVEL_string {
+      std::string toString(SEVERITY_LEVEL_enum e) {
+        static std::string s[] = {"note", "warning", "error", "failure"};
+        return s[(int)e];
+      }
+    };
     using SEVERITY_LEVEL = Enumeration<enum SEVERITY_LEVEL_enum, SEVERITY_LEVEL_string>;
 
     enum TIME_UNITS {FS, PS, NS, US, MS, SEC, MIN, HR};

@@ -153,7 +153,7 @@ namespace generator {
                                             return s.toString();
                                           });
       std::string stringList = listToString(parm, t->enumerations, ", ",
-                                          [&](ast::SimpleIdentifier& s){return "(char *)\"" + s.toString() + "\"";});
+                                          [&](ast::SimpleIdentifier& s){return "\"" + s.toString() + "\"";});
       /*
         vhdl_enum_type(name, enumArray, stringArray)
         
@@ -163,9 +163,20 @@ namespace generator {
         using BOOLEAN = Enumeration<T, p>;
       */
       //      println(parm, "vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
-      println(parm, "enum " + name + "_enum {" + enumList + "};");
-      println(parm, "char* " + name + "_string[] = {" + stringList + "};");
-      println(parm, "template<typename T = " + name + "_enum, char* p[] = " + name + "_string>");
+      std::string enumName = name + "_enum";
+      std::string stringName = name + "_string";
+      println(parm, "enum " + enumName + " {" + enumList + "};");
+      println(parm, "struct " + stringName + " {");
+      parm.incIndent();
+      println(parm, "std::string toString(" + enumName + " e) {");
+      parm.incIndent();
+      println(parm, "static std::string s[] = {" + stringList + "};");
+      println(parm, "return s[(int)e];");
+      parm.decIndent();
+      println(parm, "}");
+      parm.decIndent();
+      println(parm, "};");
+      println(parm, "template<typename T = " + enumName + ", class p = " + stringName + ">");
       println(parm, "using " + name + " = Enumeration<T, p>;");
     }
   }
@@ -422,15 +433,12 @@ namespace generator {
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     functionStart("declarations");
     for (ast::Declaration i : d.list) {
-      if (enableTypeDeclarations) {
-        type_declarations(parm, i.type);
-        subtype_declarations(parm, i.subtype);
-      } else {
-        object_declarations(parm, i.variable);
-        object_declarations(parm, i.signal);
-        object_declarations(parm, i.constant);
-        function_declarations(parm, i.function);
-      }
+      type_declarations(parm, i.type);
+      subtype_declarations(parm, i.subtype);
+      object_declarations(parm, i.variable);
+      object_declarations(parm, i.signal);
+      object_declarations(parm, i.constant);
+      function_declarations(parm, i.function);
     }
     functionEnd("declarations");
   }
@@ -612,7 +620,7 @@ namespace generator {
   void SystemC::forGenerateStatementDefinition(parameters& parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
-      parm.forGenerateHierarchy.push_back(basicIdentifierToString(parm, forGenerateStatement->identifier));
+      parm.forGenerateHierarchy.push_back(forGenerateStatement->identifier->toString(true));
       concurrentStatementsDefinition(parm, forGenerateStatement->concurrentStatements);
     }
   }
@@ -702,7 +710,7 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
-      std::string name = basicIdentifierToString(parm, forGenerateStatement->identifier);
+      std::string name = forGenerateStatement->identifier->toString(true);
       forLoop(parm, name, forGenerateStatement->range, [&](parameters& parm) {
           concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
         });
@@ -785,10 +793,7 @@ namespace generator {
       functionStart("package");
       std::string name = package->name->toString(true);
       parm.parentName = name;
-      enableTypeDeclarations = true;
       parameters p = parm;
-      declarations(p, package->declarations);
-      enableTypeDeclarations = false;
       if (!package->body) {
         println(parm, "");
         println(parm, "SC_PACKAGE(" + name + ") {");
@@ -842,9 +847,6 @@ namespace generator {
       functionStart("implementation");
       std::string name = implementation->name->toString(true);
       parm.parentName = name;
-      enableTypeDeclarations = true;
-      declarations(parm, implementation->declarations);
-      enableTypeDeclarations = false;
       println(parm, "");
       println(parm, "SC_MODULE(" + name + ") {");
       println(parm, "public:");
@@ -977,7 +979,7 @@ namespace generator {
   
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
     if (p) {
-      std::string name = basicIdentifierToString(parm, p->identifier);
+      std::string name = p->identifier->toString(true);
       forLoop(parm, name, p->range, [&](parameters& parm) {
           sequentialStatements(parm, p->sequentialStatements);
         });

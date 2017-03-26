@@ -168,10 +168,11 @@ namespace vhdl {
    * type SEVERITY_LEVEL is (NOTE, WARNING, ERROR, FAILURE);
    */
   
-  template <typename T, char* p[]>
+  template <typename T, class StringConverter>
   struct Enumeration {
   public:
     T value;
+    StringConverter stringConverter;
 
     void operator=(T v) {
       value = v;
@@ -190,7 +191,7 @@ namespace vhdl {
     }
 
     std::string toString() {
-      return p[value];
+      return stringConverter.toString(value);
     }
 
     int getValue() {
@@ -204,8 +205,8 @@ namespace vhdl {
 
     int LENGTH() { return 1; }
     
-    bool operator ==(const Enumeration<T, p> &other) const { return value == other.value; }
-    bool operator !=(const Enumeration<T, p> &other) const { return value != other.value; }
+    bool operator ==(const Enumeration<T, StringConverter> &other) const { return value == other.value; }
+    bool operator !=(const Enumeration<T, StringConverter> &other) const { return value != other.value; }
   };
 
   /*
