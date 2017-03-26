@@ -40,8 +40,13 @@ namespace vhdl {
   public:
 
     explicit Range<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
+
     Range<TYPE, RANGE>(TYPE v) :
     value(v), begin_(this, range.left), end_(this, range.right + 1) { }
+
+    template<class T>
+    Range<TYPE, RANGE>(Range<TYPE, T>& other) : value(other.value),
+      begin_(this, range.left), end_(this, range.right + 1) {};
     
     void operator=(const TYPE other) { value = other; }
     template <class T>

@@ -2,7 +2,7 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "block_statement.hpp"
 #include "concurrent_statement.hpp"
 #include "declaration.hpp"
@@ -11,7 +11,7 @@ namespace vhdl {
   namespace parser {
   
     BlockStatement* BlockStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      name = scanner->accept<BasicIdentifier>();
+      name = scanner->accept<SimpleIdentifier>();
       scanner->accept(":");
       scanner->accept(scanner::Scanner::VHDL_BLOCK);
       scanner->expect(scanner::Scanner::VHDL_IS);
@@ -20,7 +20,7 @@ namespace vhdl {
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_BLOCK);
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
       if (!name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match block name '" +

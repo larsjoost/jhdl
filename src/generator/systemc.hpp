@@ -41,9 +41,9 @@ namespace generator {
 
     bool verbose = false;
 
-    bool definesAllowed = true;
-    bool instanceAllowed = true;
-
+    enum Scope {DEFINITION, INSTANTIATION, INITIALIZATION, CONSTRUCTOR, IMPLEMENTATION} scope;
+    char* ScopeToString[5] = {(char *)"DEFINITION", (char *)"INSTANTIATION", (char *)"INITIALIZATION", (char *)"CONSTRUCTOR", (char *)"IMPLEMENTATION"};
+    
     bool quiet = false;
     
     void functionStart(std::string name);
@@ -148,7 +148,7 @@ namespace generator {
                                           bool initialization);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
-    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback);
+    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback);
     template<typename Func>
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                       bool initialization, Func typeConverter);

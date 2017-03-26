@@ -62,6 +62,11 @@ namespace generator {
       std::string packageName = "ENV";
       addPackageInfo(m, "FINISH", packageName, FUNCTION);
       packageInfo[packageName] = m;
+      addPackageInfo(visiblePackageInfo, "TIME", "STANDARD", TYPE);
+      addPackageInfo(visiblePackageInfo, "BIT", "STANDARD", TYPE);
+      addPackageInfo(visiblePackageInfo, "BOOLEAN", "STANDARD", TYPE);
+      addPackageInfo(visiblePackageInfo, "TRUE", "STANDARD", ENUM);
+      addPackageInfo(visiblePackageInfo, "FALSE", "STANDARD", ENUM);
       addPackageInfo(visiblePackageInfo, "INTEGER", "STANDARD", TYPE);
       addPackageInfo(visiblePackageInfo, "NOTE", "STANDARD", ENUM);
       addPackageInfo(visiblePackageInfo, "FAILURE", "STANDARD", ENUM);
@@ -232,7 +237,7 @@ namespace generator {
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    if (definesAllowed) {
+    if (scope == DEFINITION || scope == INSTANTIATION) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -246,7 +251,7 @@ namespace generator {
       using TYPE_T = Array<TYPE_T_type, T>;
   */
   void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
-    if (definesAllowed) {
+    if (scope == DEFINITION || scope == INSTANTIATION) {
       assert(r);
       std::string left = expressionToString(parm, r->left);
       std::string right = expressionToString(parm, r->right);
@@ -298,6 +303,7 @@ namespace generator {
   template<typename Func>
   void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback) {
     if (v) {
+      functionStart("objectDeclaration");
       assert(v->identifier);
       std::string name = v->identifier->toString(true);
       std::string type = name + "_type";
@@ -315,18 +321,22 @@ namespace generator {
       }
       addDeclarationType(parm, v->identifier, id);
       callback(name, type, init, id, v->direction);
+      functionEnd("objectDeclaration");
     }
   }
 
   template<typename Func>
-  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback) {
+  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback) {
     functionStart("traverseInterfaceList");
     if (l) {
+      bool q = quiet;
+      quiet = !printEnable;
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.variable) {objectDeclaration(parm, i.variable, callback);}
         if (i.signal) {objectDeclaration(parm, i.signal, callback);}
         if (i.constant) {objectDeclaration(parm, i.constant, callback);}
       }
+      quiet = q;
     }
     functionEnd("traverseInterfaceList");
   }
@@ -356,7 +366,7 @@ namespace generator {
     if (v) {
       printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
-      if (instanceAllowed) {
+      if (scope == INSTANTIATION) {
         println(parm, s + ";");
       }
     }
@@ -377,9 +387,10 @@ namespace generator {
     if (l) {
       std::string x = "";
       std::string d = "";
-      traverseInterfaceList(parm, l, [&](std::string& name,
-                                         std::string& type, std::string& init,
-                                         DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+      traverseInterfaceList(parm, l, true,
+                            [&](std::string& name,
+                                std::string& type, std::string& init,
+                                DeclarationID id, ast::ObjectDeclaration::Direction direction) {
                               s += d + typeConverter(type, id, direction) + " " + name;
           d = delimiter;
         }
@@ -398,6 +409,7 @@ namespace generator {
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
+      functionStart("function_declarations");
       addDeclarationType(parm, f->name, FUNCTION);
       std::string name = f->name->toString(true);
       parm.functions[name] = f;
@@ -412,7 +424,8 @@ namespace generator {
                                   return type;
                                 }) + ")";
         if (f->body) {
-          println(p, returnType + " " + p.parentName + "::" + name + interface + "{");
+          std::string s = (scope == IMPLEMENTATION) ? p.parentName + "::" : "";
+          println(p, returnType + " " + s + name + interface + "{");
           p.incIndent();
           function_body(p, f->body);
           p.decIndent();
@@ -421,17 +434,21 @@ namespace generator {
           println(p, returnType + " " + name + interface + ";");
         }
       }
+      functionEnd("function_declarations");
     }
   }
 
   void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
     assert(f);
+    functionStart("function_body");
     declarations(parm, f->declarations);
     sequentialStatements(parm, f->sequentialStatements);
+    functionEnd("function_body");
   }
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     functionStart("declarations");
+    println(parm, "// Declarations scope = " + std::string(ScopeToString[(int)scope]));
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       subtype_declarations(parm, i.subtype);
@@ -544,14 +561,12 @@ namespace generator {
     println(parm, "public:");
     parm.incIndent();
     println(parm, getConstructorDeclaration(parm, name) +  + " {};");
-    instanceAllowed = false;
+    scope = DEFINITION;
     declarations(parm);
-    instanceAllowed = true;
     println(parm, "void process() {");
     parm.incIndent();
-    definesAllowed = false;
+    scope = INSTANTIATION;
     body(parm);
-    definesAllowed = true;
     if (sensitivity) {
       std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
       if (s.size() == 0) {
@@ -597,7 +612,7 @@ namespace generator {
                                          ast::BlockStatement* blockStatement) {
     functionStart("blockStatementDefinition");
     if (blockStatement) {
-      std::string name = basicIdentifierToString(parm, blockStatement->name);
+      std::string name = blockStatement->name->toString(true);
       printSourceLine(parm, blockStatement->name);
       println(parm, "SC_BLOCK(" + name + ") {");
       parm.incIndent();
@@ -702,7 +717,7 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     functionStart("blockStatementInstantiation");
     if (blockStatement) {
-      instantiateType(parm, "SC_NEW_BLOCK", basicIdentifierToString(parm, blockStatement->name));
+      instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
     }
   }
 
@@ -710,8 +725,11 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
+      assert(forGenerateStatement->identifier);
       std::string name = forGenerateStatement->identifier->toString(true);
-      forLoop(parm, name, forGenerateStatement->range, [&](parameters& parm) {
+      parameters p = parm;
+      addDeclarationType(p, forGenerateStatement->identifier, VARIABLE);
+      forLoop(p, name, forGenerateStatement->range, [&](parameters& parm) {
           concurrentStatementsInstantiation(parm, forGenerateStatement->concurrentStatements);
         });
     }
@@ -795,10 +813,12 @@ namespace generator {
       parm.parentName = name;
       parameters p = parm;
       if (!package->body) {
+        scope = INSTANTIATION;
         println(parm, "");
         println(parm, "SC_PACKAGE(" + name + ") {");
         parm.incIndent();
       } else {
+        scope = IMPLEMENTATION;
         println(parm, "// Package body of " + name);
       }
       declarations(p, package->declarations);
@@ -851,7 +871,9 @@ namespace generator {
       println(parm, "SC_MODULE(" + name + ") {");
       println(parm, "public:");
       parm.incIndent();
+      scope = INSTANTIATION;
       declarations(parm, implementation->declarations);
+      scope = IMPLEMENTATION;
       concurrentStatementsDefinition(parm, implementation->concurrentStatements);
       println(parm, "public:");
       parm.incIndent();
@@ -887,6 +909,7 @@ namespace generator {
   }
 
   std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
+    functionStart("parametersToString");
     std::string s = "";
     std::string basisName = getName(parm, functionName);
     auto x = parm.functions.find(basisName);
@@ -900,7 +923,7 @@ namespace generator {
       */
       std::string delimiter = "";
       int argumentNumber = 0;
-      traverseInterfaceList(parm, f->interface,
+      traverseInterfaceList(parm, f->interface, false,
                             [&](std::string& name,
                                 std::string& type, std::string& init, DeclarationID id,
                                 ast::ObjectDeclaration::Direction direction) {
@@ -920,6 +943,7 @@ namespace generator {
                          [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
       }
     }
+    functionEnd("parametersToString");
     return s;
   }
   
@@ -977,15 +1001,18 @@ namespace generator {
     println(parm, "}");
   }
   
-  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* p) {
-    if (p) {
-      std::string name = p->identifier->toString(true);
-      forLoop(parm, name, p->range, [&](parameters& parm) {
-          sequentialStatements(parm, p->sequentialStatements);
+  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f) {
+    if (f) {
+      assert(f->identifier);
+      std::string name = f->identifier->toString(true);
+      parameters p = parm;
+      addDeclarationType(p, f->identifier, VARIABLE);
+      forLoop(p, name, f->range, [&](parameters& parm) {
+          sequentialStatements(parm, f->sequentialStatements);
         });
     }
   }
-
+  
   std::string SystemC::physicalToString(parameters& parm, ast::Physical* p) {
     assert (p != NULL);
     return "TIME<>(" + numberToString(parm, p->number) + ", " +
@@ -1092,11 +1119,7 @@ namespace generator {
 
   std::string SystemC::getNamePrefix(IdentifierInfo& info) {
     std::string s = "";
-    if (info.id == ENUM) {
-    } else if (info.id == TYPE) {
-      if ("WORK" != info.packageName) {
-        s = info.packageName + ".";
-      }  
+    if (info.id == ENUM || info.id == TYPE) {
     } else if (info.hierarchyLevel >= 0) {
       for (int i=0; i<info.hierarchyLevel; i++) {
         s += "p->";
