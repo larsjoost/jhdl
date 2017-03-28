@@ -6,6 +6,7 @@
 #include "list.hpp"
 #include "concurrent_statement.hpp"
 #include "range_type.hpp"
+#include "declaration.hpp"
 
 namespace ast {
 
@@ -18,6 +19,7 @@ namespace ast {
     SimpleIdentifier* name;
     SimpleIdentifier* identifier;
     RangeType* range;
+    List<Declaration> declarations;
     List<ConcurrentStatement> concurrentStatements;
     
   };

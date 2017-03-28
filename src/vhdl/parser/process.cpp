@@ -8,11 +8,16 @@
 #include "sequential_statement.hpp"
 #include "declaration.hpp"
 #include "basic_identifier_list.hpp"
+#include "simple_identifier.hpp"
 
 namespace vhdl {
   namespace parser {
   
     Process* Process::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      if (scanner->lookAhead(":", 1)) {
+        label = scanner->accept<SimpleIdentifier>();
+        scanner->accept(":");
+      }
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
       if (scanner->optional("(")) {
         sensitivity = scanner->expect<BasicIdentifierList<CommaSeparation>>();

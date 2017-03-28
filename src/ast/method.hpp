@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "basic_identifier_list.hpp"
 #include "list.hpp"
 #include "sequential_statement.hpp"
@@ -17,7 +17,7 @@ namespace ast {
   public:
     
     std::string noname;
-    BasicIdentifier* name;
+    SimpleIdentifier* label;
     BasicIdentifierList* sensitivity;
     List<Declaration> declarations;
     List<SequentialStatement> sequentialStatements;

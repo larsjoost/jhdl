@@ -4,6 +4,7 @@
 #include <list>
 #include <unordered_map>
 #include <string>
+#include <cassert>
 
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
@@ -41,8 +42,8 @@ namespace generator {
 
     bool verbose = false;
 
-    enum Scope {DEFINITION, INSTANTIATION, INITIALIZATION, CONSTRUCTOR, IMPLEMENTATION} scope;
-    char* ScopeToString[5] = {(char *)"DEFINITION", (char *)"INSTANTIATION", (char *)"INITIALIZATION", (char *)"CONSTRUCTOR", (char *)"IMPLEMENTATION"};
+    // enum Scope {DEFINITION, INSTANTIATION, INITIALIZATION, CONSTRUCTOR, IMPLEMENTATION} scope;
+    // char* ScopeToString[5] = {(char *)"DEFINITION", (char *)"INSTANTIATION", (char *)"INITIALIZATION", (char *)"CONSTRUCTOR", (char *)"IMPLEMENTATION"};
     
     bool quiet = false;
     
@@ -73,7 +74,6 @@ namespace generator {
     struct parameters {
       int indent = 0;
       std::string parentName;
-      std::list<std::string> forGenerateHierarchy;
       std::unordered_map<std::string, DeclarationInfo> declaration;
       std::unordered_map<std::string, ast::FunctionDeclaration*> functions;
       void incIndent() {
@@ -93,10 +93,9 @@ namespace generator {
 
     int methodId = 0;
 
-    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id);
     bool matchDeclarationID(parameters& parm, ast::BasicIdentifier* i, DeclarationID id);
 
-    parameters descendHierarchy(parameters& parm);
+    parameters descendHierarchy(parameters& parm, std::string& parentName);
 
     template <typename Func>
     std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e, Func basicIdentifierCallback);
@@ -112,6 +111,10 @@ namespace generator {
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
 
+    // sequential.cpp
+    void signalAssignment(parameters& parm, ast::SignalAssignment* p);
+    template<typename Func>
+    void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
     void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
@@ -125,15 +128,13 @@ namespace generator {
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
     void returnStatement(parameters& parm, ast::ReturnStatement* r);
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
-    void signalAssignment(parameters& parm, ast::SignalAssignment* p);
-    template<typename Func>
-    void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
+
+    // includes.cpp
     void includes(parameters& parm, ast::ContextClause* contextClause);
 
     void numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
     void arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
-    void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string& subtype);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
@@ -154,10 +155,37 @@ namespace generator {
                                       bool initialization, Func typeConverter);
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                       bool initialization);
-    void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void function_body(parameters& parm, ast::FunctionBody* f);
+
+    // declarations.cpp
+    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id);
+    void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
+    // definition.cpp
+    template <typename Func>
+    void createProcess(parameters& parm, Func func);
+    std::string createWait(parameters& parm, auto sensitivity);
+    template <class T, typename Func>
+    void createThread(parameters& parm, std::string& name, T sensitivity,
+                      ast::List<ast::Declaration>* declarationList,
+                      Func body);  
+    std::string getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument);
+    template <typename Func>
+    void defineObject(parameters& parm,
+                      std::string name,
+                      std::string type,
+                      std::string* argument,
+                      ast::List<ast::Declaration>* declarations,
+                      ast::List<ast::ConcurrentStatement>* concurrentStatements,
+                      Func bodyCallback);
+    void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
+    void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
+    void methodDefinition(parameters& parm, ast::Method* method);
+
+    
     template<class Key, class Value, typename Func>
     std::string listToString(parameters& parm, std::unordered_map<Key, Value>& t, std::string delimiter, Func callback);
     template<class T, typename Func>
@@ -169,25 +197,22 @@ namespace generator {
     template<typename Func, class T>
     std::string listToString(parameters& parm, ast::List<T>* list, std::string delimiter, Func callback);
 
-    std::string getConstructorDeclaration(parameters& parm, std::string& name);
-    template <class T, typename DeclarationFunc, typename BodyFunc>
-    void scThreadShell(parameters& parm, std::string& name, T sensitivity, DeclarationFunc declarations, BodyFunc body); 
-    void methodDefinition(parameters& parm, ast::Method* method);
-    void instantiateType(parameters& parm, std::string type, std::string name);
+    void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
+
+    // constructor.cpp
+    void instantiateType(parameters& parm, std::string type, std::string name, std::string arguments = "");
     void signalInstantiation(parameters& parm, ast::SignalAssignment* s);
     void methodInstantiation(parameters& parm, ast::Method* method);
-    void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
-    void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l);
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
-    void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
-    void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
-    void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
-  
-    void threadConstructor(parameters& parm, ast::SimpleIdentifier* name, 
-                           ast::List<ast::ConcurrentStatement>& concurrentStatements);
+    void createConstructor(parameters& parm, std::string& name,
+                           std::string* argument,
+                           ast::List<ast::ConcurrentStatement>* concurrentStatements);
+
+
     void addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
                         std::string name, std::string packageName,
                         DeclarationID id);
@@ -203,8 +228,103 @@ namespace generator {
     SystemC(bool verbose = false);
     void generate(ast::DesignFile& designFile);
   };
-}
 
+  template<class Key, class Value, typename Func>
+  std::string SystemC::listToString(parameters& parm, std::unordered_map<Key, Value>& t,
+                                    std::string delimiter, Func callback) {
+    std::string s;
+    std::string d;
+    for (auto x : t) {
+      s += (d + callback(x.first, x.second));
+      d = delimiter;
+    }
+    return s;
+  }
+
+  template<class T, typename Func>
+  std::string SystemC::listToString(parameters& parm, std::list<T>& t,
+                                    std::string delimiter, Func callback) {
+    return listToString(parm, &t, delimiter, callback);
+  }
+  
+  template<class T, typename Func>
+  std::string SystemC::listToString(parameters& parm, std::list<T>* t,
+                                    std::string delimiter, Func callback) {
+    std::string s;
+    std::string d;
+    for (auto x : *t) {
+      s += (d + callback(x));
+      d = delimiter;
+    }
+    return s;
+  }
+
+  template<typename Func>
+  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list,
+                                    std::string delimiter, Func callback) {
+    std::string s = "";
+    if (list) {
+      std::string d = "";
+      for (ast::BasicIdentifier t : list->textList.list) {
+        s += (d + callback(basicIdentifierToString(parm, &t)));
+        d = delimiter;
+      }
+    }
+    return s;
+  }
+  
+  template<typename Func, class T>
+  std::string SystemC::listToString(parameters& parm, ast::List<T>* list,
+                                    std::string delimiter, Func callback) {
+    std::string s = "";
+    if (list) {
+      std::string d = "";
+      for (auto t : list->list) {
+        s += (d + callback(t));
+        d = delimiter;
+      }
+    }
+    return s;
+  }
+
+  template <typename Func>
+  std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
+                                             bool initialization, Func typeConverter) {
+    std::string s;
+    if (l) {
+      std::string x = "";
+      std::string d = "";
+      traverseInterfaceList(parm, l, true,
+                            [&](std::string& name,
+                                std::string& type, std::string& init,
+                                DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                              s += d + typeConverter(type, id, direction) + " " + name;
+          d = delimiter;
+        }
+        );
+    }
+    return s;
+  }
+
+  template<typename Func>
+  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback) {
+    functionStart("traverseInterfaceList");
+    if (l) {
+      bool q = quiet;
+      quiet = !printEnable;
+      for (ast::InterfaceElement i : l->interfaceElements.list) {
+        if (i.variable) {objectDeclaration(parm, i.variable, callback);}
+        if (i.signal) {objectDeclaration(parm, i.signal, callback);}
+        if (i.constant) {objectDeclaration(parm, i.constant, callback);}
+      }
+      quiet = q;
+    }
+    functionEnd("traverseInterfaceList");
+  }
+
+
+
+}
 #endif
 
 

@@ -4,6 +4,7 @@
 
 #include "signal_assignment_condition.hpp"
 #include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "expression.hpp"
 #include "list.hpp"
 
@@ -14,7 +15,7 @@ namespace ast {
   public:
 
     std::string name = "";
-    BasicIdentifier* label;
+    SimpleIdentifier* label;
     BasicIdentifier* identifier;
     List<SignalAssignmentCondition> signalAssignmentConditions;
     

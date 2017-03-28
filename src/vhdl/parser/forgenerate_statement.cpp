@@ -5,6 +5,7 @@
 #include "simple_identifier.hpp"
 #include "concurrent_statement.hpp"
 #include "range_type.hpp"
+#include "declaration.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -16,7 +17,11 @@ namespace vhdl {
       identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IN);
       range = scanner->expect<RangeType>();
-      scanner->expect(scanner::Scanner::VHDL_GENERATE);
+      scanner->expect(scanner::Scanner::VHDL_GENERATE); 
+      if (declarations.add(scanner->optional<Declaration>())) {
+        while (declarations.add(scanner->optional<Declaration>())) {};
+        scanner->expect(scanner::Scanner::VHDL_BEGIN);
+      }
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->expect(scanner::Scanner::VHDL_GENERATE);
