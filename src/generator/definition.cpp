@@ -49,11 +49,12 @@ namespace generator {
     return "wait([&](){return " + s + ";});";
   }
 
-  template <typename Func>
-  void SystemC::createProcess(parameters& parm, Func func) {
+  template <typename DeclarationFunc, typename BodyFunc>
+  void SystemC::createProcess(parameters& parm, DeclarationFunc declarations, BodyFunc body) {
+    declarations(parm);
     println(parm, "void process() {");
     parm.incIndent();
-    func(parm);
+    body(parm);
     parm.decIndent();
     println(parm, "}");
   }
@@ -69,13 +70,16 @@ namespace generator {
         method->noname = methodName;
       }
       auto createBody = [&](parameters& parm) {
-        createProcess(parm, [&](parameters& parm) {
-            declarations(parm, method->declarations);
-            if (method->sensitivity) {
-              println(parm, createWait(parm, method->sensitivity));
-            }
-            sequentialStatements(parm, method->sequentialStatements);
-          });
+        createProcess(parm,
+                      [&](parameters& parm) {
+                        declarations(parm, method->declarations);
+                      },
+                      [&](parameters& parm) {
+                        if (method->sensitivity) {
+                          println(parm, createWait(parm, method->sensitivity));
+                        }
+                        sequentialStatements(parm, method->sequentialStatements);
+                      });
       };
       defineObject(parm, methodName, "SC_THREAD", NULL,
                    &method->declarations,
@@ -104,10 +108,12 @@ namespace generator {
           });
         quiet = false;
         auto createBody = [&](parameters& parm) {
-          createProcess(parm, [&](parameters& parm) {
-              println(parm, createWait(parm, sensitivity));
-              signalAssignment(parm, s);
-            });
+          createProcess(parm,
+                        [&](parameters& parm) {},
+                        [&](parameters& parm) {
+                          println(parm, createWait(parm, sensitivity));
+                          signalAssignment(parm, s);
+                        });
         };
         defineObject(parm, name, "SC_THREAD", NULL, NULL, NULL, createBody);
       }

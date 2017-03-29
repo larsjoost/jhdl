@@ -100,23 +100,16 @@ namespace generator {
   }
 
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument) {
-    std::string p1 = "";
-    std::string p2 = "";
     if (parm.parentName.size() > 0) {
-      p1 = parm.parentName +"* parent";
-      p2 = " : p(parent)";
-    }
-    if (argument) {
-      if (p1.size() > 0) {
-        p1 += ", ";
+      std::string p1 = parm.parentName +"* parent";
+      std::string p2 = " : p(parent)";
+      if (argument) {
+        p1 += ", auto " + *argument;
+        p2 += ", " + *argument + "(" + *argument + ")";
       }
-      p1 += "auto " + *argument;
-      if (p2.size() > 0) {
-        p2 += ", ";
-      }
-      p2 += *argument + "(" + *argument + ")";
+      return name + "(" + p1 + ") " + p2;
     }
-    return name + "(" + p1 + ") " + p2;
+    return "SC_CTOR(" + name + ")";
   }
 
   void SystemC::createConstructor(parameters& parm, std::string& name,

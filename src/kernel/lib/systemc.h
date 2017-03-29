@@ -296,7 +296,7 @@ int run(int argc, char* argv[]);
 #define SC_INTERFACE(x) struct interface_##x
 #define SC_MODULE(x) struct x : public sc_module, interface_##x
 
-#define SC_FOR_GENERATE(x) struct x 
+#define SC_FOR_GENERATE(x) struct x  : public sc_module
 #define SC_NEW_FOR_GENERATE(x) x
 
 #define SC_PACKAGE(x) struct x 

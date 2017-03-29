@@ -4,9 +4,11 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
+    std::string left = expressionToString(parm, r->left);
+    std::string right = expressionToString(parm, r->right);
     std::string rangeName = name + "_range";
-    printRangeType(parm, rangeName, r);
-    println(parm, "for (auto " + name + " : " + rangeName + ".RANGE()) {");
+    println(parm, "struct " + rangeName + " { int left = " + left + "; int right = " + right + "; };");
+    println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
     parm.incIndent();
     callback(parm);
     parm.decIndent();
