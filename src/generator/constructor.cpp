@@ -20,7 +20,7 @@ namespace generator {
       } else {
         methodName = method->noname;
       }
-      instantiateType(parm, "SC_THREAD", methodName);
+      instantiateType(parm, "SC_NEW_THREAD", methodName);
     }
     functionEnd("methodInstantiation");
   }

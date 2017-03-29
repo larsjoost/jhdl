@@ -28,20 +28,16 @@ namespace generator {
       printSourceLine(parm, forGenerateStatement->name);
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
-      auto d = new ast::Declaration();
-      d->type = new ast::TypeDeclaration();
-      d->type->identifier = forGenerateStatement->identifier;
-      d->type->typeDefinition = new ast::TypeDefinition();
-      d->type->typeDefinition->numberType = new ast::NumberType();
-      d->type->typeDefinition->numberType->range = forGenerateStatement->range;
-      forGenerateStatement->declarations.add(d);
+      addDeclarationType(parm, forGenerateStatement->identifier, VARIABLE);
       defineObject(parm,
                    name,
                    "SC_FOR_GENERATE",
                    &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
-                   [&](parameters& parm){});
+                   [&](parameters& parm){
+                     println(parm, "INTEGER<> " + identifier + ";");
+                   });
     }
   }
 

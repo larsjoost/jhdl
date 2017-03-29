@@ -2,7 +2,7 @@
 #ifndef AST_SUBTYPE_INDICATION_H_
 #define AST_SUBTYPE_INDICATION_H_
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "range_type.hpp"
 
 namespace ast {
@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    BasicIdentifier* name;
+    SimpleIdentifier* name;
     RangeType* range;
     
   };

@@ -164,7 +164,7 @@ namespace generator {
   */
   std::string SystemC::subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t) {
     assert(t);
-    std::string typeName = basicIdentifierToString(parm, t->name);
+    std::string typeName = t->name->toString(true);
     if (t->range) {
       printSubtype(parm, name, t->range, typeName);
       return name;
@@ -255,7 +255,6 @@ namespace generator {
     if (interface) {
       functionStart("interface");
       std::string name = interface->name->toString(true);
-      parm.parentName = name;
       println(parm, "");
       println(parm, "SC_INTERFACE(" + name + ") {");
       println(parm, "public:");
