@@ -28,7 +28,7 @@ namespace generator {
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     functionStart("signalInstantiation");
     if (s) {
-      instantiateType(parm, "SC_THREAD", s->name);
+      instantiateType(parm, "SC_NEW_THREAD", s->name);
     }
     functionEnd("signalInstantiation");
   }

@@ -164,8 +164,8 @@ namespace generator {
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     // definition.cpp
-    template <typename DeclarationFunc, typename BodyFunc>
-    void createProcess(parameters& parm, DeclarationFunc declarations, BodyFunc body);
+    template <typename Func>
+    void createProcess(parameters& parm, Func func);
     std::string createWait(parameters& parm, auto sensitivity);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
