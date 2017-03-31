@@ -3,18 +3,18 @@
 #define AST_PHYSICAL_H_
 
 #include "number.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 
 namespace ast {
 
-  class BasicIdentifier;
+  class SimpleIdentifier;
   
   class Physical {
     
   public:
 
     Number* number;
-    BasicIdentifier* unit;
+    SimpleIdentifier* unit;
 
   };
 

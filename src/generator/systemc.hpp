@@ -235,8 +235,11 @@ namespace generator {
     std::string s;
     std::string d;
     for (auto x : t) {
-      s += (d + callback(x.first, x.second));
-      d = delimiter;
+      std::string c = callback(x.first, x.second);
+      if (c.size() > 0) {
+        s += (d + c);
+        d = delimiter;
+      }
     }
     return s;
   }
@@ -253,8 +256,11 @@ namespace generator {
     std::string s;
     std::string d;
     for (auto x : *t) {
-      s += (d + callback(x));
-      d = delimiter;
+      std::string c = callback(x);
+      if (c.size() > 0) {
+        s += (d + c);
+        d = delimiter;
+      }
     }
     return s;
   }
