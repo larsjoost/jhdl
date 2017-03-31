@@ -107,7 +107,7 @@ namespace generator {
   
   std::string SystemC::characterToString(parameters& parm, ast::Character* n) {
     assert(n != NULL);
-    return n->value.toString();
+    return n->toString();
   }
 
 

@@ -48,7 +48,7 @@ main (int argc, char **argv)
   }
 
   try {
-    auto parserDesignFile = parser::DesignFile(false);
+    auto parserDesignFile = parser::DesignFile(verbose);
     parserDesignFile.parse(filename);
     auto systemC = generator::SystemC(verbose);
     systemC.generate(parserDesignFile);

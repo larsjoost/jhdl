@@ -2,7 +2,7 @@
 #ifndef AST_ENUMERATION_TYPE_H_
 #define AST_ENUMERATION_TYPE_H_
 
-#include "simple_identifier.hpp"
+#include "enumeration_element.hpp"
 #include "list.hpp"
 
 namespace ast {
@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    List<SimpleIdentifier>* enumerations;
+    List<EnumerationElement>* enumerations;
     
   };
 

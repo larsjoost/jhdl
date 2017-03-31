@@ -52,20 +52,45 @@ namespace generator {
   void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
       std::string name = identifier->toString(true);
+      std::string structName = name + "_struct";
       std::string enumList = listToString(parm, t->enumerations, ", ",
-                                          [&](ast::SimpleIdentifier& s){
-                                            addDeclarationType(parm, &s, ENUM);
-                                            return s.toString();
+                                          [&](ast::EnumerationElement& e){
+                                            std::string s = "";
+                                            if (e.identifier) {
+                                              addDeclarationType(parm, e.identifier, ENUM);
+                                              s = e.identifier->toString();
+                                            }
+                                            return s;
                                           });
       std::string stringList = listToString(parm, t->enumerations, ", ",
-                                          [&](ast::SimpleIdentifier& s){return "\"" + s.toString() + "\"";});
+                                          [&](ast::EnumerationElement& e){
+                                              std::string s = structName + "(";
+                                              if (e.identifier) {
+                                                std::string a = e.identifier->toString(true);
+                                                s +=  a + ", \"" + a + "\"";
+                                              } else if (e.character) {
+                                                s += e.character->toString();
+                                              } 
+                                              s += ")";
+                                              return s;
+                                              });
       /*
+        TYPE state_t IS (IDLE, '1', STOP);
+
         vhdl_enum_type(name, enumArray, stringArray)
         
-        enum BOOLEAN_enum {FALSE, TRUE};
-        char* BOOLEAN_string[] = {(char *)"false", (char *)"true"};
-        template<typename T = BOOLEAN_enum, char* p[] = BOOLEAN_string>
-        using BOOLEAN = Enumeration<T, p>;
+        enum STATE_T_enum {IDLE, STOP};
+        struct STATE_T_struct {
+          STATE_T_enum e;
+          std::string s;
+          char a;
+          bool enumType;
+          STATE_T_struct(STATE_T_enum e, std::string s) : e(e), s(s) {enumType = true;};
+          STATE_T_struct(char a) : a(a) {enumType = false;};
+        };
+        STATE_T_struct STATE_T_value[] = {STATE_T_struct(IDLE, "idle"), STATE_T_struct('1'), STATE_T_struct(STOP, "stop")};
+        template<class T[] = STATE_T_value>
+        using STATE_T = Enumeration<T>;
       */
       //      println(parm, "vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
       std::string enumName = name + "_enum";
