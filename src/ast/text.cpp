@@ -40,10 +40,7 @@ namespace ast {
       for (int i=0; i<s; i++) {
         if (text[position] == '\n') {
           lineNumber++;
-          columnNumber = 0;
           lineStart = position + 1;
-        } else {
-          columnNumber++;
         }
         position++;
       }
@@ -63,7 +60,6 @@ namespace ast {
     position = 0;
     size = textSize = strlen(t);
     lineNumber = 0;
-    columnNumber = 0;
     lineStart = 0;
     caseSensitive = c;
   }
@@ -81,7 +77,7 @@ namespace ast {
   }
 
   int Text::getColumn() {
-    return columnNumber;
+    return position - lineStart;
   }
 
   int Text::getPosition() {
@@ -141,7 +137,8 @@ namespace ast {
 
   void Text::printCurrentLinePositionMarker(std::ostream& output, std::string head) {
     output << head;
-    for (int i = 0; i < (position - lineStart); i++) {
+    int size = getColumn();
+    for (int i = 0; i < size; i++) {
       output << ' ';
     }
     output << "^" << std::endl;
@@ -161,7 +158,8 @@ namespace ast {
   }
 
   void Text::print(std::ostream& output) {
-    for (int i = 0; i < (size - position); i++) {
+    int s = getColumn();
+    for (int i = 0; i < s; i++) {
       output << lookAhead(i);
     }
   }

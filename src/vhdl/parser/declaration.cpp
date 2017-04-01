@@ -5,6 +5,7 @@
 #include "object_declaration.hpp"
 #include "function_declaration.hpp"
 #include "declaration.hpp"
+#include "attribute.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -15,7 +16,8 @@ namespace vhdl {
           (variable = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_VARIABLE>>()) || 
           (signal = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL>>()) || 
           (constant = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT>>()) || 
-          (function = scanner->optional<FunctionDeclaration>())) {
+          (function = scanner->optional<FunctionDeclaration>()) ||
+          (attribute = scanner->optional<Attribute>())) {
         scanner->expect(";");
       }
       return this;

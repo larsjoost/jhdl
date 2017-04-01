@@ -15,9 +15,8 @@ namespace ast {
     static int textSize;
     int position = 0;
     int size = 0;
-    int lineNumber = 0;
+    int lineNumber = 1;
     int lineStart = 0;
-    int columnNumber = 0;
     bool caseSensitive = false;
     const char* filename;
     

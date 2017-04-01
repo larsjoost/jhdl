@@ -9,8 +9,8 @@ namespace vhdl {
   namespace parser {
   
     RangeType* RangeType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      left = scanner->expect<Expression>();
-      rangeDirection = scanner->expect<RangeDirection>();
+      left = scanner->accept<Expression>();
+      rangeDirection = scanner->accept<RangeDirection>();
       right = scanner->expect<Expression>();
       return this;
     }

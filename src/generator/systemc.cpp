@@ -147,7 +147,7 @@ namespace generator {
     if (t) {
       std::string name = identifier->toString(true);
       std::string subtypeName = subtypeIndication(parm, name, t->type) + "<>";
-      printArrayType(parm, name, t->range, subtypeName);
+      printArrayType(parm, name, t->definition, subtypeName);
     }
   }
 
@@ -171,11 +171,16 @@ namespace generator {
     println(parm, "vhdl_range_subtype(" + name + ", " + typeName + ", " + left + ", " + right + ");");
   }
   
-  void SystemC::printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string& subtype) {
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
     assert(r);
-    std::string left = expressionToString(parm, r->left);
-    std::string right = expressionToString(parm, r->right);
-    println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
+    if (r->range) {
+      std::string left = expressionToString(parm, r->range->left);
+      std::string right = expressionToString(parm, r->range->right);
+      println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
+    } else if (r->subtype) {
+      std::string id = r->subtype->identifier->toString(true);
+      println(parm, "vhdl_array_type(" + name + ", " + id + ".LEFT(), " + id + ".RIGHT(), " + subtype + ");");
+    }
   }
   
   /*

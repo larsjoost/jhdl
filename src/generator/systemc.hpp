@@ -135,7 +135,7 @@ namespace generator {
     void numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     void enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
     void arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
-    void printArrayType(parameters& parm, std::string& name, ast::RangeType* r, std::string& subtype);
+    void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
     std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
@@ -286,8 +286,11 @@ namespace generator {
     if (list) {
       std::string d = "";
       for (auto t : list->list) {
-        s += (d + callback(t));
-        d = delimiter;
+        std::string c = callback(t);
+        if (c.size() > 0) {
+          s += (d + callback(t));
+          d = delimiter;
+        }
       }
     }
     return s;
