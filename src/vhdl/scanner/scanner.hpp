@@ -15,11 +15,11 @@ namespace vhdl {
   
     public:
 
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 14;
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 16;
 
       static char* getSpecialCharacters() {
         static char a[NUMBER_OF_SPECIAL_CHARACTERS] =
-          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-'};
+          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-', '[', ']'};
         return a;
       }
         
@@ -69,6 +69,11 @@ namespace vhdl {
         VHDL_PORT,
         VHDL_MAP,
         VHDL_ATTRIBUTE,
+        VHDL_FILE,
+        VHDL_GROUP,
+        VHDL_CONFIGURATION,
+        VHDL_COMPONENT,
+        VHDL_PROCEDURE,
         VHDL_NOT,
         VHDL_OR,
         VHDL_AND,
@@ -139,6 +144,11 @@ namespace vhdl {
           {VHDL_PORT, (char *)"port", 1987},
           {VHDL_MAP, (char *)"map", 1987},
           {VHDL_ATTRIBUTE, (char *)"attribute", 1987},
+          {VHDL_FILE, (char *)"file", 1987},
+          {VHDL_GROUP, (char *)"group", 1987},
+          {VHDL_CONFIGURATION, (char *)"configuration", 1987},
+          {VHDL_COMPONENT, (char *)"component", 1987},
+          {VHDL_PROCEDURE, (char *)"procedure", 1987},
           {VHDL_NOT, (char *)"not", 1987},
           {VHDL_OR, (char *)"or", 1987},
           {VHDL_AND, (char *)"and", 1987},

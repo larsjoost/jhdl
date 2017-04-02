@@ -3,6 +3,8 @@
 #define AST_ATTRIBUTE_H_
 
 #include "simple_identifier.hpp"
+#include "list.hpp"
+#include "string.hpp"
 
 namespace ast {
     
@@ -11,7 +13,9 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
+    List<SimpleIdentifier>* arguments;
     SimpleIdentifier* typeMark;
+    String* expression;
     
   };
 
