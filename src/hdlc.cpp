@@ -10,7 +10,9 @@
 #include "ast/scanner.hpp"
 
 void usage() {
-  printf("hdlc -f <filename> [-v]\n");
+  printf("hdlc -f <name> [-l <name>] [-v]\n");
+  printf("  -f <name> : File name\n");
+  printf("  -l <name> : Library name\n");
   printf("  -v : Verbose\n");
 }
 
@@ -20,13 +22,17 @@ main (int argc, char **argv)
   char *filename = NULL;
   int c;
   bool verbose = false;
+  std::string library = "work";
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:v")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:v")) != -1) {
     switch (c)
       {
       case 'f':
         filename = optarg;
+        break;
+      case 'l':
+        library = optarg;
         break;
       case 'v':
         verbose = true;
@@ -51,7 +57,7 @@ main (int argc, char **argv)
     auto parserDesignFile = parser::DesignFile(verbose);
     parserDesignFile.parse(filename);
     auto systemC = generator::SystemC(verbose);
-    systemC.generate(parserDesignFile);
+    systemC.generate(parserDesignFile, library);
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {

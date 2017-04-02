@@ -5,7 +5,7 @@ namespace generator {
 
   std::string SystemC::physicalToString(parameters& parm, ast::Physical* p) {
     assert (p != NULL);
-    return "TIME<>(" + numberToString(parm, p->number) + ", " + p->unit->toString(true) + ")";
+    return "{" + numberToString(parm, p->number) + ", " + p->unit->toString(true) + "}";
   }
   
   bool SystemC::getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info) {

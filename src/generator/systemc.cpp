@@ -1,7 +1,7 @@
 #include <iostream>
 #include <list>
 #include <cassert>
-
+#include <algorithm>
 
 #include "systemc.hpp"
 #include "sequential.hpp"
@@ -13,7 +13,7 @@ namespace generator {
 
   SystemC::SystemC(bool verbose) : verbose(verbose) {}
 
-  void SystemC::generate(ast::DesignFile& designFile) {
+  void SystemC::generate(ast::DesignFile& designFile, std::string& library) {
     functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
@@ -37,13 +37,18 @@ namespace generator {
     println(parm, "#include \"vhdl.h\"");
     println(parm, "namespace vhdl {");
     parm.incIndent();
-    println(parm, "using namespace STANDARD;");
+    // transform(library.begin(), library.end(), library.begin(), toupper);
+    // println(parm, "namespace " + library + " {");
+    // parm.incIndent();
+    //    println(parm, "using namespace STANDARD;");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause);
       packageDeclaration(parm, it.module.package);
       interfaceDeclaration(parm, it.module.interface);
       implementationDeclaration(parm, it.module.implementation);
     }
+    // parm.decIndent();
+    // println(parm, "}");
     parm.decIndent();
     println(parm, "}");
   }
@@ -52,62 +57,52 @@ namespace generator {
   void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
       std::string name = identifier->toString(true);
-      std::string structName = name + "_struct";
-      std::string enumList = listToString(parm, t->enumerations, ", ",
-                                          [&](ast::EnumerationElement& e){
-                                            std::string s = "";
-                                            if (e.identifier) {
-                                              addDeclarationType(parm, e.identifier, ENUM);
-                                              s = e.identifier->toString();
-                                            }
-                                            return s;
-                                          });
-      std::string stringList = listToString(parm, t->enumerations, ", ",
-                                          [&](ast::EnumerationElement& e){
-                                              std::string s = structName + "(";
-                                              if (e.identifier) {
-                                                std::string a = e.identifier->toString(true);
-                                                s +=  a + ", \"" + a + "\"";
-                                              } else if (e.character) {
-                                                s += e.character->toString();
-                                              } 
-                                              s += ")";
-                                              return s;
-                                              });
+      std::string enumList =
+        listToString(parm, t->enumerations, ", ",
+                     [&](ast::EnumerationElement& e){
+                       std::string s = "";
+                       if (e.identifier) {
+                         addDeclarationType(parm, e.identifier, ENUM);
+                         s = e.identifier->toString();
+                       }
+                       return s;
+                     });
+      int size = 0;
+      std::string enumName = name + "_enum";
+      std::string structList =
+        listToString(parm, t->enumerations, ", ",
+                     [&](ast::EnumerationElement& e){
+                       size++;
+                       std::string s;
+                       if (e.identifier) {
+                         std::string a = e.identifier->toString(true);
+                         std::string b = e.identifier->toString();
+                         s =  a + ", 0, \"" + b + "\"";
+                       } else if (e.character) {
+                         s = "(" + enumName + ")0, " + e.character->toString() + ", \"\"";
+                       } 
+                       s = "{" + s + "}";
+                       return s;
+                     });
       /*
         TYPE state_t IS (IDLE, '1', STOP);
 
         vhdl_enum_type(name, enumArray, stringArray)
         
         enum STATE_T_enum {IDLE, STOP};
-        struct STATE_T_struct {
-          STATE_T_enum e;
-          std::string s;
-          char a;
-          bool enumType;
-          STATE_T_struct(STATE_T_enum e, std::string s) : e(e), s(s) {enumType = true;};
-          STATE_T_struct(char a) : a(a) {enumType = false;};
-        };
-        STATE_T_struct STATE_T_value[] = {STATE_T_struct(IDLE, "idle"), STATE_T_struct('1'), STATE_T_struct(STOP, "stop")};
-        template<class T[] = STATE_T_value>
-        using STATE_T = Enumeration<T>;
+        EnumerationElement<STATE_T_enum> STATE_T_value[3] = { {IDLE, "idle"}, {'1'}, {STOP, "stop"}};
+        using STATE_T = Enumeration<STATE_T_value, 3>;
       */
       //      println(parm, "vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
-      std::string enumName = name + "_enum";
-      std::string stringName = name + "_string";
+      std::string valueName = name + "_value";
+      std::string s = std::to_string(size);
       println(parm, "enum " + enumName + " {" + enumList + "};");
-      println(parm, "struct " + stringName + " {");
+      println(parm, "struct " + valueName + " {");
       parm.incIndent();
-      println(parm, "std::string toString(" + enumName + " e) {");
-      parm.incIndent();
-      println(parm, "static std::string s[] = {" + stringList + "};");
-      println(parm, "return s[(int)e];");
-      parm.decIndent();
-      println(parm, "}");
+      println(parm, "EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
       parm.decIndent();
       println(parm, "};");
-      println(parm, "template<typename T = " + enumName + ", class p = " + stringName + ">");
-      println(parm, "using " + name + " = Enumeration<T, p>;");
+      println(parm, "using " + name + " = Enumeration<" + enumName + ", " + valueName + ", " + s + ">;");
     }
   }
 
@@ -125,7 +120,11 @@ namespace generator {
   void SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t) {
     if (t) {
       std::string name = identifier->toString(true);
-      printRangeType(parm, name, t->range);
+      if (t->physical) {
+        printPhysicalType(parm, name, t);
+      } else {
+        printRangeType(parm, name, t->range);
+      }
     }
   }
 
@@ -146,7 +145,7 @@ namespace generator {
   void SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
     if (t) {
       std::string name = identifier->toString(true);
-      std::string subtypeName = subtypeIndication(parm, name, t->type) + "<>";
+      std::string subtypeName = subtypeIndication(parm, name, t->type);
       printArrayType(parm, name, t->definition, subtypeName);
     }
   }
@@ -156,19 +155,74 @@ namespace generator {
     assert(r);
     std::string left = expressionToString(parm, r->left);
     std::string right = expressionToString(parm, r->right);
+    println(parm, "using " + name + "_type = decltype(" + left + ");"); 
     println(parm, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
   }
 
+  void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
+    assert(n);
+    ast::RangeType* r = n->range;
+    assert(r);
+    ast::PhysicalType* p = n->physical;
+    assert(p);
+    std::string left = expressionToString(parm, r->left);
+    std::string right = expressionToString(parm, r->right);
+    std::string s = listToString(parm, p->elements.list, ", ",
+                                 [&](ast::PhysicalElement& e){
+                                   return e.unit->toString(true);
+                                 });
+    std::string enumName = name + "_enum";
+    println(parm, "enum " + enumName + " {" + s + "};");
+    int size = 0;
+    s = listToString(parm, p->elements.list, ", ",
+                     [&](ast::PhysicalElement& e){
+                       size++;
+                       bool baseUnit = (e.physical == NULL);
+                       std::string u = e.unit->toString(true);
+                       std::string number = baseUnit ? "1" : e.physical->number->toString(); 
+                       std::string unit = baseUnit ? u : e.physical->unit->toString(true);
+                       std::string base = baseUnit ? "true" : "false";
+                       return "{" + u + ", " + number + ", " + unit + "}";
+                     });
+    std::string valueName = name + "_value";
+    println(parm, "struct " + valueName + " {");
+    parm.incIndent();
+    {
+      std::string x = std::to_string(size);
+      println(parm, "const int size = " + x + ";");
+      println(parm, "const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + s + "};");
+    }
+    parm.decIndent();
+    println(parm, "};");
+    std::string typeName = name + "_type";
+    println(parm, "using " + typeName + " = Physical<decltype(" + left + "), " + enumName + ">;"); 
+    println(parm, "vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
+  }
+
   /*
-      struct TYPE_T_range { int left = 0; int right = 4; };
-      template<class T = TYPE_T_range>
-      using TYPE_T = Array<TYPE_T_type, T>;
+   * vhdl_range_subtype examples:
+   *
+   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
+   * subtype DELAY is TIME range 0 fs to TIME'HIGH;
+
+   * struct TYPE_T_range { int left = 0; int right = 4; };
+   * template<class T = TYPE_T_range>
+   * using TYPE_T = Array<TYPE_T_type, T>;
   */
+  
   void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
     assert(r);
     std::string left = expressionToString(parm, r->left);
     std::string right = expressionToString(parm, r->right);
-    println(parm, "vhdl_range_subtype(" + name + ", " + typeName + ", " + left + ", " + right + ");");
+    std::string rangeName = name + "_range";
+    println(parm, "struct " + rangeName + " {");
+    parm.incIndent();
+    println(parm, typeName + "_type left = " + left + ";");
+    println(parm, typeName + "_type right = " + right + ";");
+    parm.decIndent();
+    println(parm, "};");
+    println(parm, "template<class RANGE = " + rangeName + ">");
+    println(parm, "using " + name + " = " + typeName + "<RANGE>;");
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
@@ -179,7 +233,7 @@ namespace generator {
       println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
     } else if (r->subtype) {
       std::string id = r->subtype->identifier->toString(true);
-      println(parm, "vhdl_array_type(" + name + ", " + id + ".LEFT(), " + id + ".RIGHT(), " + subtype + ");");
+      println(parm, "vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
     }
   }
   
@@ -265,17 +319,17 @@ namespace generator {
       parm.parentName = name;
       parameters p = parm;
       if (!package->body) {
-        println(parm, "");
-        println(parm, "SC_PACKAGE(" + name + ") {");
-        parm.incIndent();
+        println(p, "");
+        println(p, "SC_PACKAGE(" + name + ") {");
+        p.incIndent();
       } else {
-        println(parm, "// Package body of " + name);
+        println(p, "// Package body of " + name);
       }
       declarations(p, package->declarations);
       if (!package->body) {
         savePackageInfo(p, name);
-        parm.decIndent();
-        println(parm, "} " + name + ";");
+        p.decIndent();
+        println(p, "} " + name + ";");
       }
       functionEnd("package");
     }

@@ -16,7 +16,13 @@ namespace ast {
     Text value;
 
     std::string toString() {
-      return value.toString();
+      std::string s = value.toString();
+      if (s.at(1) == '\'') {
+        s = "'\\''";
+      } else if (s.at(1) == '\\') {
+        s = "'\\\\'";
+      }
+      return s;
     }
     
   };

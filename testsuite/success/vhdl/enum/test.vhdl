@@ -6,7 +6,7 @@ use std.env.finish;
 
 architecture rtl of test is
 
-  type type_t is (IDLE, START, STOP);
+  type type_t is (IDLE, START, 'a', STOP);
 
 begin
 

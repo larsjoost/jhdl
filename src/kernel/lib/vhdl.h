@@ -8,8 +8,8 @@
 #include <string>
 
 #include "systemc.h"
+#include "vhdl_type.hpp"
 #include "vhdl_std_env.hpp"
-#include "vhdl_standard.hpp"
 
 namespace vhdl {
   

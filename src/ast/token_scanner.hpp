@@ -347,7 +347,10 @@ namespace ast {
       NumberLookup() {
         assignRange(0, LUT_SIZE-1, false);
         assignRange('0', '9', true);
-        assignRange('.', '.', true);
+        assignRange(VALID_CHAR, '.', '.', true);
+        assignRange(VALID_CHAR, 'e', 'e', true);
+        assignRange(VALID_CHAR, 'E', 'E', true);
+        assignRange(VALID_CHAR, '+', '+', true);
       }
     } BASIC_IDENTIFIER;
     char a = text.lookAhead(0);

@@ -137,6 +137,7 @@ namespace generator {
     void arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
+    void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
     std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
@@ -226,7 +227,7 @@ namespace generator {
     void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);
   public:
     SystemC(bool verbose = false);
-    void generate(ast::DesignFile& designFile);
+    void generate(ast::DesignFile& designFile, std::string& library);
   };
 
   template<class Key, class Value, typename Func>
@@ -288,7 +289,7 @@ namespace generator {
       for (auto t : list->list) {
         std::string c = callback(t);
         if (c.size() > 0) {
-          s += (d + callback(t));
+          s += (d + c);
           d = delimiter;
         }
       }

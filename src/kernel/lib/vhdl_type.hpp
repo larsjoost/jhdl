@@ -77,10 +77,22 @@ namespace vhdl {
       return 32;
     }
 
-    TYPE HIGH() { return (range.left > range.right ? range.left : range.right); }
-    TYPE LOW() { return (range.left < range.right ? range.left : range.right); }
-    TYPE LEFT() { return range.left; }
-    TYPE RIGHT() { return range.right; }
+    static TYPE HIGH() {
+      RANGE range;
+      return (range.left > range.right ? range.left : range.right);
+    }
+    static TYPE LOW() {
+      RANGE range;
+      return (range.left < range.right ? range.left : range.right);
+    }
+    static TYPE LEFT() {
+      RANGE range;
+      return range.left;
+    }
+    static TYPE RIGHT() {
+      RANGE range;
+      return range.right;
+    }
     
     int getValue() {
       return value;
@@ -122,67 +134,99 @@ namespace vhdl {
   template <class RANGE = range_##name>                           \
   using name = Range<type_##name, RANGE>
 
-  /*
-   * vhdl_range_subtype examples:
-   *
-   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
-   */
-  
-#define vhdl_range_subtype(name, subtype, leftValue, rightValue)  \
-  using type_##name = decltype(leftValue);                        \
-  struct range_##name {                                           \
-    type_##name left = leftValue;                                 \
-    type_##name right = rightValue;                               \
-  };                                                              \
-  template <class RANGE = range_##name>                           \
-  using name = subtype<RANGE>
 
   /*
    * Physical example:
    * 
    * 10 ns
    */
-  
-  template <class T, typename Units, char* p[]>
-  class Physical {
-  protected:
-  public:
-    T value;
-    Units units;
 
-    Physical() {};
-    
-    Physical(T value, Units units) :
-      value(value), units(units) { }
-
-    Physical<T, Units, p> operator+(const Physical<T, Units, p>& other) {
-      Physical<T, Units, p> r;
-      r.value = value + other.value;
-      return r;
-    }
-    
-    static ::std::string IMAGE(Physical<T, Units, p>& r) {
-      return std::to_string(r.value) + " " + p[r.units];
-    }
-
+  template<typename T1, typename T2>
+  struct PhysicalElement {
+    T1 base;
+    T2 number;
+    T1 unit;
   };
+  
+#define vhdl_physical_type(name, leftValue, rightValue, enumName, valueName) \
+  using type_##name = decltype(leftValue);                              \
+  struct range_##name {                                                 \
+    type_##name left = leftValue;                                       \
+    type_##name right = rightValue;                                     \
+  };                                                                    \
+  template <typename N = type_##name, typename T = enumName, class E = valueName, class RANGE = range_##name> \
+  using name = PhysicalType<N, T, E, RANGE>
+
+  template <class VALUE, typename UNIT>
+  struct Physical {
+    VALUE value;
+    UNIT unit;
+    Physical(VALUE value, UNIT unit) :
+      value(value), unit(unit) { }
+  };
+
+  template<typename VALUE, typename UNIT, class ELEMENTS, class RANGE>
+  class PhysicalType {
+    Physical<VALUE, UNIT> value;
+  public:
+    PhysicalType(VALUE v, UNIT u) {value = {v, u};};
+
+    static UNIT getBaseUnit() {
+      ELEMENTS e;
+      for (int i=0; i < e.size; i++) {
+        if (e.array[i].base == e.array[i].unit) {
+          return e.array[i].base;
+        }
+      }
+      assert(false);
+    }
+
+    static UNIT getHighUnit(UNIT u) {
+      ELEMENTS e;
+      for (int i=0; i < e.size; i++) {
+        if (e.array[i].unit == u && e.array[i].base != u) {
+          return getHighUnit(e.array[i].base);
+        }
+      }
+      return u;
+    }
+    
+    static Physical<VALUE, UNIT> HIGH() {
+      RANGE range;
+      VALUE max = (range.left > range.right) ? range.left : range.right;
+      return Physical<VALUE, UNIT>(max, getHighUnit(getBaseUnit()));
+    }
+    static Physical<VALUE, UNIT> LOW() {return Physical<VALUE, UNIT>(1, getBaseUnit());}
+  };
+  
 
   /*
    * Enumeration example:
    *
    * type SEVERITY_LEVEL is (NOTE, WARNING, ERROR, FAILURE);
    */
-  
-  template <typename T, class StringConverter>
+
+  template<typename T>
+  struct EnumerationElement {
+    T e;
+    char c;
+    std::string s;
+  };
+
+  template <typename T, class E, int N>
   struct Enumeration {
   public:
-    T value;
-    StringConverter stringConverter;
-
+    int value = 0;
+    E valueArray;
+    
     void operator=(T v) {
       value = v;
     }
   
+    void operator=(char c) {
+      value = c;
+    }
+
     void operator=(bool v) {
       value = v ? (T)1 : (T)0;
     }
@@ -196,11 +240,14 @@ namespace vhdl {
     }
 
     std::string toString() {
-      return stringConverter.toString(value);
+      if (valueArray.array[value].c == 0) {
+        return valueArray.array[value].s;
+      }
+      return "'" + std::to_string(valueArray.array[value].c) + "'";
     }
 
     int getValue() {
-      return (int)value;
+      return value;
     }
     
     template <class X>
@@ -210,55 +257,10 @@ namespace vhdl {
 
     int LENGTH() { return 1; }
     
-    bool operator ==(const Enumeration<T, StringConverter> &other) const { return value == other.value; }
-    bool operator !=(const Enumeration<T, StringConverter> &other) const { return value != other.value; }
+    bool operator ==(const Enumeration<T, E, N> &other) const { return value == other.value; }
+    bool operator !=(const Enumeration<T, E, N> &other) const { return value != other.value; }
   };
 
-  /*
-   * vhdl_enum_type examples:
-   *
-   * TYPE boolean IS (FALSE, TRUE);
-   *
-   * enum enum_BOOLEAN {FALSE, TRUE};
-   * char* string_BOOLEAN[] = {(char *)"false", (char *)"true"};
-   * template<typename T = enum_BOOLEAN, char* p[] = string_BOOLEAN>
-   * using BOOLEAN = Enumeration<T, p>;
-   */
-
-#define vhdl_array(...) __VA_ARGS__
-#define vhdl_enum_type(name, enumArray, stringArray)              \
-  enum enum_##name enumArray ;                                    \
-  char* string_##name[] = stringArray ;                           \
-  template<typename T = enum_##name, char* p[] = string_##name >  \
-  using name = Enumeration<T, p>
-
-  template <char p[]>
-  struct CharArray {
-    public:
-    char value;
-
-    std::string toString() {
-      return std::string(1, value);
-    }
-
-    void operator=(char c) { value = c; }
-    bool operator ==(const CharArray<p> &other) const { return value == other.value; }
-    bool operator !=(const CharArray<p> &other) const { return value != other.value; }
-    bool operator ==(const char other) const { return value == other; }
-    bool operator !=(const char other) const { return value != other; }
-    
-    int LENGTH() { return 1; }
-    
-    int getValue() {
-      return value - '0';
-    }
-
-    template <class T>
-    static ::std::string IMAGE(T& r) {
-      return "'" + r.toString() + "'";
-    }
-
-  };
 
   /*
    * Array example:
