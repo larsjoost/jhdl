@@ -225,9 +225,14 @@ namespace generator {
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
     void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);
+
+
+    void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
+    void parseFile(parameters& parm, std::string& filename, std::string library);
+
   public:
     SystemC(bool verbose = false);
-    void generate(ast::DesignFile& designFile, std::string& library);
+    void generate(ast::DesignFile& designFile, std::string& library, std::string& standardPackageFilename);
   };
 
   template<class Key, class Value, typename Func>

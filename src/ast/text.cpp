@@ -21,7 +21,7 @@ namespace ast {
 
   Text::Text(bool verbose) : verbose(verbose) {}
 
-  Text::Text(const char* filename, char* text, bool caseSensitive, bool verbose) :
+  Text::Text(std::string& filename, char* text, bool caseSensitive, bool verbose) :
     verbose(verbose) {
     set(filename, text, caseSensitive);
   }
@@ -54,7 +54,7 @@ namespace ast {
     t.size = t.position + size;
   }
   
-  void Text::set(const char* filename, char* t, bool c) {
+  void Text::set(std::string& filename, char* t, bool c) {
     this->filename = filename;
     text = t;
     position = 0;

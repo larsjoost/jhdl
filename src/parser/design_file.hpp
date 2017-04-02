@@ -19,7 +19,7 @@ namespace parser {
     
     DesignFile(bool verbose = false);
 
-    void parse(const char* filename);
+    void parse(std::string& filename);
 
   };
 

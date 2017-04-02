@@ -115,8 +115,8 @@ namespace ast {
 
     bool accept(const char* c);
     
-    void setText(const char* filename, char* s);
-    void loadFile(const char* filename);
+    void setText(std::string& filename, char* s);
+    void loadFile(std::string& filename);
     
     void getText(Text& t);
     void setText(const Text& t);
@@ -394,7 +394,7 @@ namespace ast {
   }
   
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::setText(const char* filename, char* s) {
+  void TokenScanner<ApplicationSpecificScanner>::setText(std::string& filename, char* s) {
     text.set(filename, s, ApplicationSpecificScanner::CASE_SENSITIVE);
     tokenize();
     if (verbose) {
@@ -413,12 +413,12 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::loadFile(const char* filename) {
+  void TokenScanner<ApplicationSpecificScanner>::loadFile(std::string& filename) {
     if (verbose) {
-      printf("Reading file %s\n", filename);
+      std::cout << "Reading file " << filename << std::endl;
     }
-    this->filename = std::string(filename);
-    FILE *f = fopen(filename, "rb");
+    this->filename = filename;
+    FILE *f = fopen(filename.c_str(), "rb");
     if (f != NULL) {
       fseek(f, 0, SEEK_END);
       long fsize = ftell(f);

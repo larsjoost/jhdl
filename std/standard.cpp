@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "standard.hpp"
+#include "standard.h"
 
 namespace vhdl {
 

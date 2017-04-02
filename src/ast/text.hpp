@@ -18,7 +18,7 @@ namespace ast {
     int lineNumber = 1;
     int lineStart = 0;
     bool caseSensitive = false;
-    const char* filename;
+    std::string filename;
     
     char toLower(char c);
 
@@ -32,9 +32,9 @@ namespace ast {
 
     explicit Text() {};
     explicit Text(bool verbose);
-    Text(const char* filename, char* text, bool caseSensitive = false, bool verbose = false);
+    Text(std::string& filename, char* text, bool caseSensitive = false, bool verbose = false);
     
-    void set(const char* filename, char* text, bool caseSensitive = false);
+    void set(std::string& filename, char* text, bool caseSensitive = false);
     char lookAhead(int number);
     void incrementPosition(int size = 1);
     void subString(Text& t, int size);

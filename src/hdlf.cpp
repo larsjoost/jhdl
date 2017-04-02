@@ -17,7 +17,7 @@ void usage() {
 int
 main (int argc, char **argv)
 {
-  char *filename = NULL;
+  std::string filename = "";
   char *expression = NULL;
   int c;
   bool verbose = false;

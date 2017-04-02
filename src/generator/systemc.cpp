@@ -3,6 +3,9 @@
 #include <cassert>
 #include <algorithm>
 
+#include "../parser/design_file.hpp"
+
+
 #include "systemc.hpp"
 #include "sequential.hpp"
 #include "expression.hpp"
@@ -13,26 +16,18 @@ namespace generator {
 
   SystemC::SystemC(bool verbose) : verbose(verbose) {}
 
-  void SystemC::generate(ast::DesignFile& designFile, std::string& library) {
+  
+  void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& standardPackageFilename) {
     functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
-    // TODO: Add known functions from std as a work-around
-    {
-      std::unordered_map<std::string, PackageInfo> m;
-      std::string packageName = "ENV";
-      addPackageInfo(m, "FINISH", packageName, FUNCTION);
-      packageInfo[packageName] = m;
-      addPackageInfo(visiblePackageInfo, "TIME", "STANDARD", TYPE);
-      addPackageInfo(visiblePackageInfo, "BIT", "STANDARD", TYPE);
-      addPackageInfo(visiblePackageInfo, "BOOLEAN", "STANDARD", TYPE);
-      addPackageInfo(visiblePackageInfo, "TRUE", "STANDARD", ENUM);
-      addPackageInfo(visiblePackageInfo, "FALSE", "STANDARD", ENUM);
-      addPackageInfo(visiblePackageInfo, "INTEGER", "STANDARD", TYPE);
-      addPackageInfo(visiblePackageInfo, "NOTE", "STANDARD", ENUM);
-      addPackageInfo(visiblePackageInfo, "FAILURE", "STANDARD", ENUM);
+    if (standardPackageFilename.size() > 0) {
+      parseFile(parm, standardPackageFilename, "std");
     }
-    // /TODO
+    parse(parm, designFile, library);
+  }
+
+  void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "namespace vhdl {");
@@ -53,6 +48,14 @@ namespace generator {
     println(parm, "}");
   }
 
+  void SystemC::parseFile(parameters& parm, std::string& filename, std::string library) {
+    bool q = quiet;
+    quiet = true;
+    auto parserDesignFile = parser::DesignFile(verbose);
+    parserDesignFile.parse(filename);
+    parse(parm, parserDesignFile, library);
+    quiet = q;
+  }
 
   void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {

@@ -24,7 +24,7 @@ else
 fi
 
 function analyse {
-    $OPTIONS $JHDL/hdlc -f $1 $VERBOSE
+    $OPTIONS $JHDL/hdlc.sh -f $1 $VERBOSE
 }
 
 function simulate {

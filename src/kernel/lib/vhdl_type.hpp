@@ -5,6 +5,7 @@
 #include <climits>
 #include <iostream>
 #include <string>
+#include <cassert>
 
 namespace vhdl {
 
