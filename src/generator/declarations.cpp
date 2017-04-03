@@ -65,7 +65,7 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
-      std::string name = basicIdentifierToString(parm, t->identifier);
+      std::string name = t->identifier->toString(true);
       subtypeIndication(parm, name, t->type);
     }
   }
