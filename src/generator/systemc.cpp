@@ -24,10 +24,6 @@ namespace generator {
     if (standardPackageFilename.size() > 0) {
       parseFile(parm, standardPackageFilename, "std");
     }
-    parse(parm, designFile, library);
-  }
-
-  void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "namespace vhdl {");
@@ -36,16 +32,20 @@ namespace generator {
     // println(parm, "namespace " + library + " {");
     // parm.incIndent();
     //    println(parm, "using namespace STANDARD;");
+    parse(parm, designFile, library);
+    // parm.decIndent();
+    // println(parm, "}");
+    parm.decIndent();
+    println(parm, "}");
+  }
+
+  void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause);
       packageDeclaration(parm, it.module.package);
       interfaceDeclaration(parm, it.module.interface);
       implementationDeclaration(parm, it.module.implementation);
     }
-    // parm.decIndent();
-    // println(parm, "}");
-    parm.decIndent();
-    println(parm, "}");
   }
 
   void SystemC::parseFile(parameters& parm, std::string& filename, std::string library) {
@@ -56,7 +56,7 @@ namespace generator {
     parse(parm, parserDesignFile, library);
     quiet = q;
   }
-
+  
   void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     if (t) {
       std::string name = identifier->toString(true);

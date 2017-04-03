@@ -16,9 +16,6 @@
 
 namespace ast {
 
-  char* Text::text = NULL;
-  int Text::textSize = 0;
-
   Text::Text(bool verbose) : verbose(verbose) {}
 
   Text::Text(std::string& filename, char* text, bool caseSensitive, bool verbose) :

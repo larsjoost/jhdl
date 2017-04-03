@@ -11,8 +11,8 @@ namespace ast {
   class TextEof {};
 
   class Text {
-    static char* text;
-    static int textSize;
+    char* text;
+    int textSize;
     int position = 0;
     int size = 0;
     int lineNumber = 1;
