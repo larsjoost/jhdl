@@ -8,11 +8,13 @@
 #include "subtype_declaration.hpp"
 #include "object_declaration.hpp"
 #include "function_declaration.hpp"
+#include "procedure_declaration.hpp"
 #include "attribute.hpp"
 
 namespace ast {
     
   class FunctionDeclaration;
+  class ProcedureDeclaration;
 
   class Declaration {
     
@@ -24,6 +26,7 @@ namespace ast {
     ObjectDeclaration* signal;
     ObjectDeclaration* constant;
     FunctionDeclaration* function;
+    ProcedureDeclaration* procedure;
     Attribute* attribute;
     
   };

@@ -11,9 +11,12 @@ namespace vhdl {
     Attribute* Attribute::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ATTRIBUTE);
       identifier = scanner->expect<SimpleIdentifier>();
-      if (scanner->optional("[")) {
-        arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
-        scanner->expect("]");
+      if (scanner->optional(scanner::Scanner::VHDL_OF)) {
+        item = scanner->expect<SimpleIdentifier>();
+        if (scanner->optional("[")) {
+          arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+          scanner->expect("]");
+        }
       }
       scanner->expect(":");
       bool classFound =

@@ -13,6 +13,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
+    SimpleIdentifier* item;
     List<SimpleIdentifier>* arguments;
     SimpleIdentifier* typeMark;
     String* expression;
