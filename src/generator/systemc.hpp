@@ -44,8 +44,7 @@ namespace generator {
 
     bool verbose = false;
 
-    // enum Scope {DEFINITION, INSTANTIATION, INITIALIZATION, CONSTRUCTOR, IMPLEMENTATION} scope;
-    // char* ScopeToString[5] = {(char *)"DEFINITION", (char *)"INSTANTIATION", (char *)"INITIALIZATION", (char *)"CONSTRUCTOR", (char *)"IMPLEMENTATION"};
+    std::string filename;
     
     bool quiet = false;
     
@@ -87,6 +86,7 @@ namespace generator {
     };
 
     Config config;
+    Config libraryInfo;
     
     void printDeclaration(parameters& parm);
     
@@ -237,6 +237,7 @@ namespace generator {
   public:
     SystemC(bool verbose = false);
     void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename);
+    void saveLibraryInfo();
   };
 
   template<class Key, class Value, typename Func>

@@ -18,7 +18,7 @@ void Config::printError(std::string message) {
   std::cerr << "#Error: " << message << std::endl;
 }
 
-void Config::loadFile(std::string filename) {
+bool Config::load(std::string filename) {
   int lineNumber = 0;
   this->filename = filename;
   std::ifstream cFile (filename);
@@ -47,9 +47,20 @@ void Config::loadFile(std::string filename) {
       }
     }
     cFile.close();
-  } else {
-    printError("Unable to open config file " + filename);
+    return true;
   }
+  return false;
+}
+
+void Config::save() {
+  std::ofstream cFile(filename);
+  for (auto i : map) {
+    cFile << "[" << i.first << "]" << std::endl;
+    for (auto j : i.second) {
+      cFile << j.first << " = " << j.second << std::endl;
+    }
+  }
+  cFile.close();
 }
 
 std::string Config::expandEnvironmentVariables(const std::string& text)  {
@@ -100,7 +111,8 @@ std::string Config::find(std::string section, std::string key, bool expand) {
   return "";
 }
 
-void Config::add(std::string& section, std::string& key, std::string& value) {
+void Config::add(std::string section, std::string key, std::string value) {
+  toLower(key);
   std::string s = section.empty() ? "unnamed" : section;
   auto x = map.find(s);
   if (x != map.end()) {

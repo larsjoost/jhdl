@@ -19,10 +19,17 @@ namespace generator {
   
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
     functionStart("SystemC");
+    filename = designFile.filename;
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
-    config.loadFile(configurationFilename);
-    parsePackage(parm, "standard", "std");
+    if (!configurationFilename.empty()) {
+      if (!config.load(configurationFilename)) {
+        std::cerr << "Could not open configuration file " << configurationFilename << std::endl;
+      } else {
+        parsePackage(parm, "standard", "std");
+      }
+    }
+    libraryInfo.load(".jhdl.ini");
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "namespace vhdl {");
@@ -38,6 +45,10 @@ namespace generator {
     println(parm, "}");
   }
 
+  void SystemC::saveLibraryInfo() {
+    libraryInfo.save();
+  }
+  
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause);
@@ -51,7 +62,7 @@ namespace generator {
     std::string stdPath = config.find("libraries", library);
     if (!stdPath.empty()) {
       Config c;
-      c.loadFile(stdPath + "/.jhdl.ini");
+      c.load(stdPath + "/.jhdl.ini");
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
         filename = stdPath + "/" + filename;
@@ -339,8 +350,11 @@ namespace generator {
       declarations(p, package->declarations);
       if (!package->body) {
         savePackageInfo(p, name);
+        libraryInfo.add("package", name, filename);
         p.decIndent();
         println(p, "} " + name + ";");
+      } else {
+        libraryInfo.add("body", name, filename);
       }
       functionEnd("package");
     }
@@ -350,6 +364,7 @@ namespace generator {
     if (interface) {
       functionStart("interface");
       std::string name = interface->name->toString(true);
+      libraryInfo.add("entity", name, filename);
       println(parm, "");
       println(parm, "SC_INTERFACE(" + name + ") {");
       println(parm, "public:");
@@ -380,6 +395,7 @@ namespace generator {
     if (implementation) {
       functionStart("implementation");
       std::string name = implementation->name->toString(true);
+      libraryInfo.add("architecture", name, filename);
       defineObject(parm,
                    name,
                    "SC_MODULE",

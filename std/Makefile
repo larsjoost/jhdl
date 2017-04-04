@@ -6,9 +6,12 @@ CXXFLAGS := -std=c++14 -g -MMD # -Wall -ansi
 all: $(OBJS)
 
 standard.hpp: standard.vhd
-	../src/hdlc -f standard.vhd -l standard > standard.hpp
+	../src/hdlc -f standard.vhd -l standard -s > standard.hpp
 
-%.o: %.cpp standard.hpp
+env.hpp: env.vhd
+	../src/hdlc.sh -f env.vhd -l standard -s > env.hpp
+
+%.o: %.cpp standard.hpp env.hpp
 	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib 
 
 -include $(DEPS)

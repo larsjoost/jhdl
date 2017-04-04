@@ -17,8 +17,9 @@ public:
   void removeWhitespace(std::string& s);
   std::string expandEnvironmentVariables(const std::string& text );
   
-  void add(std::string& section, std::string& key, std::string& value);
-  void loadFile(std::string filename);
+  void add(std::string section, std::string key, std::string value);
+  bool load(std::string filename);
+  void save();
   std::string find(std::string section, std::string key, bool expand = true);
 };
 

@@ -14,6 +14,7 @@ void usage() {
   printf("  -f <name> : File name\n");
   printf("  -l <name> : Library name\n");
   printf("  -c <name> : Configuration file name\n");
+  printf("  -s        : Save library info file\n"); 
   printf("  -v : Verbose\n");
 }
 
@@ -25,9 +26,10 @@ main (int argc, char **argv)
   bool verbose = false;
   std::string library = "work";
   std::string configurationFilename = "";
+  bool saveLibraryInfo = false;
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:l:c:v")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:c:sv")) != -1) {
     switch (c)
       {
       case 'f':
@@ -38,6 +40,9 @@ main (int argc, char **argv)
         break;
       case 'c':
         configurationFilename = optarg;
+        break;
+      case 's':
+        saveLibraryInfo = true;
         break;
       case 'v':
         verbose = true;
@@ -63,6 +68,9 @@ main (int argc, char **argv)
     parserDesignFile.parse(filename);
     auto systemC = generator::SystemC(verbose);
     systemC.generate(parserDesignFile, library, configurationFilename);
+    if (saveLibraryInfo) {
+      systemC.saveLibraryInfo();
+    }
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {
