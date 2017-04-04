@@ -55,6 +55,54 @@ namespace generator {
     }
   }
 
+  void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
+                                      bool implementation) {
+    if (f) {
+      functionStart("procedure_declarations");
+      addDeclarationType(parm, f->name, PROCEDURE);
+      std::string name = f->name->toString(true);
+      parm.procedures[name] = f;
+      {
+        parameters p = parm;
+        printSourceLine(p, f->name->text);
+        std::string interface = "(" +
+          interfaceListToString(p, f->interface, ", ", false,
+                                [](std::string& type, DeclarationID id,
+                                   ast::ObjectDeclaration::Direction direction) {
+                                  return type;
+                                }) + ")";
+        if (f->body) {
+          std::string s = implementation ? p.parentName + "::" : "";
+          println(p, "void " + s + name + interface + "{");
+          p.incIndent();
+          procedure_body(p, f->body);
+          p.decIndent();
+          println(p, "}");
+        } else {
+          println(p, "void " + name + interface + ";");
+        }
+      }
+      functionEnd("procedure_declarations");
+    }
+  }
+
+  void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
+    assert(f);
+    functionStart("function_body");
+    declarations(parm, f->declarations);
+    sequentialStatements(parm, f->sequentialStatements);
+    functionEnd("function_body");
+  }
+  
+  void SystemC::procedure_body(parameters& parm, ast::ProcedureBody* f) {
+    assert(f);
+    functionStart("procedure_body");
+    declarations(parm, f->declarations);
+    sequentialStatements(parm, f->sequentialStatements);
+    functionEnd("procedure_body");
+  }
+  
+
       /*
   vhdl:
     subtype type_t is integer range 0 to 10;
@@ -71,7 +119,8 @@ namespace generator {
   }
 
 
-  void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
+  void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
+                             bool implementation) {
     functionStart("declarations");
     println(parm, "// Declarations");
     for (ast::Declaration i : d.list) {
@@ -80,7 +129,8 @@ namespace generator {
       object_declarations(parm, i.variable);
       object_declarations(parm, i.signal);
       object_declarations(parm, i.constant);
-      function_declarations(parm, i.function, false);
+      function_declarations(parm, i.function, implementation);
+      procedure_declarations(parm, i.procedure, implementation);
     }
     functionEnd("declarations");
   }

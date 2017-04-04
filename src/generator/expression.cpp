@@ -75,7 +75,7 @@ namespace generator {
     std::string name = identifier->text.toString(true);
     if (getIdentifierInfo(parm, identifier, info)) {
       name = getNamePrefix(info) + name;
-      if (info.id == FUNCTION) {
+      if (info.id == FUNCTION || info.id == PROCEDURE) {
         std::string parameters = parametersToString(parm, identifier, identifier->arguments);
         name += "(" + parameters + ")";
       } else {

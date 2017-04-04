@@ -53,7 +53,7 @@ namespace generator {
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PORT, TYPE, ENUM};
+    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PROCEDURE, PORT, TYPE, ENUM};
 
     struct DeclarationInfo {
       DeclarationID id;
@@ -79,6 +79,7 @@ namespace generator {
       std::string parentName;
       std::unordered_map<std::string, DeclarationInfo> declaration;
       std::unordered_map<std::string, ast::FunctionDeclaration*> functions;
+      std::unordered_map<std::string, ast::ProcedureDeclaration*> procedures;
       void incIndent() {
         indent += 2;
       }
@@ -162,13 +163,15 @@ namespace generator {
                                       bool initialization, Func typeConverter);
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                       bool initialization);
-    void function_body(parameters& parm, ast::FunctionBody* f);
-
+    
     // declarations.cpp
     void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
-    void declarations(parameters& parm, ast::List<ast::Declaration>& d);
+    void function_body(parameters& parm, ast::FunctionBody* f);
+    void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);
+    void procedure_body(parameters& parm, ast::ProcedureBody* f);
+    void declarations(parameters& parm, ast::List<ast::Declaration>& d, bool implementation = false);
 
     // definition.cpp
     template <typename Func>

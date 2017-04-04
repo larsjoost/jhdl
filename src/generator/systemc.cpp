@@ -314,14 +314,6 @@ namespace generator {
     }
   }
 
-  void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
-    assert(f);
-    functionStart("function_body");
-    declarations(parm, f->declarations);
-    sequentialStatements(parm, f->sequentialStatements);
-    functionEnd("function_body");
-  }
-  
   void SystemC::addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
                                std::string name, std::string packageName,
                                DeclarationID id) {
@@ -353,7 +345,8 @@ namespace generator {
       } else {
         println(p, "// Package body of " + name);
       }
-      declarations(p, package->declarations);
+      bool implementationArea = (package->body) ? true : false;
+      declarations(p, package->declarations, implementationArea);
       if (!package->body) {
         savePackageInfo(p, name);
         addLibraryInfo("package", name, filename);
