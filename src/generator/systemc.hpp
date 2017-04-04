@@ -6,6 +6,8 @@
 #include <string>
 #include <cassert>
 
+#include "config.hpp"
+
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
 #include "../ast/expression_term.hpp"
@@ -83,6 +85,8 @@ namespace generator {
         indent -= 2;
       }
     };
+
+    Config config;
     
     void printDeclaration(parameters& parm);
     
@@ -228,11 +232,11 @@ namespace generator {
 
 
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
-    void parseFile(parameters& parm, std::string& filename, std::string library);
+    void parsePackage(parameters& parm, std::string name, std::string library);
 
   public:
     SystemC(bool verbose = false);
-    void generate(ast::DesignFile& designFile, std::string& library, std::string& standardPackageFilename);
+    void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename);
   };
 
   template<class Key, class Value, typename Func>

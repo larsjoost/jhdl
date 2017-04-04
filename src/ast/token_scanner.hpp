@@ -431,6 +431,7 @@ namespace ast {
       string[fsize] = 0;
       setText(filename, string);
     } else {
+      std::cerr << "File " << filename << " not found" << std::endl;
       throw FileNotFound();
     }
   }

@@ -13,7 +13,7 @@ void usage() {
   printf("hdlc -f <name> [-l <name>] [-s <name>] [-v]\n");
   printf("  -f <name> : File name\n");
   printf("  -l <name> : Library name\n");
-  printf("  -s <name> : Standard package file name\n");
+  printf("  -c <name> : Configuration file name\n");
   printf("  -v : Verbose\n");
 }
 
@@ -24,10 +24,10 @@ main (int argc, char **argv)
   int c;
   bool verbose = false;
   std::string library = "work";
-  std::string standardPackageFilename = "";
+  std::string configurationFilename = "";
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:l:s:v")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:c:v")) != -1) {
     switch (c)
       {
       case 'f':
@@ -36,8 +36,8 @@ main (int argc, char **argv)
       case 'l':
         library = optarg;
         break;
-      case 's':
-        standardPackageFilename = optarg;
+      case 'c':
+        configurationFilename = optarg;
         break;
       case 'v':
         verbose = true;
@@ -57,12 +57,12 @@ main (int argc, char **argv)
         abort ();
       }
   }
-
+  
   try {
     auto parserDesignFile = parser::DesignFile(verbose);
     parserDesignFile.parse(filename);
     auto systemC = generator::SystemC(verbose);
-    systemC.generate(parserDesignFile, library, standardPackageFilename);
+    systemC.generate(parserDesignFile, library, configurationFilename);
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {

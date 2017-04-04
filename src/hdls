@@ -68,7 +68,7 @@ make -C $KERNEL > /dev/null
 
 filebase="${FILENAME%.*}"
 sourcefile="$filebase.hpp"
-$SCRIPTPATH/hdlc -f $FILENAME > $sourcefile
+$SCRIPTPATH/hdlc.sh -f $FILENAME > $sourcefile
 targetdir=$(dirname $FILENAME)
 templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
 targets=""

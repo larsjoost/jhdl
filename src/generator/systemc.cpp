@@ -17,13 +17,12 @@ namespace generator {
   SystemC::SystemC(bool verbose) : verbose(verbose) {}
 
   
-  void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& standardPackageFilename) {
+  void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
     functionStart("SystemC");
     std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
-    if (standardPackageFilename.size() > 0) {
-      parseFile(parm, standardPackageFilename, "std");
-    }
+    config.loadFile(configurationFilename);
+    parsePackage(parm, "standard", "std");
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "namespace vhdl {");
@@ -48,13 +47,22 @@ namespace generator {
     }
   }
 
-  void SystemC::parseFile(parameters& parm, std::string& filename, std::string library) {
-    bool q = quiet;
-    quiet = true;
-    auto parserDesignFile = parser::DesignFile(verbose);
-    parserDesignFile.parse(filename);
-    parse(parm, parserDesignFile, library);
-    quiet = q;
+  void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
+    std::string stdPath = config.find("libraries", library);
+    if (!stdPath.empty()) {
+      Config c;
+      c.loadFile(stdPath + "/.jhdl.ini");
+      std::string filename = c.find("package", name);
+      if (!filename.empty()) {
+        filename = stdPath + "/" + filename;
+        bool q = quiet;
+        quiet = true;
+        auto parserDesignFile = parser::DesignFile(verbose);
+        parserDesignFile.parse(filename);
+        parse(parm, parserDesignFile, library);
+        quiet = q;
+      }
+    }
   }
   
   void SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
