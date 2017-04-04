@@ -40,7 +40,6 @@ bool Config::load(std::string filename) {
         } else if(line[0] != '#') {
           int delimiterPos = line.find("=");
           std::string key = line.substr(0, delimiterPos);
-          toLower(key);
           std::string value = line.substr(delimiterPos + 1);
           add(currentSection, key, value);
         }
@@ -117,8 +116,9 @@ void Config::add(std::string section, std::string key, std::string value) {
   auto x = map.find(s);
   if (x != map.end()) {
     x->second[key] = value;
+  } else {
+    std::unordered_map<std::string, std::string> m;
+    m[key] = value;
+    map[section] = m;
   }
-  std::unordered_map<std::string, std::string> m;
-  m[key] = value;
-  map[section] = m;
 }

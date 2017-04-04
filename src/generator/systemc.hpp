@@ -42,6 +42,8 @@ namespace generator {
   
   class SystemC { 
 
+    const std::string libraryInfoFilename = ".jhdl.ini";
+    
     bool verbose = false;
 
     std::string filename;
@@ -233,6 +235,8 @@ namespace generator {
 
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
     void parsePackage(parameters& parm, std::string name, std::string library);
+
+    void addLibraryInfo(std::string section, std::string name, std::string filename);
 
   public:
     SystemC(bool verbose = false);

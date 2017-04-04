@@ -18,7 +18,7 @@ env.hpp: env.vhd
 
 clean:
 	find . -name "*.o" -type f -delete
-	rm standard.hpp
+	rm standard.hpp env.hpp
 
 print-%:
 	@echo '$*=$($*)'
