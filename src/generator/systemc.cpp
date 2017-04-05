@@ -27,7 +27,7 @@ namespace generator {
       if (!config.load(configurationFilename)) {
         std::cerr << "Could not open configuration file " << configurationFilename << std::endl;
       } else {
-        parsePackage(parm, "standard", "std");
+        loadPackage(parm, "STANDARD", "STD", "ALL");
       }
     }
     println(parm, "#include \"systemc.h\"");
@@ -65,7 +65,7 @@ namespace generator {
   }
 
   void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
-    std::string stdPath = config.find("libraries", library);
+    std::string stdPath = config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
       c.load(stdPath + "/" + libraryInfoFilename);
@@ -450,7 +450,7 @@ namespace generator {
                                 ast::ObjectDeclaration::Direction direction) {
                               std::string argument = associateArgument(parm, name, init, argumentNumber, l);
                               if (argument.size() == 0) {
-                                printError(functionName->text, "No argument associated element " + std::to_string(argumentNumber));
+                                printError("No argument associated element " + std::to_string(argumentNumber), &functionName->text);
                               }
                               s += delimiter + argument;
                               delimiter = ", ";
@@ -458,7 +458,7 @@ namespace generator {
                             }
                             );
     } else {
-      printWarning(functionName->text, "Could not find function " + basisName + " declaration. Cannot associate arguments.");
+      printWarning("Could not find function " + basisName + " declaration. Cannot associate arguments.", &functionName->text);
       if (l) {
         s = listToString(parm, l->associationElements.list, ",",
                          [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});

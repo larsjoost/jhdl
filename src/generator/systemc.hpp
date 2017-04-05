@@ -95,12 +95,10 @@ namespace generator {
     
     void println(parameters& parm, std::string text);
 
-    void printError(ast::Text& t, std::string message);
-    void printWarning(ast::Text& t, std::string message);
+    void printError(std::string message, ast::Text* t = NULL);
+    void printWarning(std::string message, ast::Text* t = NULL);
 
     int methodId = 0;
-
-    bool matchDeclarationID(parameters& parm, ast::BasicIdentifier* i, DeclarationID id);
 
     parameters descendHierarchy(parameters& parm, std::string& parentName);
 
@@ -137,6 +135,12 @@ namespace generator {
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
 
     // includes.cpp
+    void makeVisible(std::unordered_map<std::string, PackageInfo>& info,
+                     std::string& identifier,
+                     std::string& package,
+                     ast::Text* text = NULL);
+    void loadPackage(parameters& parm, std::string package, std::string library,
+                     std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause);
 
     void numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);

@@ -33,7 +33,7 @@ namespace generator {
             s = ". Found " + name + " in package " + i.first + ". Maybe you forgot to declare it in an USE statement.";
           }
         }
-        printError(identifier->text, "Could not find declaration of identifier " + name + s);
+        printError("Could not find declaration of identifier " + name + s, &identifier->text);
       }
     }
     functionEnd("getIdentifierInfo");

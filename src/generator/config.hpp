@@ -14,6 +14,7 @@ public:
   void printError(std::string message);
   
   void toLower(std::string& s);
+  void toUpper(std::string& s);
   void removeWhitespace(std::string& s);
   std::string expandEnvironmentVariables(const std::string& text );
   

@@ -10,12 +10,20 @@ namespace generator {
     }
   }
 
-  void SystemC::printError(ast::Text& t, std::string message) {
-    t.printException("error", message);
+  void SystemC::printError(std::string message, ast::Text* t) {
+    if (t) {
+      t->printException("error", message);
+    } else {
+      std::cerr << "#Error: " << message << std::endl;
+    }
   }
   
-  void SystemC::printWarning(ast::Text& t, std::string message) {
-    t.printException("warning", message, std::cout, "// ");
+  void SystemC::printWarning(std::string message, ast::Text* t) {
+    if (t) {
+      t->printException("warning", message, std::cout, "// ");
+    } else {
+      std::cerr << "#Warning: " << message << std::endl;
+    }
   }
 
   void SystemC::functionStart(std::string name) {
@@ -57,17 +65,6 @@ namespace generator {
 
   void SystemC::printSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
     printSourceLine(parm, t->text);
-  }
-
-  bool SystemC::matchDeclarationID(parameters& parm, ast::BasicIdentifier* identifier, DeclarationID id) {
-    functionStart("matchDeclarationID");
-    IdentifierInfo info;
-    bool result = false;
-    if (getIdentifierInfo(parm, identifier, info)) {
-      result = (info.id == id);
-    }
-    functionEnd("matchDeclarationID");
-    return result;
   }
 
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,

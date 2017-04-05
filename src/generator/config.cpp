@@ -10,6 +10,10 @@ void Config::toLower(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 
+void Config::toUpper(std::string& s) {
+  std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+}
+
 void Config::removeWhitespace(std::string& s) {
   s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
 }
@@ -33,7 +37,6 @@ bool Config::load(std::string filename) {
           int delimiterPos = line.find("]");
           if (delimiterPos != std::string::npos) {
             currentSection = line.substr(1, delimiterPos-1);
-            toLower(currentSection);
           } else {
             printError("Missing end ] in line " + std::to_string(lineNumber) + " of file " + filename);
           }
@@ -53,10 +56,18 @@ bool Config::load(std::string filename) {
 
 void Config::save() {
   std::ofstream cFile(filename);
+  std::string x;
+  std::string y;
   for (auto i : map) {
-    cFile << "[" << i.first << "]" << std::endl;
+    x = i.first;
+    toLower(x);
+    cFile << "[" << x << "]" << std::endl;
     for (auto j : i.second) {
-      cFile << j.first << " = " << j.second << std::endl;
+      x = j.first;
+      toLower(x);
+      y = j.second;
+      toLower(y);
+      cFile << x << " = " << y << std::endl;
     }
   }
   cFile.close();
@@ -95,6 +106,8 @@ std::string Config::expandEnvironmentVariables(const std::string& text)  {
 
 std::string Config::find(std::string section, std::string key, bool expand) {
   std::string s = section.empty() ? "unnamed" : section;
+  toUpper(s);
+  toUpper(key);
   auto x = map.find(s);
   if (x != map.end()) {
     auto y = x->second.find(key);
@@ -106,19 +119,20 @@ std::string Config::find(std::string section, std::string key, bool expand) {
       return x;
     }
   }
-  printError("Could not find key " + key + " in section " + section + " of config file " + filename);
+  printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + filename);
   return "";
 }
 
 void Config::add(std::string section, std::string key, std::string value) {
-  toLower(key);
   std::string s = section.empty() ? "unnamed" : section;
+  toUpper(s);
+  toUpper(key);
   auto x = map.find(s);
   if (x != map.end()) {
     x->second[key] = value;
   } else {
     std::unordered_map<std::string, std::string> m;
     m[key] = value;
-    map[section] = m;
+    map[s] = m;
   }
 }
