@@ -1,9 +1,43 @@
 #include <cassert>
+#include <algorithm>
 
 #include "systemc.hpp"
 
 namespace generator {
 
+  void SystemC::makeVisible(std::unordered_map<std::string, PackageInfo>& info,
+                            std::string& identifier,
+                            std::string& package,
+                            ast::Text* text) {
+    if ("ALL" == identifier) {
+      for (auto i : info) {
+        visiblePackageInfo[i.first] = i.second; 
+      }
+    } else {
+      auto i = info.find(identifier);
+      if (i != info.end()) {
+        visiblePackageInfo[i->first] = i->second;
+      } else {
+        printError("Did not find \"" + identifier + "\" in package \"" + package + "\"", text);
+      }
+    }
+  };
+
+  void SystemC::loadPackage(parameters& parm, std::string package,
+                            std::string library, std::string identifier,
+                            ast::Text* text) {
+    auto info = packageInfo.find(package);
+    if (info == packageInfo.end()) {
+      parsePackage(parm, package, library);
+      info = packageInfo.find(package);
+    }
+    if (info != packageInfo.end()) {
+      makeVisible(info->second, identifier, package, text);
+    } else {
+      printError("Did not find package " + package, text);
+    }
+  }
+  
   void SystemC::includes(parameters& parm, ast::ContextClause* contextClause) {
     if (contextClause) {
       functionStart("includes");
@@ -15,24 +49,8 @@ namespace generator {
           println(parm, "using namespace " + library + ";");
         }
         std::string package = useClause.package->toString(true);
-        auto i = packageInfo.find(package);
-        if (i != packageInfo.end()) {
-          std::string identifier = useClause.identifier->toString(true);
-          if ("ALL" == identifier) {
-            for (auto j : i->second) {
-              visiblePackageInfo[j.first] = j.second; 
-            }
-          } else {
-            auto j = i->second.find(identifier);
-            if (j != i->second.end()) {
-              visiblePackageInfo[j->first] = j->second;
-            } else {
-              printError(useClause.identifier->text, "Did not find " + identifier + " is package " + package);
-            }
-          }
-        } else {
-          printError(useClause.package->text, "Did not find package " + package);
-        }
+        std::string identifier = useClause.identifier->toString(true);
+        loadPackage(parm, package, library, identifier, &useClause.package->text);
       }
       functionEnd("includes");
     }    

@@ -1,4 +1,11 @@
+DIRS := src std
 
 all:
-	make -C ./src
-	make -C ./std
+	for m in $(DIRS); do \
+	$(MAKE) -C $$m; \
+	done
+
+clean:
+	for m in $(DIRS); do \
+	$(MAKE) -C $$m clean; \
+	done
