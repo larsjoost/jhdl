@@ -8,47 +8,18 @@ namespace generator {
     return "{" + numberToString(parm, p->number) + ", " + p->unit->toString(true) + "}";
   }
   
-  bool SystemC::getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info) {
-    functionStart("getIdentifierInfo");
-    assert (identifier);
-    std::string name = identifier->text.toString(true);
-    auto t = parm.declaration.find(name); 
-    bool result = true;
-    if (t != parm.declaration.end()) {
-      info.id = t->second.id;
-      info.packageName = "WORK";
-      info.hierarchyLevel = t->second.hierarchyLevel;
-    } else {
-      auto t = visiblePackageInfo.find(name);
-      if (t != visiblePackageInfo.end()) {
-        info.packageName = t->second.name;
-        info.id = t->second.id;
-        info.hierarchyLevel = -1;
-      } else {
-        result = false;
-        std::string s = "";
-        for (auto i : packageInfo) {
-          auto x = i.second.find(name);
-          if (x != i.second.end()) {
-            s = ". Found " + name + " in package " + i.first + ". Maybe you forgot to declare it in an USE statement.";
-          }
-        }
-        printError(identifier->text, "Could not find declaration of identifier " + name + s);
-      }
-    }
-    functionEnd("getIdentifierInfo");
-    return result;
-  }
-  
-  std::string SystemC::getNamePrefix(IdentifierInfo& info) {
+  std::string SystemC::getNamePrefix(parameters& parm, ast::BasicIdentifier* identifier) {
+    int hierarchyLevel;
+    std::string id = identifier->toString(true);
+    DatabaseElement* e = parm.database.findObject(id, hierarchyLevel);
     std::string s = "";
-    if (info.id == ENUM || info.id == TYPE) {
-    } else if (info.hierarchyLevel >= 0) {
-      for (int i=0; i<info.hierarchyLevel; i++) {
-        s += "p->";
+    if (e) {
+      if (e->id == ast::ENUM || e->id == ast::TYPE) {
+      } else if (hierarchyLevel >= 0) {
+        for (int i=0; i<hierarchyLevel; i++) {
+          s += "p->";
+        }
       }
-    } else {
-      s = info.packageName + ".";
     }
     return s;
   }
@@ -59,10 +30,7 @@ namespace generator {
     std::string s = "";
     std::string name = identifier->text.toString(true);
     if (hierarchy) {
-      IdentifierInfo info;
-      if (getIdentifierInfo(parm, identifier, info)) {
-        s = getNamePrefix(info);
-      }
+      s = getNamePrefix(parm, identifier);
     }
     functionEnd("getName");
     return s + name;
@@ -71,28 +39,25 @@ namespace generator {
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier) {
     functionStart("basicIdentifierToString");
     assert (identifier);
-    IdentifierInfo info;
     std::string name = identifier->text.toString(true);
-    if (getIdentifierInfo(parm, identifier, info)) {
-      name = getNamePrefix(info) + name;
-      if (info.id == FUNCTION || info.id == PROCEDURE) {
-        std::string parameters = parametersToString(parm, identifier, identifier->arguments);
-        name += "(" + parameters + ")";
-      } else {
-        if (identifier->attribute) {
-          bool objectMatch = (info.id == VARIABLE) || (info.id == SIGNAL);
-          std::string seperator = objectMatch ? "." : "<>::";
-          name += seperator + identifier->attribute->toString(true);
-          std::string arguments = "";
-          if (identifier->arguments) {
-            arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
-                                     [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
-          }
-          name += "(" + arguments + ")";
-        } else if (identifier->arguments) {
-          name += listToString(parm, identifier->arguments->associationElements.list, ",",
-                            [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
+    name = getNamePrefix(parm, identifier) + name;
+    if (info.id == FUNCTION || info.id == PROCEDURE) {
+      std::string parameters = parametersToString(parm, identifier, identifier->arguments);
+      name += "(" + parameters + ")";
+    } else {
+      if (identifier->attribute) {
+        bool objectMatch = (info.id == VARIABLE) || (info.id == SIGNAL);
+        std::string seperator = objectMatch ? "." : "<>::";
+        name += seperator + identifier->attribute->toString(true);
+        std::string arguments = "";
+        if (identifier->arguments) {
+          arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
+                                   [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
         }
+        name += "(" + arguments + ")";
+      } else if (identifier->arguments) {
+        name += listToString(parm, identifier->arguments->associationElements.list, ",",
+                             [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
       }
     }
     functionEnd("basicIdentifierToString");

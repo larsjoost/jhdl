@@ -18,9 +18,9 @@ namespace generator {
       }
       DeclarationID id;
       switch (v->objectType) {
-      case ast::ObjectDeclaration::SIGNAL: id = SIGNAL; break;
-      case ast::ObjectDeclaration::VARIABLE: id = VARIABLE; break;
-      case ast::ObjectDeclaration::CONSTANT: id = CONSTANT; break;
+      case ast::SIGNAL: id = SIGNAL; break;
+      case ast::VARIABLE: id = VARIABLE; break;
+      case ast::CONSTANT: id = CONSTANT; break;
       default: assert(false);
       }
       addDeclarationType(parm, v->identifier, id);

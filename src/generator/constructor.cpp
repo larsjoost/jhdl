@@ -49,7 +49,7 @@ namespace generator {
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
       parameters p = parm;
-      addDeclarationType(p, forGenerateStatement->identifier, VARIABLE);
+      addDeclarationType(p, forGenerateStatement->identifier, ast::VARIABLE);
       forLoop(p, identifier, forGenerateStatement->range, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
         });
@@ -100,8 +100,9 @@ namespace generator {
   }
 
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument) {
-    if (parm.parentName.size() > 0) {
-      std::string p1 = parm.parentName +"* parent";
+    std::string parentName = parm.database.getParentName();
+    if (parentName.size() > 0) {
+      std::string p1 = parentName +"* parent";
       std::string p2 = " : p(parent)";
       if (argument) {
         p1 += ", auto " + *argument;

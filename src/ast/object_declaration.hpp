@@ -5,14 +5,13 @@
 #include "simple_identifier.hpp"
 #include "declaration_initialization.hpp"
 #include "subtype_indication.hpp"
+#include "object_type.hpp"
 
 namespace ast {
     
   class ObjectDeclaration {
     
   public:
-
-    enum ObjectType {SIGNAL, VARIABLE, CONSTANT};
 
     enum Direction {IN, OUT, INOUT, BUFFER, NONE};
     

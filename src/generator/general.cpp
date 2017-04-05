@@ -36,15 +36,12 @@ namespace generator {
     }
   }
   
-  SystemC::parameters SystemC::descendHierarchy(parameters& parm, std::string& parentName) {
-    parameters p = parm;
-    for (auto it = p.declaration.begin(); it != p.declaration.end(); it++) {
-      if (it->second.hierarchyLevel >= 0) {
-        it->second.hierarchyLevel++;
-      }
-    }
-    p.parentName = parentName;
-    return p;
+  void SystemC::descendHierarchy(parameters& parm, std::string& parentName) {
+    parm.database.descendHierarchy(parentName);
+  }
+
+  void SystemC::ascendHierarchy(parameters& parm) {
+    parm.database.ascendHierarchy();
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text& t) {

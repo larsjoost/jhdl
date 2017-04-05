@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "config.hpp"
+#include "database.hpp"
 
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
@@ -53,33 +54,9 @@ namespace generator {
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    enum DeclarationID {SIGNAL, VARIABLE, CONSTANT, FUNCTION, PROCEDURE, PORT, TYPE, ENUM};
-
-    struct DeclarationInfo {
-      DeclarationID id;
-      int hierarchyLevel = 0;
-    };
-
-    struct PackageInfo {
-      DeclarationID id;
-      std::string name;
-    };
-
-    struct IdentifierInfo {
-      DeclarationID id;
-      std::string packageName;
-      int hierarchyLevel;
-    };
-    
-    std::unordered_map<std::string, std::unordered_map<std::string, PackageInfo>> packageInfo;
-    std::unordered_map<std::string, PackageInfo> visiblePackageInfo;
-
     struct parameters {
       int indent = 0;
-      std::string parentName;
-      std::unordered_map<std::string, DeclarationInfo> declaration;
-      std::unordered_map<std::string, ast::FunctionDeclaration*> functions;
-      std::unordered_map<std::string, ast::ProcedureDeclaration*> procedures;
+      LocalDatabase database;
       void incIndent() {
         indent += 2;
       }
@@ -88,6 +65,8 @@ namespace generator {
       }
     };
 
+    GlobalDatabase database;
+    
     Config config;
     Config libraryInfo;
     
@@ -100,9 +79,8 @@ namespace generator {
 
     int methodId = 0;
 
-    bool matchDeclarationID(parameters& parm, ast::BasicIdentifier* i, DeclarationID id);
-
-    parameters descendHierarchy(parameters& parm, std::string& parentName);
+    void descendHierarchy(parameters& parm, std::string& parentName);
+    void ascendHierarchy(parameters& parm);
 
     template <typename Func>
     std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e, Func basicIdentifierCallback);
@@ -112,8 +90,7 @@ namespace generator {
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
-    bool getIdentifierInfo(parameters& parm, ast::BasicIdentifier* identifier, IdentifierInfo& info);
-    std::string getNamePrefix(IdentifierInfo& info);
+    std::string getNamePrefix(parameters& parm, ast::BasicIdentifier* identifier);
     std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
@@ -165,7 +142,7 @@ namespace generator {
                                       bool initialization);
     
     // declarations.cpp
-    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id);
+    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ObjectType id);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
@@ -222,11 +199,6 @@ namespace generator {
                            std::string* argument,
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
-
-    void addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
-                        std::string name, std::string packageName,
-                        DeclarationID id);
-    void savePackageInfo(parameters& parm, std::string& packageName);
     void packageDeclaration(parameters& parm, ast::Package* package);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation);
@@ -324,7 +296,7 @@ namespace generator {
       traverseInterfaceList(parm, l, true,
                             [&](std::string& name,
                                 std::string& type, std::string& init,
-                                DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                                ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
                               s += d + typeConverter(type, id, direction) + " " + name;
           d = delimiter;
         }
