@@ -11,6 +11,10 @@ namespace ast {
   public:
     
     Text text;
+
+    std::string toString() {
+      return text.toString();
+    }
     
   };
 

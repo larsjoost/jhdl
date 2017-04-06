@@ -11,9 +11,7 @@ namespace ast {
     
   public:
 
-    ObjectDeclaration* variable;
-    ObjectDeclaration* signal;
-    ObjectDeclaration* constant;
+    ObjectDeclaration* object;
     
   };
 

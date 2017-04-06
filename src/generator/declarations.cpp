@@ -18,11 +18,10 @@ namespace generator {
 
   std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
     if (interface) {
-      return interfaceListToString(parm, interface, ", ", false,
-                                   [](std::string& type, ast::ObjectType id,
-                                      ast::ObjectDeclaration::Direction direction) {
-                                     return type;
-                                   });
+      return listToString(parm, &interface->interfaceElements, ", ",
+                          [](ast::InterfaceElement& e) {
+                            return e.object->type->name->toString(true);
+                          });
     }
     return "";
   }
@@ -33,6 +32,17 @@ namespace generator {
                           [](ast::SimpleIdentifier& s) {
                             return s.toString(true);
                           });
+    }
+    return "";
+  }
+  
+  std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
+    if (interface) {
+      return interfaceListToString(parm, interface, ", ", false,
+                                   [](std::string& type, ast::ObjectType id,
+                                      ast::ObjectDeclaration::Direction direction) {
+                                     return type;
+                                   });
     }
     return "";
   }
@@ -67,23 +77,27 @@ namespace generator {
                                       bool implementation) {
     if (f) {
       functionStart("procedure_declarations");
+      printSourceLine(parm, f->name->text);
       std::string name = f->name->toString(true);
       std::string argumentTypes = getArgumentTypes(parm, f->interface);
-      parm.database.addProcedure(name, argumentTypes, f);
-      descendHierarchy(parm, name);
-      printSourceLine(parm, f->name->text);
-      std::string interface = "(" + argumentTypes + ")";
+      std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
         std::string s = implementation ? parm.database.getParentName() + "::" : "";
+        DatabaseElement* e = parm.database.findObject(name, argumentTypes, ast::PROCEDURE);
+        if (e && e->attribute && e->attribute->expression) {
+          println(parm, "void " + e->attribute->expression->toString() + interface + ";");
+        }
         println(parm, "void " + s + name + interface + "{");
         parm.incIndent();
+        descendHierarchy(parm, name);
         procedure_body(parm, f->body);
+        ascendHierarchy(parm);
         parm.decIndent();
         println(parm, "}");
       } else {
+        parm.database.addProcedure(name, argumentTypes, f);
         println(parm, "void " + name + interface + ";");
       }
-      ascendHierarchy(parm);
       functionEnd("procedure_declarations");
     }
   }

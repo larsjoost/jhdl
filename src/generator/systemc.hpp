@@ -143,6 +143,7 @@ namespace generator {
     
     // declarations.cpp
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    std::string getInterface(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
     std::string parametersToString(parameters& parm, ast::BasicIdentifier* name,
@@ -317,9 +318,7 @@ namespace generator {
       bool q = quiet;
       quiet = !printEnable;
       for (ast::InterfaceElement i : l->interfaceElements.list) {
-        if (i.variable) {objectDeclaration(parm, i.variable, callback);}
-        if (i.signal) {objectDeclaration(parm, i.signal, callback);}
-        if (i.constant) {objectDeclaration(parm, i.constant, callback);}
+        if (i.object) {objectDeclaration(parm, i.object, callback);}
       }
       quiet = q;
     }

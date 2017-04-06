@@ -25,6 +25,7 @@ namespace generator {
     void setAllVisible();
     void addObject(std::string& arguments, DatabaseElement& e);
     DatabaseElement* findObject(std::string& argument, ast::ObjectType id);
+    void print();
   };
   
   class NameMap {
@@ -38,6 +39,7 @@ namespace generator {
     DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id);
     DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id, int& hierarchyLevel);
     std::string getSection() {return section;};
+    void print();
   };
   
   class LocalDatabase {
@@ -69,7 +71,7 @@ namespace generator {
     void ascendHierarchy();
 
     std::string getParentName();
-    
+    void print();
   };
 
   class GlobalDatabase {

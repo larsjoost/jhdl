@@ -5,6 +5,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "object_declaration.hpp"
+#include "../../ast/object_type.hpp"
 #include "../../ast/interface_element.hpp"
 
 namespace vhdl {
@@ -17,9 +18,13 @@ namespace vhdl {
     public:
       
       InterfaceElement<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
-        ((variable = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_VARIABLE, defaultType == scanner::Scanner::VHDL_VARIABLE>>()) || 
-         (signal = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL, defaultType == scanner::Scanner::VHDL_SIGNAL>>()) || 
-         (constant = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT, defaultType == scanner::Scanner::VHDL_CONSTANT>>()));
+        if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_VARIABLE, defaultType == scanner::Scanner::VHDL_VARIABLE>>()) {
+          object->objectType = ast::VARIABLE;
+        } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL, defaultType == scanner::Scanner::VHDL_SIGNAL>>()) {
+          object->objectType = ast::SIGNAL;
+        } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT, defaultType == scanner::Scanner::VHDL_CONSTANT>>()) {
+          object->objectType = ast::CONSTANT;
+        }
         return this;
       }
 

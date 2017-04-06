@@ -17,9 +17,14 @@ namespace generator {
   };
 
   void NameMap::addObject(std::string& name, std::string& arguments, DatabaseElement& e) {
-    ArgumentMap m;
-    m.addObject(arguments, e);
-    map[name] = m;
+    auto m = map.find(name);
+    if (m != map.end()) {
+      m->second.addObject(arguments, e);
+    } else {
+      ArgumentMap m;
+      m.addObject(arguments, e);
+      map[name] = m;
+    }
   };
 
   void ArgumentMap::addObject(std::string& arguments, DatabaseElement& e) {
@@ -103,6 +108,28 @@ namespace generator {
     }
   }
 
+  void ArgumentMap::print() {
+    for (auto i = map.begin(); i != map.end(); i++) {
+      std::cout << "[ARGUMENTS] = " << i->first << std::endl;
+      std::cout << "visible = " << (i->second.visible ? "true" : "false") << std::endl;
+      std::cout << "attribute = " << (i->second.attribute ? "true" : "false") << std::endl;
+    }
+  }
+
+  void NameMap::print() {
+    std::cout << "[SECTION] = " << section << std::endl;
+    for (auto i = map.begin(); i != map.end(); i++) {
+      std::cout << "[NAME] = " << i->first << std::endl;
+      i->second.print();
+    }
+  }
+
+  void LocalDatabase::print() {
+    for (auto i = map.begin(); i != map.end(); i++) {
+      i->print();
+    }
+  }
+
   void LocalDatabase::addAttribute(std::string& name, std::string& arguments,
                                    ast::ObjectType id, ast::Attribute* attribute) {
     DatabaseElement* e = findObject(name, arguments, id);
@@ -111,6 +138,7 @@ namespace generator {
     } else {
       std::cerr << "#Error: Could not find object \"" <<  name << "\"" <<
         (arguments.empty() ? "" : " with arguments (" + arguments + ")") << std::endl;
+      // print();
     }
   };
 
