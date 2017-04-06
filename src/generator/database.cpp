@@ -110,7 +110,7 @@ namespace generator {
       e->attribute = attribute;
     } else {
       std::cerr << "#Error: Could not find object \"" <<  name << "\"" <<
-        (arguments.empty() ? "" : " with arguments " + arguments) << std::endl;
+        (arguments.empty() ? "" : " with arguments (" + arguments + ")") << std::endl;
     }
   };
 

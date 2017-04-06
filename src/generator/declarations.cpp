@@ -27,6 +27,15 @@ namespace generator {
     return "";
   }
   
+  std::string SystemC::getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments) {
+    if (arguments) {
+      return listToString(parm, arguments, ", ", 
+                          [](ast::SimpleIdentifier& s) {
+                            return s.toString(true);
+                          });
+    }
+    return "";
+  }
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
                                       bool implementation) {
@@ -95,7 +104,16 @@ namespace generator {
     functionEnd("procedure_body");
   }
   
-
+  void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
+    if (a) {
+      if (a->item) {
+        std::string name = a->item->toString(true);
+        std::string arguments = getArgumentTypes(parm, a->arguments);
+        ast::ObjectType id = a->objectType;
+        parm.database.addAttribute(name, arguments, id, a);
+      }
+    }
+  }
       /*
   vhdl:
     subtype type_t is integer range 0 to 10;
@@ -124,6 +142,7 @@ namespace generator {
       object_declarations(parm, i.constant);
       function_declarations(parm, i.function, implementation);
       procedure_declarations(parm, i.procedure, implementation);
+      attribute_declarations(parm, i.attribute);
     }
     functionEnd("declarations");
   }

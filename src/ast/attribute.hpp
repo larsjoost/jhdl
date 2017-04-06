@@ -5,6 +5,7 @@
 #include "simple_identifier.hpp"
 #include "list.hpp"
 #include "string.hpp"
+#include "object_type.hpp"
 
 namespace ast {
     
@@ -15,6 +16,7 @@ namespace ast {
     SimpleIdentifier* identifier;
     SimpleIdentifier* item;
     List<SimpleIdentifier>* arguments;
+    ObjectType objectType;
     SimpleIdentifier* typeMark;
     String* expression;
     

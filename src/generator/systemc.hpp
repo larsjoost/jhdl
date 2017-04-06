@@ -144,6 +144,7 @@ namespace generator {
     // declarations.cpp
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
+    std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
     std::string parametersToString(parameters& parm, ast::BasicIdentifier* name,
                                    ast::InterfaceList* interface,
                                    ast::AssociationList* associationList);
@@ -151,6 +152,7 @@ namespace generator {
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);
     void procedure_body(parameters& parm, ast::ProcedureBody* f);
+    void attribute_declarations(parameters& parm, ast::Attribute* a);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d, bool implementation = false);
 
     // definition.cpp
