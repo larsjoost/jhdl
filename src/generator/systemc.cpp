@@ -90,7 +90,7 @@ namespace generator {
                      [&](ast::EnumerationElement& e){
                        std::string s = "";
                        if (e.identifier) {
-                         addDeclarationType(parm, e.identifier, ENUM);
+                         addDeclarationType(parm, e.identifier, ast::ENUM);
                          s = e.identifier->toString();
                        }
                        return s;
@@ -415,7 +415,8 @@ namespace generator {
       for (ast::AssociationElement e : l->associationElements.list) {
         std::string actualPart = expressionToString(parm, e.actualPart);
         if (e.formalPart) {
-          std::string formalPart = getName(parm, e.formalPart->name);
+          std::string formalPart = "";
+          getName(parm, e.formalPart->name, formalPart);
           if (formalPart == name) {
             return actualPart;
           }
@@ -432,7 +433,8 @@ namespace generator {
   std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
     functionStart("parametersToString");
     std::string s = "";
-    std::string basisName = getName(parm, functionName);
+    std::string basisName = "";
+    getName(parm, functionName, basisName);
     auto x = parm.functions.find(basisName);
     if (x != parm.functions.end()) {
       ast::FunctionDeclaration* f = x->second;

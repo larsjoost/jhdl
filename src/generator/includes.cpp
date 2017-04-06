@@ -5,20 +5,16 @@
 
 namespace generator {
 
-  void SystemC::makeVisible(std::unordered_map<std::string, PackageInfo>& info,
-                            std::string& identifier,
+  void SystemC::makeVisible(std::string& identifier,
                             std::string& package,
                             ast::Text* text) {
     if ("ALL" == identifier) {
-      for (auto i : info) {
-        visiblePackageInfo[i.first] = i.second; 
+      if (!database.setAllVisible(package)) {
+        printError("Could not find package " + package, text);
       }
     } else {
-      auto i = info.find(identifier);
-      if (i != info.end()) {
-        visiblePackageInfo[i->first] = i->second;
-      } else {
-        printError("Did not find \"" + identifier + "\" in package \"" + package + "\"", text);
+      if (!database.setVisible(package, identifier)) {
+        printError("Could not find package " + package, text);
       }
     }
   };
@@ -26,13 +22,11 @@ namespace generator {
   void SystemC::loadPackage(parameters& parm, std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
-    auto info = packageInfo.find(package);
-    if (info == packageInfo.end()) {
+    if (!database.exists(package)) {
       parsePackage(parm, package, library);
-      info = packageInfo.find(package);
     }
-    if (info != packageInfo.end()) {
-      makeVisible(info->second, identifier, package, text);
+    if (database.exists(package)) {
+      makeVisible(identifier, package, text);
     } else {
       printError("Did not find package " + package, text);
     }

@@ -11,6 +11,11 @@ namespace generator {
     add(name, arguments, e);
   };
 
+  void LocalDatabase::addObject(std::string& name, ast::ObjectType id) {
+    std::string arguments = "";
+    addObject(name, arguments, id);
+  };
+
   void NameMap::addObject(std::string& name, std::string& arguments, DatabaseElement& e) {
     ArgumentMap m;
     m.addObject(arguments, e);
@@ -26,13 +31,21 @@ namespace generator {
   }
 
   DatabaseElement* LocalDatabase::findObject(std::string& name, int& hierarchyLevel) {
-    ast::ObjectType id;
-    return map.findObject(name, arguments, id, hierarchyLevel);
+    ast::ObjectType id = (ast::ObjectType)0;
+    std::string arguments = "";
+    DatabaseElement* e;
+    for (auto i : map) {
+      e = i.findObject(name, arguments, id, hierarchyLevel);
+      if (e) {
+        return e;
+      }
+    }
+    return NULL;
   }
 
   DatabaseElement* LocalDatabase::findObject(std::string& name) {
     std::string arguments = "";
-    ast::ObjectType id = 0;
+    ast::ObjectType id = (ast::ObjectType)0;
     return findObject(name, arguments, id);
   }
 
@@ -124,9 +137,11 @@ namespace generator {
 
   std::string LocalDatabase::getParentName() {
     if (map.size() > 1) {
-      return map.end()[-2].name;
+      auto i = map.end();
+      auto p = std::prev(i, 2);
+      return p->getSection();
     }
-    return ""
+    return "";
   }
   
   void GlobalDatabase::add(std::string& name, LocalDatabase& d) {
@@ -144,6 +159,28 @@ namespace generator {
     return NULL;
   }
 
+  bool GlobalDatabase::setAllVisible(std::string& name) {
+    auto i = map.find(name);
+    if (i != map.end()) {
+      i->second.setAllVisible();
+      return true;
+    }
+    return false;
+  }
+  
+  bool GlobalDatabase::setVisible(std::string& name, std::string& subname) {
+    auto i = map.find(name);
+    if (i != map.end()) {
+      i->second.setVisible(subname);
+      return true;
+    }
+    return false;
+  }
+
+  bool GlobalDatabase::exists(std::string& name) {
+    auto i = map.find(name);
+    return (i == map.end()) ? false : true;
+  }
   
 }
   

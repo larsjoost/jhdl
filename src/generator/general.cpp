@@ -38,13 +38,7 @@ namespace generator {
     }
   }
 
-    void SystemC::printDeclaration(parameters& parm) {
-    for (auto i : parm.declaration) {
-      std::cout << "name = " << i.first << ", hierarchy level = " << i.second.hierarchyLevel << std::endl;
-    }
-  }
-  
-  void SystemC::descendHierarchy(parameters& parm, std::string& parentName) {
+  void SystemC::descendHierarchy(parameters& parm, std::string parentName) {
     parm.database.descendHierarchy(parentName);
   }
 
@@ -67,7 +61,7 @@ namespace generator {
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                              bool initialization) {
     return interfaceListToString(parm, l, delimiter, initialization,
-                                 [](std::string& type, DeclarationID id, ast::ObjectDeclaration::Direction direction) {
+                                 [](std::string& type, ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
                                    return type;
                                  });
   }

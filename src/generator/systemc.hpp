@@ -70,8 +70,6 @@ namespace generator {
     Config config;
     Config libraryInfo;
     
-    void printDeclaration(parameters& parm);
-    
     void println(parameters& parm, std::string text);
 
     void printError(std::string message, ast::Text* t = NULL);
@@ -79,7 +77,8 @@ namespace generator {
 
     int methodId = 0;
 
-    void descendHierarchy(parameters& parm, std::string& parentName);
+    // general.cpp
+    void descendHierarchy(parameters& parm, std::string parentName = "");
     void ascendHierarchy(parameters& parm);
 
     template <typename Func>
@@ -90,8 +89,7 @@ namespace generator {
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
-    std::string getNamePrefix(parameters& parm, ast::BasicIdentifier* identifier);
-    std::string getName(parameters& parm, ast::BasicIdentifier* i, bool hierarchy = false);
+    DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
     std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
 
@@ -114,10 +112,7 @@ namespace generator {
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
 
     // includes.cpp
-    void makeVisible(std::unordered_map<std::string, PackageInfo>& info,
-                     std::string& identifier,
-                     std::string& package,
-                     ast::Text* text = NULL);
+    void makeVisible(std::string& identifier, std::string& package, ast::Text* text);
     void loadPackage(parameters& parm, std::string package, std::string library,
                      std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause);
@@ -150,6 +145,7 @@ namespace generator {
     // declarations.cpp
     void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ObjectType id);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);

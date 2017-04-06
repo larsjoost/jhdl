@@ -5,52 +5,48 @@
 
 namespace generator {
 
-  void SystemC::addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, DeclarationID id) {
-      std::string name = identifier->toString(true);
-      DeclarationInfo i;
-      i.id = id;
-      i.hierarchyLevel = 0;
-      parm.declaration[name] = i;
-  }
-  
    void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
     if (t) {
       assert(t->typeDefinition);
-      addDeclarationType(parm, t->identifier, TYPE);
+      std::string name = t->identifier->toString(true);
+      parm.database.addObject(name, ast::TYPE);
       numberType(parm, t->identifier, t->typeDefinition->numberType);
       enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
       arrayType(parm, t->identifier, t->typeDefinition->arrayType);
     }
   }
 
+  std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
+    assert(interface);
+    return interfaceListToString(parm, interface, ", ", false,
+                                 [](std::string& type, ast::ObjectType id,
+                                    ast::ObjectDeclaration::Direction direction) {
+                                   return type;
+                                 });
+  }
+  
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
                                       bool implementation) {
     if (f) {
       functionStart("function_declarations");
-      addDeclarationType(parm, f->name, FUNCTION);
       std::string name = f->name->toString(true);
-      parm.functions[name] = f;
-      {
-        parameters p = parm;
-        printSourceLine(p, f->name->text);
-        std::string returnType = f->returnType->toString(true) + "<>";
-        std::string interface = "(" +
-          interfaceListToString(p, f->interface, ", ", false,
-                                [](std::string& type, DeclarationID id,
-                                   ast::ObjectDeclaration::Direction direction) {
-                                  return type;
-                                }) + ")";
-        if (f->body) {
-          std::string s = implementation ? p.parentName + "::" : "";
-          println(p, returnType + " " + s + name + interface + "{");
-          p.incIndent();
-          function_body(p, f->body);
-          p.decIndent();
-          println(p, "}");
-        } else {
-          println(p, returnType + " " + name + interface + ";");
-        }
+      std::string argumentTypes = getArgumentTypes(parm, f->interface);
+      parm.database.addFunction(name, argumentTypes, f);
+      descendHierarchy(parm, name);
+      printSourceLine(parm, f->name->text);
+      std::string returnType = f->returnType->toString(true) + "<>";
+      std::string interface = "(" + argumentTypes + ")";
+      if (f->body) {
+        std::string s = implementation ? parm.database.getParentName() + "::" : "";
+        println(parm, returnType + " " + s + name + interface + "{");
+        parm.incIndent();
+        function_body(parm, f->body);
+        parm.decIndent();
+        println(parm, "}");
+      } else {
+        println(parm, returnType + " " + name + interface + ";");
       }
+      ascendHierarchy(parm);
       functionEnd("function_declarations");
     }
   }
@@ -59,29 +55,23 @@ namespace generator {
                                       bool implementation) {
     if (f) {
       functionStart("procedure_declarations");
-      addDeclarationType(parm, f->name, PROCEDURE);
       std::string name = f->name->toString(true);
-      parm.procedures[name] = f;
-      {
-        parameters p = parm;
-        printSourceLine(p, f->name->text);
-        std::string interface = "(" +
-          interfaceListToString(p, f->interface, ", ", false,
-                                [](std::string& type, DeclarationID id,
-                                   ast::ObjectDeclaration::Direction direction) {
-                                  return type;
-                                }) + ")";
-        if (f->body) {
-          std::string s = implementation ? p.parentName + "::" : "";
-          println(p, "void " + s + name + interface + "{");
-          p.incIndent();
-          procedure_body(p, f->body);
-          p.decIndent();
-          println(p, "}");
-        } else {
-          println(p, "void " + name + interface + ";");
-        }
+      std::string argumentTypes = getArgumentTypes(parm, f->interface);
+      parm.database.addProcedure(name, argumentTypes, f);
+      descendHierarchy(parm, name);
+      printSourceLine(parm, f->name->text);
+      std::string interface = "(" + argumentTypes + ")";
+      if (f->body) {
+        std::string s = implementation ? parm.database.getParentName() + "::" : "";
+        println(parm, "void " + s + name + interface + "{");
+        parm.incIndent();
+        procedure_body(parm, f->body);
+        parm.decIndent();
+        println(parm, "}");
+      } else {
+        println(parm, "void " + name + interface + ";");
       }
+      ascendHierarchy(parm);
       functionEnd("procedure_declarations");
     }
   }

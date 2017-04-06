@@ -62,11 +62,12 @@ namespace generator {
     if (f) {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
-      parameters p = parm;
-      addDeclarationType(p, f->identifier, VARIABLE);
-      forLoop(p, name, f->range, [&](parameters& parm) {
+      descendHierarchy(parm);
+      parm.database.addObject(name, ast::VARIABLE);
+      forLoop(parm, name, f->range, [&](parameters& parm) {
           sequentialStatements(parm, f->sequentialStatements);
         });
+      ascendHierarchy(parm);
     }
   }
   

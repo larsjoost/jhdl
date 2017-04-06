@@ -4,60 +4,50 @@
 namespace generator {
 
   std::string SystemC::physicalToString(parameters& parm, ast::Physical* p) {
-    assert (p != NULL);
+    assert (p);
     return "{" + numberToString(parm, p->number) + ", " + p->unit->toString(true) + "}";
   }
   
-  std::string SystemC::getNamePrefix(parameters& parm, ast::BasicIdentifier* identifier) {
-    int hierarchyLevel;
-    std::string id = identifier->toString(true);
-    DatabaseElement* e = parm.database.findObject(id, hierarchyLevel);
-    std::string s = "";
-    if (e) {
-      if (e->id == ast::ENUM || e->id == ast::TYPE) {
-      } else if (hierarchyLevel >= 0) {
-        for (int i=0; i<hierarchyLevel; i++) {
-          s += "p->";
-        }
-      }
-    }
-    return s;
-  }
-  
-  std::string SystemC::getName(parameters& parm, ast::BasicIdentifier* identifier, bool hierarchy) {
+  DatabaseElement* SystemC::getName(parameters& parm, ast::BasicIdentifier* identifier, std::string& name) {
     functionStart("getName");
-    assert (identifier != NULL);
-    std::string s = "";
-    std::string name = identifier->text.toString(true);
-    if (hierarchy) {
-      s = getNamePrefix(parm, identifier);
+    assert (identifier);
+    name = identifier->toString(true);
+    int hierarchyLevel;
+    DatabaseElement* e = parm.database.findObject(name, hierarchyLevel);
+    if (e) {
+      for (int i=0; i<hierarchyLevel; i++) {
+        name = "p->" + name;
+      }
+    } else {
+      printError("Did not find identifier " + name, &identifier->text);
     }
     functionEnd("getName");
-    return s + name;
+    return e;
   }
   
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier) {
     functionStart("basicIdentifierToString");
-    assert (identifier);
-    std::string name = identifier->text.toString(true);
-    name = getNamePrefix(parm, identifier) + name;
-    if (info.id == FUNCTION || info.id == PROCEDURE) {
-      std::string parameters = parametersToString(parm, identifier, identifier->arguments);
-      name += "(" + parameters + ")";
-    } else {
-      if (identifier->attribute) {
-        bool objectMatch = (info.id == VARIABLE) || (info.id == SIGNAL);
-        std::string seperator = objectMatch ? "." : "<>::";
-        name += seperator + identifier->attribute->toString(true);
-        std::string arguments = "";
-        if (identifier->arguments) {
-          arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
-                                   [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
+    std::string name = "";
+    DatabaseElement* e = getName(parm, identifier, name);
+    if (e) {
+      if (e->id == ast::FUNCTION || e->id == ast::PROCEDURE) {
+        std::string parameters = parametersToString(parm, identifier, identifier->arguments);
+        name += "(" + parameters + ")";
+      } else {
+        if (identifier->attribute) {
+          bool objectMatch = (e->id == ast::VARIABLE) || (e->id == ast::SIGNAL);
+          std::string seperator = objectMatch ? "." : "<>::";
+          name += seperator + identifier->attribute->toString(true);
+          std::string arguments = "";
+          if (identifier->arguments) {
+            arguments = listToString(parm, identifier->arguments->associationElements.list, ",",
+                                     [&](ast::AssociationElement& a){return expressionToString(parm, a.actualPart);});
+          }
+          name += "(" + arguments + ")";
+        } else if (identifier->arguments) {
+          name += listToString(parm, identifier->arguments->associationElements.list, ",",
+                               [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
         }
-        name += "(" + arguments + ")";
-      } else if (identifier->arguments) {
-        name += listToString(parm, identifier->arguments->associationElements.list, ",",
-                             [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
       }
     }
     functionEnd("basicIdentifierToString");

@@ -7,6 +7,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/object_declaration.hpp"
+#include "../../ast/object_type.hpp"
 #include "simple_identifier.hpp"
 #include "declaration_initialization.hpp"
 #include "subtype_indication.hpp"
@@ -27,10 +28,10 @@ namespace vhdl {
           scanner->accept(keyword);
         }
         switch (keyword) {
-          case scanner::Scanner::VHDL_CONSTANT: objectType = CONSTANT; break;
-          case scanner::Scanner::VHDL_SIGNAL: objectType = SIGNAL; break;
-          case scanner::Scanner::VHDL_VARIABLE: objectType = VARIABLE; break;
-          default: assert(false);
+        case scanner::Scanner::VHDL_CONSTANT: objectType = ast::CONSTANT; break;
+        case scanner::Scanner::VHDL_SIGNAL: objectType = ast::SIGNAL; break;
+        case scanner::Scanner::VHDL_VARIABLE: objectType = ast::VARIABLE; break;
+        default: assert(false);
         }
         identifier = scanner->accept<SimpleIdentifier>();
         scanner->accept(":");

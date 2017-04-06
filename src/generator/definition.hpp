@@ -14,8 +14,9 @@ namespace generator {
     functionStart("defineObject");
     println(parm, type + "(" + name + ") {");
     parm.incIndent();
-    if (parm.parentName.size() > 0) {
-      println(parm, parm.parentName + "* p = NULL;");
+    std::string parentName = parm.database.getParentName();
+    if (parentName.size() > 0) {
+      println(parm, parentName + "* p = NULL;");
     }
     if (declarationList) {
       declarations(parm, *declarationList);

@@ -10,21 +10,14 @@ namespace generator {
       functionStart("objectDeclaration");
       assert(v->identifier);
       std::string name = v->identifier->toString(true);
+      parm.database.addObject(name, v->objectType);
       std::string type = name + "_type";
       type = subtypeIndication(parm, type, v->type) + "<>";
       std::string init = "";
       if (v->initialization) {
         init = expressionToString(parm, v->initialization->value);
       }
-      DeclarationID id;
-      switch (v->objectType) {
-      case ast::SIGNAL: id = SIGNAL; break;
-      case ast::VARIABLE: id = VARIABLE; break;
-      case ast::CONSTANT: id = CONSTANT; break;
-      default: assert(false);
-      }
-      addDeclarationType(parm, v->identifier, id);
-      callback(name, type, init, id, v->direction);
+      callback(name, type, init, v->objectType, v->direction);
       functionEnd("objectDeclaration");
     }
   }

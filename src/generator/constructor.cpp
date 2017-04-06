@@ -60,7 +60,7 @@ namespace generator {
     if (l) {
       println(parm, listToString(parm, l->associationElements.list, "; ",
                                  [&](ast::AssociationElement a){
-                                   return instanceName + "->" + getName(parm, a.formalPart->name) +
+                                   return instanceName + "->" + a.formalPart->name->toString(true) +
                                      ".bind(" + expressionToString(parm, a.actualPart) + ")";
                                  }) + ";"
               );

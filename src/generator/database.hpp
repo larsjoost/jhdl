@@ -37,6 +37,7 @@ namespace generator {
     void addObject(std::string& name, std::string& arguments, DatabaseElement& e);
     DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id);
     DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id, int& hierarchyLevel);
+    std::string getSection() {return section;};
   };
   
   class LocalDatabase {
@@ -45,6 +46,7 @@ namespace generator {
   
   public:
 
+    void addObject(std::string& name, ast::ObjectType id);
     void addObject(std::string& name, std::string& arguments, ast::ObjectType id);
     DatabaseElement* findObject(std::string& name, std::string& arguments, ast::ObjectType id);
     DatabaseElement* findObject(std::string& name, int& hierarchyLevel);
@@ -75,6 +77,9 @@ namespace generator {
   public:
     void add(std::string& name, LocalDatabase& d);
     DatabaseElement* findObject(std::string& name, std::string& arguments, ast::ObjectType id, std::string& location);
+    bool setAllVisible(std::string& name);
+    bool setVisible(std::string& name, std::string& subname);
+    bool exists(std::string& name);
   };
   
 }

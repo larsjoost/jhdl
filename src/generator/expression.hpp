@@ -49,7 +49,9 @@ namespace generator {
         return e->text->text.toString();
       }
       if (e->identifier) {
-        basicIdentifierCallback(getName(parm, e->identifier), getName(parm, e->identifier, true));
+        std::string hierarchyName = "";
+        getName(parm, e->identifier, hierarchyName);
+        basicIdentifierCallback(e->identifier->toString(true), hierarchyName);
         return basicIdentifierToString(parm, e->identifier);
       }
       if (e->character) {
