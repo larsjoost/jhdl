@@ -27,45 +27,7 @@ namespace generator {
     return "";
   }
   
-  std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
-    functionStart("parametersToString");
-    std::string s = "";
-    std::string basisName = "";
-    DatabaseElement* e = getName(parm, functionName, basisName);
-    if (e) {
-      ast::FunctionDeclaration* f = e->function;
-      /*
-        Association list can either be:
-        func(formalPart => actualPart, a => w, b => x, c => y)
-        or
-        func(actualPart, w, x, y)
-      */
-      std::string delimiter = "";
-      int argumentNumber = 0;
-      traverseInterfaceList(parm, f->interface, false,
-                            [&](std::string& name,
-                                std::string& type, std::string& init, ast::ObjectType id,
-                                ast::ObjectDeclaration::Direction direction) {
-                              std::string argument = associateArgument(parm, name, init, argumentNumber, l);
-                              if (argument.size() == 0) {
-                                printError("No argument associated element " + std::to_string(argumentNumber), &functionName->text);
-                              }
-                              s += delimiter + argument;
-                              delimiter = ", ";
-                              argumentNumber++;
-                            }
-                            );
-    } else {
-      printWarning("Could not find function " + basisName + " declaration. Cannot associate arguments.", &functionName->text);
-      if (l) {
-        s = listToString(parm, l->associationElements.list, ",",
-                         [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
-      }
-    }
-    functionEnd("parametersToString");
-    return s;
-  }
-
+  
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
                                       bool implementation) {
     if (f) {

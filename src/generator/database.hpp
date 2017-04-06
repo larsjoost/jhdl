@@ -16,7 +16,7 @@ namespace generator {
     bool visible;
     ast::Attribute* attribute;
     ast::FunctionDeclaration* function;
-    ast::ProcedureDeclaration* procedures;
+    ast::ProcedureDeclaration* procedure;
   };
   
   class ArgumentMap {

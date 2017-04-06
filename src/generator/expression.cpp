@@ -1,3 +1,4 @@
+#include "declarations.hpp"
 #include "systemc.hpp"
 #include "expression.hpp"
 
@@ -24,14 +25,44 @@ namespace generator {
     functionEnd("getName");
     return e;
   }
-  
+
+  std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* identifier,
+                                          ast::InterfaceList* interface,
+                                          ast::AssociationList* associationList) {
+    functionStart("parametersToString");
+    std::string s = "";
+    /*
+      Association list can either be:
+      func(formalPart => actualPart, a => w, b => x, c => y)
+      or
+      func(actualPart, w, x, y)
+    */
+    std::string delimiter = "";
+    int argumentNumber = 0;
+    auto func = [&](std::string& name,
+                    std::string& type, std::string& init, ast::ObjectType id,
+                    ast::ObjectDeclaration::Direction direction) {
+      std::string argument = associateArgument(parm, name, init, argumentNumber, associationList);
+      if (argument.size() == 0) {
+        printError("No argument associated element " + std::to_string(argumentNumber), &identifier->text);
+      }
+      s += delimiter + argument;
+      delimiter = ", ";
+      argumentNumber++;
+    };
+    traverseInterfaceList(parm, interface, false, func);
+    functionEnd("parametersToString");
+    return s;
+  }
+
   std::string SystemC::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier) {
     functionStart("basicIdentifierToString");
     std::string name = "";
     DatabaseElement* e = getName(parm, identifier, name);
     if (e) {
       if (e->id == ast::FUNCTION || e->id == ast::PROCEDURE) {
-        std::string parameters = parametersToString(parm, identifier, identifier->arguments);
+        ast::InterfaceList* l = (e->id == ast::FUNCTION) ? e->function->interface : e->procedure->interface;
+        std::string parameters = parametersToString(parm, identifier, l, identifier->arguments);
         name += "(" + parameters + ")";
       } else {
         if (identifier->attribute) {
@@ -49,6 +80,8 @@ namespace generator {
                                [&](ast::AssociationElement& a){return "[" + expressionToString(parm, a.actualPart) + "]";});
         }
       }
+    } else {
+      printError("Could not find identifier " + identifier->toString(true), &identifier->text);
     }
     functionEnd("basicIdentifierToString");
     return name;
