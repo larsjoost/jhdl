@@ -10,21 +10,12 @@ if [ -z "$JHDL" ]; then
     JHDL=$SCRIPTPATH/../src
 fi
 
-if [ -n "$VALGRIND" ]; then
-    OPTIONS="valgrind --leak-check=yes"
-else
-    if [ -n "$DEBUG" ]; then
-        OPTIONS="gdb --args"
-        HDLS_DEBUG="-x"
-    fi
-
-    if [ -n "$VERBOSE" ]; then
-        VERBOSE="-v"
-    fi
+if [ -n "$VERBOSE" ]; then
+    VERBOSE="-v"
 fi
 
 function analyse {
-    $OPTIONS $JHDL/hdlc.sh -f $1 $VERBOSE
+    $JHDL/hdlc.sh -f $1 $VERBOSE
 }
 
 function simulate {

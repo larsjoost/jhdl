@@ -142,7 +142,6 @@ namespace generator {
                                       bool initialization);
     
     // declarations.cpp
-    void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ObjectType id);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l = NULL);

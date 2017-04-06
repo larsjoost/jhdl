@@ -90,8 +90,8 @@ namespace generator {
                      [&](ast::EnumerationElement& e){
                        std::string s = "";
                        if (e.identifier) {
-                         addDeclarationType(parm, e.identifier, ast::ENUM);
                          s = e.identifier->toString();
+                         parm.database.addObject(s, ast::ENUM);
                        }
                        return s;
                      });

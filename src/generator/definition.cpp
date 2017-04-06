@@ -28,7 +28,7 @@ namespace generator {
       printSourceLine(parm, forGenerateStatement->name);
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
-      addDeclarationType(parm, forGenerateStatement->identifier, VARIABLE);
+      parm.database.addObject(identifier, ast::VARIABLE);
       defineObject(parm,
                    name,
                    "SC_FOR_GENERATE",

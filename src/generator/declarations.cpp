@@ -17,22 +17,23 @@ namespace generator {
   }
 
   std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
-    assert(interface);
-    return interfaceListToString(parm, interface, ", ", false,
-                                 [](std::string& type, ast::ObjectType id,
-                                    ast::ObjectDeclaration::Direction direction) {
-                                   return type;
-                                 });
+    if (interface) {
+      return interfaceListToString(parm, interface, ", ", false,
+                                   [](std::string& type, ast::ObjectType id,
+                                      ast::ObjectDeclaration::Direction direction) {
+                                     return type;
+                                   });
+    }
+    return "";
   }
   
   std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
     functionStart("parametersToString");
     std::string s = "";
     std::string basisName = "";
-    getName(parm, functionName, basisName);
-    auto x = parm.functions.find(basisName);
-    if (x != parm.functions.end()) {
-      ast::FunctionDeclaration* f = x->second;
+    DatabaseElement* e = getName(parm, functionName, basisName);
+    if (e) {
+      ast::FunctionDeclaration* f = e->function;
       /*
         Association list can either be:
         func(formalPart => actualPart, a => w, b => x, c => y)
@@ -43,7 +44,7 @@ namespace generator {
       int argumentNumber = 0;
       traverseInterfaceList(parm, f->interface, false,
                             [&](std::string& name,
-                                std::string& type, std::string& init, DeclarationID id,
+                                std::string& type, std::string& init, ast::ObjectType id,
                                 ast::ObjectDeclaration::Direction direction) {
                               std::string argument = associateArgument(parm, name, init, argumentNumber, l);
                               if (argument.size() == 0) {

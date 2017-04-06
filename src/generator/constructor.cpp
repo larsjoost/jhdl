@@ -48,9 +48,8 @@ namespace generator {
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
-      parameters p = parm;
-      addDeclarationType(p, forGenerateStatement->identifier, ast::VARIABLE);
-      forLoop(p, identifier, forGenerateStatement->range, [&](parameters& parm) {
+      parm.database.addObject(identifier, ast::VARIABLE);
+      forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
         });
     }

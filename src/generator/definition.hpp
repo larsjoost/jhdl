@@ -23,8 +23,9 @@ namespace generator {
     }
     println(parm, "public:");
     if (concurrentStatements) {
-      parameters p = descendHierarchy(parm, name);
-      concurrentStatementsDefinition(p, *concurrentStatements);
+      descendHierarchy(parm, name);
+      concurrentStatementsDefinition(parm, *concurrentStatements);
+      ascendHierarchy(parm);
     }
     bodyCallback(parm);
     createConstructor(parm, name, argument, concurrentStatements);
