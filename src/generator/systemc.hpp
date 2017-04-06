@@ -105,7 +105,6 @@ namespace generator {
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
-    std::string parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l = NULL);
     std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
     void returnStatement(parameters& parm, ast::ReturnStatement* r);
@@ -146,6 +145,7 @@ namespace generator {
     void addDeclarationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ObjectType id);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
+    std::string parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l = NULL);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);

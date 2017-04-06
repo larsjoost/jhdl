@@ -292,16 +292,16 @@ namespace generator {
        objectDeclaration(parm, v,
                         [&](std::string& name,
                             std::string& type, std::string& init,
-                            DeclarationID id, ast::ObjectDeclaration::Direction direction) {
-                          if (id == SIGNAL) {
-                            type = "sc_signal<" + type + ">";
-                          }
-                          s = type + " " + name;
-                          if (initialization && init.size() > 0) {
-                            s += " = " + init;
-                          }
-                        }
-                        );
+                            ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+                           if (id == ast::SIGNAL) {
+                             type = "sc_signal<" + type + ">";
+                           }
+                           s = type + " " + name;
+                           if (initialization && init.size() > 0) {
+                             s += " = " + init;
+                           }
+                         }
+                         );
     }
     return s;
   }
@@ -314,47 +314,26 @@ namespace generator {
     }
   }
 
-  void SystemC::addPackageInfo(std::unordered_map<std::string, PackageInfo>& m,
-                               std::string name, std::string packageName,
-                               DeclarationID id) {
-    PackageInfo p;
-    p.id = id;
-    p.name = packageName;
-    m[name] = (p);
-  }
-  
-  void SystemC::savePackageInfo(parameters& parm, std::string& packageName) {
-    std::unordered_map<std::string, PackageInfo> m;
-    // std::cout << "PACKAGE INFO of " << packageName << std::endl;
-    for (auto i : parm.declaration) {
-      addPackageInfo(m, i.first, packageName, i.second.id);  
-    }
-    packageInfo[packageName] = m;
-  }
-  
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package) {
     if (package) {
       functionStart("package");
       std::string name = package->name->toString(true);
-      parm.parentName = name;
-      parameters p = parm;
+      descendHierarchy(parm, name);
       if (!package->body) {
-        println(p, "");
-        println(p, "SC_PACKAGE(" + name + ") {");
-        p.incIndent();
+        println(parm, "");
+        println(parm, "SC_PACKAGE(" + name + ") {");
+        parm.incIndent();
       } else {
-        println(p, "// Package body of " + name);
+        println(parm, "// Package body of " + name);
       }
       bool implementationArea = (package->body) ? true : false;
-      declarations(p, package->declarations, implementationArea);
+      declarations(parm, package->declarations, implementationArea);
       if (!package->body) {
-        savePackageInfo(p, name);
-        addLibraryInfo("package", name, filename);
-        p.decIndent();
-        println(p, "} " + name + ";");
-      } else {
-        addLibraryInfo("body", name, filename);
+        database.add(name, parm.database);
+        parm.decIndent();
+        println(parm, "} " + name + ";");
       }
+      ascendHierarchy(parm);
       functionEnd("package");
     }
   }
@@ -373,7 +352,7 @@ namespace generator {
       }
       if (interface->ports) {
         println(parm, interfaceListToString(parm, interface->ports, "; ", false,
-                                            [&](std::string& type, DeclarationID id,
+                                            [&](std::string& type, ast::ObjectType id,
                                                 ast::ObjectDeclaration::Direction direction) {
                                               switch (direction) {
                                               case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
@@ -430,45 +409,6 @@ namespace generator {
     return argument;
   }
 
-  std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* functionName, ast::AssociationList* l) {
-    functionStart("parametersToString");
-    std::string s = "";
-    std::string basisName = "";
-    getName(parm, functionName, basisName);
-    auto x = parm.functions.find(basisName);
-    if (x != parm.functions.end()) {
-      ast::FunctionDeclaration* f = x->second;
-      /*
-        Association list can either be:
-        func(formalPart => actualPart, a => w, b => x, c => y)
-        or
-        func(actualPart, w, x, y)
-      */
-      std::string delimiter = "";
-      int argumentNumber = 0;
-      traverseInterfaceList(parm, f->interface, false,
-                            [&](std::string& name,
-                                std::string& type, std::string& init, DeclarationID id,
-                                ast::ObjectDeclaration::Direction direction) {
-                              std::string argument = associateArgument(parm, name, init, argumentNumber, l);
-                              if (argument.size() == 0) {
-                                printError("No argument associated element " + std::to_string(argumentNumber), &functionName->text);
-                              }
-                              s += delimiter + argument;
-                              delimiter = ", ";
-                              argumentNumber++;
-                            }
-                            );
-    } else {
-      printWarning("Could not find function " + basisName + " declaration. Cannot associate arguments.", &functionName->text);
-      if (l) {
-        s = listToString(parm, l->associationElements.list, ",",
-                         [&](ast::AssociationElement a){return expressionToString(parm, a.actualPart);});
-      }
-    }
-    functionEnd("parametersToString");
-    return s;
-  }
   
   
 }
