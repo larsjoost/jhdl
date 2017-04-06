@@ -110,16 +110,16 @@ namespace generator {
 
   void ArgumentMap::print() {
     for (auto i = map.begin(); i != map.end(); i++) {
-      std::cout << "[ARGUMENTS] = " << i->first << std::endl;
-      std::cout << "visible = " << (i->second.visible ? "true" : "false") << std::endl;
-      std::cout << "attribute = " << (i->second.attribute ? "true" : "false") << std::endl;
+      std::cout << "    [ARGUMENTS] = " << i->first << std::endl;
+      std::cout << "      visible = " << (i->second.visible ? "true" : "false") << std::endl;
+      std::cout << "      attribute = " << (i->second.attribute ? "true" : "false") << std::endl;
     }
   }
 
   void NameMap::print() {
     std::cout << "[SECTION] = " << section << std::endl;
     for (auto i = map.begin(); i != map.end(); i++) {
-      std::cout << "[NAME] = " << i->first << std::endl;
+      std::cout << "  [NAME] = " << i->first << std::endl;
       i->second.print();
     }
   }
@@ -163,10 +163,10 @@ namespace generator {
     map.pop_back();
   }
 
-  std::string LocalDatabase::getParentName() {
-    if (map.size() > 1) {
+  std::string LocalDatabase::getParentName(int hierarchy) {
+    if (map.size() > hierarchy) {
       auto i = map.end();
-      auto p = std::prev(i, 2);
+      auto p = std::prev(i, hierarchy + 1);
       return p->getSection();
     }
     return "";
@@ -177,11 +177,18 @@ namespace generator {
   }
   
   DatabaseElement* GlobalDatabase::findObject(std::string& name, std::string& arguments, ast::ObjectType id, std::string& location) {
-    for (auto i = map.begin(); i != map.end(); i++) {
-      DatabaseElement* e = i->second.findObject(name, arguments, id);
-      if (e) {
-        location = i->first;
-        return e;
+    if (location.empty()) {
+      for (auto i = map.begin(); i != map.end(); i++) {
+        DatabaseElement* e = i->second.findObject(name, arguments, id);
+        if (e) {
+          location = i->first;
+          return e;
+        }
+      }
+    } else {
+      auto i = map.find(location);
+      if (i != map.end()) {
+        return i->second.findObject(name, arguments, id);
       }
     }
     return NULL;
@@ -208,6 +215,24 @@ namespace generator {
   bool GlobalDatabase::exists(std::string& name) {
     auto i = map.find(name);
     return (i == map.end()) ? false : true;
+  }
+
+  void GlobalDatabase::print(std::string name) {
+    if (name.empty()) {
+      for (auto i = map.begin(); i != map.end(); i++) {
+        std::cout << "[GLOBAL] = " << i->first << std::endl;
+        i->second.print();
+      }
+    } else {
+      auto i = map.find(name);
+      if (i != map.end()) {
+        std::cout << "[GLOBAL] = " << i->first << std::endl;
+        i->second.print();
+      } else {
+        std::cerr << "Did not find " + name + " in global database" << std::endl;
+      }
+             
+    }
   }
   
 }

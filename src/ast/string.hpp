@@ -12,8 +12,17 @@ namespace ast {
     
     Text text;
 
-    std::string toString() {
-      return text.toString();
+    std::string toString(bool removeQuotationMarks) {
+      std::string s = text.toString();
+      if (removeQuotationMarks) {
+        if (!s.empty()) {
+          s.erase(0, 1);
+        }
+        if (!s.empty()) {
+          s.erase(s.size() - 1, 1);
+        }
+      }
+      return s;
     }
     
   };

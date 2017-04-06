@@ -26,6 +26,16 @@ namespace generator {
     return "";
   }
   
+  std::string SystemC::getArgumentNames(parameters& parm, ast::InterfaceList* interface) {
+    if (interface) {
+      return listToString(parm, &interface->interfaceElements, ", ",
+                          [](ast::InterfaceElement& e) {
+                            return e.object->identifier->toString(true);
+                          });
+    }
+    return "";
+  }
+
   std::string SystemC::getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments) {
     if (arguments) {
       return listToString(parm, arguments, ", ", 
@@ -80,16 +90,30 @@ namespace generator {
       printSourceLine(parm, f->name->text);
       std::string name = f->name->toString(true);
       std::string argumentTypes = getArgumentTypes(parm, f->interface);
+      std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
-        std::string s = implementation ? parm.database.getParentName() + "::" : "";
-        DatabaseElement* e = parm.database.findObject(name, argumentTypes, ast::PROCEDURE);
+        std::string parentName = parm.database.getParentName();
+        std::string s = implementation ? parentName + "::" : "";
+        DatabaseElement* e = database.findObject(name, argumentTypes, ast::PROCEDURE, parentName);
+        bool foreignAttribute = false;
+        std::string foreignFunctionName = "";
         if (e && e->attribute && e->attribute->expression) {
-          println(parm, "void " + e->attribute->expression->toString() + interface + ";");
+          foreignAttribute = true;
+          println(parm, "/*");
+          println(parm, " * This is the definition of the foreign function set as an attribute");
+          println(parm, " * The implementation must be defined in a .cpp file in this directory");
+          println(parm, "*/");
+          foreignFunctionName = e->attribute->expression->toString(true);
+          println(parm, "void " + foreignFunctionName + interface + ";");
         }
         println(parm, "void " + s + name + interface + "{");
         parm.incIndent();
         descendHierarchy(parm, name);
+        if (foreignAttribute) {
+          println(parm, "// Foreign function call");
+          println(parm, foreignFunctionName + "(" + argumentNames + ");");
+        }
         procedure_body(parm, f->body);
         ascendHierarchy(parm);
         parm.decIndent();
@@ -147,7 +171,6 @@ namespace generator {
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
                              bool implementation) {
     functionStart("declarations");
-    println(parm, "// Declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       subtype_declarations(parm, i.subtype);

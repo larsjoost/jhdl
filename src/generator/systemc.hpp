@@ -145,6 +145,7 @@ namespace generator {
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string getInterface(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
+    std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
     std::string parametersToString(parameters& parm, ast::BasicIdentifier* name,
                                    ast::InterfaceList* interface,

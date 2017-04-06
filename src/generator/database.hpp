@@ -70,7 +70,7 @@ namespace generator {
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 
-    std::string getParentName();
+    std::string getParentName(int hierarchy = 0);
     void print();
   };
 
@@ -82,6 +82,7 @@ namespace generator {
     bool setAllVisible(std::string& name);
     bool setVisible(std::string& name, std::string& subname);
     bool exists(std::string& name);
+    void print(std::string name);
   };
   
 }
