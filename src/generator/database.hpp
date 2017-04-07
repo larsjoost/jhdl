@@ -12,6 +12,9 @@
 namespace generator {
 
   struct DatabaseElement {
+    std::string section;
+    std::string name;
+    std::string arguments;
     ast::ObjectType id;
     bool visible;
     ast::Attribute* attribute;
@@ -26,6 +29,7 @@ namespace generator {
     void addObject(std::string& arguments, DatabaseElement& e);
     DatabaseElement* findObject(std::string& argument, ast::ObjectType id);
     void print();
+    static void print(DatabaseElement* e);
   };
   
   class NameMap {
@@ -37,13 +41,13 @@ namespace generator {
     void setVisible(std::string& name);
     void addObject(std::string& name, std::string& arguments, DatabaseElement& e);
     DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id);
-    DatabaseElement* findObject(std::string& name, std::string& argument, ast::ObjectType id, int& hierarchyLevel);
     std::string getSection() {return section;};
     void print();
   };
   
   class LocalDatabase {
 
+    std::string section;
     std::list<NameMap> map;
   
   public:
@@ -79,6 +83,7 @@ namespace generator {
   public:
     void add(std::string& name, LocalDatabase& d);
     DatabaseElement* findObject(std::string& name, std::string& arguments, ast::ObjectType id, std::string& location);
+    DatabaseElement* findObject(std::string& name, std::string& arguments, std::string& location);
     bool setAllVisible(std::string& name);
     bool setVisible(std::string& name, std::string& subname);
     bool exists(std::string& name);

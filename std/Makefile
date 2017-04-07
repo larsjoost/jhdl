@@ -5,10 +5,10 @@ CXXFLAGS := -std=c++14 -g -MMD # -Wall -ansi
 
 all: $(OBJS)
 
-standard.hpp: standard.vhd
+standard.hpp: standard.vhd ../src/hdlc
 	../src/hdlc -f standard.vhd -l standard -s > standard.hpp
 
-env.hpp: env.vhd
+env.hpp: env.vhd ../src/hdlc
 	../src/hdlc.sh -f env.vhd -l standard -s > env.hpp
 
 %.o: %.cpp standard.hpp env.hpp

@@ -7,7 +7,7 @@ namespace generator {
   }
   
   void LocalDatabase::addObject(std::string& name, std::string& arguments, ast::ObjectType id) {
-    DatabaseElement e = {id, false, NULL};
+    DatabaseElement e = {section, name, arguments, id, false, NULL};
     add(name, arguments, e);
   };
 
@@ -32,18 +32,20 @@ namespace generator {
   };
 
   DatabaseElement* LocalDatabase::findObject(std::string& name, std::string& arguments, ast::ObjectType id) {
-    return map.back().findObject(name, arguments, id);
+    return map.front().findObject(name, arguments, id);
   }
 
   DatabaseElement* LocalDatabase::findObject(std::string& name, int& hierarchyLevel) {
     ast::ObjectType id = (ast::ObjectType)0;
     std::string arguments = "";
     DatabaseElement* e;
+    hierarchyLevel = 0;
     for (auto i : map) {
-      e = i.findObject(name, arguments, id, hierarchyLevel);
+      e = i.findObject(name, arguments, id);
       if (e) {
         return e;
       }
+      hierarchyLevel++;
     }
     return NULL;
   }
@@ -55,18 +57,9 @@ namespace generator {
   }
 
   DatabaseElement* NameMap::findObject(std::string& name, std::string& arguments, ast::ObjectType id) {
-    int h;
-    return findObject(name, arguments, id, h);
-  }
-
-  DatabaseElement* NameMap::findObject(std::string& name, std::string& arguments, ast::ObjectType id, int& hierarchyLevel) {
-    hierarchyLevel = 0;
-    for (auto i = map.begin(); i != map.end(); i++) {
-      auto m = i->second.findObject(arguments, id);
-      if (m) {
-        return m;
-      }
-      hierarchyLevel++;
+    auto m = map.find(name);
+    if (m != map.end()) {
+      return m->second.findObject(arguments, id);
     }
     return NULL;
   }
@@ -74,6 +67,8 @@ namespace generator {
   DatabaseElement* ArgumentMap::findObject(std::string& arguments, ast::ObjectType id) {
     auto m = map.find(arguments);
     if (m != map.end()) {
+      DatabaseElement* e = &m->second;
+      print(e);
       return &m->second;
     }
     return NULL;
@@ -108,12 +103,19 @@ namespace generator {
     }
   }
 
+  void ArgumentMap::print(DatabaseElement* e) {
+      std::cout << "      section   = " << e->section << std::endl;
+      std::cout << "      name      = " << e->name << std::endl;
+      std::cout << "      arguments = " << e->arguments << std::endl;
+      std::cout << "      visible   = " << (e->visible ? "true" : "false") << std::endl;
+      std::cout << "      attribute = " << (e->attribute ? "true" : "false") << std::endl;
+      std::cout << "      type      = " << ast::toString(e->id) << std::endl;
+  }
+  
   void ArgumentMap::print() {
     for (auto i = map.begin(); i != map.end(); i++) {
       std::cout << "    [ARGUMENTS] = " << i->first << std::endl;
-      std::cout << "      visible   = " << (i->second.visible ? "true" : "false") << std::endl;
-      std::cout << "      attribute = " << (i->second.attribute ? "true" : "false") << std::endl;
-      std::cout << "      type      = " << ast::toString(i->second.id) << std::endl;
+      print(&i->second);
     }
   }
 
@@ -145,23 +147,24 @@ namespace generator {
 
   void LocalDatabase::addFunction(std::string& name, std::string& arguments,
                                   ast::FunctionDeclaration* function) {
-    DatabaseElement e = {ast::FUNCTION, false, NULL, function, NULL};
+    DatabaseElement e = {section, name, arguments, ast::FUNCTION, false, NULL, function, NULL};
     add(name, arguments, e);
   };
 
   void LocalDatabase::addProcedure(std::string& name, std::string& arguments,
                                    ast::ProcedureDeclaration* procedure) {
-    DatabaseElement e = {ast::PROCEDURE, false, NULL, NULL, procedure};
+    DatabaseElement e = {section, name, arguments, ast::PROCEDURE, false, NULL, NULL, procedure};
     add(name, arguments, e);
   };
 
   void LocalDatabase::descendHierarchy(std::string& name) {
+    section = name;
     NameMap m(name);
-    map.push_back(m);
+    map.push_front(m);
   }
   
   void LocalDatabase::ascendHierarchy() {
-    map.pop_back();
+    map.pop_front();
   }
 
   std::string LocalDatabase::getParentName(int hierarchy) {
@@ -177,6 +180,12 @@ namespace generator {
     map[name] = d;
   }
   
+  DatabaseElement* GlobalDatabase::findObject(std::string& name, std::string& arguments,
+                                              std::string& location) {
+    ast::ObjectType id = (ast::ObjectType)0;
+    return findObject(name, arguments, id, location);
+  }
+
   DatabaseElement* GlobalDatabase::findObject(std::string& name, std::string& arguments,
                                               ast::ObjectType id, std::string& location) {
     if (location.empty()) {

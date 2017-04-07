@@ -13,8 +13,9 @@ namespace generator {
     functionStart("getName");
     assert (identifier);
     name = identifier->toString(true);
+    std::string parentName = parm.database.getParentName();
     int hierarchyLevel;
-    DatabaseElement* e = parm.database.findObject(name, hierarchyLevel);
+    DatabaseElement* e = database.findObject(name, hierarchyLevel, parentName);
     if (e) {
       for (int i=0; i<hierarchyLevel; i++) {
         name = "p->" + name;
