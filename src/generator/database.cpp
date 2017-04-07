@@ -63,7 +63,7 @@ namespace generator {
     hierarchyLevel = 0;
     for (auto i = map.begin(); i != map.end(); i++) {
       auto m = i->second.findObject(arguments, id);
-      if (m != NULL) {
+      if (m) {
         return m;
       }
       hierarchyLevel++;
@@ -111,8 +111,9 @@ namespace generator {
   void ArgumentMap::print() {
     for (auto i = map.begin(); i != map.end(); i++) {
       std::cout << "    [ARGUMENTS] = " << i->first << std::endl;
-      std::cout << "      visible = " << (i->second.visible ? "true" : "false") << std::endl;
+      std::cout << "      visible   = " << (i->second.visible ? "true" : "false") << std::endl;
       std::cout << "      attribute = " << (i->second.attribute ? "true" : "false") << std::endl;
+      std::cout << "      type      = " << ast::toString(i->second.id) << std::endl;
     }
   }
 
@@ -176,7 +177,8 @@ namespace generator {
     map[name] = d;
   }
   
-  DatabaseElement* GlobalDatabase::findObject(std::string& name, std::string& arguments, ast::ObjectType id, std::string& location) {
+  DatabaseElement* GlobalDatabase::findObject(std::string& name, std::string& arguments,
+                                              ast::ObjectType id, std::string& location) {
     if (location.empty()) {
       for (auto i = map.begin(); i != map.end(); i++) {
         DatabaseElement* e = i->second.findObject(name, arguments, id);

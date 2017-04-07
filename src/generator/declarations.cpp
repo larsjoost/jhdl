@@ -95,14 +95,15 @@ namespace generator {
       if (f->body) {
         std::string parentName = parm.database.getParentName();
         std::string s = implementation ? parentName + "::" : "";
+        database.print(parentName);
         DatabaseElement* e = database.findObject(name, argumentTypes, ast::PROCEDURE, parentName);
         bool foreignAttribute = false;
         std::string foreignFunctionName = "";
         if (e && e->attribute && e->attribute->expression) {
           foreignAttribute = true;
           println(parm, "/*");
-          println(parm, " * This is the definition of the foreign function set as an attribute");
-          println(parm, " * The implementation must be defined in a .cpp file in this directory");
+          println(parm, " * This is the definition of the foreign function set as an attribute.");
+          println(parm, " * The implementation must be defined in a .cpp file in this directory.");
           println(parm, "*/");
           foreignFunctionName = e->attribute->expression->toString(true);
           println(parm, "void " + foreignFunctionName + interface + ";");
