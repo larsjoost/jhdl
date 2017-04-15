@@ -385,30 +385,5 @@ namespace generator {
     }
   }
 
-  std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init,
-                                         int argumentNumber, ast::AssociationList* l) { 
-    functionStart("associateArgument");
-    std::string argument = init;
-    if (l) {
-      int associationElementNumber = 0;
-      for (ast::AssociationElement e : l->associationElements.list) {
-        std::string actualPart = expressionToString(parm, e.actualPart);
-        if (e.formalPart) {
-          std::string formalPart = "";
-          getName(parm, e.formalPart->name, formalPart);
-          if (formalPart == name) {
-            return actualPart;
-          }
-        } else if (associationElementNumber == argumentNumber) {
-          return actualPart;
-        }
-        associationElementNumber++;
-      }
-    }
-    functionEnd("associateArgument");
-    return argument;
-  }
-
-  
   
 }

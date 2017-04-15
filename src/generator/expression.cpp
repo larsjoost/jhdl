@@ -15,16 +15,43 @@ namespace generator {
     name = identifier->toString(true);
     std::string parentName = parm.database.getParentName();
     int hierarchyLevel;
-    DatabaseElement* e = database.findObject(name, hierarchyLevel, parentName);
-    if (e) {
+    DatabaseElement* e;
+    std::string arguments = getArgumentTypes(parm, identifier->arguments);
+    if (e = parm.database.findObject(name, hierarchyLevel)) {
       for (int i=0; i<hierarchyLevel; i++) {
         name = "p->" + name;
       }
+    } else if (e = database.findObject(name, arguments)) {
+      name = e->section + "::" + name;
     } else {
       printError("Did not find identifier " + name, &identifier->text);
     }
     functionEnd("getName");
     return e;
+  }
+
+  std::string SystemC::associateArgument(parameters& parm, std::string& name, std::string& init,
+                                         int argumentNumber, ast::AssociationList* l) { 
+    functionStart("associateArgument");
+    std::string argument = init;
+    if (l) {
+      int associationElementNumber = 0;
+      for (ast::AssociationElement e : l->associationElements.list) {
+        std::string actualPart = expressionToString(parm, e.actualPart);
+        if (e.formalPart) {
+          std::string formalPart = "";
+          getName(parm, e.formalPart->name, formalPart);
+          if (formalPart == name) {
+            return actualPart;
+          }
+        } else if (associationElementNumber == argumentNumber) {
+          return actualPart;
+        }
+        associationElementNumber++;
+      }
+    }
+    functionEnd("associateArgument");
+    return argument;
   }
 
   std::string SystemC::parametersToString(parameters& parm, ast::BasicIdentifier* identifier,

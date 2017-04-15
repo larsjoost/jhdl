@@ -47,6 +47,7 @@ namespace generator {
   
   class LocalDatabase {
 
+    std::string library;
     std::string section;
     std::list<NameMap> map;
   
@@ -84,6 +85,8 @@ namespace generator {
     void add(std::string& name, LocalDatabase& d);
     DatabaseElement* findObject(std::string& name, std::string& arguments, ast::ObjectType id, std::string& location);
     DatabaseElement* findObject(std::string& name, std::string& arguments, std::string& location);
+    DatabaseElement* findObject(std::string& name, std::string& arguments);
+    DatabaseElement* findObject(std::string& name);
     bool setAllVisible(std::string& name);
     bool setVisible(std::string& name, std::string& subname);
     bool exists(std::string& name);

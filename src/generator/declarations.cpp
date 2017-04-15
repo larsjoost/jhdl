@@ -27,10 +27,20 @@ namespace generator {
     return "";
   }
   
-  std::string SystemC::getArgumentNames(parameters& parm, ast::InterfaceList* interface) {
+  std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
     if (interface) {
       return listToString(parm, &interface->interfaceElements, ", ",
                           [](ast::InterfaceElement& e) {
+                            return e.object->type->name->toString(true);
+                          });
+    }
+    return "";
+  }
+
+  std::string SystemC::getArgumentNames(parameters& parm, ast::AssociationList* arguments) {
+    if (arguments) {
+      return listToString(parm, &arguments->associationElements, ", ",
+                          [](ast::AssociationElements& e) {
                             return e.object->identifier->toString(true);
                           });
     }

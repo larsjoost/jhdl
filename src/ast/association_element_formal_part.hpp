@@ -2,17 +2,17 @@
 #ifndef AST_ASSOCIATION_ELEMENT_FORMAL_PART_HPP_
 #define AST_ASSOCIATION_ELEMENT_FORMAL_PART_HPP_
 
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 
 namespace ast {
 
-  class BasicIdentifier;
+  class SimpleIdentifier;
   
   class AssociationElementFormalPart {
     
   public:
 
-    BasicIdentifier* name;
+    SimpleIdentifier* name;
         
   };
 
