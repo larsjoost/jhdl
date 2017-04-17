@@ -31,7 +31,8 @@ namespace ast {
 
   enum TokenType {
     TOKEN_KEYWORD,
-    TOKEN_NUMBER,
+    TOKEN_INTEGER,
+    TOKEN_REAL,
     TOKEN_STRING,
     TOKEN_CHARACTER,
     TOKEN_IDENTIFIER,
@@ -358,11 +359,19 @@ namespace ast {
       return NULL;
     }
     int i = 0;
+    bool punctuationFound = false;
     do {
       a = text.lookAhead(++i);
+      if (a == '.') {
+        punctuationFound = true;
+      }
     } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
-    t->type = TOKEN_NUMBER;
+    if (punctuationFound) {
+      t->type = TOKEN_REAL;
+    } else {
+      t->type = TOKEN_INTEGER;
+    }
     text.subString(t->text, i);
     if (verbose) {
       std::cout << "Found number = " << t->text.toString() << std::endl;

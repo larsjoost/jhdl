@@ -18,10 +18,6 @@ void Config::removeWhitespace(std::string& s) {
   s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
 }
 
-void Config::printError(std::string message) {
-  std::cerr << "#Error: " << message << std::endl;
-}
-
 bool Config::load(std::string filename) {
   int lineNumber = 0;
   this->filename = filename;
@@ -38,7 +34,7 @@ bool Config::load(std::string filename) {
           if (delimiterPos != std::string::npos) {
             currentSection = line.substr(1, delimiterPos-1);
           } else {
-            printError("Missing end ] in line " + std::to_string(lineNumber) + " of file " + filename);
+            exceptions.printError("Missing end ] in line " + std::to_string(lineNumber) + " of file " + filename);
           }
         } else if(line[0] != '#') {
           int delimiterPos = line.find("=");
@@ -98,7 +94,7 @@ std::string Config::expandEnvironmentVariables(const std::string& text)  {
       r.replace(pos, size, s);
       return expandEnvironmentVariables(r);
     } else {
-      printError("Environment variable " + envName + " is not defined");
+      exceptions.printError("Environment variable " + envName + " is not defined");
     }
   }
   return text;
@@ -119,7 +115,7 @@ std::string Config::find(std::string section, std::string key, bool expand) {
       return x;
     }
   }
-  printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + filename);
+  exceptions.printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + filename);
   return "";
 }
 

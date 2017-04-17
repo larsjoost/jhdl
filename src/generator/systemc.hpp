@@ -9,6 +9,8 @@
 #include "config.hpp"
 #include "database.hpp"
 
+#include "../exceptions/exceptions.hpp"
+
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
 #include "../ast/expression_term.hpp"
@@ -43,6 +45,8 @@ namespace generator {
   
   class SystemC { 
 
+    Exceptions exceptions;
+
     const std::string libraryInfoFilename = ".jhdl.ini";
     
     bool verbose = false;
@@ -72,20 +76,12 @@ namespace generator {
     
     void println(parameters& parm, std::string text);
 
-    void printError(std::string message, ast::Text* t = NULL);
-    void printWarning(std::string message, ast::Text* t = NULL);
-
     int methodId = 0;
 
     // general.cpp
     void descendHierarchy(parameters& parm, std::string parentName = "");
     void ascendHierarchy(parameters& parm);
 
-    template <typename Func>
-    std::string expressionTermToString(parameters& parm, ast::ExpressionTerm* e, Func basicIdentifierCallback);
-    template <typename Func>
-    std::string expressionToString(parameters& parm, ast::Expression* e, Func basicIdentifierCallback);
-    std::string expressionToString(parameters& parm, ast::Expression* e);
     std::string physicalToString(parameters& parm, ast::Physical* p);
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
@@ -147,9 +143,6 @@ namespace generator {
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
-    std::string parametersToString(parameters& parm, ast::BasicIdentifier* name,
-                                   ast::InterfaceList* interface,
-                                   ast::AssociationList* associationList);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);

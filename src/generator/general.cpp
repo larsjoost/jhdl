@@ -10,21 +10,6 @@ namespace generator {
     }
   }
 
-  void SystemC::printError(std::string message, ast::Text* t) {
-    if (t) {
-      t->printException("error", message);
-    } else {
-      std::cerr << "#Error: " << message << std::endl;
-    }
-  }
-  
-  void SystemC::printWarning(std::string message, ast::Text* t) {
-    if (t) {
-      t->printException("warning", message, std::cout, "// ");
-    } else {
-      std::cerr << "#Warning: " << message << std::endl;
-    }
-  }
 
   void SystemC::functionStart(std::string name) {
     if (verbose) {

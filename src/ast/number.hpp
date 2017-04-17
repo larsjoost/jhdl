@@ -5,12 +5,15 @@
 #include <string>
 
 #include "text.hpp"
+#include "object_type.hpp"
 
 namespace ast {
     
   class Number {
     
   public:
+
+    ObjectValue type;
     
     Text value;
 

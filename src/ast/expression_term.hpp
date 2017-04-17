@@ -2,6 +2,8 @@
 #ifndef AST_EXPRESSION_TERM_H_
 #define AST_EXPRESSION_TERM_H_
 
+#include <list>
+
 #include "number.hpp"
 #include "string.hpp"
 #include "basic_identifier.hpp"

@@ -10,11 +10,11 @@ namespace generator {
                             ast::Text* text) {
     if ("ALL" == identifier) {
       if (!database.setAllVisible(package)) {
-        printError("Could not find package " + package, text);
+        exceptions.printError("Could not find package " + package, text);
       }
     } else {
       if (!database.setVisible(package, identifier)) {
-        printError("Could not find package " + package, text);
+        exceptions.printError("Could not find package " + package, text);
       }
     }
   };
@@ -28,7 +28,7 @@ namespace generator {
     if (database.exists(package)) {
       makeVisible(identifier, package, text);
     } else {
-      printError("Did not find package " + package, text);
+      exceptions.printError("Did not find package " + package, text);
     }
   }
   

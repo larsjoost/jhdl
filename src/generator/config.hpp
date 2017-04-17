@@ -3,15 +3,17 @@
 
 #include <string>
 #include <unordered_map>
+#include "../exception/exception.hpp"
 
 class Config {
 
+  Exceptions exceptions;
+  
   std::string filename;
   
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> map;
   
 public:
-  void printError(std::string message);
   
   void toLower(std::string& s);
   void toUpper(std::string& s);
