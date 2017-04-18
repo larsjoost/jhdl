@@ -4,6 +4,7 @@
 
 #include "list.hpp"
 #include "interface_element.hpp"
+#include "object_type.hpp"
 
 namespace ast {
     
@@ -12,7 +13,7 @@ namespace ast {
   public:
 
     List<InterfaceElement> interfaceElements;
-    
+
   };
 
 }

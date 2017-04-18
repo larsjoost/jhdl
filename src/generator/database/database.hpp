@@ -18,6 +18,10 @@ namespace generator {
     void append(std::string& library, Database& database);
 
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = {});
+    void addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute);
+    void addFunction(std::string& name, ast::ObjectArguments& arguments,
+                     ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function);
+    void addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures);
 
     bool find(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
     

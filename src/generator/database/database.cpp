@@ -10,6 +10,18 @@ namespace generator {
     localDatabase.add(id, name, type, arguments); 
   }
 
+  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute) {
+    localDatabase.addAttribute(name, arguments, attribute);
+  }
+  void Database::addFunction(std::string& name, ast::ObjectArguments& arguments,
+                             ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function) {
+    localDatabase.addFunction(name, arguments, returnType, function);
+  }
+
+  void Database::addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures) {
+    localDatabase.addProcedure(name, arguments, procedures);
+  }
+
   bool Database::find(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
     if (package.empty() && library.empty()) {
       localDatabase.find(objects, name);

@@ -17,14 +17,39 @@ namespace generator {
     }
   }
 
-  std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
-    if (interface) {
-      return listToString(parm, &interface->interfaceElements, ", ",
-                          [](ast::InterfaceElement& e) {
-                            return e.object->type->name->toString(true);
-                          });
+  bool SystemC::findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type) {
+    assert(name);
+    std::string name = name->toString(true);
+    DatabaseResults objects;
+    database.find(objects, name);
+    bool typeFound = false;
+    if (!objects.empty()) {
+      for (DatabaseResult& o : objects) {
+        if (o.object->id == ast::TYPE) {
+          if (typeFound) {
+            exceptions.printError("Found more than one type with name \"" + name + "\"", &name->text);
+          }
+          type = o.object->type;
+          typeFound = true;
+        }
+      }
     }
-    return "";
+    if (!typeFound) {
+      exceptions.printError("Could not find declaration of type \"" + name + "\"", &name->text);
+    }
+    return typeFound;
+  }
+  
+  void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
+    if (interface) {
+      for (ast::InterfaceElement& i : interface->interfaceElements.list) {
+        ast::ObjectArgument a;
+        a.name = i.object->identifier.toString(true);
+        findType(i.object->type->name, a.type);
+        a.defaultValue = (i.object->initialization) ? true : false;
+        arguments.push_back(a);
+      }
+    }
   }
   
   std::string SystemC::getArgumentTypes(parameters& parm, ast::InterfaceList* interface) {
@@ -73,8 +98,11 @@ namespace generator {
     if (f) {
       functionStart("function_declarations");
       std::string name = f->name->toString(true);
-      std::string argumentTypes = getArgumentTypes(parm, f->interface);
-      parm.database.addFunction(name, argumentTypes, f);
+      ast::ObjectArguments arguments;
+      generateObjectArguments(f->interface, arguments);
+      ast::ObjectValueContainer returnType;
+      findType(f->returnType, returnType);
+      database.addFunction(name, arguments, returnType, f);
       descendHierarchy(parm, name);
       printSourceLine(parm, f->name->text);
       std::string returnType = f->returnType->toString(true) + "<>";
@@ -94,26 +122,48 @@ namespace generator {
     }
   }
 
+  bool SystemC::databaseFilter(DatabaseResults& objects, int number, ast::ObjectType type, ast::ObjectArguments& arguments, ast::Text* text) {
+    DatabaseResults result;
+    int matches = 0;
+    for (DatabaseResult& o : objects) {
+      if (type == o.object->type && ast::match(o.object->arguments, arguments)) {
+        result.push_back(o);
+        matches++;
+      }
+    }
+    if (matches != number) {
+      exceptions.printError("Expected " + std::to_string(number) + " matches, but found " + std::to_string(matches), text);
+      return false;
+    }
+    objects = result;
+    return true;
+  }
+  
   void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
                                       bool implementation) {
     if (f) {
       functionStart("procedure_declarations");
       printSourceLine(parm, f->name->text);
       std::string name = f->name->toString(true);
-      std::string argumentTypes = getArgumentTypes(parm, f->interface);
+      ast::ObjectArguments arguments;
+      generateObjectArguments(f->interface, arguments);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
         std::string parentName = parm.database.getParentName();
-        DatabaseElement* e = database.findObject(name, argumentTypes, ast::PROCEDURE, parentName);
+        DatabaseResults objects;
+        database.find(objects, name);
+        ;
         std::string foreignFunctionName = "";
-        if (e && e->attribute && e->attribute->expression) {
-          println(parm, "/*");
-          println(parm, " * This is the definition of the foreign function set as an attribute.");
-          println(parm, " * The implementation must be defined in a .cpp file in this directory.");
-          println(parm, "*/");
-          foreignFunctionName = e->attribute->expression->toString(true);
-          println(parm, "void " + foreignFunctionName + interface + ";");
+        if (databaseFilter(objects, 1, ast::PROCEDURE, arguments, f->name->text)) {
+          DatabaseElement* e = objects->begin()->object;
+          if (e->attribute && e->attribute->expression) {
+            println(parm, "/*");
+            println(parm, " * This is the definition of the foreign function set as an attribute.");
+            println(parm, " * The implementation must be defined in a .cpp file in this directory.");
+            println(parm, "*/");
+            foreignFunctionName = e->attribute->expression->toString(true);
+            println(parm, "void " + foreignFunctionName + interface + ";");
         }
         std::string s = implementation ? parentName + "::" : "";
         println(parm, "void " + s + name + interface + "{");
@@ -128,7 +178,7 @@ namespace generator {
         parm.decIndent();
         println(parm, "}");
       } else {
-        parm.database.addProcedure(name, argumentTypes, f);
+        parm.database.addProcedure(name, arguments, f);
         println(parm, "void " + name + interface + ";");
       }
       functionEnd("procedure_declarations");
