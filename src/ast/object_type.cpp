@@ -24,14 +24,13 @@ namespace ast {
     return toString(o.value);
   }
 
-  int match(ObjectArguments& interface, ObjectArgument& association, int index) {
-    if (association.name.empty() && index >= 0 && interface.size() > index) {
-      ObjectArguments::iterator it = interface.begin();
+  int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index) {
+    auto it = interface.list.begin();
+    if (association.name.empty() && index >= 0 && interface.list.size() > index) {
       std::advance(it, index);
       return it->type.equal(association.type) ? index : -1;
     } else {
-      ObjectArguments::iterator it = interface.begin();
-      for (int i = 0; i < interface.size(); i++) {
+      for (int i = 0; i < interface.list.size(); i++) {
         if (it->name == association.name) {
           return it->type.equal(association.type) ? i : -1;
         }
@@ -39,12 +38,21 @@ namespace ast {
     }
     return -1;
   }
+
+  /*
+   *    interface      association       
+   *    a : type1      a : type1   
+   *    b : type2      c : type3   
+   *    c : type3                  
+   */
   
-  bool match(ObjectArguments& interface, ObjectArguments& association) {
-    int size = interface.size();
+  bool ObjectArguments::equals(ObjectArguments& other) {
+    ObjectArguments& interface = isInterface ? *this : other;
+    ObjectArguments& association = isInterface ? other : *this;
+    int size = interface.list.size();
     bool m[size] {};
     int index = 0;
-    for (ObjectArgument& a : association) {
+    for (ObjectArgument& a : association.list) {
       int i = match(interface, a, index);
       if (i < 0) {
         return false;

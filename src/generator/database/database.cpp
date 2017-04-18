@@ -10,13 +10,6 @@ namespace generator {
     localDatabase.add(id, name, type, arguments); 
   }
 
-  bool Database::find(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
-    if (package.empty() && library.empty()) {
-      localDatabase.find(objects, name);
-    }
-    globalDatabase.find(objects, name, package, library);
-  }
-    
   void Database::descendHierarchy(std::string& name) {
     localDatabase.descendHierarchy(name);
   }

@@ -26,7 +26,7 @@ namespace generator {
     
     bool setVisible(std::string name = "", std::string package = "");
 
-    void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = {});
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = ast::ObjectArguments(false));
     void addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute);
     void addFunction(std::string& name, ast::ObjectArguments& arguments,
                      ast::ObjectValueContainer returnType,ast::FunctionDeclaration* function);
