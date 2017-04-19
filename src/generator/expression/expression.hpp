@@ -17,6 +17,9 @@ namespace generator {
     Exceptions exceptions;
     
     using ReturnTypes = std::list<ast::ObjectValueContainer>;
+
+    template<typename Func>
+    ReturnTypes getReturnTypes(std::string& name, Func valid);
     
     // First-pass functions
     ReturnTypes expressionReturnTypes(ast::Expression* e);   
@@ -49,9 +52,6 @@ namespace generator {
                                    ast::InterfaceList* interface,
                                    ast::AssociationList* associationList);
 
-    bool match(DatabaseResult& databaseResult, ast::ObjectArguments& arguments);
-    ReturnTypes match(DatabaseResults& databaseResults, ast::ObjectArguments& arguments);
-      
     ast::ObjectArguments toObjectArguments(ast::AssociationList* associationList);
 
   public:
@@ -78,28 +78,26 @@ namespace generator {
     return toString(e, expectedType, [&](std::string& name) {});
   }
 
-  bool ExpressionParser::match(DatabaseResult& databaseResult, ast::ObjectArguments& arguments) {
-    ast::ObjectArguments& a = databaseResult.object->arguments;
-    return ast::match(a, arguments);
-  }
-  
-  ExpressionParser::ReturnTypes ExpressionParser::match(DatabaseResults& databaseResults, ast::ObjectArguments& arguments) {
+  template<typename Func>
+  ExpressionParser::ReturnTypes ExpressionParser::getReturnTypes(std::string& name, Func valid) {
+    DatabaseResults objects;
+    database->findAll(objects, name, valid);
     ReturnTypes result;
-    for (auto i : databaseResults) {
-      if (match(i, arguments)) {
-        result.push_back(i.object->type);
-      }
+    for (auto& i : objects) {
+      result.push_back(i.object->type);
     }
     return result;
-  };
+  }
   
   ExpressionParser::ReturnTypes ExpressionParser::operatorReturnTypes(std::string& name,
                                                                       ast::ObjectValueContainer& l,
                                                                       ast::ObjectValueContainer& r) {
-    DatabaseResults databaseResults;
-    database->find(databaseResults, name);
-    ast::ObjectArguments x = {ast::ObjectArgument(l), ast::ObjectArgument(r)};
-    return match(databaseResults, x);
+    std::list<ast::ObjectArgument> a = {ast::ObjectArgument(l), ast::ObjectArgument(r)};
+    auto x = ast::ObjectArguments(false, a);
+    auto valid = [&](DatabaseElement* e) {
+      return x.equals(e->arguments);
+    };
+    return getReturnTypes(name, valid);
   }
 
   ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {
@@ -146,7 +144,7 @@ namespace generator {
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(ast::AssociationList* associationList) {
-    ast::ObjectArguments a;
+    auto a = ast::ObjectArguments(false);
     if (associationList) {
       for (auto& i : associationList->associationElements.list) {
         ast::ObjectArgument x;
@@ -185,10 +183,10 @@ namespace generator {
     } else if (b->arguments) {
       return functionReturnTypes(name, b->arguments); 
     } else {
-      DatabaseResults databaseResults;
-      database->find(databaseResults, name);
-      ast::ObjectArguments a;
-      return match(databaseResults, a);
+      auto valid = [&](DatabaseElement* e) {
+        return e->arguments.empty();
+      };
+      return getReturnTypes(name, valid);
     }
   }
   

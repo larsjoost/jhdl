@@ -44,13 +44,13 @@ namespace generator {
     DatabaseElement e = {id, library, package, name, arguments, type, false, NULL, NULL, NULL};
     add(name, e);
   }
-  
+
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute) {
     DatabaseResults results;
     find(results, name);
     if (!results.empty()) {
       for (auto& i : results) {
-        if (ast::match(i.object->arguments, arguments)) {
+        if (i.object->arguments.equals(arguments)) {
           i.object->attribute = attribute;
         }
       }

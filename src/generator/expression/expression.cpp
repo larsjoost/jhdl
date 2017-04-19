@@ -76,16 +76,6 @@ namespace generator {
     return name;
   }
 
-  void ExpressionParser::findBestMatches(DatabaseResults& matches,
-                                         DatabaseResult& bestMatch) {
-    bestMatch = {-1, false, NULL};
-    for (auto& i : matches) {
-      if (bestMatch.object == NULL || (!bestMatch.local && i.local) || (bestMatch.hierarchyLevel > i.local)) {
-        bestMatch = i;
-      }
-    }
-  }
-
   ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
                                                                std::string attributeName) {
     static std::unordered_map<std::string, ast::ObjectValueContainer> t =
@@ -149,29 +139,23 @@ namespace generator {
     // functionStart("basicIdentifierToString");
     std::string name = b->indentifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
-    DatabaseResults objects;
-    database.find(objects, name);
-    if (!objects.empty()) {
-      if (identifier->attribute) {
-        return attributeToString(objects, expectedType, identifier->attribute, identifier->arguments);
+    auto valid = [&](DatabaseElement* e) {
+      if (e->arguments.equals(arguments) &&
+          e->type.equals(expectedType)) {
+        return true;
       } else {
-        DatabaseResults matches;
-        for (auto& i : objects) {
-          if (ast::match(i.object->arguments, arguments) &&
-              ast::match(i.object->type, expectedType)) {
-            matches.push_back(i);
-          }
+        return false;
+      }
+    };
+    DatabaseResult object;
+    if (database.find(object, name, valid)) {
+      if (identifier->attribute) {
+        return attributeToString(object, expectedType, identifier->attribute, identifier->arguments);
+      } else {
+        if (object.object->id == ast::SIGNAL) {
+          sensitivityListCallback(name);
         }
-        DatabasResult bestMatch;
-        findbestMatch(matches, bestMatch);
-        if (bestMatch.object) {
-          if (bestMatch.object->id == ast::SIGNAL) {
-            sensitivityListCallback(name);
-          }
         return databaseResultToString(bestMatch, b->arguments);
-        } else {
-          expections.printError("Did not resolve name \"" + name + "\"", &b->identifier->text);
-        }
       }
     } else {
       expections.printError("Could not find definition of name \"" + name + "\"", &b->identifier->text);

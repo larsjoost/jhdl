@@ -24,9 +24,9 @@ namespace ast {
     std::string typeName;
     bool equal(ObjectValueContainer& other);
     ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") : value(value), typeName(typeName) {}
+    std::string toString();
   };
   
-  std::string toString(ObjectValueContainer& o);
 
   struct ObjectArgument {
     std::string name = "";
@@ -34,16 +34,22 @@ namespace ast {
     bool defaultValue = false;
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
     ObjectArgument() {}
+    std::string toString();
   };
 
-  std::string toString(ObjectArgument& a);
-  
-  using ObjectArguments = std::list<ObjectArgument>;
 
-  std::string toString(ObjectArguments& a);
+  class ObjectArguments {
+    bool isInterface;
+    std::list<ObjectArgument> list;
+    int match(ObjectArguments& interface, ObjectArgument& association, int index);
+  public:
+    ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
+    void push_back(ObjectArgument& o) {list.push_back(o);}
+    bool equals(ObjectArguments& other);
+    bool empty() { return list.empty(); }
+    std::string toString();
+  };  
 
-  bool match(ObjectArguments& l, ObjectArguments& r);
-  
 }
 
 #endif
