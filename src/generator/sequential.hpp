@@ -1,11 +1,13 @@
 #include "systemc.hpp"
+#include "expression/expression.hpp"
 
 namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
-    std::string left = expressionToString(parm, r->left);
-    std::string right = expressionToString(parm, r->right);
+    ExpressionParser expr(&database);
+    std::string left = expr.toString(r->left, ast::INTEGER);
+    std::string right = expr.toString(r->right, ast::INTEGER);
     std::string rangeName = name + "_range";
     println(parm, "struct " + rangeName + " { int left = " + left + "; int right = " + right + "; };");
     println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
@@ -21,27 +23,36 @@ namespace generator {
     functionStart("signalAssignment");
     if (p) {
       printSourceLine(parm, p->identifier);
-      std::string name = basicIdentifierToString(parm, p->identifier);
-      std::string command = "if";
-      std::string noConditionCommand = "";
-      std::string noConditionDelimiter = "";
-      for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
-        if (s.condition) {
-          println(parm, command + " (" + expressionToString(parm, s.condition, callback) + ") {");
-          command = "else if";
-          noConditionCommand = "else {";
-          noConditionDelimiter = "}";
-        } else {
-          println(parm, noConditionCommand);
+      std::string name = p->identifier->toString(true);
+      DatabaseResult object;
+      auto valid = [&](DatabaseElement* e) {
+        return e->id == ast::SIGNAL;
+      };
+      if (database.findOne(object, name, valid)) {  
+        std::string command = "if";
+        std::string noConditionCommand = "";
+        std::string noConditionDelimiter = "";
+        ExpressionParser expr(&database);
+        for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
+          if (s.condition) {
+            println(parm, command + " (" + expr.toString(s.condition, ast::BOOLEAN, callback) + ") {");
+            command = "else if";
+            noConditionCommand = "else {";
+            noConditionDelimiter = "}";
+          } else {
+            println(parm, noConditionCommand);
+          }
+          parm.incIndent();
+          println(parm, name + " = " + expr.toString(s.expression, object.object->type, callback) + ";");
+          parm.decIndent();
+          if (s.condition) {
+            println(parm, "}");
+          } else {
+            println(parm, noConditionDelimiter);
+          }
         }
-        parm.incIndent();
-        println(parm, name + " = " + expressionToString(parm, s.expression, callback) + ";");
-        parm.decIndent();
-        if (s.condition) {
-          println(parm, "}");
-        } else {
-          println(parm, noConditionDelimiter);
-        }
+      } else {
+        exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
       }
     }
     functionEnd("signalAssignment");

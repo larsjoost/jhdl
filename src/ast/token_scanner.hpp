@@ -573,8 +573,10 @@ namespace ast {
     switch (k) {
     case TOKEN_KEYWORD:
       return "keyword";
-    case TOKEN_NUMBER:
+    case TOKEN_INTEGER:
       return "number";
+    case TOKEN_REAL:
+      return "real";
     case TOKEN_IDENTIFIER:
       return "identifier";
     case TOKEN_SPECIAL_CHARACTER:

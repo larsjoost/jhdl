@@ -13,26 +13,34 @@ namespace ast {
   
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
-      "INTEGER", "REAL", "BOOLEAN", "CHARACTER", "TEXT", "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE"};
+      "INTEGER", "REAL", "BOOLEAN", "CHARACTER", "TEXT", "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
     return a[o];
   }
 
-  std::string toString(ObjectValueContainer& o) {
-    if (o.value == USER_TYPE) {
-      return o.typeName;
+  std::string ObjectValueContainer::toString() {
+    if (value == USER_TYPE) {
+      return typeName;
     }
-    return toString(o.value);
+    return ast::toString(value);
+  }
+
+  bool ObjectValueContainer::equals(ObjectValueContainer& other) {
+    if (value != other.value) return false;
+    if (value == USER_TYPE) {
+      return typeName == other.typeName;
+    }
+    return true;
   }
 
   int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index) {
     auto it = interface.list.begin();
     if (association.name.empty() && index >= 0 && interface.list.size() > index) {
       std::advance(it, index);
-      return it->type.equal(association.type) ? index : -1;
+      return it->type.equals(association.type) ? index : -1;
     } else {
       for (int i = 0; i < interface.list.size(); i++) {
         if (it->name == association.name) {
-          return it->type.equal(association.type) ? i : -1;
+          return it->type.equals(association.type) ? i : -1;
         }
       }
     }

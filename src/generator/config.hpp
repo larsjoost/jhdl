@@ -3,7 +3,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "../exception/exception.hpp"
+#include "../exceptions/exceptions.hpp"
 
 class Config {
 

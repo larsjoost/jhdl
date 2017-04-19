@@ -1,6 +1,6 @@
 #include "systemc.hpp"
 #include "sequential.hpp"
-#include "expression.hpp"
+#include "expression/expression.hpp"
 
 namespace generator {
 
@@ -23,8 +23,9 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
+      ExpressionParser expr(&database);
       println(parm, basicIdentifierToString(parm, p->identifier) + " = " +
-              expressionToString(parm, p->expression) + ";");
+              expr.toString(p->expression) + ";");
     }
   }
 
@@ -35,17 +36,19 @@ namespace generator {
 
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
-      println(parm, "report(" + expressionToString(parm, p->message) + ", " +
-              basicIdentifierToString(parm, p->severity) + ");");
+      ExpressionParser expr(&database);
+      println(parm, "report(" + expr.toString(p->message) + ", " +
+              p->severity->toString() + ");");
     }
   }
 
     void SystemC::ifStatement(parameters& parm, ast::IfStatement* p) {
     if (p) {
       std::string command = "if ";
+      ExpressionParser expr(&database);
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-	  println(parm, command + " (" + expressionToString(parm, c.condition) + ") {");
+	  println(parm, command + " (" + expr.toString(c.condition) + ") {");
 	} else {
 	  println(parm, "} else {");
 	}
@@ -63,7 +66,7 @@ namespace generator {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
       descendHierarchy(parm);
-      parm.database.addObject(name, ast::VARIABLE);
+      database.add(ast::VARIABLE, name, ast::INTEGER);
       forLoop(parm, name, f->range, [&](parameters& parm) {
           sequentialStatements(parm, f->sequentialStatements);
         });
@@ -80,7 +83,8 @@ namespace generator {
 
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
-      println(parm, "return " + expressionToString(parm, r->value) + ";");
+      ExpressionParser expr(&database);
+      println(parm, "return " + expr.toString(r->value) + ";");
     }
   }
 

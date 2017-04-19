@@ -48,7 +48,7 @@ namespace generator {
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
-      parm.database.addObject(identifier, ast::VARIABLE);
+      database.add(ast::VARIABLE, identifier, ast::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
         });
@@ -59,8 +59,9 @@ namespace generator {
     if (l) {
       println(parm, listToString(parm, l->associationElements.list, "; ",
                                  [&](ast::AssociationElement a){
+                                   ExpressionParser expr(&database);
                                    return instanceName + "->" + a.formalPart->name->toString(true) +
-                                     ".bind(" + expressionToString(parm, a.actualPart) + ")";
+                                     ".bind(" + expr.toString(a.actualPart) + ")";
                                  }) + ";"
               );
     }
@@ -99,7 +100,7 @@ namespace generator {
   }
 
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument) {
-    std::string parentName = parm.database.getParentName();
+    std::string parentName = database.getParentName();
     if (parentName.size() > 0) {
       std::string p1 = parentName +"* parent";
       std::string p2 = " : p(parent)";

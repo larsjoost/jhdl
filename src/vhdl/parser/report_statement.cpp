@@ -11,7 +11,7 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_REPORT);
       message = scanner->expect<Expression>();
       scanner->expect(scanner::Scanner::VHDL_SEVERITY);
-      severity = scanner->expect<BasicIdentifier>();
+      severity = scanner->expect<SimpleIdentifier>();
       return this;
     }
 

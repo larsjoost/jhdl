@@ -16,7 +16,7 @@ namespace ast {
 
     std::string name = "";
     SimpleIdentifier* label;
-    BasicIdentifier* identifier;
+    SimpleIdentifier* identifier;
     List<SignalAssignmentCondition> signalAssignmentConditions;
     
   };

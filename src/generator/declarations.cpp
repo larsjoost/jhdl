@@ -46,7 +46,7 @@ namespace generator {
         ast::ObjectArgument a;
         a.name = i.object->identifier.toString(true);
         findType(i.object->type->name, a.type);
-        a.defaultValue = (i.object->initialization) ? true : false;
+        a.defaultValue = (i.object->initialization) ? expressionToString(i.object->initialization->value) : "";
         arguments.push_back(a);
       }
     }

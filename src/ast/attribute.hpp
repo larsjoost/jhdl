@@ -19,6 +19,10 @@ namespace ast {
     ObjectType objectType;
     SimpleIdentifier* typeMark;
     String* expression;
+
+    std::string toString(bool setCase = false) {
+      return identifier->toString(setCase);
+    }
     
   };
 

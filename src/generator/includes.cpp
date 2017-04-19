@@ -9,7 +9,7 @@ namespace generator {
                             std::string& package,
                             ast::Text* text) {
     if ("ALL" == identifier) {
-      if (!database.setAllVisible(package)) {
+      if (!database.setVisible(package)) {
         exceptions.printError("Could not find package " + package, text);
       }
     } else {

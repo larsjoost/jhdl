@@ -7,7 +7,7 @@
 #include <cassert>
 
 #include "config.hpp"
-#include "database.hpp"
+#include "database/database.hpp"
 
 #include "../exceptions/exceptions.hpp"
 
@@ -60,7 +60,6 @@ namespace generator {
 
     struct parameters {
       int indent = 0;
-      LocalDatabase database;
       void incIndent() {
         indent += 2;
       }
@@ -69,7 +68,7 @@ namespace generator {
       }
     };
 
-    GlobalDatabase database;
+    Database database;
     
     Config config;
     Config libraryInfo;

@@ -6,8 +6,17 @@ namespace generator {
     globalDatabase.append(library, database.localDatabase);
   }
 
+  std::string Database::getParentName(int hierarchy) {
+    return localDatabase.getParentName(hierarchy);
+  }
+  
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments) {
     localDatabase.add(id, name, type, arguments); 
+  }
+
+  void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type) {
+    ast::ObjectValueContainer t = ast::ObjectValueContainer(type);
+    localDatabase.add(id, name, type); 
   }
 
   void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute) {
@@ -22,13 +31,6 @@ namespace generator {
     localDatabase.addProcedure(name, arguments, procedures);
   }
 
-  bool Database::find(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
-    if (package.empty() && library.empty()) {
-      localDatabase.find(objects, name);
-    }
-    globalDatabase.find(objects, name, package, library);
-  }
-    
   void Database::descendHierarchy(std::string& name) {
     localDatabase.descendHierarchy(name);
   }
@@ -39,7 +41,11 @@ namespace generator {
   bool Database::setVisible(std::string& name, std::string package, std::string library) {
     globalDatabase.setVisible(name, package, library);
   }
-  
+
+  bool Database::exists(std::string& name) {
+    return globalDatabase.exists(name);
+  }
+
 }
   
 

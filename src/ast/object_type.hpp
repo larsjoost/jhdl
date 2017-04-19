@@ -15,23 +15,22 @@ namespace ast {
   std::string toString(ObjectType o);
 
   enum ObjectValue {
-    INTEGER, REAL, BOOLEAN, CHARACTER, TEXT,  PHYSICAL, ARRAY, USER_TYPE, UNKNOWN, NONE, NUMBER_OF_OBJECT_VALUES};
+    INTEGER, REAL, BOOLEAN, CHARACTER, TEXT,  PHYSICAL, ARRAY, USER_TYPE, UNKNOWN, NONE, DONT_CARE, NUMBER_OF_OBJECT_VALUES};
 
   std::string toString(ObjectValue o);
 
   struct ObjectValueContainer {
     ObjectValue value;
     std::string typeName;
-    bool equal(ObjectValueContainer& other);
+    bool equals(ObjectValueContainer& other);
     ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") : value(value), typeName(typeName) {}
     std::string toString();
   };
   
-
   struct ObjectArgument {
     std::string name = "";
     ObjectValueContainer type;
-    bool defaultValue = false;
+    std::string defaultValue = "";
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
     ObjectArgument() {}
     std::string toString();
@@ -40,9 +39,9 @@ namespace ast {
 
   class ObjectArguments {
     bool isInterface;
-    std::list<ObjectArgument> list;
     int match(ObjectArguments& interface, ObjectArgument& association, int index);
   public:
+    std::list<ObjectArgument> list;
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
     void push_back(ObjectArgument& o) {list.push_back(o);}
     bool equals(ObjectArguments& other);

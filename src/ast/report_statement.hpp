@@ -12,7 +12,7 @@ namespace ast {
   public:
 
     Expression* message;
-    BasicIdentifier* severity;
+    SimpleIdentifier* severity;
     
   };
 

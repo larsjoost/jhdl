@@ -27,6 +27,7 @@ namespace generator {
                      ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function);
     void addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures);
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = ast::ObjectArguments(false));
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValue type);
 
     template<typename Func>
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
@@ -37,7 +38,11 @@ namespace generator {
     void ascendHierarchy();
 
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
- };
+
+    std::string getParentName(int hierarchy = 0);
+
+    bool exists(std::string& name);
+  };
 
   template<typename Func>
   bool Database::findBestMatch(DatabaseResults& matches,
