@@ -30,7 +30,7 @@ namespace generator {
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
-    signalAssignment(parm, p,  [](std::string baseName, std::string hierarchyName) {});
+    signalAssignment(parm, p,  [](DatabaseResult& object) {});
   }
 
 

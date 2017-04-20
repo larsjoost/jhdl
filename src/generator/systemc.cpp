@@ -274,8 +274,9 @@ namespace generator {
     template<class T = TYPE_T_range>
     using TYPE_T = INTEGER<T>;
   */
-  std::string SystemC::subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t) {
+  std::string SystemC::subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t) {
     assert(t);
+    value = ast::ObjectValueContainer(ast::INTEGER);
     std::string typeName = t->name->toString(true);
     if (t->range) {
       printSubtype(parm, name, t->range, typeName);

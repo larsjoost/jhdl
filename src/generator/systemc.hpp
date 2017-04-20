@@ -111,14 +111,14 @@ namespace generator {
                      std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause);
 
-    void numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
-    void enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
-    void arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
+    ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
+    ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
+    ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
-    std::string subtypeIndication(parameters& parm, std::string& name, ast::SubtypeIndication* t);
+    std::string subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
@@ -144,7 +144,7 @@ namespace generator {
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
     bool databaseFilter(DatabaseResults& objects, int number, ast::ObjectType type, ast::ObjectArguments& arguments, ast::Text* text);
     bool findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type);
-    void generateObjectArguments(ast::InterfaceList* interface);
+    void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);

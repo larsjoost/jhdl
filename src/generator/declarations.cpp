@@ -2,7 +2,7 @@
 
 #include "systemc.hpp"
 #include "declarations.hpp"
-#include "database.hpp"
+#include "database/database.hpp"
 
 namespace generator {
 
@@ -10,43 +10,43 @@ namespace generator {
     if (t) {
       assert(t->typeDefinition);
       std::string name = t->identifier->toString(true);
-      parm.database.addObject(name, ast::TYPE);
-      numberType(parm, t->identifier, t->typeDefinition->numberType);
-      enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
-      arrayType(parm, t->identifier, t->typeDefinition->arrayType);
+      ast::ObjectValueContainer value;
+      if (t->typeDefinition->numberType) {
+        value = numberType(parm, t->identifier, t->typeDefinition->numberType);
+      } else if (t->typeDefinition->enumerationType) {
+        value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
+      } else if (t->typeDefinition->arrayType) {
+        value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
+      } else {
+        assert(false);
+      }
+      database.add(ast::TYPE, name, value);
     }
   }
 
-  bool SystemC::findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type) {
-    assert(name);
-    std::string name = name->toString(true);
-    DatabaseResults objects;
-    database.find(objects, name);
-    bool typeFound = false;
-    if (!objects.empty()) {
-      for (DatabaseResult& o : objects) {
-        if (o.object->id == ast::TYPE) {
-          if (typeFound) {
-            exceptions.printError("Found more than one type with name \"" + name + "\"", &name->text);
-          }
-          type = o.object->type;
-          typeFound = true;
-        }
-      }
+  bool SystemC::findType(ast::SimpleIdentifier* identifier, ast::ObjectValueContainer& type) {
+    assert(identifier);
+    std::string name = identifier->toString(true);
+    auto valid = [&](DatabaseElement* e) {
+      return e->id == ast::TYPE;
+    };
+    DatabaseResult object;
+    if (database.findOne(object, name, valid)) {
+      type = object.object->type;
+      return true;
     }
-    if (!typeFound) {
-      exceptions.printError("Could not find declaration of type \"" + name + "\"", &name->text);
-    }
-    return typeFound;
+    exceptions.printError("Could not find declaration of type \"" + name + "\"", &identifier->text);
+    return false;
   }
   
   void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
     if (interface) {
       for (ast::InterfaceElement& i : interface->interfaceElements.list) {
         ast::ObjectArgument a;
-        a.name = i.object->identifier.toString(true);
+        a.name = i.object->identifier->toString(true);
         findType(i.object->type->name, a.type);
-        a.defaultValue = (i.object->initialization) ? expressionToString(i.object->initialization->value) : "";
+        ExpressionParser expr(&database);
+        a.defaultValue = (i.object->initialization) ? expr.toString(i.object->initialization->value, a.type) : "";
         arguments.push_back(a);
       }
     }

@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "systemc.hpp"
+#include "expression/expression.hpp"
 
 namespace generator {
 
@@ -10,12 +11,14 @@ namespace generator {
       functionStart("objectDeclaration");
       assert(v->identifier);
       std::string name = v->identifier->toString(true);
-      parm.database.addObject(name, v->objectType);
       std::string type = name + "_type";
-      type = subtypeIndication(parm, type, v->type) + "<>";
+      ast::ObjectValueContainer value;
+      type = subtypeIndication(parm, value, type, v->type) + "<>";
+      database.add(v->objectType, name, value);
       std::string init = "";
       if (v->initialization) {
-        init = expressionToString(parm, v->initialization->value);
+        ExpressionParser expr(&database);
+        init = expr.toString(v->initialization->value, value);
       }
       callback(name, type, init, v->objectType, v->direction);
       functionEnd("objectDeclaration");

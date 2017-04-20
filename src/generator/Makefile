@@ -12,6 +12,7 @@ all: $(OBJS)
 
 clean:
 	find . -name "*.o" -type f -delete
+	find . -name "*.d" -type f -delete
 
 print-%:
 	@echo '$*=$($*)'

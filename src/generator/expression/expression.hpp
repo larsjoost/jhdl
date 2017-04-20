@@ -101,7 +101,7 @@ namespace generator {
   }
 
   std::string ExpressionParser::toString(ast::Expression* e, ast::ObjectValueContainer& expectedType) {
-    return toString(e, expectedType, [&](std::string& name) {});
+    return toString(e, expectedType, [&](DatabaseResult& object) {});
   }
 
   std::string ExpressionParser::toString(ast::Expression* expr, ast::ObjectValue expectedType) {
@@ -377,7 +377,7 @@ namespace generator {
       DatabaseResult object;
       if (database->findOne(object, name, valid)) {
         if (object.object->id == ast::SIGNAL) {
-          sensitivityListCallback(name);
+          sensitivityListCallback(object);
         }
         return objectToString(object, identifier->arguments, sensitivityListCallback);
       } else {
