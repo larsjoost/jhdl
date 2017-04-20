@@ -26,11 +26,19 @@ namespace generator {
     
     bool setVisible(std::string name = "", std::string package = "");
 
-    void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = ast::ObjectArguments(false));
-    void addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute);
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
+             ast::ObjectArguments arguments = ast::ObjectArguments(false),
+             ast::Text* text = NULL);
+    void addAttribute(std::string& name, ast::ObjectArguments& arguments,
+                      ast::ObjectType id, ast::Attribute* attribute,
+                      ast::Text* text = NULL);
     void addFunction(std::string& name, ast::ObjectArguments& arguments,
-                     ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function);
-    void addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures);
+                     ast::ObjectValueContainer returnType,
+                     ast::FunctionDeclaration* function,
+                     ast::Text* text = NULL);
+    void addProcedure(std::string& name, ast::ObjectArguments& arguments,
+                      ast::ProcedureDeclaration* procedures,
+                      ast::Text* text = NULL);
     
     void descendHierarchy(std::string& name);
     void ascendHierarchy();

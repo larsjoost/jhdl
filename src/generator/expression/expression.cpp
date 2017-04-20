@@ -117,7 +117,8 @@ namespace generator {
                                                                std::string attributeName) {
     static std::unordered_map<std::string, ast::ObjectValueContainer> t =
       {{"IMAGE", ast::ObjectValueContainer(ast::USER_TYPE, "STRING")},
-       {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)}};
+       {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)},
+       {"HIGH", ast::ObjectValueContainer(ast::INTEGER)}};
     auto i = t.find(attributeName);
     if (i != t.end()) {
       return i->second;
@@ -127,21 +128,23 @@ namespace generator {
     }
   }
   
-  void ExpressionParser::findAttributeMatch(DatabaseResults& objects,
+  bool ExpressionParser::findAttributeMatch(DatabaseResults& objects,
                                             DatabaseResult& match,
                                             ast::ObjectValueContainer& expectedType,
                                             std::string& name) {
-    match.object = NULL;
+    bool foundMatch = false;;
     for (auto& i : objects) {
       ast::ObjectValueContainer a = getAttributeType(i.object->type, name);
       if (expectedType.equals(a)) {
         if (!match.object) {
           match = i;
+          foundMatch = true;
         } else {
           exceptions.printError("Found more than one attribute match");
         }
       }
     }
+    return foundMatch;
   }
   
       

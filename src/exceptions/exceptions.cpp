@@ -8,11 +8,19 @@ std::string Exceptions::colorCode(int color) {
   return "\x1b[" + std::to_string(color) + "m";
 }
 
-void Exceptions::print(std::string severity, int color, std::string& message) {
+void Exceptions::print(std::string severity, int color, std::string& message, ast::Text* text) {
   if (colorsSupported) {
     std::cerr << colorCode(color);
   }
-  std::cerr << "#" << severity << ": " << message;
+  std::string location = text ?
+    (" in " + text->getFilename() + " at " +
+     std::to_string(text->getLine()) + ", " +
+     std::to_string(text->getColumn())) : ""; 
+  std::cerr << "#" << severity << location << ": " << message;
+  if (text) {
+    std::cerr << text->getCurrentLine() << std::endl;
+    std::cerr << text->getCurrentLinePositionMarker() << std::endl;
+  }
   if (colorsSupported) {
     std::cerr << colorCode(RESET);
   }
@@ -21,19 +29,11 @@ void Exceptions::print(std::string severity, int color, std::string& message) {
 
 void Exceptions::printError(std::string message, ast::Text* text) {
   numberOfErrors++;
-  if (text) {
-    text->printException("error", message);
-  } else {
-    print("Error", RED, message);
-  }
+  print("Error", RED, message, text);
 }
 
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
   numberOfWarnings++;
-  if (text) {
-    text->printException("warning", message, std::cout, "// ");
-  } else {
-    print("Warning", BLUE, message);
-  }
+  print("Warning", BLUE, message, text);
 }

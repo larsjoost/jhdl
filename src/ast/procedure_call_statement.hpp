@@ -4,6 +4,7 @@
 
 #include "list.hpp"
 #include "simple_identifier.hpp"
+#include "association_list.hpp"
 
 namespace ast {
 
@@ -14,6 +15,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* name;
+    AssociationList* arguments = NULL; 
     
   };
 

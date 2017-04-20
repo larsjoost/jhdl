@@ -53,7 +53,7 @@ namespace generator {
     ast::ObjectValueContainer getAttributeType(ast::ObjectValueContainer& type,
                                                std::string attributeName);
     
-    void findAttributeMatch(DatabaseResults& objects,
+    bool findAttributeMatch(DatabaseResults& objects,
                             DatabaseResult& match,
                             ast::ObjectValueContainer& expectedType,
                             std::string& name);
@@ -287,8 +287,8 @@ namespace generator {
     database->findAll(objects, name, valid);
     name = attribute->toString(true);
     DatabaseResult match;
-    findAttributeMatch(objects, match, expectedType, name);
-    if (match.object) {
+    if (findAttributeMatch(objects, match, expectedType, name)) {
+      assert(match.object);
       bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
       std::string seperator = objectMatch ? "." : "<>::";
       name = seperator + name;
@@ -302,7 +302,7 @@ namespace generator {
         name += "(" + a + ")";
       }
     } else {
-      exceptions.printError("Cound not find match for attribute " + name, attribute);
+      exceptions.printError("Could not find match for attribute \"" + name + "\"", attribute);
     }
     return name;
   }

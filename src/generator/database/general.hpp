@@ -10,6 +10,7 @@
 #include "../../ast/attribute.hpp"
 #include "../../ast/function_declaration.hpp"
 #include "../../ast/procedure_declaration.hpp"
+#include "../../ast/text.hpp"
 
 namespace generator {
 
@@ -24,6 +25,7 @@ namespace generator {
     ast::Attribute* attribute;
     ast::FunctionDeclaration* function;
     ast::ProcedureDeclaration* procedure;
+    ast::Text* text;
     void print();
   };
   

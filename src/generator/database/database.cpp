@@ -10,25 +10,29 @@ namespace generator {
     return localDatabase.getParentName(hierarchy);
   }
   
-  void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments) {
-    localDatabase.add(id, name, type, arguments); 
+  void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
+                     ast::ObjectArguments arguments, ast::Text* text) {
+    localDatabase.add(id, name, type, arguments, text); 
   }
 
-  void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type) {
+  void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type, ast::Text* text) {
     ast::ObjectValueContainer t = ast::ObjectValueContainer(type);
-    localDatabase.add(id, name, type); 
+    localDatabase.add(id, name, type, text); 
   }
 
-  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute) {
-    localDatabase.addAttribute(name, arguments, id, attribute);
+  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
+                              ast::Attribute* attribute, ast::Text* text) {
+    localDatabase.addAttribute(name, arguments, id, attribute, text);
   }
   void Database::addFunction(std::string& name, ast::ObjectArguments& arguments,
-                             ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function) {
-    localDatabase.addFunction(name, arguments, returnType, function);
+                             ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
+                             ast::Text* text) {
+    localDatabase.addFunction(name, arguments, returnType, function, text);
   }
 
-  void Database::addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures) {
-    localDatabase.addProcedure(name, arguments, procedures);
+  void Database::addProcedure(std::string& name, ast::ObjectArguments& arguments,
+                              ast::ProcedureDeclaration* procedures, ast::Text* text) {
+    localDatabase.addProcedure(name, arguments, procedures, text);
   }
 
   void Database::descendHierarchy(std::string& name) {

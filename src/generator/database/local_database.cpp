@@ -40,12 +40,12 @@ namespace generator {
     }
   }
 
-  void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments) {
-    DatabaseElement e = {id, library, package, name, arguments, type, false, NULL, NULL, NULL};
+  void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments, ast::Text* text) {
+    DatabaseElement e = {id, library, package, name, arguments, type, false, NULL, NULL, NULL, text};
     add(name, e);
   }
 
-  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute) {
+  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute, ast::Text* text) {
     DatabaseResults results;
     find(results, name);
     if (!results.empty()) {
@@ -55,21 +55,23 @@ namespace generator {
         }
       }
     } else {
-      exceptions.printError("Could not find object \"" +  name + "\"");
+      exceptions.printError("Could not find object \"" +  name + "\"", text);
     }
   };
 
   void LocalDatabase::addFunction(std::string& name, ast::ObjectArguments& arguments,
                                   ast::ObjectValueContainer returnType,
-                                  ast::FunctionDeclaration* function) {
-    DatabaseElement e = {ast::FUNCTION, library, package, name, arguments, returnType, false, NULL, function, NULL};
+                                  ast::FunctionDeclaration* function,
+                                  ast::Text* text) {
+    DatabaseElement e = {ast::FUNCTION, library, package, name, arguments, returnType, false, NULL, function, NULL, text};
     add(name, e);
   };
 
   void LocalDatabase::addProcedure(std::string& name, ast::ObjectArguments& arguments,
-                                   ast::ProcedureDeclaration* procedure) {
+                                   ast::ProcedureDeclaration* procedure,
+                                   ast::Text* text) {
     ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::NONE);
-    DatabaseElement e = {ast::PROCEDURE, library, package, name, arguments, c, false, NULL, NULL, procedure};
+    DatabaseElement e = {ast::PROCEDURE, library, package, name, arguments, c, false, NULL, NULL, procedure, text};
     add(name, e);
   };
 

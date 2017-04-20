@@ -17,6 +17,7 @@
 #include "list.hpp"
 #include "identifier.hpp"
 #include "token_scanner.hpp"
+#include "../exceptions/exceptions.hpp"
 
 namespace ast {
 
@@ -38,6 +39,8 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   class Scanner : public TokenScanner<ApplicationSpecificScanner>{
 
+    Exceptions expections;
+    
     void print(const std::string &severity, const std::string &message);
 
     void debug(const std::string &message);

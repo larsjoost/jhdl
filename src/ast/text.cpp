@@ -127,31 +127,19 @@ namespace ast {
     }
     return s;
   }
-  
-  void Text::printCurrentLine(std::ostream& output, std::string head) {
-    output << head << getCurrentLine() << std::endl;
-  }
 
-  void Text::printCurrentLinePositionMarker(std::ostream& output, std::string head) {
-    output << head;
+  std::string Text::getCurrentLinePositionMarker() {
+    std::string s = "";
     int size = getColumn();
     for (int i = 0; i < size; i++) {
-      output << ' ';
+      s +=  ' ';
     }
-    output << "^" << std::endl;
+    s += "^";
+    return s;
   }
   
-  void Text::printLinePosition(std::ostream& output, std::string head) {
-    printCurrentLine(output, head);
-    printCurrentLinePositionMarker(output, head);
-  }
-  
-  void Text::printException(const std::string &severity, const std::string &message, std::ostream& output, std::string head) {
-    output << head << severity << " in file " << filename << " at "
-           << std::to_string(getLine()) << ", "
-           << std::to_string(getColumn()) << ": "
-           << message << std::endl;
-    printLinePosition(output, head);
+  std::string Text::getFilename() {
+    return filename;
   }
 
   void Text::print(std::ostream& output) {
