@@ -82,7 +82,6 @@ namespace generator {
     map.pop_front();
   }
 
-  /*
   std::string LocalDatabase::getParentName(int hierarchy) {
     if (map.size() > hierarchy) {
       auto i = map.end();
@@ -91,7 +90,6 @@ namespace generator {
     }
     return "";
   }
-  */
   
 }
   

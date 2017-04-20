@@ -41,14 +41,6 @@ namespace generator {
     }
   }
 
-  std::string SystemC::createWait(parameters& parm, auto sensitivity) {
-    std::string s = listToString(parm, sensitivity, " || ", [&](std::string s){return s + ".EVENT()";}); 
-    if (s.size() == 0) {
-      return "wait();";
-    }
-    return "wait([&](){return " + s + ";});";
-  }
-
   template <typename Func>
   void SystemC::createProcess(parameters& parm, Func func) {
     println(parm, "void process() {");
@@ -72,7 +64,10 @@ namespace generator {
         createProcess(parm,
                       [&](parameters& parm) {
                         if (method->sensitivity) {
-                          println(parm, createWait(parm, method->sensitivity));
+                          auto s = [&](ast::SimpleIdentifier& s) {
+                            return s.toString(true);
+                          };
+                          println(parm, createWait(parm, method->sensitivity, s));
                         }
                         sequentialStatements(parm, method->sequentialStatements);
                       });
@@ -103,10 +98,11 @@ namespace generator {
             sensitivity.push_back(object.getName(false));
           });
         quiet = false;
+        auto func = [&](std::string& s) { return s; };
         auto createBody = [&](parameters& parm) {
           createProcess(parm,
                         [&](parameters& parm) {
-                          println(parm, createWait(parm, sensitivity));
+                          println(parm, createWait(parm, sensitivity, func));
                           signalAssignment(parm, s);
                         });
         };

@@ -7,7 +7,7 @@
 #include "process.hpp"
 #include "sequential_statement.hpp"
 #include "declaration.hpp"
-#include "basic_identifier_list.hpp"
+#include "list.hpp"
 #include "simple_identifier.hpp"
 
 namespace vhdl {
@@ -20,7 +20,7 @@ namespace vhdl {
       }
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
       if (scanner->optional("(")) {
-        sensitivity = scanner->expect<BasicIdentifierList<CommaSeparation>>();
+        sensitivity = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
         scanner->expect(")");
       }
       scanner->expect(scanner::Scanner::VHDL_IS);

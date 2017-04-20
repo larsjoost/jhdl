@@ -24,7 +24,6 @@
 #include "../ast/array_type.hpp"
 #include "../ast/character.hpp"
 #include "../ast/basic_identifier.hpp"
-#include "../ast/basic_identifier_list.hpp"
 #include "../ast/report_statement.hpp"
 #include "../ast/if_statement.hpp"
 #include "../ast/forloop_statement.hpp"
@@ -83,9 +82,6 @@ namespace generator {
     void descendHierarchy(parameters& parm, std::string parentName = "");
     void ascendHierarchy(parameters& parm);
 
-    std::string physicalToString(parameters& parm, ast::Physical* p);
-    std::string numberToString(parameters& parm, ast::Number* i);
-    std::string characterToString(parameters& parm, ast::Character* i);
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
 
@@ -158,7 +154,8 @@ namespace generator {
     // definition.cpp
     template <typename Func>
     void createProcess(parameters& parm, Func func);
-    std::string createWait(parameters& parm, auto sensitivity);
+    template <typename Func>
+    std::string createWait(parameters& parm, auto sensitivity, Func func);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
@@ -184,8 +181,6 @@ namespace generator {
     std::string listToString(parameters& parm, std::list<T>& t, std::string delimiter, Func callback);
     template<class T, typename Func>
     std::string listToString(parameters& parm, std::list<T>* t, std::string delimiter, Func callback);
-    template<typename Func>
-    std::string listToString(parameters& parm, ast::BasicIdentifierList* list, std::string delimiter, Func callback);
     template<typename Func, class T>
     std::string listToString(parameters& parm, ast::List<T>* list, std::string delimiter, Func callback);
 
@@ -260,20 +255,6 @@ namespace generator {
     return s;
   }
 
-  template<typename Func>
-  std::string SystemC::listToString(parameters& parm, ast::BasicIdentifierList* list,
-                                    std::string delimiter, Func callback) {
-    std::string s = "";
-    if (list) {
-      std::string d = "";
-      for (ast::BasicIdentifier t : list->textList.list) {
-        s += (d + callback(basicIdentifierToString(parm, &t)));
-        d = delimiter;
-      }
-    }
-    return s;
-  }
-  
   template<typename Func, class T>
   std::string SystemC::listToString(parameters& parm, ast::List<T>* list,
                                     std::string delimiter, Func callback) {

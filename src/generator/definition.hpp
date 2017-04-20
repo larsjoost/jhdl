@@ -34,4 +34,13 @@ namespace generator {
     functionEnd("defineObject");
   }
 
+  template<typename Func>
+  std::string SystemC::createWait(parameters& parm, auto sensitivity, Func func) {
+    std::string s = listToString(parm, sensitivity, " || ", [&](auto s){return func(s) + ".EVENT()";}); 
+    if (s.size() == 0) {
+      return "wait();";
+    }
+    return "wait([&](){return " + s + ";});";
+  }
+
 }

@@ -81,5 +81,19 @@ namespace ast {
     }
     return true;
   }
+
+  std::string ObjectArgument::toString() {
+    return name + " : " + type.toString() + " := " + defaultValue;
+  }
+  
+  std::string ObjectArguments::toString() {
+    std::string delimiter = "";
+    std::string s = "";
+    for (auto& a : list) {
+      s += delimiter + a.toString();
+      delimiter = ", ";
+    }
+    return s;
+  }
   
 }

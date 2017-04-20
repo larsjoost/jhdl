@@ -19,6 +19,7 @@ namespace generator {
     std::list<DatabaseElement>* find(std::string& name);
     void print();
     static void print(DatabaseElement* e);
+    std::string getSection();
   };
   
 }

@@ -76,7 +76,7 @@ namespace generator {
   
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
     if (p) {
-      println(parm, "wait(" + numberToString(parm, p->physical->number) + ");");
+      println(parm, "wait(" + p->physical->number->toString() + ");");
     }
   }
 

@@ -1,6 +1,10 @@
 #include "name_map.hpp"
 
 namespace generator {
+
+  std::string NameMap::getSection() {
+    return section;
+  }
   
   void NameMap::add(std::string& name, DatabaseElement& e) {
     auto m = map.find(name);

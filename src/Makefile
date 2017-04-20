@@ -33,5 +33,6 @@ print-%:
 
 clean:
 	find . -name "*.o" -type f -delete
+	find . -name "*.d" -type f -delete
 	rm hdlc hdlf
 

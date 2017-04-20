@@ -74,6 +74,16 @@ namespace generator {
     return "";
   }
 
+  std::string SystemC::getArgumentNames(parameters& parm, ast::InterfaceList* interface) {
+   if (interface) {
+      return listToString(parm, &interface->interfaceElements, ", ",
+                          [](ast::InterfaceElement& e) {
+                            return e.object->identifier->toString(true);
+                          });
+    }
+    return "";
+  };
+    
   std::string SystemC::getArgumentNames(parameters& parm, ast::AssociationList* arguments) {
     if (arguments) {
       return listToString(parm, &arguments->associationElements, ", ",

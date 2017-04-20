@@ -2,9 +2,8 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "module.hpp"
-#include "basic_identifier.hpp"
+#include "list.hpp"
 #include "simple_identifier.hpp"
-#include "basic_identifier_list.hpp"
 
 namespace verilog {
   namespace parser {
@@ -15,7 +14,7 @@ namespace verilog {
       implementation = new ::ast::Implementation();
       interface->name = scanner->expect<SimpleIdentifier>();
       if (scanner->optional("(")) {
-        BasicIdentifierList* i = scanner->expect<BasicIdentifierList>();
+        auto i = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
         scanner->expect(")");
       }
       scanner->expect(";");
