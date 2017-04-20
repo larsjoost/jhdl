@@ -1,7 +1,7 @@
 #include "../../ast/scanner.hpp"
+#include "../../ast/object_type.hpp"
 #include "../scanner/scanner.hpp"
 #include "number.hpp"
-#include "object_type.hpp"
 
 namespace vhdl {
   namespace parser {

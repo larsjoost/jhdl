@@ -1,7 +1,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "report_statement.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 #include "expression.hpp"
 
 namespace vhdl {

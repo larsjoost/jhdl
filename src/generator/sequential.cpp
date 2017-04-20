@@ -8,7 +8,7 @@ namespace generator {
     std::string s = "";
     if (p) {
       functionStart("procedureCallStatementToString");
-      s = basicIdentifierToString(parm, p->name);
+      s = p->name->toString(true);
       functionEnd("procedureCallStatementToString");
     }
     return s;
@@ -24,7 +24,7 @@ namespace generator {
     if (p) {
       printSourceLine(parm, p->identifier);
       ExpressionParser expr(&database);
-      println(parm, basicIdentifierToString(parm, p->identifier) + " = " +
+      println(parm, p->identifier->toString(true) + " = " +
               expr.toString(p->expression) + ";");
     }
   }

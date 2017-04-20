@@ -14,4 +14,21 @@ namespace generator {
     std::cout << "      type      = " << ast::toString(id) << std::endl;
   }
 
+  std::string DatabaseResult::getName(bool fullName) {
+    std::string name = object->name;
+    if (fullName) {
+      if (local) {
+        for (int i=0; i < hierarchyLevel; i++) {
+          name = "p->" + name;
+        }
+      } else {
+        name =
+          object->library + "::" +
+          object->package + "::" +
+          name;
+      }
+    }
+    return name;
+  }
+
 }

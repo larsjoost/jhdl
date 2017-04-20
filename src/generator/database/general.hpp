@@ -31,6 +31,7 @@ namespace generator {
     int hierarchyLevel;
     bool local;
     DatabaseElement* object;
+    std::string getName(bool fullName);
   };
 
   using DatabaseResults = std::list<DatabaseResult>;

@@ -2,7 +2,6 @@
 #include "../scanner/scanner.hpp"
 #include "../../ast/signal_assignment_condition.hpp"
 #include "simple_identifier.hpp"
-#include "basic_identifier.hpp"
 #include "expression.hpp"
 #include "signal_assignment.hpp"
 
@@ -14,7 +13,7 @@ namespace vhdl {
         label = scanner->accept<SimpleIdentifier>();
         scanner->accept(":");
       }
-      identifier = scanner->accept<BasicIdentifier>();
+      identifier = scanner->accept<SimpleIdentifier>();
       scanner->accept("<=");
       do {
         ::ast::SignalAssignmentCondition s;

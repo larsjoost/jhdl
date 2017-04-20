@@ -2,8 +2,8 @@
 
 namespace generator {
   
-  void Database::append(std::string& library, Database& database) {
-    globalDatabase.append(library, database.localDatabase);
+  void Database::globalize(std::string& library) {
+    globalDatabase.append(library, localDatabase);
   }
 
   std::string Database::getParentName(int hierarchy) {
@@ -19,8 +19,8 @@ namespace generator {
     localDatabase.add(id, name, type); 
   }
 
-  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute) {
-    localDatabase.addAttribute(name, arguments, attribute);
+  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute) {
+    localDatabase.addAttribute(name, arguments, id, attribute);
   }
   void Database::addFunction(std::string& name, ast::ObjectArguments& arguments,
                              ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function) {

@@ -1,4 +1,4 @@
-DIRS := ast parser generator vhdl verilog
+DIRS := ast parser exceptions generator vhdl verilog 
 MAKEFILES := $(shell find $(DIRS) -type f -iname 'Makefile' -print)
 SUBDIRS := $(patsubst %/Makefile, %, $(MAKEFILES))
 SOURCE := $(shell find $(DIRS) -type f -iname '*.cpp' -print)

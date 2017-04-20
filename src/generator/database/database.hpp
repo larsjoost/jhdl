@@ -20,14 +20,14 @@ namespace generator {
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
   public:
 
-    void append(std::string& library, Database& database);
+    void globalize(std::string& library);
 
-    void addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute);
+    void addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute);
     void addFunction(std::string& name, ast::ObjectArguments& arguments,
                      ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function);
     void addProcedure(std::string& name, ast::ObjectArguments& arguments, ast::ProcedureDeclaration* procedures);
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments = ast::ObjectArguments(false));
-    void add(ast::ObjectType id, std::string& name, ast::ObjectValue type);
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::NONE);
 
     template<typename Func>
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");

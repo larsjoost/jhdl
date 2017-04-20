@@ -24,11 +24,11 @@ namespace generator {
   }
 
   void SystemC::descendHierarchy(parameters& parm, std::string parentName) {
-    parm.database.descendHierarchy(parentName);
+    database.descendHierarchy(parentName);
   }
 
   void SystemC::ascendHierarchy(parameters& parm) {
-    parm.database.ascendHierarchy();
+    database.ascendHierarchy();
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text& t) {

@@ -1,7 +1,7 @@
 
 #include "../../ast/scanner.hpp"
-#include "../../ast/expression_operator.hpp"
 #include "../scanner/scanner.hpp"
+#include "expression_operator.hpp"
 
 namespace vhdl {
   namespace parser {

@@ -40,6 +40,8 @@
 #include "../ast/subtype_declaration.hpp"
 #include "../ast/function_declaration.hpp"
 #include "../ast/function_body.hpp"
+#include "../ast/association_list.hpp"
+#include "../ast/association_element.hpp"
 
 namespace generator {
   
@@ -85,7 +87,6 @@ namespace generator {
     std::string numberToString(parameters& parm, ast::Number* i);
     std::string characterToString(parameters& parm, ast::Character* i);
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
-    std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* i);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
 
     // sequential.cpp
@@ -99,6 +100,7 @@ namespace generator {
     void forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
+    std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
     std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
     std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
@@ -115,6 +117,7 @@ namespace generator {
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
+    void rangeToString(ast::RangeType* r, std::string& left, std::string& right);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
@@ -142,8 +145,8 @@ namespace generator {
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
-    bool databaseFilter(DatabaseResults& objects, int number, ast::ObjectType type, ast::ObjectArguments& arguments, ast::Text* text);
     bool findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type);
+    void generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
     void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);

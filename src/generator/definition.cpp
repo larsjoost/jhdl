@@ -1,7 +1,7 @@
 #include "systemc.hpp"
 #include "definition.hpp"
 #include "sequential.hpp"
-#include "expression.hpp"
+#include "expression/expression.hpp"
 
 namespace generator {
 
@@ -28,7 +28,7 @@ namespace generator {
       printSourceLine(parm, forGenerateStatement->name);
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
-      parm.database.addObject(identifier, ast::VARIABLE);
+      database.add(ast::VARIABLE, identifier, ast::INTEGER);
       defineObject(parm,
                    name,
                    "SC_FOR_GENERATE",
@@ -99,8 +99,8 @@ namespace generator {
       {
         std::list<std::string> sensitivity;
         quiet = true;
-        signalAssignment(parm, s, [&](std::string baseName, std::string hierarchyName) {
-            sensitivity.push_back(hierarchyName);
+        signalAssignment(parm, s, [&](DatabaseResult& object) {
+            sensitivity.push_back(object.getName(false));
           });
         quiet = false;
         auto createBody = [&](parameters& parm) {

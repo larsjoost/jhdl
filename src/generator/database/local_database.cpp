@@ -45,7 +45,7 @@ namespace generator {
     add(name, e);
   }
 
-  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::Attribute* attribute) {
+  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute) {
     DatabaseResults results;
     find(results, name);
     if (!results.empty()) {

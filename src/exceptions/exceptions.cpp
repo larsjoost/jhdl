@@ -1,5 +1,6 @@
 #include "exceptions.hpp"
 
+bool Exceptions::colorsSupported;
 int Exceptions::numberOfErrors = 0;
 int Exceptions::numberOfWarnings = 0;
 

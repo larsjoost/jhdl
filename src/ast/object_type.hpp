@@ -33,7 +33,7 @@ namespace ast {
     std::string defaultValue = "";
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
     ObjectArgument(std::string name) : name(name) { type = USER_TYPE; }
-    ObjectArgument() {}
+    ObjectArgument() { type = UNKNOWN; }
     std::string toString();
   };
 

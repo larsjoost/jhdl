@@ -3,17 +3,17 @@
 #define AST_PROCEDURECALLSTATEMENT_H_
 
 #include "list.hpp"
-#include "basic_identifier.hpp"
+#include "simple_identifier.hpp"
 
 namespace ast {
 
-  class BasicIdentifier;
+  class SimpleIdentifier;
   
   class ProcedureCallStatement {
     
   public:
 
-    BasicIdentifier* name;
+    SimpleIdentifier* name;
     
   };
 
