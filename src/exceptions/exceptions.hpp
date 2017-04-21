@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <string>
 #include <unistd.h>
+#include <cstring>
 
 #include "../ast/text.hpp"
 
@@ -15,7 +16,7 @@ class Exceptions {
   const static int YELLOW = 34; 
   const static int BLUE = 34; 
   
-  static bool colorsSupported;
+  bool colorsSupported = false;
 
   static int numberOfErrors;
   static int numberOfWarnings;
@@ -26,7 +27,12 @@ class Exceptions {
 public:
 
   Exceptions() {
-    colorsSupported = isatty(fileno(stdout));
+    if (isatty(STDERR_FILENO)) {
+      char* term = getenv("TERM");
+      if (term && strcmp(term, "dumb")) {
+        colorsSupported = true;
+      }
+    }
   };
   
   void printError(std::string message, ast::Text* text = NULL);
