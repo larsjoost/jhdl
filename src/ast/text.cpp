@@ -120,6 +120,7 @@ namespace ast {
         if (a == '\n') {
           done = true;
         } else {
+          if (a == '\t') {a = ' ';}
           s += a;
         }
       } while (!done);

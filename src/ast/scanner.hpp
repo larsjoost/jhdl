@@ -39,10 +39,20 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   class Scanner : public TokenScanner<ApplicationSpecificScanner>{
 
-    Exceptions expections;
+    Exceptions exceptions;
     
-    void print(const std::string &severity, const std::string &message);
+    template <typename Func>
+    void print(Func print) {
+      Token* t = tokenLookAhead(0);
+      std::string message = "Found " + toString(t);
+      if (verbose) {
+        message += "[" + std::to_string(getTokenPosition()) + "]";
+      }
+      print(&t->text, message);
+    }
 
+    void printCurrentLine();
+    
     void debug(const std::string &message);
 
     int number_of_errors = 0;
@@ -153,31 +163,27 @@ namespace ast {
   };  
 
   template <class ApplicationSpecificScanner>
-  void Scanner<ApplicationSpecificScanner>::print(const std::string &severity, const std::string &text) {
-    Token* t = tokenLookAhead(0);
-    std::string message = "Found " + toString(t);
-    if (verbose) {
-      message += "[" + std::to_string(getTokenPosition()) + "]";
-    }
-    t->text.printException(severity, message);
-  }
-
-  template <class ApplicationSpecificScanner>
   void Scanner<ApplicationSpecificScanner>::error(const std::string &s)
   {
     number_of_errors++;
-    print("error", s);
+    print([&](ast::Text* text, std::string& message) {
+        exceptions.printError(message + s, text);
+      });
     throw SyntaxError();
   }
 
   template <class ApplicationSpecificScanner>
   void Scanner<ApplicationSpecificScanner>::warning(const std::string &s) {
-    print("warning", s);
+    print([&](ast::Text* text, std::string& message) {
+        exceptions.printWarning(message + s, text);
+      });
   }
   
   template <class ApplicationSpecificScanner>
   void Scanner<ApplicationSpecificScanner>::critical(const std::string &s) {
-    print("critical", s);
+    print([&](ast::Text* text, std::string& message) {
+        exceptions.printError(message + s, text);
+      });
     throw CriticalError();
   }
 
@@ -214,11 +220,18 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
+  void Scanner<ApplicationSpecificScanner>::printCurrentLine() {
+    std::cout << tokenLookAhead(0)->text.getCurrentLine() << std::endl;
+    std::cout << tokenLookAhead(0)->text.getCurrentLinePositionMarker() << std::endl;
+  }
+  
+  
+  template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::optional(const char* t) {
     int len = match(t);
     DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
     if (verbose) {
-      tokenLookAhead(0)->text.printLinePosition(std::cout);
+      printCurrentLine();
     }
     if (len > 0) {
       nextToken(len);
@@ -231,7 +244,7 @@ namespace ast {
     bool m = match(t);
     DEBUG("optional '" + std::to_string(t) + "'");
     if (verbose) {
-      tokenLookAhead(0)->text.printLinePosition(std::cout);
+      printCurrentLine();
     }
     if (m) {
       nextToken();

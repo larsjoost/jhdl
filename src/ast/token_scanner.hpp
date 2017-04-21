@@ -19,6 +19,8 @@
 #include "list.hpp"
 #include "identifier.hpp"
 
+#include "../exceptions/exceptions.hpp"
+
 #define DEBUG_ENABLE
 
 namespace ast {
@@ -42,6 +44,8 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   class TokenScanner {
 
+    Exceptions exceptions;
+    
     bool skippedWhiteSpace = false;
   public:
 
@@ -71,8 +75,6 @@ namespace ast {
     
     int number_of_errors = 0;
     
-    void print(const std::string &severity, const std::string &message);
-
   protected:
     
     bool verbose = false;
@@ -502,26 +504,21 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  void TokenScanner<ApplicationSpecificScanner>::print(const std::string &severity, const std::string &text) {
-    this->text.printException(severity, text);
-  }
-  
-  template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::error(const std::string &s)
   {
     number_of_errors++;
-    print("error", s);
+    exceptions.printError(s, &text);
     throw SyntaxError();
   }
 
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::warning(const std::string &s) {
-    print("warning", s);
+    exceptions.printWarning(s, &text);
   }
   
   template <class ApplicationSpecificScanner>
   void TokenScanner<ApplicationSpecificScanner>::critical(const std::string &s) {
-    print("critical", s);
+    exceptions.printError(s, &text);
     throw CriticalError();
   }
 
