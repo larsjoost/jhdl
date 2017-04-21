@@ -59,7 +59,7 @@ namespace generator {
                             std::string& name);
     
     template <typename Func>
-    std::string attributeToString(std::string& name,
+    std::string attributeToString(std::string name,
                                   ast::ObjectArguments& arguments,
                                   ast::ObjectValueContainer& expectedType,
                                   ast::Text* attribute,
@@ -269,7 +269,7 @@ namespace generator {
   }
 
   template <typename Func>
-  std::string ExpressionParser::attributeToString(std::string& name,
+  std::string ExpressionParser::attributeToString(std::string name,
                                                   ast::ObjectArguments& arguments,
                                                   ast::ObjectValueContainer& expectedType,
                                                   ast::Text* attribute,
@@ -285,13 +285,13 @@ namespace generator {
       };
     DatabaseResults objects;
     database->findAll(objects, name, valid);
-    name = attribute->toString(true);
+    std::string attributeName = attribute->toString(true);
     DatabaseResult match;
-    if (findAttributeMatch(objects, match, expectedType, name)) {
+    if (findAttributeMatch(objects, match, expectedType, attributeName)) {
       assert(match.object);
       bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
       std::string seperator = objectMatch ? "." : "<>::";
-      name = seperator + name;
+      name = name + seperator + attributeName;
       if (associationList) {
         std::string a = "";
         std::string delimiter = "";
@@ -302,7 +302,7 @@ namespace generator {
         name += "(" + a + ")";
       }
     } else {
-      exceptions.printError("Could not find match for attribute \"" + name + "\"", attribute);
+      exceptions.printError("Could not find match for attribute \"" + attributeName + "\"", attribute);
     }
     return name;
   }
