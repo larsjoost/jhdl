@@ -27,6 +27,7 @@ namespace generator {
     ast::ProcedureDeclaration* procedure;
     ast::Text* text;
     void print();
+    std::string toString();
   };
   
   struct DatabaseResult {
@@ -34,6 +35,7 @@ namespace generator {
     bool local;
     DatabaseElement* object;
     std::string getName(bool fullName);
+    std::string toString();
   };
 
   using DatabaseResults = std::list<DatabaseResult>;

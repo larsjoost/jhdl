@@ -2,13 +2,31 @@
 
 namespace generator {
 
+  void ExpressionParser::functionStart(std::string name) {
+    if (verbose) {
+      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
+    }
+  }
+
+  void ExpressionParser::functionEnd(std::string name) {
+    if (verbose) {
+      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
+    }
+  }
+
   std::string ExpressionParser::toString(ast::Expression* e, ast::ObjectValueContainer& expectedType) {
-    return toString(e, expectedType, [&](DatabaseResult& object) {});
+    functionStart("toString");
+    std::string s = toString(e, expectedType, [&](DatabaseResult& object) {});
+    functionEnd("toString");
+    return s;
   }
 
   std::string ExpressionParser::toString(ast::Expression* expr, ast::ObjectValue expectedType) {
-    ast::ObjectValueContainer e = ast::ObjectValueContainer(expectedType);
-    return toString(expr, e);
+    functionStart("toString");
+    ast::ObjectValueContainer e(expectedType);
+    std::string s = toString(expr, e);
+    functionEnd("toString");
+    return s;
   }
 
 
@@ -24,11 +42,13 @@ namespace generator {
   }
 
   ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {
+    functionStart("expressionReturnTypes");
     assert(e);
+    ReturnTypes result;
     if (e->parenthis) {
-      expressionReturnTypes(e->parenthis);
+      result = expressionReturnTypes(e->parenthis);
     } else if (e->unaryOperator) {
-      return expressionReturnTypes(e->expression);
+      result = expressionReturnTypes(e->expression);
     } else if (e->op) {
       ReturnTypes term = expressionTermReturnTypes(e->term);
       ReturnTypes expr = expressionReturnTypes(e->expression);
@@ -39,31 +59,33 @@ namespace generator {
           result.insert(result.end(), t.begin(), t.end());
         }
       }
-      return result;
     } else {
-      return expressionTermReturnTypes(e->term);
+      result = expressionTermReturnTypes(e->term);
     }
-    assert(false);
+    functionEnd("expressionReturnTypes");
+    return result;
   }
 
   ExpressionParser::ReturnTypes ExpressionParser::expressionTermReturnTypes(ast::ExpressionTerm* e) {
+    functionStart("expressionTermReturnTypes");
     assert(e);
+    ReturnTypes result;
     if (e->physical) {
-      return {ast::ObjectValueContainer(ast::PHYSICAL, e->physical->unit->toString(true))};
+      result = {ast::ObjectValueContainer(ast::PHYSICAL, e->physical->unit->toString(true))};
+    } else if (e->number) {
+      result = {ast::ObjectValueContainer(e->number->type)};
+    } else if (e->text) {
+      result = {ast::ObjectValueContainer(ast::TEXT)};
+    } else if (e->identifier) {
+      result = basicIdentifierReturnTypes(e->identifier);
+    } else if (e->character) {
+      result = {ast::ObjectValueContainer(ast::CHARACTER)};
+    } else {
+      exceptions.printInternal("Unknown expression term");
+      assert(false);
     }
-    if (e->number) {
-      return {ast::ObjectValueContainer(e->number->type)};
-    }
-    if (e->text) {
-      return {ast::ObjectValueContainer(ast::TEXT)};
-    }
-    if (e->identifier) {
-      return basicIdentifierReturnTypes(e->identifier);
-    }
-    if (e->character) {
-      return {ast::ObjectValueContainer(ast::CHARACTER)};
-    }
-    assert(false);
+    functionStart("expressionTermReturnTypes");
+    return result;
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(ast::AssociationList* associationList) {
@@ -94,37 +116,60 @@ namespace generator {
   
   ExpressionParser::ReturnTypes ExpressionParser::attributeReturnTypes(std::string& name, std::string& attribute,
                                                                        ast::AssociationList* associationList) {
+    functionStart("attributeReturnTypes");
+    ReturnTypes result;
     ast::ObjectArguments arguments = toObjectArguments(associationList);
-    
+    auto valid = [&](DatabaseElement* e) {
+      return true;
+    };
+    DatabaseResult object;
+    if (database->findOne(object, name, valid)) {
+      result.push_back(object.object->type);
+    } else {
+      exceptions.printError("Could not resolve type of attribute \"" + attribute + "\" of \"" + name + "\"");
+    }
+    functionEnd("attributeReturnTypes");
+    return result;
   }
 
   ExpressionParser::ReturnTypes ExpressionParser::basicIdentifierReturnTypes(ast::BasicIdentifier* b) {
+    functionStart("basicIdentifierReturnTypes");
+    ReturnTypes result;
     std::string name = b->text.toString(true);
     if (b->attribute) {
       std::string attribute = b->attribute->toString(true);
-      return attributeReturnTypes(name, attribute, b->arguments);
+      result = attributeReturnTypes(name, attribute, b->arguments);
     } else if (b->arguments) {
-      return functionReturnTypes(name, b->arguments); 
+      result = functionReturnTypes(name, b->arguments); 
     } else {
       auto valid = [&](DatabaseElement* e) {
         return e->arguments.empty();
       };
-      return getReturnTypes(name, valid);
+      result = getReturnTypes(name, valid);
     }
+    functionEnd("basicIdentifierReturnTypes");
+    return result;
   }
  
   ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
                                                                std::string attributeName) {
-    static std::unordered_map<std::string, ast::ObjectValueContainer> t =
+    static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
       {{"IMAGE", ast::ObjectValueContainer(ast::USER_TYPE, "STRING")},
-       {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)},
-       {"HIGH", ast::ObjectValueContainer(ast::INTEGER)}};
-    auto i = t.find(attributeName);
-    if (i != t.end()) {
+       {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)}};
+    auto i = fixedAttributeTypes.find(attributeName);
+    if (i != fixedAttributeTypes.end()) {
       return i->second;
     } else {
-      exceptions.printError("Could not resolve type of attribute " + attributeName);
-      assert(false);
+      if (attributeName == "HIGH") {
+        switch(type.value) {
+        case ast::INTEGER: return ast::ObjectValueContainer(ast::INTEGER); break;
+        case ast::PHYSICAL: return ast::ObjectValueContainer(ast::PHYSICAL); break;
+        default: exceptions.printError("Could not find attribute \"HIGH\" of type " + type.toString()); 
+        };
+      } else {
+        exceptions.printError("Could not resolve type of attribute " + attributeName);
+        assert(false);
+      }
     }
   }
   
@@ -136,11 +181,13 @@ namespace generator {
     for (auto& i : objects) {
       ast::ObjectValueContainer a = getAttributeType(i.object->type, name);
       if (expectedType.equals(a)) {
-        if (!match.object) {
+        if (!foundMatch) {
           match = i;
           foundMatch = true;
         } else {
-          exceptions.printError("Found more than one attribute match");
+          exceptions.printError("Found more than one attribute match on " + name);
+          exceptions.printError("Last match = " + match.toString());
+          exceptions.printError("New match = " + i.toString());
         }
       }
     }

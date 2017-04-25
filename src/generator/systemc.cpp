@@ -182,16 +182,17 @@ namespace generator {
     return value;
   }
 
-  void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right) {
+  void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type) {
     assert(r);
     ExpressionParser expr(&database);
-    left = expr.toString(r->left);
-    right = expr.toString(r->right);
+    left = expr.toString(r->left, type);
+    right = expr.toString(r->right, type);
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     std::string left, right;
-    rangeToString(r, left, right);
+    ast::ObjectValueContainer type(ast::INTEGER);
+    rangeToString(r, left, right, type);
     println(parm, "using " + name + "_type = decltype(" + left + ");"); 
     println(parm, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
   }
@@ -203,7 +204,8 @@ namespace generator {
     ast::PhysicalType* p = n->physical;
     assert(p);
     std::string left, right;
-    rangeToString(r, left, right);
+    ast::ObjectValueContainer type(ast::PHYSICAL);
+    rangeToString(r, left, right, type);
     std::string s = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    return e.unit->toString(true);
@@ -247,9 +249,9 @@ namespace generator {
    * using TYPE_T = Array<TYPE_T_type, T>;
   */
   
-  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName) {
+  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type) {
     std::string left, right;
-    rangeToString(r, left, right);
+    rangeToString(r, left, right, type);
     std::string rangeName = name + "_range";
     println(parm, "struct " + rangeName + " {");
     parm.incIndent();
@@ -265,7 +267,8 @@ namespace generator {
     assert(r);
     if (r->range) {
       std::string left, right;
-      rangeToString(r->range, left, right);
+      ast::ObjectValueContainer type(ast::INTEGER);
+      rangeToString(r->range, left, right, type);
       println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
     } else if (r->subtype) {
       std::string id = r->subtype->identifier->toString(true);
@@ -284,11 +287,19 @@ namespace generator {
   */
   std::string SystemC::subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t) {
     assert(t);
-    value = ast::ObjectValueContainer(ast::INTEGER);
     std::string typeName = t->name->toString(true);
-    if (t->range) {
-      printSubtype(parm, name, t->range, typeName);
-      return name;
+    auto valid = [&](DatabaseElement* e) {
+      return e->id == ast::TYPE;
+    };
+    DatabaseResult object;
+    if (database.findOne(object, typeName, valid)) { 
+      value = object.object->type;
+      if (t->range) {
+        printSubtype(parm, name, t->range, typeName, value);
+        return name;
+      }
+    } else {
+      exceptions.printError("Could not fin type \"" + typeName + "\"", &t->name->text);
     }
     return typeName;
   }

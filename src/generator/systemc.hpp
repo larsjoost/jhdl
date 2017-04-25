@@ -113,12 +113,11 @@ namespace generator {
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
-    void rangeToString(ast::RangeType* r, std::string& left, std::string& right);
+    void rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
-    void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName);
+    void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type);
     std::string subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t);
-    void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);
@@ -136,6 +135,7 @@ namespace generator {
                                       bool initialization);
     
     // declarations.cpp
+    void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     std::string getInterface(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);

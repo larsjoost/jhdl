@@ -24,11 +24,14 @@ void Exceptions::print(std::string severity, int color, std::string& message, as
   std::cerr << colorCode(RESET);
 }
 
+void Exceptions::printInternal(std::string message, ast::Text* text) {
+  print("Internal", RED, message, text);
+}
+
 void Exceptions::printError(std::string message, ast::Text* text) {
   numberOfErrors++;
   print("Error", RED, message, text);
 }
-
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
   numberOfWarnings++;

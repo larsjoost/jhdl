@@ -14,6 +14,14 @@ namespace generator {
     std::cout << "      type      = " << ast::toString(id) << std::endl;
   }
 
+  std::string DatabaseElement::toString() {
+    return "name = " + name + ", type = " + ast::toString(id);
+  }
+
+  std::string DatabaseResult::toString() {
+    return object ? object->toString() : "NIL";
+  }
+  
   std::string DatabaseResult::getName(bool fullName) {
     std::string name = object->name;
     if (fullName) {

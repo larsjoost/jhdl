@@ -12,7 +12,11 @@ namespace generator {
 
   class ExpressionParser {
 
+    bool verbose;
     Database* database;
+
+    void functionStart(std::string name);
+    void functionEnd(std::string name);
 
     Exceptions exceptions;
     
@@ -79,7 +83,7 @@ namespace generator {
 
   public:
 
-    ExpressionParser(Database* database) : database(database) {}
+    ExpressionParser(Database* database, bool verbose = false) : database(database), verbose(verbose) {}
   
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValueContainer& expectedType, Func sensitivityListCallback);
@@ -94,16 +98,24 @@ namespace generator {
   std::string ExpressionParser::toString(ast::Expression* e,
                                          ast::ObjectValueContainer& expectedType,
                                          Func sensitivityListCallback) {
+    functionStart("toString");
     // First-pass: Collect the possible return types
     ReturnTypes o = expressionReturnTypes(e);
     // Second-pass: Resolve the return type and convert to string
-    return expressionToString(e, expectedType, sensitivityListCallback);
+    std::string s = expressionToString(e, expectedType, sensitivityListCallback);
+    functionEnd("toString");
+    return s;
   }
 
   template <typename Func>
-  std::string ExpressionParser::toString(ast::Expression* expr, ast::ObjectValue expectedType, Func sensitivityListCallback) {
-    ast::ObjectValueContainer e = ast::ObjectValueContainer(expectedType);
-    return toString(expr, e, sensitivityListCallback);
+  std::string ExpressionParser::toString(ast::Expression* expr,
+                                         ast::ObjectValue expectedType,
+                                         Func sensitivityListCallback) {
+    functionStart("toString");
+    ast::ObjectValueContainer e(expectedType);
+    std::string s = toString(expr, e, sensitivityListCallback);
+    functionEnd("toString");
+    return s;
   }
     
   template<typename Func>
@@ -190,9 +202,11 @@ namespace generator {
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback) {
+    functionStart("expressionToString");
     assert(e);
+    std::string result;
     if (e->parenthis) {
-      return "(" + expressionToString(e->parenthis, expectedType, sensitivityListCallback) + ")";
+      result = "(" + expressionToString(e->parenthis, expectedType, sensitivityListCallback) + ")";
     } else if (e->unaryOperator) {
       std::string op;
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
@@ -201,15 +215,17 @@ namespace generator {
       case ::ast::UnaryOperator::MINUS: {op = "-"; break;}
       default: {assert (false);}
       }
-      return op + expr;
+      result = op + expr;
     } else if (e->op) {
       std::string op;
       std::string term = expressionTermToString(e->term, expectedType, sensitivityListCallback);
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
-      return term + " " + op + " " + expr;
+      result = term + " " + op + " " + expr;
     } else {
-      return expressionTermToString(e->term, expectedType, sensitivityListCallback);
+      result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
+    functionEnd("expressionToString");
+    return result;
   }
 
   template <typename Func>
@@ -302,7 +318,8 @@ namespace generator {
         name += "(" + a + ")";
       }
     } else {
-      exceptions.printError("Could not find match for attribute \"" + attributeName + "\"", attribute);
+      exceptions.printError("Could not find match for attribute \"" + attributeName +
+                            "\" with expected type " + expectedType.toString(), attribute);
     }
     return name;
   }
