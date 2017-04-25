@@ -308,15 +308,15 @@ namespace generator {
       bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
       std::string seperator = objectMatch ? "." : "<>::";
       name = name + seperator + attributeName;
+      std::string a = "";
       if (associationList) {
-        std::string a = "";
         std::string delimiter = "";
         for (auto& i : associationList->associationElements.list) {
           a = delimiter + expressionToString(i.actualPart, match.object->type, sensitivityListCallback);
           delimiter = ", ";
         }
-        name += "(" + a + ")";
       }
+      name += "(" + a + ")";
     } else {
       exceptions.printError("Could not find match for attribute \"" + attributeName +
                             "\" with expected type " + expectedType.toString(), attribute);

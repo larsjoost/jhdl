@@ -235,6 +235,7 @@ namespace generator {
       std::string name = t->identifier->toString(true);
       ast::ObjectValueContainer value;
       subtypeIndication(parm, value, name, t->type);
+      database.add(ast::TYPE, name, value);
     }
   }
 
