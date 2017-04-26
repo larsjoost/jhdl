@@ -51,11 +51,12 @@ namespace generator {
   }
 
   bool Database::setVisible(std::string& name, std::string package, std::string library) {
-    globalDatabase.setVisible(name, package, library);
+    std::string n = (name == "ALL") ? "" : name;
+    globalDatabase.setVisible(n, package, library);
   }
 
-  bool Database::exists(std::string& name) {
-    return globalDatabase.exists(name);
+  bool Database::exists(std::string& library, std::string& package) {
+    return globalDatabase.exists(library, package);
   }
 
   void Database::print(std::string name) {

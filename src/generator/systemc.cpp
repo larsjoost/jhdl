@@ -50,7 +50,9 @@ namespace generator {
   }
 
   void SystemC::addLibraryInfo(std::string section, std::string name, std::string filename) {
-    libraryInfo.add(section, name, filename);
+    if (!quiet) {
+      libraryInfo.add(section, name, filename);
+    }
   }
   
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {

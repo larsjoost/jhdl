@@ -52,7 +52,7 @@ namespace generator {
 
     std::string getParentName(int hierarchy = 0);
 
-    bool exists(std::string& name);
+    bool exists(std::string& library, std::string& package);
 
     void print(std::string name = "");
   };

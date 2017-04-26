@@ -5,31 +5,19 @@
 
 namespace generator {
 
-  void SystemC::makeVisible(std::string& identifier,
-                            std::string& package,
-                            ast::Text* text) {
-    if ("ALL" == identifier) {
-      if (!database.setVisible(package)) {
-        exceptions.printError("Could not find package " + package, text);
-      }
-    } else {
-      if (!database.setVisible(package, identifier)) {
-        exceptions.printError("Could not find package " + package, text);
-      }
-    }
-  };
-
   void SystemC::loadPackage(parameters& parm, std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
     functionStart("loadPackage(library = " + library + ", name = " + package + ")");
-    if (!database.exists(package)) {
+    if (!database.exists(library, package)) {
       parsePackage(parm, package, library);
     }
-    if (database.exists(package)) {
-      makeVisible(identifier, package, text);
+    if (database.exists(library, package)) {
+      if (!database.setVisible(identifier, package, library)) {
+        exceptions.printError("Could not find " + identifier + " in package " + package + " of library " + library, text);
+      }
     } else {
-      exceptions.printError("Did not find package " + package, text);
+      exceptions.printError("Did not find package " + package + " in library " + library, text);
     }
     functionEnd("loadPackage");
   }

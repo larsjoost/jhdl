@@ -14,48 +14,27 @@ namespace generator {
     }
   }
 
-  void GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string& package,
-                            std::unordered_map<std::string, LocalDatabase>& map) {
-    if (package.empty()) {
-      for (auto& i : map) {
-        i.second.find(results, name);
-      }
-    } else {
-      auto i = map.find(package);
-      if (i != map.end()) {
-        return i->second.find(results, name);
-      }
-    }
-    
-  }
-
-  void GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
-    if (library.empty()) {
-      for (auto& i : map) {
-        find(results, name, package, i.second);
-      }
-    } else {
-      auto i = map.find(library);
-      if (i != map.end()) {
-        find(results, name, package, i->second);
-      }
-    }
+  bool GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
+    auto func = [&](LocalDatabase& l) {
+      l.find(results, name);
+    };
+    return traverse(package, library, func);
   }
 
   bool GlobalDatabase::setVisible(std::string name, std::string package, std::string library) {
-    bool found = false;
-    DatabaseResults results;
-    find(results, name, package, library);
-    for (auto& i : results) {
-      found = true;
-      i.object->visible = true;
-    }
-    return found;
+    auto func = [&](LocalDatabase& l) {
+      l.setVisible(name);
+    };
+    return traverse(package, library, func);
   }
 
-  bool GlobalDatabase::exists(std::string& name) {
-    auto i = map.find(name);
-    return (i == map.end()) ? false : true;
+  bool GlobalDatabase::exists(std::string& library, std::string& package) {
+    auto i = map.find(library);
+    if (i != map.end()) {
+      auto j = i->second.find(package);
+      return j == i->second.end() ? false : true;
+    }
+    return false;
   }
 
   void GlobalDatabase::print(std::unordered_map<std::string, LocalDatabase>& m) {
