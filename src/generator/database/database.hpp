@@ -20,7 +20,7 @@ namespace generator {
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
   public:
 
-    void globalize(std::string& library);
+    void globalize();
 
     void addAttribute(std::string& name, ast::ObjectArguments& arguments,
                       ast::ObjectType id, ast::Attribute* attribute,
@@ -41,7 +41,10 @@ namespace generator {
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
-    
+
+    void setLibrary(std::string& name);
+    void setPackage(std::string& name);
+
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 

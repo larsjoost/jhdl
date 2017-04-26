@@ -1,35 +1,51 @@
+#include <cassert>
+
 #include "database.hpp"
 
 namespace generator {
   
+  void LocalDatabase::setLibrary(std::string& name) {
+    library = name;
+  }
+
+  std::string LocalDatabase::getLibrary() {
+    assert(library.size() > 0);
+    return library;
+  }
+
+  void LocalDatabase::setPackage(std::string& name) {
+    package = name;
+  }
+
+  std::string LocalDatabase::getPackage() {
+    assert(package.size() > 0);
+    return package;
+  }
+
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
     map.back().add(name, e);
   }
   
-  void LocalDatabase::find(DatabaseResults& results, std::string& name, std::string package) {
-    if (package.empty() || package == this->package) {
-      int hierarchyLevel = 0;
-      for (auto i = map.begin(); i != map.end(); i++) {
-        std::list<DatabaseElement>* e = i->find(name);
-        if (e) {
-          for (auto& j : *e) {
-            DatabaseResult r;
-            r.hierarchyLevel = hierarchyLevel;
-            r.object = &j;
-            results.push_back(r);
-          }
+  void LocalDatabase::find(DatabaseResults& results, std::string& name) {
+    int hierarchyLevel = 0;
+    for (auto i = map.begin(); i != map.end(); i++) {
+      std::list<DatabaseElement>* e = i->find(name);
+      if (e) {
+        for (auto& j : *e) {
+          DatabaseResult r;
+          r.hierarchyLevel = hierarchyLevel;
+          r.object = &j;
+          results.push_back(r);
         }
-        hierarchyLevel++;
       }
+      hierarchyLevel++;
     }
   }
 
-  bool LocalDatabase::setVisible(std::string name, std::string package) {
+  bool LocalDatabase::setVisible(std::string name) {
     bool found = false;
-    if (package.empty() || package == this->package) {
-      for (auto& i : map) {
-        found |= i.setVisible(name);
-      }
+    for (auto& i : map) {
+      found |= i.setVisible(name);
     }
     return found;
   }

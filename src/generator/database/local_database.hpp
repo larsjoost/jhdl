@@ -20,11 +20,11 @@ namespace generator {
 
   public:
            
-    void find(DatabaseResults& results, std::string& name, std::string package = "");
+    void find(DatabaseResults& results, std::string& name);
 
     int getHierarchyLevel(std::string& name);
     
-    bool setVisible(std::string name = "", std::string package = "");
+    bool setVisible(std::string name = "");
 
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
              ast::ObjectArguments arguments = ast::ObjectArguments(false),
@@ -39,7 +39,11 @@ namespace generator {
     void addProcedure(std::string& name, ast::ObjectArguments& arguments,
                       ast::ProcedureDeclaration* procedures,
                       ast::Text* text = NULL);
-    
+
+    void setLibrary(std::string& name);
+    std::string getLibrary();
+    void setPackage(std::string& name);
+    std::string getPackage();
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 

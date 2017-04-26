@@ -2,8 +2,16 @@
 
 namespace generator {
   
-  void Database::globalize(std::string& library) {
-    globalDatabase.append(library, localDatabase);
+  void Database::setLibrary(std::string& name) {
+    localDatabase.setLibrary(name);
+  }
+
+  void Database::setPackage(std::string& name) {
+    localDatabase.setPackage(name);
+  }
+
+  void Database::globalize() {
+    globalDatabase.append(localDatabase);
   }
 
   std::string Database::getParentName(int hierarchy) {

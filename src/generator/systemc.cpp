@@ -346,6 +346,8 @@ namespace generator {
       functionStart("packageDeclaration(library = " + library + ")");
       std::string name = package->name->toString(true);
       addLibraryInfo("package", name, filename);
+      database.setLibrary(library);
+      database.setPackage(name);
       descendHierarchy(parm, name);
       if (!package->body) {
         println(parm, "");
@@ -360,7 +362,7 @@ namespace generator {
         parm.decIndent();
         println(parm, "} " + name + ";");
       }
-      database.globalize(library);
+      database.globalize();
       ascendHierarchy(parm);
       functionEnd("packageDeclaration");
     }
