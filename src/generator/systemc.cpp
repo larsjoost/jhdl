@@ -50,21 +50,22 @@ namespace generator {
   }
 
   void SystemC::addLibraryInfo(std::string section, std::string name, std::string filename) {
-    if (!quiet) {
-      libraryInfo.add("package", name, filename);
-    }
+    libraryInfo.add(section, name, filename);
   }
   
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
+    functionStart("parse");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause);
-      packageDeclaration(parm, it.module.package);
+      packageDeclaration(parm, it.module.package, library);
       interfaceDeclaration(parm, it.module.interface);
       implementationDeclaration(parm, it.module.implementation);
     }
+    functionEnd("parse");
   }
 
   void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
+    functionStart("parsePackage(library = " + library + ", name = " + name + ")");
     std::string stdPath = config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
@@ -74,12 +75,18 @@ namespace generator {
         filename = stdPath + "/" + filename;
         bool q = quiet;
         quiet = true;
-        auto parserDesignFile = parser::DesignFile(verbose);
+        parser::DesignFile parserDesignFile;
         parserDesignFile.parse(filename);
         parse(parm, parserDesignFile, library);
+        database.print();
         quiet = q;
+      } else {
+        exceptions.printError("Could not resolve filename of package \"" + name + "\"");
       }
+    } else {
+      exceptions.printError("Could not find library \"" + library + "\" is [hdl] section of config file");
     }
+    functionEnd("parsePackage");
   }
   
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
@@ -334,10 +341,11 @@ namespace generator {
     }
   }
 
-  void SystemC::packageDeclaration(parameters& parm, ast::Package* package) {
+  void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {
-      functionStart("package");
+      functionStart("packageDeclaration(library = " + library + ")");
       std::string name = package->name->toString(true);
+      addLibraryInfo("package", name, filename);
       descendHierarchy(parm, name);
       if (!package->body) {
         println(parm, "");
@@ -352,8 +360,9 @@ namespace generator {
         parm.decIndent();
         println(parm, "} " + name + ";");
       }
+      database.globalize(library);
       ascendHierarchy(parm);
-      functionEnd("package");
+      functionEnd("packageDeclaration");
     }
   }
 

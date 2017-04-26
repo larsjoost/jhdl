@@ -50,6 +50,8 @@ namespace generator {
     std::string getParentName(int hierarchy = 0);
 
     bool exists(std::string& name);
+
+    void print(std::string name = "");
   };
 
   template<typename Func>

@@ -22,6 +22,7 @@ namespace generator {
   void SystemC::loadPackage(parameters& parm, std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
+    functionStart("loadPackage(library = " + library + ", name = " + package + ")");
     if (!database.exists(package)) {
       parsePackage(parm, package, library);
     }
@@ -30,6 +31,7 @@ namespace generator {
     } else {
       exceptions.printError("Did not find package " + package, text);
     }
+    functionEnd("loadPackage");
   }
   
   void SystemC::includes(parameters& parm, ast::ContextClause* contextClause) {

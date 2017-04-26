@@ -50,6 +50,13 @@ namespace generator {
     return globalDatabase.exists(name);
   }
 
+  void Database::print(std::string name) {
+    std::cout << "Local Database:" << std::endl;
+    localDatabase.print();
+    std::cout << "Global Database:" << std::endl;
+    globalDatabase.print(name);
+  }
+  
 }
   
 

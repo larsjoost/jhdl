@@ -4,7 +4,11 @@
 namespace generator {
   
   void GlobalDatabase::append(std::string& name, LocalDatabase& d) {
-    map[name] = d;
+    if (exists(name)) {
+      
+    } else {
+      map[name] = d;
+    }
   }
 
   void GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
@@ -42,9 +46,9 @@ namespace generator {
 
   void GlobalDatabase::print(std::string name) {
     if (name.empty()) {
-      for (auto i = map.begin(); i != map.end(); i++) {
-        std::cout << "[GLOBAL] = " << i->first << std::endl;
-        i->second.print();
+      for (auto& i = map) {
+        std::cout << "[GLOBAL] = " << i.first << std::endl;
+        i.second.print();
       }
     } else {
       auto i = map.find(name);

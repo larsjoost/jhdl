@@ -7,21 +7,23 @@
 namespace generator {
 
    void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
-    if (t) {
-      assert(t->typeDefinition);
-      std::string name = t->identifier->toString(true);
-      ast::ObjectValueContainer value;
-      if (t->typeDefinition->numberType) {
-        value = numberType(parm, t->identifier, t->typeDefinition->numberType);
-      } else if (t->typeDefinition->enumerationType) {
-        value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
-      } else if (t->typeDefinition->arrayType) {
-        value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
-      } else {
-        assert(false);
-      }
-      database.add(ast::TYPE, name, value);
-    }
+     if (t) {
+       functionStart("type_declarations");
+       assert(t->typeDefinition);
+       std::string name = t->identifier->toString(true);
+       ast::ObjectValueContainer value;
+       if (t->typeDefinition->numberType) {
+         value = numberType(parm, t->identifier, t->typeDefinition->numberType);
+       } else if (t->typeDefinition->enumerationType) {
+         value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
+       } else if (t->typeDefinition->arrayType) {
+         value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
+       } else {
+         assert(false);
+       }
+       database.add(ast::TYPE, name, value);
+       functionEnd("type_declarations");
+     }
   }
 
   bool SystemC::findType(ast::SimpleIdentifier* identifier, ast::ObjectValueContainer& type) {
