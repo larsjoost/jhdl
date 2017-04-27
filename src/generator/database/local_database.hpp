@@ -12,6 +12,7 @@ namespace generator {
   class LocalDatabase {
     std::string library;
     std::string package;
+    std::list<ast::Attribute*> packageAttributes;
     std::list<NameMap> map;
 
     Exceptions exceptions;

@@ -61,17 +61,26 @@ namespace generator {
     add(name, e);
   }
 
-  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id, ast::Attribute* attribute, ast::Text* text) {
-    DatabaseResults results;
-    find(results, name);
-    if (!results.empty()) {
-      for (auto& i : results) {
-        if (i.object->arguments.equals(arguments)) {
-          i.object->attribute = attribute;
-        }
+  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
+                                   ast::Attribute* attribute, ast::Text* text) {
+    if (id == ast::PACKAGE) {
+      if (name == package) {
+        packageAttributes.push_back(attribute);
+      } else {
+        exceptions.printError("Could not find package \"" + name + "\"", text);
       }
     } else {
-      exceptions.printError("Could not find object \"" +  name + "\"", text);
+      DatabaseResults results;
+      find(results, name);
+      if (!results.empty()) {
+        for (auto& i : results) {
+          if (i.object->arguments.equals(arguments)) {
+            i.object->attribute = attribute;
+          }
+        }
+      } else {
+        exceptions.printError("Could not find \"" + toString(id) + "\" with name \"" +  name + "\"", text);
+      }
     }
   };
 

@@ -70,9 +70,9 @@ namespace generator {
           if (found) {
             if (found == 1) {
               exceptions.printError("More than one match of " + bestMatch.toString());
-              exceptions.printError("match 1: " + bestMatch.toString()); 
+              exceptions.printError("match #1: " + bestMatch.toString()); 
             }
-            exceptions.printError("match " + std::to_string(found + 1) + ": " + i.toString()); 
+            exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
           }
           found++;
         }

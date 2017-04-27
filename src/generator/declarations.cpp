@@ -162,7 +162,7 @@ namespace generator {
       if (f->body) {
         std::string parentName = database.getParentName();
         auto valid = [&](DatabaseElement* e) {
-          return e->id == ast::PROCEDURE;
+          return (e->id == ast::PROCEDURE) && (e->arguments.equals(arguments));
         };
         std::string foreignFunctionName = "";
         DatabaseResult object;
@@ -176,6 +176,8 @@ namespace generator {
             foreignFunctionName = e->attribute->expression->toString(true);
             println(parm, "void " + foreignFunctionName + interface + ";");
           }
+        } else {
+          exceptions.printError("Did not find declaration of procedure \"" + name + "\"", &f->name->text); 
         }
         std::string s = implementation ? parentName + "::" : "";
         println(parm, "void " + s + name + interface + "{");
