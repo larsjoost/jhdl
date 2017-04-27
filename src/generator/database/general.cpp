@@ -9,13 +9,14 @@ namespace generator {
     std::cout << "      package   = " << package << std::endl;
     std::cout << "      name      = " << name << std::endl;
     std::cout << "      arguments = " << arguments.toString() << std::endl;
+    std::cout << "      value     = " << type.toString() << std::endl;
     std::cout << "      visible   = " << (visible ? "true" : "false") << std::endl;
     std::cout << "      attribute = " << (attribute ? "true" : "false") << std::endl;
     std::cout << "      type      = " << ast::toString(id) << std::endl;
   }
 
   std::string DatabaseElement::toString() {
-    return "name = " + name + ", type = " + ast::toString(id);
+    return ast::toString(id) + " " + library + "." + package + "." + name + "(" + arguments.toString() + ") : " + type.toString();
   }
 
   std::string DatabaseResult::toString() {

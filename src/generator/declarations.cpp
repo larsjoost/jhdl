@@ -215,13 +215,15 @@ namespace generator {
   
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
+      functionStart("attribute_declarations");
       if (a->item) {
         std::string name = a->item->toString(true);
         ast::ObjectArguments arguments(true);
         generateObjectArguments(a->arguments, arguments);
         ast::ObjectType id = a->objectType;
-        database.addAttribute(name, arguments, id, a);
+        database.addAttribute(name, arguments, id, a, &a->item->text);
       }
+      functionEnd("attribute_declarations");
     }
   }
       /*
@@ -240,7 +242,6 @@ namespace generator {
       database.add(ast::TYPE, name, value);
     }
   }
-
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
                              bool implementation) {

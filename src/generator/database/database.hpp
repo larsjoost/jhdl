@@ -61,20 +61,24 @@ namespace generator {
   bool Database::findBestMatch(DatabaseResults& matches,
                                DatabaseResult& bestMatch,
                                Func valid) {
-    bool found = false;
+    int found = 0;
     bestMatch = {-1, false, NULL};
     for (auto& i : matches) {
       if (valid(i.object)) {
         if (bestMatch.object == NULL || (!bestMatch.local && i.local) || (bestMatch.hierarchyLevel > i.local)) {
           bestMatch = i;
           if (found) {
-            exceptions.printError("More than one match");
+            if (found == 1) {
+              exceptions.printError("More than one match of " + bestMatch.toString());
+              exceptions.printError("match 1: " + bestMatch.toString()); 
+            }
+            exceptions.printError("match " + std::to_string(found + 1) + ": " + i.toString()); 
           }
-          found = true;
+          found++;
         }
       }
     }
-    return found;
+    return (found == 1);
   }
 
   template<typename Func>

@@ -80,7 +80,6 @@ namespace generator {
         parser::DesignFile parserDesignFile;
         parserDesignFile.parse(filename);
         parse(parm, parserDesignFile, library);
-        database.print();
         quiet = q;
       } else {
         exceptions.printError("Could not resolve filename of package \"" + name + "\"");
