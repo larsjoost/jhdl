@@ -23,7 +23,7 @@ namespace generator {
     return object ? object->toString() : "NIL";
   }
   
-  std::string DatabaseResult::getName(bool fullName) {
+  std::string DatabaseResult::getName(bool fullName, std::string library, std::string package) {
     std::string name = object->name;
     if (fullName) {
       if (local) {
@@ -31,10 +31,9 @@ namespace generator {
           name = "p->" + name;
         }
       } else {
-        name =
-          object->library + "::" +
-          object->package + "::" +
-          name;
+        if ((library != object->library) || (package != object->package)) {
+          name = object->library + "::" + object->package + "::" + name;
+        }
       }
     }
     return name;

@@ -137,7 +137,7 @@ namespace generator {
                                                   int argumentNumber,
                                                   ast::AssociationList* l,
                                                   Func sensitivityListCallback) { 
-    //    functionStart("associateArgument");
+    functionStart("associateArgument");
     std::string argument = interfaceElement.defaultValue;
     if (l) {
       int associationElementNumber = 0;
@@ -154,7 +154,7 @@ namespace generator {
         associationElementNumber++;
       }
     }
-    // functionEnd("associateArgument");
+    functionEnd("associateArgument");
     return argument;
   }
 
@@ -162,7 +162,7 @@ namespace generator {
   std::string ExpressionParser::parametersToString(ast::ObjectArguments& interface,
                                                    ast::AssociationList* associationList,
                                                    Func sensitivityListCallback) { 
-    // functionStart("parametersToString");
+    functionStart("parametersToString");
     std::string s = "";
     /*
       Association list can either be:
@@ -181,7 +181,7 @@ namespace generator {
       delimiter = ", ";
       argumentNumber++;
     };
-    // functionEnd("parametersToString");
+    functionEnd("parametersToString");
     return s;
   }
 
@@ -190,7 +190,7 @@ namespace generator {
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
     assert(object.object);
-    std::string name = object.getName(true);
+    std::string name = object.getName(true, database->getLibrary(), database->getPackage());
     if (arguments) {
       assert(object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE);
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
@@ -262,15 +262,11 @@ namespace generator {
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
     if (identifier->attribute) {
-      return attributeToString(name, arguments, expectedType, identifier->attribute, identifier->arguments, sensitivityListCallback);
+      return attributeToString(name, arguments, expectedType, identifier->attribute,
+                               identifier->arguments, sensitivityListCallback);
     } else {
       auto valid = [&](DatabaseElement* e) {
-        if (e->arguments.equals(arguments) &&
-            e->type.equals(expectedType)) {
-          return true;
-        } else {
-          return false;
-        }
+        return (e->arguments.equals(arguments) && e->type.equals(expectedType)) ? true : false;
       };
       DatabaseResult object;
       if (database->findOne(object, name, valid)) {
@@ -295,12 +291,8 @@ namespace generator {
                                                   Func sensitivityListCallback) {
     assert(attribute);
     auto valid = [&](DatabaseElement* e) {
-        if (e->arguments.equals(arguments)) {
-          return true;
-        } else {
-          return false;
-        }
-      };
+      return e->arguments.equals(arguments);
+    };
     DatabaseResults objects;
     database->findAll(objects, name, valid);
     std::string attributeName = attribute->toString(true);

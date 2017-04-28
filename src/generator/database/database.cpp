@@ -6,8 +6,16 @@ namespace generator {
     localDatabase.setLibrary(name);
   }
 
+  std::string Database::getLibrary() {
+    return localDatabase.getLibrary();
+  }
+  
   void Database::setPackage(std::string& name) {
     localDatabase.setPackage(name);
+  }
+
+  std::string Database::getPackage() {
+    return localDatabase.getPackage();
   }
 
   void Database::globalize() {

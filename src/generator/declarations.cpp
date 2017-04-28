@@ -58,7 +58,7 @@ namespace generator {
     if (args) {
       for (ast::SimpleIdentifier& i : args->list) {
         ast::ObjectArgument a;
-        a.name = i.toString(true);
+        a.name = "";
         findType(&i, a.type);
         a.defaultValue = "";
         arguments.push_back(a);
@@ -220,7 +220,7 @@ namespace generator {
       functionStart("attribute_declarations");
       if (a->item) {
         std::string name = a->item->toString(true);
-        ast::ObjectArguments arguments(true);
+        ast::ObjectArguments arguments(false);
         generateObjectArguments(a->arguments, arguments);
         ast::ObjectType id = a->objectType;
         database.addAttribute(name, arguments, id, a, &a->item->text);

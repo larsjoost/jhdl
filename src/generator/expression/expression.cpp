@@ -40,7 +40,7 @@ namespace generator {
     };
     DatabaseResult object;
     if (database->findOne(object, name, valid)) {
-      name = name + "(" + objectToString(object, p->arguments, [&](DatabaseResult& e) {}) + ")";
+      return objectToString(object, p->arguments, [&](DatabaseResult& e) {});
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
     }
@@ -107,14 +107,15 @@ namespace generator {
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(ast::AssociationList* associationList) {
-    auto a = ast::ObjectArguments(false);
+    ast::ObjectArguments result(false);
     if (associationList) {
       for (auto& i : associationList->associationElements.list) {
         ast::ObjectArgument x;
-        x.name = i.formalPart->name->toString(true);
+        x.name = (i.formalPart && i.formalPart->name) ? i.formalPart->name->toString(true) : "";
         ReturnTypes r = expressionReturnTypes(i.actualPart);
         if (r.size() == 1) {
           x.type = *(r.begin());
+          result.push_back(x);
         } else {
           if (r.empty()) {
             exceptions.printError("Could not resolve argument type", &i.formalPart->name->text);
@@ -124,7 +125,7 @@ namespace generator {
         }
       }
     }
-    return a;
+    return result;
   }
   
   ExpressionParser::ReturnTypes ExpressionParser::functionReturnTypes(std::string& name, ast::AssociationList* associationList) {

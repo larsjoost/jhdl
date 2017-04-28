@@ -43,7 +43,9 @@ namespace generator {
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
 
     void setLibrary(std::string& name);
+    std::string getLibrary();
     void setPackage(std::string& name);
+    std::string getPackage();
 
     void descendHierarchy(std::string& name);
     void ascendHierarchy();

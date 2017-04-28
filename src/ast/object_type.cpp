@@ -1,4 +1,7 @@
+#include <cassert>
 #include <string>
+#include <iostream>
+
 #include "object_type.hpp"
 
 namespace ast {
@@ -57,11 +60,14 @@ namespace ast {
   bool ObjectArguments::equals(ObjectArguments& other) {
     ObjectArguments& interface = isInterface ? *this : other;
     ObjectArguments& association = isInterface ? other : *this;
+    //    std::cout << "Interface = " << interface.toString() << std::endl;
+    //   std::cout << "Association = " << association.toString() << std::endl;
     int size = interface.list.size();
     bool m[size] {};
     int index = 0;
     for (ObjectArgument& a : association.list) {
       int i = match(interface, a, index);
+      // std::cout << "i = " << std::to_string(i) << std::endl;
       if (i < 0) {
         return false;
       }

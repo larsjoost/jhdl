@@ -56,7 +56,8 @@ namespace generator {
     }
   }
 
-  void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type, ast::ObjectArguments arguments, ast::Text* text) {
+  void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
+                          ast::ObjectArguments arguments, ast::Text* text) {
     DatabaseElement e = {id, library, package, name, arguments, type, false, NULL, NULL, NULL, text};
     add(name, e);
   }
@@ -70,16 +71,19 @@ namespace generator {
         exceptions.printError("Could not find package \"" + name + "\"", text);
       }
     } else {
+      bool found = false;
       DatabaseResults results;
       find(results, name);
       if (!results.empty()) {
         for (auto& i : results) {
-          if (i.object->arguments.equals(arguments)) {
+          if (id == i.object->id && i.object->arguments.equals(arguments)) {
             i.object->attribute = attribute;
+            found = true;
           }
         }
-      } else {
-        exceptions.printError("Could not find \"" + toString(id) + "\" with name \"" +  name + "\"", text);
+      }
+      if (!found) {
+        exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
       }
     }
   };
