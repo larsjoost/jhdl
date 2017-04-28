@@ -91,6 +91,8 @@ namespace generator {
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValue expectedType, Func sensitivityListCallback);
     std::string toString(ast::Expression* e, ast::ObjectValue expectedType = ast::DONT_CARE);
+
+    std::string procedureCallStatementToString(ast::ProcedureCallStatement* p);
     
   };
 

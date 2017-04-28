@@ -4,19 +4,10 @@
 
 namespace generator {
 
-  std::string SystemC::procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p) {
-    std::string s = "";
-    if (p) {
-      functionStart("procedureCallStatementToString");
-      s = p->name->toString(true);
-      functionEnd("procedureCallStatementToString");
-    }
-    return s;
-  }
-
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
-      println(parm, procedureCallStatementToString(parm, p) + ";");
+      ExpressionParser expr(&database);
+      println(parm, expr.procedureCallStatementToString(p) + ";");
     }
   }
   

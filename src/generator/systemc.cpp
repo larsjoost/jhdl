@@ -32,6 +32,7 @@ namespace generator {
     }
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
+    println(parm, "#include \"standard.h\"");
     println(parm, "namespace vhdl {");
     parm.incIndent();
     // transform(library.begin(), library.end(), library.begin(), toupper);

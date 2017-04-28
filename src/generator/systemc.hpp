@@ -97,7 +97,6 @@ namespace generator {
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
-    std::string procedureCallStatementToString(parameters& parm, ast::ProcedureCallStatement* p);
     std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);
     void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
     void returnStatement(parameters& parm, ast::ReturnStatement* r);

@@ -30,6 +30,24 @@ namespace generator {
   }
 
 
+  std::string ExpressionParser::procedureCallStatementToString(ast::ProcedureCallStatement* p) {
+    functionStart("procedureCallStatementToString");
+    assert(p);
+    std::string name = p->name->toString(true);
+    ast::ObjectArguments arguments = toObjectArguments(p->arguments);
+    auto valid = [&](DatabaseElement* e) {
+      return e->id == ast::PROCEDURE && e->arguments.equals(arguments);
+    };
+    DatabaseResult object;
+    if (database->findOne(object, name, valid)) {
+      name = name + "(" + objectToString(object, p->arguments, [&](DatabaseResult& e) {}) + ")";
+    } else {
+      exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
+    }
+    functionEnd("procedureCallStatementToString");
+    return name;
+  }
+
   ExpressionParser::ReturnTypes ExpressionParser::operatorReturnTypes(std::string& name,
                                                                       ast::ObjectValueContainer& l,
                                                                       ast::ObjectValueContainer& r) {
