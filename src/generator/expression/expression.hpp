@@ -81,6 +81,8 @@ namespace generator {
 
     ast::ObjectArguments toObjectArguments(ast::AssociationList* associationList);
 
+    std::string physicalToString(ast::Physical* physical);
+    
   public:
 
     ExpressionParser(Database* database, bool verbose = false) : database(database), verbose(verbose) {}
@@ -236,7 +238,7 @@ namespace generator {
                                                        Func sensitivityListCallback) {
     if (e) {
       if (e->physical) {
-        return e->physical->toString();
+        return physicalToString(e->physical);
       }
       if (e->number) {
         return e->number->toString();

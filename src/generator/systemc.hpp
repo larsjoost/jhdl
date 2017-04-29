@@ -142,6 +142,7 @@ namespace generator {
     bool findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type);
     void generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
     void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
+    std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
     void function_body(parameters& parm, ast::FunctionBody* f);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);

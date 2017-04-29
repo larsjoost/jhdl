@@ -1,9 +1,13 @@
 #include "env.hpp"
 
-void vhdl_stop(INTEGER<> STATUS) {
-  exit(STATUS);
-}
+namespace vhdl {
+  
+  void vhdl_stop(STANDARD::INTEGER<> STATUS) {
+    exit(STATUS);
+  }
+  
+  void vhdl_finish(STANDARD::INTEGER<> STATUS) {
+    exit(STATUS);
+  }
 
-void vhdl_finish(INTEGER<> STATUS) {
-  exit(STATUS);
 }

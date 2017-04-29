@@ -25,7 +25,7 @@ namespace generator {
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
-        std::cerr << "Could not open configuration file " << configurationFilename << std::endl;
+        exceptions.printError("Could not open configuration file " + configurationFilename);
       } else {
         loadPackage(parm, "STANDARD", "STD", "ALL");
       }
@@ -217,7 +217,9 @@ namespace generator {
     rangeToString(r, left, right, type);
     std::string s = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
-                                   return e.unit->toString(true);
+                                   std::string unit = e.unit->toString(true); 
+                                   database.add(ast::ENUM, unit);
+                                   return unit;
                                  });
     std::string enumName = name + "_enum";
     println(parm, "enum " + enumName + " {" + s + "};");
@@ -294,7 +296,8 @@ namespace generator {
     template<class T = TYPE_T_range>
     using TYPE_T = INTEGER<T>;
   */
-  std::string SystemC::subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t) {
+  std::string SystemC::subtypeIndication(parameters& parm, ast::ObjectValueContainer& value,
+                                         std::string& name, ast::SubtypeIndication* t) {
     assert(t);
     std::string typeName = t->name->toString(true);
     auto valid = [&](DatabaseElement* e) {

@@ -42,6 +42,8 @@ namespace generator {
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
 
+    bool globalName(std::string& name, ast::ObjectType id);
+
     void setLibrary(std::string& name);
     std::string getLibrary();
     void setPackage(std::string& name);

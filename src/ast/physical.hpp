@@ -16,9 +16,6 @@ namespace ast {
     Number* number;
     SimpleIdentifier* unit;
 
-    std::string toString() {
-      return "{" + number->toString() + ", " + unit->toString(true) + "}";
-    }
   };
 
 }

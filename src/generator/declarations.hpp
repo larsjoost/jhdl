@@ -13,7 +13,7 @@ namespace generator {
       std::string name = v->identifier->toString(true);
       std::string type = name + "_type";
       ast::ObjectValueContainer value;
-      type = subtypeIndication(parm, value, type, v->type) + "<>";
+      type = subtypeIndication(parm, value, type, v->type);
       database.add(v->objectType, name, value);
       std::string init = "";
       if (v->initialization) {

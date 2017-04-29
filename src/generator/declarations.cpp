@@ -105,14 +105,16 @@ namespace generator {
     }
     return "";
   }
-  
+
   std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
     if (interface) {
-      return interfaceListToString(parm, interface, ", ", false,
-                                   [](std::string& type, ast::ObjectType id,
-                                      ast::ObjectDeclaration::Direction direction) {
-                                     return type;
-                                   });
+      auto func = [&](std::string& type, ast::ObjectType id,
+                      ast::ObjectDeclaration::Direction direction) {
+        std::string s = type;
+        database.globalName(s, ast::TYPE);
+        return s;
+      };
+      return interfaceListToString(parm, interface, ", ", false, func);
     }
     return "";
   }
@@ -131,7 +133,8 @@ namespace generator {
       }
       descendHierarchy(parm, name);
       printSourceLine(parm, f->name->text);
-      std::string returnType = f->returnType->toString(true) + "<>";
+      std::string returnType = f->returnType->toString(true);
+      database.globalName(returnType, ast::TYPE);
       std::string interface = "(" + getArgumentTypes(parm, f->interface) + ")";
       if (f->body) {
         std::string s = implementation ? database.getParentName() + "::" : "";
@@ -148,6 +151,18 @@ namespace generator {
     }
   }
 
+  std::string SystemC::function_attribute(parameters& parm, DatabaseElement* e, std::string& interface) {
+    std::string name = "";
+    if (e->attribute && e->attribute->expression) {
+      println(parm, "/*");
+      println(parm, " * This is the definition of the foreign function set as an attribute.");
+      println(parm, " * The implementation must be defined in a .cpp file in this directory.");
+      println(parm, "*/");
+      name = e->attribute->expression->toString(true);
+      println(parm, "void " + name + interface + ";");
+    }
+    return name;
+  };
   
   void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
                                       bool implementation) {
@@ -167,15 +182,7 @@ namespace generator {
         std::string foreignFunctionName = "";
         DatabaseResult object;
         if (database.findOne(object, name, valid)) {
-          DatabaseElement* e = object.object;
-          if (e->attribute && e->attribute->expression) {
-            println(parm, "/*");
-            println(parm, " * This is the definition of the foreign function set as an attribute.");
-            println(parm, " * The implementation must be defined in a .cpp file in this directory.");
-            println(parm, "*/");
-            foreignFunctionName = e->attribute->expression->toString(true);
-            println(parm, "void " + foreignFunctionName + interface + ";");
-          }
+          foreignFunctionName = function_attribute(parm, object.object, interface);
         } else {
           exceptions.printError("Did not find declaration of procedure \"" + name + "\"", &f->name->text); 
         }

@@ -1,6 +1,26 @@
 #include "database.hpp"
 
 namespace generator {
+
+  bool Database::globalName(std::string& name, ast::ObjectType id) {
+    bool found = false;
+    auto valid = [&](DatabaseElement* e) {
+      return e->id == id;
+    };
+    DatabaseResult object;
+    if (findOne(object, name, valid)) {
+      found = true;
+      if (object.object->package != getPackage()) {
+        name = object.object->package + "::" + name;
+      }
+      if (id == ast::TYPE) {
+        name = name + "<>";
+      }
+    } else {
+      exceptions.printError("Unable to find " + ast::toString(id) + " " + name);
+    }
+    return found;
+  }
   
   void Database::setLibrary(std::string& name) {
     localDatabase.setLibrary(name);
