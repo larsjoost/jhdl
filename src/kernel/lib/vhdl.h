@@ -9,7 +9,6 @@
 
 #include "systemc.h"
 #include "vhdl_type.hpp"
-#include "vhdl_std_env.hpp"
 
 namespace vhdl {
   

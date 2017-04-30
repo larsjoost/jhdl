@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "standard.h"
+#include "env.hpp"
 
 namespace vhdl {
 
@@ -13,7 +14,7 @@ namespace vhdl {
     s = severity;
     *o << STANDARD::SEVERITY_LEVEL::IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
-      STD::ENV.FINISH(1);
+      ENV.FINISH(1);
     } 
   }
   

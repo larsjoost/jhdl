@@ -155,8 +155,8 @@ namespace vhdl {
     type_##name left = leftValue;                                       \
     type_##name right = rightValue;                                     \
   };                                                                    \
-  template <typename N = type_##name, typename T = enumName, class E = valueName, class RANGE = range_##name> \
-  using name = PhysicalType<N, T, E, RANGE>
+  template <class RANGE = range_##name, typename N = type_##name, typename T = enumName, class E = valueName> \
+  using name = PhysicalType<RANGE, N, T, E>
 
   template <class VALUE, typename UNIT>
   struct Physical {
@@ -166,11 +166,13 @@ namespace vhdl {
       value(value), unit(unit) { }
   };
 
-  template<typename VALUE, typename UNIT, class ELEMENTS, class RANGE>
+  template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS>
   class PhysicalType {
-    Physical<VALUE, UNIT> value;
+    VALUE value;
+    UNIT unit;
   public:
-    PhysicalType(VALUE v, UNIT u) {value = {v, u};};
+    PhysicalType() {RANGE range; value = range.left.value; unit = range.left.unit;};  
+    PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
 
     static UNIT getBaseUnit() {
       ELEMENTS e;
@@ -195,9 +197,9 @@ namespace vhdl {
     static Physical<VALUE, UNIT> HIGH() {
       RANGE range;
       VALUE max = (range.left > range.right) ? range.left : range.right;
-      return Physical<VALUE, UNIT>(max, getHighUnit(getBaseUnit()));
+      return {max, getHighUnit(getBaseUnit())};
     }
-    static Physical<VALUE, UNIT> LOW() {return Physical<VALUE, UNIT>(1, getBaseUnit());}
+    static Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
   };
   
 
