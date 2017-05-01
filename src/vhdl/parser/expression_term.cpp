@@ -12,10 +12,11 @@ namespace vhdl {
   namespace parser {
   
     ExpressionTerm* ExpressionTerm::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      text = scanner->getCurrentTextPosition();
       (physical = scanner->optional<Physical>()) ||
         (number = scanner->optional<Number>()) ||
         (character = scanner->optional<Character>()) ||
-        (text = scanner->optional<String>()) || 
+        (string = scanner->optional<String>()) || 
         (identifier = scanner->optional<BasicIdentifier>());
       return this;
     }

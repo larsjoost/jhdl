@@ -82,6 +82,8 @@ namespace generator {
     ast::ObjectArguments toObjectArguments(ast::AssociationList* associationList);
 
     std::string physicalToString(ast::Physical* physical);
+
+    std::string returnTypesToString(ReturnTypes& returnTypes);
     
   public:
 
@@ -93,9 +95,12 @@ namespace generator {
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValue expectedType, Func sensitivityListCallback);
     std::string toString(ast::Expression* e, ast::ObjectValue expectedType);
-    std::string toString(ast::Expression* e, ast::ObjectValue expectedType, ast::ObjectValue& foundType);
 
     std::string procedureCallStatementToString(ast::ProcedureCallStatement* p);
+
+    bool getType(ast::Expression* e,
+                 ast::ObjectValueContainer& expectedType,
+                 ast::ObjectValueContainer& actualType);
     
   };
 
@@ -105,18 +110,10 @@ namespace generator {
                                          Func sensitivityListCallback) {
     functionStart("toString");
     // First-pass: Collect the possible return types
-    ReturnTypes o = expressionReturnTypes(e);
-    if (o.size() != 1 || !o.back().equals(expectedType)) {
-      std::string found = "";
-      std::string delimiter;
-      for (auto& i : o) {
-        found += delimiter + i.toString();
-        delimiter = ", ";
-      }
-      exceptions.printError("Expected " + expectedType.toString() + ", but found " + found, e->text);
-    }
+    ast::ObjectValueContainer actualType;
+    getType(e, expectedType, actualType);
     // Second-pass: Resolve the return type and convert to string
-    std::string s = expressionToString(e, expectedType, sensitivityListCallback);
+    std::string s = expressionToString(e, actualType, sensitivityListCallback);
     functionEnd("toString");
     return s;
   }
@@ -252,8 +249,8 @@ namespace generator {
       if (e->number) {
         return e->number->toString();
       }
-      if (e->text) {
-        return e->text->toString();
+      if (e->string) {
+        return e->string->toString();
       }
       if (e->identifier) {
         return basicIdentifierToString(e->identifier, expectedType, sensitivityListCallback);

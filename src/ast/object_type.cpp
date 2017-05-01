@@ -16,7 +16,8 @@ namespace ast {
   
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
-      "INTEGER", "REAL", "BOOLEAN", "CHARACTER", "TEXT", "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
+      "INTEGER", "REAL", "NUMBER", "BOOLEAN", "CHARACTER", "TEXT",
+      "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
     return a[o];
   }
 
@@ -28,6 +29,8 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
+    if (value == NUMBER) return (other.value == INTEGER || other.value == REAL || other.value == NUMBER);
+    if (other.value == NUMBER) return (value == INTEGER || value == REAL || value == NUMBER);
     if (value != other.value) return false;
     if (value == USER_TYPE) {
       return typeName == other.typeName;

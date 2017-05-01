@@ -6,6 +6,7 @@
 #include "interface_list.hpp"
 #include "function_body.hpp"
 #include "object_type.hpp"
+#include "string.hpp"
 
 namespace ast {
 
@@ -16,6 +17,7 @@ namespace ast {
   public:
     
     SimpleIdentifier* name;
+    String* string;
     SimpleIdentifier* returnType;
     InterfaceList* interface;
     FunctionBody* body;

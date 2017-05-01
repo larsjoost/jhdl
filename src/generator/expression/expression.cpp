@@ -14,6 +14,32 @@ namespace generator {
     }
   }
 
+  std::string ExpressionParser::returnTypesToString(ReturnTypes& returnTypes) {
+    std::string found = "";
+    std::string delimiter;
+    for (auto& i : returnTypes) {
+      found += delimiter + i.toString();
+      delimiter = ", ";
+    }
+    return found;
+  }
+  
+  bool ExpressionParser::getType(ast::Expression* e,
+                                 ast::ObjectValueContainer& expectedType,
+                                 ast::ObjectValueContainer& actualType) {
+    bool result;
+    ReturnTypes o = expressionReturnTypes(e);
+    if (o.size() == 1 && o.back().equals(expectedType)) {
+      actualType = o.back();
+      result = true;
+    } else {
+      exceptions.printError("Expected " + expectedType.toString() +
+                            ", but found " + returnTypesToString(o), e->text);
+      result = false;
+    }
+    return result;
+  }
+  
   std::string ExpressionParser::toString(ast::Expression* e, ast::ObjectValueContainer& expectedType) {
     functionStart("toString");
     std::string s = toString(e, expectedType, [&](DatabaseResult& object) {});
@@ -71,15 +97,22 @@ namespace generator {
     } else if (e->op) {
       ReturnTypes term = expressionTermReturnTypes(e->term);
       ReturnTypes expr = expressionReturnTypes(e->expression);
-      ReturnTypes result;
       for (auto& i : term) {
         for (auto& j : expr) {
           ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
           result.insert(result.end(), t.begin(), t.end());
         }
       }
+      if (result.empty()) {
+        exceptions.printError("Could not resolve type of expression " +
+                              returnTypesToString(term) + " " + e->op->op + " " +
+                              returnTypesToString(expr), e->text);
+      }
     } else {
       result = expressionTermReturnTypes(e->term);
+    }
+    if (result.empty()) {
+      exceptions.printError("Could not resolve type of expression ", e->text);
     }
     functionEnd("expressionReturnTypes");
     return result;
@@ -100,7 +133,7 @@ namespace generator {
       result = {ast::ObjectValueContainer(ast::PHYSICAL, e->physical->unit->toString(true))};
     } else if (e->number) {
       result = {ast::ObjectValueContainer(e->number->type)};
-    } else if (e->text) {
+    } else if (e->string) {
       result = {ast::ObjectValueContainer(ast::TEXT)};
     } else if (e->identifier) {
       result = basicIdentifierReturnTypes(e->identifier);
@@ -109,6 +142,9 @@ namespace generator {
     } else {
       exceptions.printInternal("Unknown expression term");
       assert(false);
+    }
+    if (result.empty()) {
+      exceptions.printError("Could not resolve type of expression term", e->text);
     }
     functionStart("expressionTermReturnTypes");
     return result;
@@ -173,6 +209,9 @@ namespace generator {
         return e->arguments.empty();
       };
       result = getReturnTypes(name, valid);
+    }
+    if (result.empty()) {
+      exceptions.printError("Could not resolve type of " + name, &b->text);
     }
     functionEnd("basicIdentifierReturnTypes");
     return result;

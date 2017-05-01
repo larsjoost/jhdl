@@ -123,7 +123,8 @@ namespace generator {
                                       bool implementation) {
     if (f) {
       functionStart("function_declarations");
-      std::string name = f->name->toString(true);
+      ast::Text& text = f->name ? f->name->text : f->string->text;
+      std::string name = f->name ? f->name->toString(true) : f->string->toString();
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       ast::ObjectValueContainer returnType;
@@ -131,7 +132,7 @@ namespace generator {
       parm.returnType = returnType;
       database.addFunction(name, arguments, returnType, f);
       descendHierarchy(parm, name);
-      printSourceLine(parm, f->name->text);
+      printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
       database.globalName(returnTypeName, ast::TYPE);
       std::string interface = "(" + getArgumentTypes(parm, f->interface) + ")";
@@ -225,11 +226,12 @@ namespace generator {
     if (a) {
       functionStart("attribute_declarations");
       if (a->item) {
-        std::string name = a->item->toString(true);
+        std::string name = a->item ? a->item->toString(true) : a->string->toString();
+        ast::Text* text = a->item ? &a->item->text : &a->string->text;
         ast::ObjectArguments arguments(false);
         generateObjectArguments(a->arguments, arguments);
         ast::ObjectType id = a->objectType;
-        database.addAttribute(name, arguments, id, a, &a->item->text);
+        database.addAttribute(name, arguments, id, a, text);
       }
       functionEnd("attribute_declarations");
     }

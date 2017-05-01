@@ -19,9 +19,11 @@ namespace ast {
     
   public:
 
+    Text* text;
+    
     Physical* physical;
     Number* number;
-    String* text;
+    String* string;
     BasicIdentifier* identifier;
     Character* character;
     

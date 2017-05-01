@@ -57,13 +57,13 @@ namespace generator {
 
   void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l) {
     if (l) {
-      println(parm, listToString(parm, l->associationElements.list, "; ",
-                                 [&](ast::AssociationElement a){
-                                   ExpressionParser expr(&database);
-                                   return instanceName + "->" + a.formalPart->name->toString(true) +
-                                     ".bind(" + expr.toString(a.actualPart) + ")";
-                                 }) + ";"
-              );
+      // TODO: resolve ast::UNKNOWN
+      auto func = [&](ast::AssociationElement a){
+        ExpressionParser expr(&database);
+        return instanceName + "->" + a.formalPart->name->toString(true) +
+        ".bind(" + expr.toString(a.actualPart, ast::UNKNOWN) + ")";
+      };
+      println(parm, listToString(parm, l->associationElements.list, "; ", func) + ";");
     }
   }
   

@@ -195,16 +195,18 @@ namespace generator {
     return value;
   }
 
-  void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type) {
+  void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
     assert(r);
+    ast::ObjectValueContainer actualType;
     ExpressionParser expr(&database);
-    left = expr.toString(r->left, type);
-    right = expr.toString(r->right, type);
+    expr.getType(r->left, expectedType, actualType);
+    left = expr.toString(r->left, actualType);
+    right = expr.toString(r->right, actualType);
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     std::string left, right;
-    ast::ObjectValueContainer type(ast::INTEGER);
+    ast::ObjectValueContainer type(ast::NUMBER);
     rangeToString(r, left, right, type);
     println(parm, "using " + name + "_type = decltype(" + left + ");"); 
     println(parm, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
@@ -217,7 +219,7 @@ namespace generator {
     ast::PhysicalType* p = n->physical;
     assert(p);
     std::string left, right;
-    ast::ObjectValueContainer type(ast::PHYSICAL);
+    ast::ObjectValueContainer type(ast::NUMBER);
     rangeToString(r, left, right, type);
     std::string s = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){

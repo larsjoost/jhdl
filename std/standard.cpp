@@ -17,6 +17,11 @@ namespace vhdl {
       ENV.FINISH(1);
     } 
   }
+
+  STANDARD::BOOLEAN vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B) {
+    return A != B;
+  }
+
   
 }
   
