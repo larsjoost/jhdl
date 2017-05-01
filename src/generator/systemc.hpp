@@ -61,6 +61,7 @@ namespace generator {
 
     struct parameters {
       int indent = 0;
+      ast::ObjectValueContainer returnType;
       void incIndent() {
         indent += 2;
       }

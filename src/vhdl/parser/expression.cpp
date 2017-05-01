@@ -10,6 +10,7 @@ namespace vhdl {
   namespace parser {
   
     Expression* Expression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      text = scanner->getCurrentTextPosition();
       if (scanner->optional("(")) {
         parenthis = scanner->expect<Expression>();
         scanner->expect(")");

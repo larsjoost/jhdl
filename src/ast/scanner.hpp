@@ -79,6 +79,8 @@ namespace ast {
     Text* expect(Keyword keyword);
     Text* expect(TokenType type);
 
+    Text* getCurrentTextPosition();
+    
     void warning(const std::string &s);
     void error(const std::string &s);
     void critical(const std::string &s);
@@ -225,6 +227,10 @@ namespace ast {
     std::cout << tokenLookAhead(0)->text.getCurrentLinePositionMarker() << std::endl;
   }
   
+  template <class ApplicationSpecificScanner>
+  Text* Scanner<ApplicationSpecificScanner>::getCurrentTextPosition() {
+    return &tokenLookAhead(0)->text;
+  }
   
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::optional(const char* t) {

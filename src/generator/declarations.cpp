@@ -126,25 +126,24 @@ namespace generator {
       std::string name = f->name->toString(true);
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
-      {
-        ast::ObjectValueContainer type;
-        findType(f->returnType, type);
-        database.addFunction(name, arguments, type, f);
-      }
+      ast::ObjectValueContainer returnType;
+      findType(f->returnType, returnType);
+      parm.returnType = returnType;
+      database.addFunction(name, arguments, returnType, f);
       descendHierarchy(parm, name);
       printSourceLine(parm, f->name->text);
-      std::string returnType = f->returnType->toString(true);
-      database.globalName(returnType, ast::TYPE);
+      std::string returnTypeName = f->returnType->toString(true);
+      database.globalName(returnTypeName, ast::TYPE);
       std::string interface = "(" + getArgumentTypes(parm, f->interface) + ")";
       if (f->body) {
         std::string s = implementation ? database.getParentName() + "::" : "";
-        println(parm, returnType + " " + s + name + interface + "{");
+        println(parm, returnTypeName + " " + s + name + interface + "{");
         parm.incIndent();
         function_body(parm, f->body);
         parm.decIndent();
         println(parm, "}");
       } else {
-        println(parm, returnType + " " + name + interface + ";");
+        println(parm, returnTypeName + " " + name + interface + ";");
       }
       ascendHierarchy(parm);
       functionEnd("function_declarations");

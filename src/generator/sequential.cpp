@@ -84,7 +84,7 @@ namespace generator {
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
       ExpressionParser expr(&database);
-      println(parm, "return " + expr.toString(r->value) + ";");
+      println(parm, "return " + expr.toString(r->value, parm.returnType) + ";");
     }
   }
 

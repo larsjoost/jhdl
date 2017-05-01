@@ -16,6 +16,8 @@ namespace ast {
     
   public:
 
+    Text* text;
+
     ExpressionTerm* term;
     ExpressionOperator* op;
     UnaryOperator* unaryOperator;

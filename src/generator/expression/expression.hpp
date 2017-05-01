@@ -92,7 +92,8 @@ namespace generator {
     std::string toString(ast::Expression* e, ast::ObjectValueContainer& expectedType);
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValue expectedType, Func sensitivityListCallback);
-    std::string toString(ast::Expression* e, ast::ObjectValue expectedType = ast::DONT_CARE);
+    std::string toString(ast::Expression* e, ast::ObjectValue expectedType);
+    std::string toString(ast::Expression* e, ast::ObjectValue expectedType, ast::ObjectValue& foundType);
 
     std::string procedureCallStatementToString(ast::ProcedureCallStatement* p);
     
@@ -105,6 +106,15 @@ namespace generator {
     functionStart("toString");
     // First-pass: Collect the possible return types
     ReturnTypes o = expressionReturnTypes(e);
+    if (o.size() != 1 || !o.back().equals(expectedType)) {
+      std::string found = "";
+      std::string delimiter;
+      for (auto& i : o) {
+        found += delimiter + i.toString();
+        delimiter = ", ";
+      }
+      exceptions.printError("Expected " + expectedType.toString() + ", but found " + found, e->text);
+    }
     // Second-pass: Resolve the return type and convert to string
     std::string s = expressionToString(e, expectedType, sensitivityListCallback);
     functionEnd("toString");
