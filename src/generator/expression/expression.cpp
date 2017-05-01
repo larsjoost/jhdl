@@ -43,6 +43,7 @@ namespace generator {
       return objectToString(object, p->arguments, [&](DatabaseResult& e) {});
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
+      database->printAllObjects(name);
     }
     functionEnd("procedureCallStatementToString");
     return name;

@@ -199,8 +199,8 @@ namespace generator {
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
-    void interfaceDeclaration(parameters& parm, ast::Interface* interface);
-    void implementationDeclaration(parameters& parm, ast::Implementation* implementation);
+    void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);
+    void implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library);
 
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);

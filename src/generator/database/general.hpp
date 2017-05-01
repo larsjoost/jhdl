@@ -17,7 +17,8 @@ namespace generator {
   struct DatabaseElement {
     ast::ObjectType id;
     std::string library;
-    std::string package;
+    ast::ObjectType sectionType;
+    std::string sectionName;
     std::string name;
     ast::ObjectArguments arguments;
     ast::ObjectValueContainer type;

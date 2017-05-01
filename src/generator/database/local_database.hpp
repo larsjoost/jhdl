@@ -11,7 +11,8 @@ namespace generator {
 
   class LocalDatabase {
     std::string library;
-    std::string package;
+    ast::ObjectType sectionType;
+    std::string sectionName;
     std::list<ast::Attribute*> packageAttributes;
     std::list<NameMap> map;
 
@@ -45,6 +46,11 @@ namespace generator {
     std::string getLibrary();
     void setPackage(std::string& name);
     std::string getPackage();
+    void setEntity(std::string& name);
+    std::string getEntity();
+    void setArchitecture(std::string& name);
+    std::string getSection();
+    
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 

@@ -6,10 +6,10 @@ namespace generator {
   void GlobalDatabase::append(LocalDatabase& d) {
     auto l = map.find(d.getLibrary());
     if (l != map.end()) {
-      l->second[d.getPackage()] = d;
+      l->second[d.getSection()] = d;
     } else {
       std::unordered_map<std::string, LocalDatabase> l;
-      l[d.getPackage()] = d;
+      l[d.getSection()] = d;
       map[d.getLibrary()] = l;
     }
   }

@@ -61,27 +61,31 @@ namespace generator {
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause);
       packageDeclaration(parm, it.module.package, library);
-      interfaceDeclaration(parm, it.module.interface);
-      implementationDeclaration(parm, it.module.implementation);
+      interfaceDeclaration(parm, it.module.interface, library);
+      implementationDeclaration(parm, it.module.implementation, library);
     }
     functionEnd("parse");
   }
 
   void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
     functionStart("parsePackage(library = " + library + ", name = " + name + ")");
-    std::string stdPath = config.find("hdl", library);
+    std::string stdPath = (library == "WORK") ? "." : config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
       c.load(stdPath + "/" + libraryInfoFilename);
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
-        filename = stdPath + "/" + filename;
-        bool q = quiet;
-        quiet = true;
-        parser::DesignFile parserDesignFile;
-        parserDesignFile.parse(filename);
-        parse(parm, parserDesignFile, library);
-        quiet = q;
+	if (filename != this->filename) {
+	  filename = stdPath + "/" + filename;
+	  bool q = quiet;
+	  quiet = true;
+	  parser::DesignFile parserDesignFile;
+	  parserDesignFile.parse(filename);
+	  parse(parm, parserDesignFile, library);
+	  quiet = q;
+	} else {
+	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename);
+	}
       } else {
         exceptions.printError("Could not resolve filename of package \"" + name + "\"");
       }
@@ -321,19 +325,18 @@ namespace generator {
                                                  bool initialization) {
     std::string s = "";
     if (v) {
-       objectDeclaration(parm, v,
-                        [&](std::string& name,
-                            std::string& type, std::string& init,
-                            ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-                           if (id == ast::SIGNAL) {
-                             type = "sc_signal<" + type + ">";
-                           }
-                           s = type + " " + name;
-                           if (initialization && init.size() > 0) {
-                             s += " = " + init;
-                           }
-                         }
-                         );
+      auto func = [&](std::string& name,
+		      std::string& type, std::string& init,
+		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+	if (id == ast::SIGNAL) {
+	  type = "sc_signal<" + type + ">";
+	}
+	s = type + " " + name;
+	if (initialization && init.size() > 0) {
+	  s += " = " + init;
+	}
+      };
+      objectDeclaration(parm, v, func);
     }
     return s;
   }
@@ -373,11 +376,14 @@ namespace generator {
     }
   }
 
-  void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface) {
+  void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {
     if (interface) {
       functionStart("interface");
       std::string name = interface->name->toString(true);
       addLibraryInfo("entity", name, filename);
+      database.setLibrary(library);
+      database.setEntity(name);
+      descendHierarchy(parm, name);
       println(parm, "");
       println(parm, "SC_INTERFACE(" + name + ") {");
       println(parm, "public:");
@@ -386,29 +392,34 @@ namespace generator {
         println(parm, interfaceListToString(parm, interface->generics, "; ", false) + ";");
       }
       if (interface->ports) {
-        println(parm, interfaceListToString(parm, interface->ports, "; ", false,
-                                            [&](std::string& type, ast::ObjectType id,
-                                                ast::ObjectDeclaration::Direction direction) {
-                                              switch (direction) {
-                                              case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
-                                              case ast::ObjectDeclaration::OUT: 
-                                              case ast::ObjectDeclaration::INOUT: 
-                                              case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
-                                              }
-                                              return type;
-                                            }) + ";");
+	auto func = [&](std::string& type, ast::ObjectType id,
+			ast::ObjectDeclaration::Direction direction) {
+	  switch (direction) {
+	  case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
+	  case ast::ObjectDeclaration::OUT: 
+	  case ast::ObjectDeclaration::INOUT: 
+	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+	  }
+	  return type;
+	};
+        println(parm, interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
       }
       parm.decIndent();
       println(parm, "};");
+      database.globalize();
+      ascendHierarchy(parm);
       functionEnd("interface");
     }
   }
 
-  void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation) {
+  void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
       functionStart("implementation");
       std::string name = implementation->name->toString(true);
       addLibraryInfo("architecture", name, filename);
+      database.setLibrary(library);
+      database.setArchitecture(name);
+      descendHierarchy(parm, name);
       defineObject(parm,
                    name,
                    "SC_MODULE",
@@ -416,6 +427,7 @@ namespace generator {
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){});
+      ascendHierarchy(parm);
       functionEnd("implementation");
     }
   }

@@ -53,6 +53,7 @@ namespace generator {
         }
       } else {
         exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
+	database.printAllObjects(name);
       }
     }
     functionEnd("signalAssignment");

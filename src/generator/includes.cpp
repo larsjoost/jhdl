@@ -9,11 +9,12 @@ namespace generator {
                             std::string library, std::string identifier,
                             ast::Text* text) {
     functionStart("loadPackage(library = " + library + ", name = " + package + ")");
-    if (!database.exists(library, package)) {
-      parsePackage(parm, package, library);
+    std::string lib = (library == "WORK") ? database.getLibrary() : library;
+    if (!database.exists(lib, package)) {
+      parsePackage(parm, package, lib);
     }
-    if (database.exists(library, package)) {
-      if (!database.setVisible(identifier, package, library)) {
+    if (database.exists(lib, package)) {
+      if (!database.setVisible(identifier, package, lib)) {
         exceptions.printError("Could not find " + identifier + " in package " + package + " of library " + library, text);
       }
     } else {

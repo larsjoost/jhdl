@@ -15,7 +15,8 @@ namespace ast {
   std::string toString(ObjectType o);
 
   enum ObjectValue {
-    INTEGER, REAL, BOOLEAN, CHARACTER, TEXT,  PHYSICAL, ARRAY, USER_TYPE, UNKNOWN, NONE, DONT_CARE, NUMBER_OF_OBJECT_VALUES};
+    INTEGER, REAL, BOOLEAN, CHARACTER, TEXT,  PHYSICAL, ARRAY, USER_TYPE,
+    UNKNOWN, NONE, DONT_CARE, NUMBER_OF_OBJECT_VALUES};
 
   std::string toString(ObjectValue o);
 

@@ -15,8 +15,15 @@ namespace generator {
     if (p) {
       printSourceLine(parm, p->identifier);
       ExpressionParser expr(&database);
-      println(parm, p->identifier->toString(true) + " = " +
-              expr.toString(p->expression) + ";");
+      std::string name = p->identifier->toString(true);
+      auto valid = [&](DatabaseElement* e) { return e->id == ast::VARIABLE; };
+      DatabaseResult object;
+      if (database.findOne(object, name, valid)) {
+	println(parm, name + " = " + expr.toString(p->expression, object.object->type) + ";");
+      } else {
+	exceptions.printError("Cound to find definition of VARIABLE with name " + name, &p->identifier->text);
+	database.printAllObjects(name);
+      }
     }
   }
 

@@ -6,7 +6,7 @@ namespace generator {
   
   void DatabaseElement::print() {
     std::cout << "      library   = " << library << std::endl;
-    std::cout << "      package   = " << package << std::endl;
+    std::cout << "      " << ast::toString(sectionType) << "   = " << sectionName << std::endl;
     std::cout << "      name      = " << name << std::endl;
     std::cout << "      arguments = " << arguments.toString() << std::endl;
     std::cout << "      value     = " << type.toString() << std::endl;
@@ -16,14 +16,16 @@ namespace generator {
   }
 
   std::string DatabaseElement::toString() {
-    return ast::toString(id) + " " + library + "." + package + "." + name + "(" + arguments.toString() + ") : " + type.toString();
+    std::string args = arguments.toString();
+    args = args.empty() ? "" : "(" + args + ")";
+    return ast::toString(id) + " " + library + "." + sectionName + "." + name + args + " : " + type.toString();
   }
 
   std::string DatabaseResult::toString() {
     return object ? object->toString() : "NIL";
   }
   
-  std::string DatabaseResult::getName(bool fullName, std::string library, std::string package) {
+  std::string DatabaseResult::getName(bool fullName, std::string library, std::string sectionName) {
     std::string name = object->name;
     if (fullName) {
       if (local) {
@@ -31,8 +33,8 @@ namespace generator {
           name = "p->" + name;
         }
       } else {
-        if ((library != object->library) || (package != object->package)) {
-          name = object->library + "::" + object->package + "::" + name;
+        if ((library != object->library) || (sectionName != object->sectionName)) {
+          name = object->library + "::" + object->sectionName + "::" + name;
         }
       }
     }

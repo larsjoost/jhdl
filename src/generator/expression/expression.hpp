@@ -192,7 +192,7 @@ namespace generator {
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
     assert(object.object);
-    std::string name = object.getName(true, database->getLibrary(), database->getPackage());
+    std::string name = object.getName(true, database->getLibrary(), database->getSection());
     if (arguments) {
       assert(object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE);
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
@@ -277,7 +277,11 @@ namespace generator {
         }
         return objectToString(object, identifier->arguments, sensitivityListCallback);
       } else {
-        exceptions.printError("Could not find definition of name \"" + name + "\"", &identifier->text);
+	std::string args = arguments.toString();
+	args = args.empty() ? "" : "(" + args + ")";
+        exceptions.printError("Could not find definition of \"" + name + args +
+			      "\" with type " + expectedType.toString(), &identifier->text);
+	database->printAllObjects(name);
       }
     } 
     // functionEnd("basicIdentifierToString");

@@ -48,7 +48,11 @@ namespace generator {
     std::string getLibrary();
     void setPackage(std::string& name);
     std::string getPackage();
-
+    void setEntity(std::string& name);
+    std::string getEntity();
+    void setArchitecture(std::string& name);
+    std::string getSection();
+    
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 
@@ -59,6 +63,7 @@ namespace generator {
     bool exists(std::string& library, std::string& package);
 
     void print(std::string name = "");
+    void printAllObjects(std::string& name);
   };
 
   template<typename Func>

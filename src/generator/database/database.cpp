@@ -10,8 +10,8 @@ namespace generator {
     DatabaseResult object;
     if (findOne(object, name, valid)) {
       found = true;
-      if (object.object->package != getPackage()) {
-        name = object.object->package + "::" + name;
+      if (object.object->sectionName != localDatabase.getSection()) {
+        name = object.object->sectionName + "::" + name;
       }
       if (id == ast::TYPE) {
         name = name + "<>";
@@ -36,6 +36,22 @@ namespace generator {
 
   std::string Database::getPackage() {
     return localDatabase.getPackage();
+  }
+
+  void Database::setEntity(std::string& name) {
+    localDatabase.setEntity(name);
+  }
+
+  std::string Database::getEntity() {
+    return localDatabase.getEntity();
+  }
+
+  void Database::setArchitecture(std::string& name) {
+    localDatabase.setArchitecture(name);
+  }
+
+  std::string Database::getSection() {
+    return localDatabase.getSection();
   }
 
   void Database::globalize() {
@@ -92,6 +108,18 @@ namespace generator {
     localDatabase.print();
     std::cout << "Global Database:" << std::endl;
     globalDatabase.print(name);
+  }
+
+  void Database::printAllObjects(std::string& name) {
+    auto valid = [&](DatabaseElement* e) { return true; };
+    DatabaseResults objects;
+    findAll(objects, name, valid);
+    if (!objects.empty()) {
+      std::cout << "Found the following objects with name \"" + name + "\":" << std::endl;
+      for (auto& i : objects) {
+	std::cout << i.toString() << std::endl;
+      }
+    }
   }
   
 }

@@ -24,7 +24,7 @@ main (int argc, char **argv)
   std::string filename = "";
   int c;
   bool verbose = false;
-  std::string library = "work";
+  std::string library = "WORK";
   std::string configurationFilename = "";
   bool saveLibraryInfo = false;
   

@@ -14,15 +14,36 @@ namespace generator {
   }
 
   void LocalDatabase::setPackage(std::string& name) {
-    package = name;
+    sectionName = name;
+    sectionType = ast::PACKAGE;
   }
 
   std::string LocalDatabase::getPackage() {
-    assert(package.size() > 0);
-    return package;
+    assert(!sectionName.empty() && sectionType == ast::PACKAGE);
+    return sectionName;
+  }
+
+  void LocalDatabase::setEntity(std::string& name) {
+    sectionName = name;
+    sectionType = ast::ENTITY;
+  }
+
+  std::string LocalDatabase::getEntity() {
+    assert(!sectionName.empty() && sectionType == ast::ENTITY);
+    return sectionName;
+  }
+
+  void LocalDatabase::setArchitecture(std::string& name) {
+    sectionName = name;
+    sectionType = ast::ARCHITECTURE;
+  }
+  
+  std::string LocalDatabase::getSection() {
+    return sectionName;
   }
 
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
+    assert(!map.empty());
     map.back().add(name, e);
   }
   
@@ -58,17 +79,17 @@ namespace generator {
 
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                           ast::ObjectArguments arguments, ast::Text* text) {
-    DatabaseElement e = {id, library, package, name, arguments, type, false, NULL, NULL, NULL, text};
+    DatabaseElement e = {id, library, sectionType, sectionName, name, arguments, type, false, NULL, NULL, NULL, text};
     add(name, e);
   }
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    if (id == ast::PACKAGE) {
-      if (name == package) {
+    if (id == sectionType) {
+      if (name == sectionName) {
         packageAttributes.push_back(attribute);
       } else {
-        exceptions.printError("Could not find package \"" + name + "\"", text);
+        exceptions.printError("Could not find " + ast::toString(id) + "\"" + name + "\"", text);
       }
     } else {
       bool found = false;
@@ -92,7 +113,7 @@ namespace generator {
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {ast::FUNCTION, library, package, name, arguments, returnType, false, NULL, function, NULL, text};
+    DatabaseElement e = {ast::FUNCTION, library, sectionType, sectionName, name, arguments, returnType, false, NULL, function, NULL, text};
     add(name, e);
   };
 
@@ -100,7 +121,7 @@ namespace generator {
                                    ast::ProcedureDeclaration* procedure,
                                    ast::Text* text) {
     ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::NONE);
-    DatabaseElement e = {ast::PROCEDURE, library, package, name, arguments, c, false, NULL, NULL, procedure, text};
+    DatabaseElement e = {ast::PROCEDURE, library, sectionType, sectionName, name, arguments, c, false, NULL, NULL, procedure, text};
     add(name, e);
   };
 
