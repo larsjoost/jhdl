@@ -144,7 +144,7 @@ namespace generator {
     parm.decIndent();
     println(parm, "};");
     println(parm, "using " + name + " = Enumeration<" + enumName + ", " + valueName + ", " + s + ">;");
-    return ast::ObjectValueContainer(ast::USER_TYPE, name);
+    return ast::ObjectValueContainer(name);
   }
 
   /*

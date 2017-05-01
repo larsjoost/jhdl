@@ -221,10 +221,9 @@ namespace generator {
       }
       result = op + expr;
     } else if (e->op) {
-      std::string op;
       std::string term = expressionTermToString(e->term, expectedType, sensitivityListCallback);
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
-      result = term + " " + op + " " + expr;
+      result = term + " " + e->op->op + " " + expr;
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }

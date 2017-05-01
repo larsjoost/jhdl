@@ -25,6 +25,7 @@ namespace ast {
     std::string typeName;
     bool equals(ObjectValueContainer& other);
     ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") : value(value), typeName(typeName) {}
+    ObjectValueContainer(std::string typeName) : typeName(typeName) { value = USER_TYPE; }
     std::string toString();
   };
   
