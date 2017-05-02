@@ -119,6 +119,34 @@ namespace generator {
     return "";
   }
   
+  std::string SystemC::function_attribute(parameters& parm,
+                                          std::string &name,
+                                          ast::ObjectType type,
+                                          std::string& interface,
+                                          ast::ObjectArguments& arguments,
+                                          ast::Text* text) {
+    std::string foreignName = "";
+    auto valid = [&](DatabaseElement* e) {
+      return (e->id == type) && (e->arguments.equals(arguments));
+    };
+    DatabaseResult object;
+    if (database.findOne(object, name, valid)) {
+      DatabaseElement* e = object.object;
+      if (e->attribute && e->attribute->expression) {
+        println(parm, "/*");
+        println(parm, " * This is the definition of the foreign function set as an attribute.");
+        println(parm, " * The implementation must be defined in a .cpp file in this directory.");
+        println(parm, "*/");
+        foreignName = e->attribute->expression->toString(true);
+        println(parm, "void " + foreignName + interface + ";");
+      }
+    } else {
+      exceptions.printError("Did not find declaration of " + ast::toString(type) + " \"" + name + "\"", text); 
+      database.printAllObjects(name);
+    }
+    return foreignName;
+  };
+  
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
                                       bool implementation) {
     if (f) {
@@ -126,53 +154,50 @@ namespace generator {
       bool operatorName = (f->name == NULL);
       ast::Text& text = operatorName ? f->string->text : f->name->text;
       std::string name;
+      std::string translatedName;
       if (operatorName) {
         ExpressionParser expr(&database);
         name = f->string->toString(true);
-        expr.translateOperator(name, name);
+        expr.translateOperator(name, translatedName);
+        translatedName = "operator " + translatedName;
       } else {
         name = f->name->toString(true);
+        translatedName = name;
       }
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       ast::ObjectValueContainer returnType;
       findType(f->returnType, returnType);
       parm.returnType = returnType;
-      database.addFunction(name, arguments, returnType, f);
       descendHierarchy(parm, name);
       printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
       database.globalName(returnTypeName, ast::TYPE);
+      std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
-      if (operatorName) { name = "operator " + name; }
       if (f->body) {
-        std::string s = (implementation && !operatorName) ? database.getParentName() + "::" : "";
-        println(parm, returnTypeName + " " + s + name + interface + "{");
+        std::string parentName = database.getParentName();
+        std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
+                                                             interface, arguments, &text);
+        std::string s = (implementation && !operatorName) ? parentName + "::" : "";
+        println(parm, returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
+        if (!foreignFunctionName.empty()) {
+          println(parm, "// Foreign function call");
+          println(parm, foreignFunctionName + "(" + argumentNames + ");");
+        }
         function_body(parm, f->body);
         parm.decIndent();
         println(parm, "}");
       } else {
-        println(parm, (operatorName ? "friend " : "") + returnTypeName + " " + name + interface + ";");
+        database.addFunction(name, arguments, returnType, f);
+        println(parm, (operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       ascendHierarchy(parm);
       functionEnd("function_declarations");
     }
   }
 
-  std::string SystemC::function_attribute(parameters& parm, DatabaseElement* e, std::string& interface) {
-    std::string name = "";
-    if (e->attribute && e->attribute->expression) {
-      println(parm, "/*");
-      println(parm, " * This is the definition of the foreign function set as an attribute.");
-      println(parm, " * The implementation must be defined in a .cpp file in this directory.");
-      println(parm, "*/");
-      name = e->attribute->expression->toString(true);
-      println(parm, "void " + name + interface + ";");
-    }
-    return name;
-  };
-  
   void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
                                       bool implementation) {
     if (f) {
@@ -185,16 +210,8 @@ namespace generator {
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
         std::string parentName = database.getParentName();
-        auto valid = [&](DatabaseElement* e) {
-          return (e->id == ast::PROCEDURE) && (e->arguments.equals(arguments));
-        };
-        std::string foreignFunctionName = "";
-        DatabaseResult object;
-        if (database.findOne(object, name, valid)) {
-          foreignFunctionName = function_attribute(parm, object.object, interface);
-        } else {
-          exceptions.printError("Did not find declaration of procedure \"" + name + "\"", &f->name->text); 
-        }
+        std::string foreignFunctionName = function_attribute(parm, name, ast::PROCEDURE,
+                                                             interface, arguments, &f->name->text);
         std::string s = implementation ? parentName + "::" : "";
         println(parm, "void " + s + name + interface + "{");
         parm.incIndent();

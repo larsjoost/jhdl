@@ -10,15 +10,15 @@ namespace vhdl {
     if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
       o = &std::cerr;
     } 
-    STANDARD::SEVERITY_LEVEL s;
+    STANDARD::SEVERITY_LEVEL<> s;
     s = severity;
-    *o << STANDARD::SEVERITY_LEVEL::IMAGE(s) << ": " << message << ::std::endl;
+    *o << STANDARD::SEVERITY_LEVEL<>::IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STANDARD::FAILURE) {
       ENV.FINISH(1);
     } 
   }
 
-  STANDARD::BOOLEAN vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B) {
+  STANDARD::BOOLEAN<> vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B) {
     return A != B;
   }
 

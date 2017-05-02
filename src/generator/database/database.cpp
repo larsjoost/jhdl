@@ -116,9 +116,9 @@ namespace generator {
     DatabaseResults objects;
     findAll(objects, name, valid);
     if (!objects.empty()) {
-      std::cout << "Found the following objects with name \"" + name + "\":" << std::endl;
+      std::cerr << "Found the following objects with name \"" + name + "\":" << std::endl;
       for (auto& i : objects) {
-	std::cout << i.toString() << std::endl;
+	std::cerr << i.toString() << std::endl;
       }
     }
   }
