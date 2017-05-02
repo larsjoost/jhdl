@@ -124,6 +124,7 @@ namespace generator {
                                           ast::ObjectType type,
                                           std::string& interface,
                                           ast::ObjectArguments& arguments,
+					  std::string returnType,
                                           ast::Text* text) {
     std::string foreignName = "";
     auto valid = [&](DatabaseElement* e) {
@@ -138,7 +139,7 @@ namespace generator {
         println(parm, " * The implementation must be defined in a .cpp file in this directory.");
         println(parm, "*/");
         foreignName = e->attribute->expression->toString(true);
-        println(parm, "void " + foreignName + interface + ";");
+        println(parm, returnType + " " + foreignName + interface + ";");
       }
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(type) + " \"" + name + "\"", text); 
@@ -178,13 +179,14 @@ namespace generator {
       if (f->body) {
         std::string parentName = database.getParentName();
         std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
-                                                             interface, arguments, &text);
+                                                             interface, arguments, returnTypeName,
+							     &text);
         std::string s = (implementation && !operatorName) ? parentName + "::" : "";
         println(parm, returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
         if (!foreignFunctionName.empty()) {
           println(parm, "// Foreign function call");
-          println(parm, foreignFunctionName + "(" + argumentNames + ");");
+          println(parm, "return " + foreignFunctionName + "(" + argumentNames + ");");
         }
         function_body(parm, f->body);
         parm.decIndent();
@@ -211,7 +213,7 @@ namespace generator {
       if (f->body) {
         std::string parentName = database.getParentName();
         std::string foreignFunctionName = function_attribute(parm, name, ast::PROCEDURE,
-                                                             interface, arguments, &f->name->text);
+                                                             interface, arguments, "void", &f->name->text);
         std::string s = implementation ? parentName + "::" : "";
         println(parm, "void " + s + name + interface + "{");
         parm.incIndent();
@@ -251,13 +253,13 @@ namespace generator {
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
       functionStart("attribute_declarations");
-      if (a->item) {
-        std::string name = a->item ? a->item->toString(true) : a->string->toString();
-        ast::Text* text = a->item ? &a->item->text : &a->string->text;
-        ast::ObjectArguments arguments(false);
-        generateObjectArguments(a->arguments, arguments);
-        ast::ObjectType id = a->objectType;
-        database.addAttribute(name, arguments, id, a, text);
+      if (a->item || a->string) {
+	ast::Text* text = a->item ? &a->item->text : &a->string->text;
+	std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
+	ast::ObjectArguments arguments(false);
+	generateObjectArguments(a->arguments, arguments);
+	ast::ObjectType id = a->objectType;
+	database.addAttribute(name, arguments, id, a, text);
       }
       functionEnd("attribute_declarations");
     }

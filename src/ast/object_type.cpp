@@ -41,13 +41,13 @@ namespace ast {
   int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index) {
     auto it = interface.list.begin();
     // std::cout << "association.name.empty() " << (association.name.empty() ? "true" : "false") << std::endl;
-    if (!association.name.empty() && index >= 0 && interface.list.size() > index) {
+    if (association.name.empty() && index >= 0 && interface.list.size() > index) {
       std::advance(it, index);
       // std::cout << "it->type = " + it->type.toString() << std::endl;
       // std::cout << "association.type = " + association.type.toString() << std::endl;
       return it->type.equals(association.type) ? index : -1;
     } else {
-      for (int i = 0; i < interface.list.size(); i++) {
+      for (int i = 0; i < interface.list.size(); i++, it++) {
         if (it->name == association.name) {
           return it->type.equals(association.type) ? i : -1;
         }

@@ -120,6 +120,8 @@ namespace generator {
       for (auto& i : objects) {
 	std::cerr << i.toString() << std::endl;
       }
+    } else {
+      std::cerr << "Found no objects with name \"" + name + "\":" << std::endl;
     }
   }
   

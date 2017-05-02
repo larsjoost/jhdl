@@ -20,6 +20,8 @@ namespace generator {
 
     void add(std::string& name, DatabaseElement& e);
 
+    void printAllObjects(std::string& name);
+
   public:
            
     void find(DatabaseResults& results, std::string& name);

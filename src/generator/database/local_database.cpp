@@ -99,20 +99,32 @@ namespace generator {
       bool found = false;
       DatabaseResults results;
       find(results, name);
-      if (!results.empty()) {
-        for (auto& i : results) {
-          if (id == i.object->id && i.object->arguments.equals(arguments)) {
-            i.object->attribute = attribute;
-            found = true;
-          }
-        }
+      for (auto& i : results) {
+	if (id == i.object->id && i.object->arguments.equals(arguments)) {
+	  i.object->attribute = attribute;
+	  found = true;
+	}
       }
       if (!found) {
         exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
+	printAllObjects(name);
       }
     }
   };
 
+  void LocalDatabase::printAllObjects(std::string& name) {
+      DatabaseResults results;
+      find(results, name);
+      if (!results.empty()) { 
+	std::cerr << "Found the following objects with name \"" + name + "\":" << std::endl;
+      	for (auto& i : results) {
+	  std::cerr << i.object->toString() << std::endl;
+	}
+      } else {
+	std::cerr << "Found no objects with name " + name << std::endl;
+      }
+  }
+  
   void LocalDatabase::addFunction(std::string& name, ast::ObjectArguments& arguments,
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
