@@ -123,8 +123,16 @@ namespace generator {
                                       bool implementation) {
     if (f) {
       functionStart("function_declarations");
-      ast::Text& text = f->name ? f->name->text : f->string->text;
-      std::string name = f->name ? f->name->toString(true) : f->string->toString();
+      bool operatorName = (f->name == NULL);
+      ast::Text& text = operatorName ? f->string->text : f->name->text;
+      std::string name;
+      if (operatorName) {
+        ExpressionParser expr(&database);
+        name = f->string->toString(true);
+        expr.translateOperator(name, name);
+      } else {
+        name = f->name->toString(true);
+      }
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       ast::ObjectValueContainer returnType;
@@ -135,16 +143,17 @@ namespace generator {
       printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
       database.globalName(returnTypeName, ast::TYPE);
-      std::string interface = "(" + getArgumentTypes(parm, f->interface) + ")";
+      std::string interface = "(" + getInterface(parm, f->interface) + ")";
+      if (operatorName) { name = "operator " + name; }
       if (f->body) {
-        std::string s = implementation ? database.getParentName() + "::" : "";
+        std::string s = (implementation && !operatorName) ? database.getParentName() + "::" : "";
         println(parm, returnTypeName + " " + s + name + interface + "{");
         parm.incIndent();
         function_body(parm, f->body);
         parm.decIndent();
         println(parm, "}");
       } else {
-        println(parm, returnTypeName + " " + name + interface + ";");
+        println(parm, (operatorName ? "friend " : "") + returnTypeName + " " + name + interface + ";");
       }
       ascendHierarchy(parm);
       functionEnd("function_declarations");

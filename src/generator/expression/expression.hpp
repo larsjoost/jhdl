@@ -102,6 +102,8 @@ namespace generator {
                  ast::ObjectValueContainer& expectedType,
                  ast::ObjectValueContainer& actualType);
     
+    bool translateOperator(std::string& op, std::string& translatedOp);
+
   };
 
   template <typename Func>
@@ -208,7 +210,6 @@ namespace generator {
     return name;
   }
 
-
   template <typename Func>
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
@@ -230,7 +231,9 @@ namespace generator {
     } else if (e->op) {
       std::string term = expressionTermToString(e->term, expectedType, sensitivityListCallback);
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
-      result = term + " " + e->op->op + " " + expr;
+      std::string op;
+      translateOperator(e->op->op, op);
+      result = term + " " + op + " " + expr;
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }

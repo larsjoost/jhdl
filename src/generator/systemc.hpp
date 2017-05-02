@@ -199,6 +199,7 @@ namespace generator {
                            std::string* argument,
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
+    // systemc.cpp
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library);

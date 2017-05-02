@@ -46,7 +46,7 @@ namespace generator {
 
     void setLibrary(std::string& name);
     std::string getLibrary();
-    void setPackage(std::string& name);
+    void setPackage(std::string& name, bool body);
     std::string getPackage();
     void setEntity(std::string& name);
     std::string getEntity();

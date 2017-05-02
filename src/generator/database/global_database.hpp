@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <list>
 
+#include "../../exceptions/exceptions.hpp"
+
 #include "general.hpp"
 #include "local_database.hpp"
 
@@ -11,6 +13,8 @@ namespace generator {
 
   class GlobalDatabase {
     
+    Exceptions exceptions;
+
     std::unordered_map<std::string, std::unordered_map<std::string, LocalDatabase>> map;
 
     void print(std::unordered_map<std::string, LocalDatabase>& m);

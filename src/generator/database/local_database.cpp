@@ -13,9 +13,9 @@ namespace generator {
     return library;
   }
 
-  void LocalDatabase::setPackage(std::string& name) {
+  void LocalDatabase::setPackage(std::string& name, bool body) {
     sectionName = name;
-    sectionType = ast::PACKAGE;
+    sectionType = body ? ast::PACKAGE_BODY : ast::PACKAGE;
   }
 
   std::string LocalDatabase::getPackage() {
@@ -40,6 +40,10 @@ namespace generator {
   
   std::string LocalDatabase::getSection() {
     return sectionName;
+  }
+
+  ast::ObjectType LocalDatabase::getSectionType() {
+    return sectionType;
   }
 
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {

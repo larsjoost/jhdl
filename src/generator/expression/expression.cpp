@@ -75,6 +75,18 @@ namespace generator {
     return name;
   }
 
+  bool ExpressionParser::translateOperator(std::string& op, std::string& translatedOp) {
+    static std::unordered_map<std::string, std::string> translate =
+      { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"} };
+    auto i = translate.find(op);
+    bool result = false;
+    if (i != translate.end()) {
+      translatedOp = i->second;
+      result = true;
+    }
+    return result;
+  }
+  
   ExpressionParser::ReturnTypes ExpressionParser::operatorReturnTypes(std::string& name,
                                                                       ast::ObjectValueContainer& l,
                                                                       ast::ObjectValueContainer& r) {

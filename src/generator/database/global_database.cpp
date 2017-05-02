@@ -6,7 +6,11 @@ namespace generator {
   void GlobalDatabase::append(LocalDatabase& d) {
     auto l = map.find(d.getLibrary());
     if (l != map.end()) {
-      l->second[d.getSection()] = d;
+      if (l->second.find(d.getSection()) != l->second.end()) {
+        l->second[d.getSection()] = d;
+      } else {
+        exceptions.printError(ast::toString(d.getSectionType()) + " " + d.getSection() + " is already defined");
+      }
     } else {
       std::unordered_map<std::string, LocalDatabase> l;
       l[d.getSection()] = d;

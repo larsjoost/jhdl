@@ -143,7 +143,8 @@ namespace generator {
     println(parm, "EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
     parm.decIndent();
     println(parm, "};");
-    println(parm, "using " + name + " = Enumeration<" + enumName + ", " + valueName + ", " + s + ">;");
+    println(parm, "template<typename T=" + enumName+ ", class E=" + valueName + ", int N=" + s + ">");
+    println(parm, "using " + name + " = Enumeration<T, E, N>;");
     return ast::ObjectValueContainer(name);
   }
 
@@ -286,10 +287,10 @@ namespace generator {
       std::string left, right;
       ast::ObjectValueContainer type(ast::INTEGER);
       rangeToString(r->range, left, right, type);
-      println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
+      println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + "<>);");
     } else if (r->subtype) {
       std::string id = r->subtype->identifier->toString(true);
-      println(parm, "vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
+      println(parm, "vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + "<>);");
     }
   }
   
@@ -317,7 +318,7 @@ namespace generator {
         return name;
       }
     } else {
-      exceptions.printError("Could not fin type \"" + typeName + "\"", &t->name->text);
+      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
     }
     return typeName;
   }
@@ -355,24 +356,24 @@ namespace generator {
     if (package) {
       functionStart("packageDeclaration(library = " + library + ")");
       std::string name = package->name->toString(true);
-      addLibraryInfo("package", name, filename);
+      bool body = (package->body) ? true : false;
+      addLibraryInfo(body ? "body" : "package", name, filename);
       database.setLibrary(library);
-      database.setPackage(name);
+      database.setPackage(name, body);
       descendHierarchy(parm, name);
-      if (!package->body) {
+      if (!body) {
         println(parm, "");
         println(parm, "SC_PACKAGE(" + name + ") {");
         parm.incIndent();
       } else {
         println(parm, "// Package body of " + name);
       }
-      bool implementationArea = (package->body) ? true : false;
-      declarations(parm, package->declarations, implementationArea);
-      if (!package->body) {
+      declarations(parm, package->declarations, body);
+      if (!body) {
         parm.decIndent();
         println(parm, "} " + name + ";");
+        database.globalize();
       }
-      database.globalize();
       ascendHierarchy(parm);
       functionEnd("packageDeclaration");
     }

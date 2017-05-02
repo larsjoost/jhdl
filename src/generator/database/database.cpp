@@ -10,7 +10,8 @@ namespace generator {
     DatabaseResult object;
     if (findOne(object, name, valid)) {
       found = true;
-      if (object.object->sectionName != localDatabase.getSection()) {
+      if (object.object->sectionName != localDatabase.getSection() ||
+          object.object->sectionType != localDatabase.getSectionType()) {
         name = object.object->sectionName + "::" + name;
       }
       if (id == ast::TYPE) {
@@ -30,8 +31,8 @@ namespace generator {
     return localDatabase.getLibrary();
   }
   
-  void Database::setPackage(std::string& name) {
-    localDatabase.setPackage(name);
+  void Database::setPackage(std::string& name, bool body) {
+    localDatabase.setPackage(name, body);
   }
 
   std::string Database::getPackage() {
