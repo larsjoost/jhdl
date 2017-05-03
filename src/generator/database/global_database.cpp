@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "general.hpp"
 #include "global_database.hpp"
 
@@ -6,10 +8,10 @@ namespace generator {
   void GlobalDatabase::append(LocalDatabase& d) {
     auto l = map.find(d.getLibrary());
     if (l != map.end()) {
-      if (l->second.find(d.getSection()) != l->second.end()) {
+      if (l->second.find(d.getSection()) == l->second.end()) {
         l->second[d.getSection()] = d;
       } else {
-        exceptions.printError(ast::toString(d.getSectionType()) + " " + d.getSection() + " is already defined");
+        exceptions.printError(ast::toString(d.getSectionType()) + " " + d.getLibrary() + "." + d.getSection() + " is already defined");
       }
     } else {
       std::unordered_map<std::string, LocalDatabase> l;
