@@ -2,6 +2,10 @@
 #ifndef AST_BASICINDETIFIER_H_
 #define AST_BASICINDETIFIER_H_
 
+#include <list>
+
+#include "object_type.hpp"
+
 #include "text.hpp"
 #include "list.hpp"
 #include "expression.hpp"
@@ -14,6 +18,9 @@ namespace ast {
   
   class BasicIdentifier {
   public:
+
+    std::list<ObjectValueContainer> returnTypes;
+    
     Text text;
     Text* attribute = NULL; 
     AssociationList* arguments;

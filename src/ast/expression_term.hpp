@@ -4,11 +4,14 @@
 
 #include <list>
 
+#include "object_type.hpp"
+
 #include "number.hpp"
 #include "string.hpp"
 #include "basic_identifier.hpp"
 #include "physical.hpp"
 #include "character.hpp"
+
 
 namespace ast {
 
@@ -18,6 +21,8 @@ namespace ast {
   class ExpressionTerm {
     
   public:
+
+    std::list<ObjectValueContainer> returnTypes;
 
     Text* text;
     

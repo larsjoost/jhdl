@@ -47,7 +47,7 @@ namespace generator {
       ExpressionParser expr(&database);
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-	  ast::ObjectValueContainer expectedType(ast::BOOLEAN);
+	  ast::ObjectValueContainer expectedType("BOOLEAN");
 	  println(parm, command + " (" + expr.toString(c.condition, expectedType) + ") {");
 	} else {
 	  println(parm, "} else {");

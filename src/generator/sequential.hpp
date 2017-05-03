@@ -35,7 +35,8 @@ namespace generator {
         ExpressionParser expr(&database);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
-            println(parm, command + " (" + expr.toString(s.condition, ast::BOOLEAN, callback) + ") {");
+            ast::ObjectValueContainer expectedValue("BOOLEAN");
+            println(parm, command + " (" + expr.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";
             noConditionDelimiter = "}";

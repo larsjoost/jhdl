@@ -2,6 +2,10 @@
 #ifndef AST_EXPRESSION_H_
 #define AST_EXPRESSION_H_
 
+#include <list>
+
+#include "object_type.hpp"
+
 #include "number.hpp"
 #include "string.hpp"
 #include "expression_operator.hpp"
@@ -16,6 +20,8 @@ namespace ast {
     
   public:
 
+    std::list<ObjectValueContainer> returnTypes;
+    
     Text* text;
 
     ExpressionTerm* term;

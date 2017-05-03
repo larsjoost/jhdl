@@ -16,19 +16,21 @@ namespace ast {
   
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
-      "INTEGER", "REAL", "NUMBER", "BOOLEAN", "CHARACTER", "TEXT",
+      "INTEGER", "REAL", "NUMBER", "CHARACTER", "TEXT",
       "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
     return a[o];
   }
 
   std::string ObjectValueContainer::toString() {
     if (value == USER_TYPE) {
-      return typeName;
+      return typeName + "(User type)";
     }
     return ast::toString(value);
   }
 
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
+    // std::cout << "this = " + toString() << std::endl;
+    // std::cout << "other = " + other.toString() << std::endl;
     if (value == NUMBER) return (other.value == INTEGER || other.value == REAL || other.value == NUMBER);
     if (other.value == NUMBER) return (value == INTEGER || value == REAL || value == NUMBER);
     if (value != other.value) return false;

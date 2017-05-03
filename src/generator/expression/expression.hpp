@@ -19,6 +19,11 @@ namespace generator {
     void functionEnd(std::string name);
 
     Exceptions exceptions;
+
+    struct ReturnTypePair {
+      ast::ObjectValueContainer left;
+      ast::ObjectValueContainer right;
+    };
     
     using ReturnTypes = std::list<ast::ObjectValueContainer>;
 
@@ -229,11 +234,34 @@ namespace generator {
       }
       result = op + expr;
     } else if (e->op) {
-      std::string term = expressionTermToString(e->term, expectedType, sensitivityListCallback);
-      std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
-      std::string op;
-      translateOperator(e->op->op, op);
-      result = term + " " + op + " " + expr;
+      std::list<ReturnTypePair> typePairs;
+      for (auto& i : e->term->returnTypes) {
+        for (auto& j : e->expression->returnTypes) {
+          ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
+          for (auto& x : t) {
+            if (x.equals(expectedType)) {
+              typePairs.push_back({i, j});
+            }
+          }
+        }
+      }
+      if (typePairs.size() != 1) {
+        exceptions.printError("Cound not resolve expected type " + expectedType.toString(), e->text);
+        if (typePairs.empty()) {
+          std::cerr << "Did not find anything" << std::endl;
+        } else {
+          std::cerr << "Found the following types:" << std::endl;
+          for (auto& i : typePairs) {
+            std::cerr << i.left.toString() + " " + e->op->op + " " + i.right.toString() + " = " + expectedType.toString() << std::endl;
+          }
+        }
+      } else {
+        std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback);
+        std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback);
+        std::string op;
+        translateOperator(e->op->op, op);
+        result = term + " " + op + " " + expr;
+      }
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
