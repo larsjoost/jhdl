@@ -11,6 +11,7 @@ namespace generator {
     functionStart("loadPackage(library = " + library + ", name = " + package + ")");
     std::string lib = (library == "WORK") ? database.getLibrary() : library;
     if (!database.exists(lib, package)) {
+      exceptions.printNote("Loading package " + library + "." + package);
       parsePackage(parm, package, lib);
     }
     if (database.exists(lib, package)) {

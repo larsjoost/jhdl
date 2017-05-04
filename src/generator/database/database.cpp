@@ -22,6 +22,20 @@ namespace generator {
     }
     return found;
   }
+
+  ast::ObjectValueContainer Database::getType(std::string name, std::string package, std::string library) {
+    auto valid = [&] (DatabaseElement* e) { return e->id == ast::TYPE; };
+    ast::ObjectValueContainer result(ast::UNKNOWN);
+    DatabaseResult object;
+    if (findOne(object, name, valid, package, library)) {
+      result = object.object->type;
+    } else {
+      exceptions.printError("Unable to find type " + name + " in package " + library + "." + package);
+      printAllObjects(name);
+    }
+    return result;
+  }
+
   
   void Database::setLibrary(std::string& name) {
     localDatabase.setLibrary(name);
@@ -121,7 +135,7 @@ namespace generator {
 	std::cerr << i.toString() << std::endl;
       }
     } else {
-      std::cerr << "Found no objects with name \"" + name + "\":" << std::endl;
+      std::cerr << "Found no objects with name \"" + name + "\"." << std::endl;
     }
   }
   

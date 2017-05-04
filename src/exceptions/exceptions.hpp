@@ -36,6 +36,7 @@ public:
   };
   
   void printInternal(std::string message, ast::Text* text = NULL);
+  void printNote(std::string message, ast::Text* text = NULL);
   void printError(std::string message, ast::Text* text = NULL);
   void printWarning(std::string message, ast::Text* text = NULL);
 

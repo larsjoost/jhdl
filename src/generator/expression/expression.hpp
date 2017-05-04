@@ -90,6 +90,8 @@ namespace generator {
 
     std::string returnTypesToString(ReturnTypes& returnTypes);
     
+    bool getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result);
+    
   public:
 
     ExpressionParser(Database* database, bool verbose = false) : database(database), verbose(verbose) {}

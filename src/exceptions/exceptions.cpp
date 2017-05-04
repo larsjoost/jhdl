@@ -28,6 +28,10 @@ void Exceptions::printInternal(std::string message, ast::Text* text) {
   print("Internal", RED, message, text);
 }
 
+void Exceptions::printNote(std::string message, ast::Text* text) {
+  print("Note", YELLOW, message, text);
+}
+
 void Exceptions::printError(std::string message, ast::Text* text) {
   numberOfErrors++;
   print("Error", RED, message, text);

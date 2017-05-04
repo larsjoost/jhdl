@@ -41,7 +41,8 @@ namespace generator {
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
-
+    ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
+    
     bool globalName(std::string& name, ast::ObjectType id);
 
     void setLibrary(std::string& name);
@@ -99,7 +100,8 @@ namespace generator {
   
   template<typename Func>
   void Database::findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package, std::string library) {
-    if (package.empty() && library.empty()) {
+    if ((package.empty() || package == localDatabase.getPackage()) &&
+        (library.empty() || library == localDatabase.getLibrary())) {
       localDatabase.find(objects, name);
     }
     globalDatabase.find(objects, name, package, library);

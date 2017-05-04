@@ -225,22 +225,30 @@ namespace generator {
     functionEnd("basicIdentifierReturnTypes");
     return b->returnTypes;
   }
- 
-  ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
-                                                               std::string attributeName) {
+
+  bool ExpressionParser::getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result) {
+    static ast::ObjectValueContainer stringType = database->getType("STRING", "STANDARD", "STD");
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
-      {{"IMAGE", ast::ObjectValueContainer("STRING")},
+      {{"IMAGE", stringType},
        {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)}};
-    ast::ObjectValueContainer result(ast::UNKNOWN);
+    bool found = false;
     auto i = fixedAttributeTypes.find(attributeName);
     if (i != fixedAttributeTypes.end()) {
       result = i->second;
-    } else {
-      if (attributeName == "HIGH") {
+      found = true;
+    }
+    return found;
+  }
+  
+  ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
+                                                               std::string attributeName) {
+    ast::ObjectValueContainer result(ast::UNKNOWN);
+    if (!getStaticAttributeType(attributeName, result)) {
+      if (attributeName == "HIGH" || attributeName == "LOW") {
         switch(type.value) {
         case ast::INTEGER: result = ast::ObjectValueContainer(ast::INTEGER); break;
         case ast::PHYSICAL: result = ast::ObjectValueContainer(ast::PHYSICAL); break;
-        default: exceptions.printError("Could not find attribute \"HIGH\" of type " + type.toString()); 
+        default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {
         exceptions.printError("Could not resolve type of attribute " + attributeName);

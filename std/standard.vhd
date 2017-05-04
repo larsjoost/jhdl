@@ -72,6 +72,10 @@ package STANDARD is
       hr	=   60 min;	-- hour
     end units;
   
+  -- predefined array types:
+  
+  type STRING is array (POSITIVE range <>) of CHARACTER;
+
   subtype DELAY_LENGTH is TIME range 0 fs to TIME'HIGH;
   
   -- function that returns the current simulation time:
@@ -83,10 +87,6 @@ package STANDARD is
   subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
   
   subtype POSITIVE is INTEGER range 1 to INTEGER'HIGH;
-  
-  -- predefined array types:
-  
-  type STRING is array (POSITIVE range <>) of CHARACTER;
   
   type BIT_VECTOR is array (NATURAL range <>) of BIT;
   
