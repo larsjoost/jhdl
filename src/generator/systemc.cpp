@@ -145,7 +145,7 @@ namespace generator {
     println(parm, "};");
     println(parm, "template<typename T=" + enumName+ ", class E=" + valueName + ", int N=" + s + ">");
     println(parm, "using " + name + " = Enumeration<T, E, N>;");
-    return ast::ObjectValueContainer(name);
+    return ast::ObjectValueContainer(ast::ENUMERATION, name);
   }
 
   /*
@@ -190,9 +190,11 @@ namespace generator {
   ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
     assert(t); 
     std::string name = identifier->toString(true);
-    ast::ObjectValueContainer value;
-    std::string subtypeName = subtypeIndication(parm, value, name, t->type);
+    ast::ObjectValueContainer subtypeValue;
+    std::string subtypeName = subtypeIndication(parm, subtypeValue, name, t->type);
     printArrayType(parm, name, t->definition, subtypeName);
+    ast::ObjectValueContainer value(ast::ARRAY);
+    value.setSubtype(subtypeValue);
     return value;
   }
 

@@ -15,7 +15,7 @@ namespace ast {
   std::string toString(ObjectType o);
 
   enum ObjectValue {
-    INTEGER, REAL, NUMBER, CHARACTER, TEXT,  PHYSICAL, ARRAY, USER_TYPE,
+    INTEGER, REAL, NUMBER, CHARACTER, TEXT,  PHYSICAL, ARRAY, ENUMERATION, USER_TYPE,
     UNKNOWN, NONE, DONT_CARE, NUMBER_OF_OBJECT_VALUES};
 
   std::string toString(ObjectValue o);
@@ -23,8 +23,13 @@ namespace ast {
   struct ObjectValueContainer {
     ObjectValue value;
     std::string typeName;
+    ObjectValueContainer* subtype;
     bool equals(ObjectValueContainer& other);
     ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") : value(value), typeName(typeName) {}
+    void setSubtype(ObjectValueContainer& subtype) {
+      this->subtype = new ObjectValueContainer();
+      *this->subtype = subtype;
+    };
     ObjectValueContainer(std::string typeName) : typeName(typeName) { value = USER_TYPE; }
     std::string toString();
   };

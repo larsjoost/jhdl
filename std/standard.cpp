@@ -22,6 +22,10 @@ namespace vhdl {
     return A != B;
   }
 
+  STANDARD::STRING<> vhdl_concat(STANDARD::STRING<> A, STANDARD::STRING<> B) {
+    return A + B;
+  }
+
   
 }
   

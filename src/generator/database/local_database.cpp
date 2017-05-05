@@ -9,7 +9,6 @@ namespace generator {
   }
 
   std::string LocalDatabase::getLibrary() {
-    assert(library.size() > 0);
     return library;
   }
 
@@ -19,7 +18,6 @@ namespace generator {
   }
 
   std::string LocalDatabase::getPackage() {
-    assert(!sectionName.empty() && sectionType == ast::PACKAGE);
     return sectionName;
   }
 
@@ -29,7 +27,6 @@ namespace generator {
   }
 
   std::string LocalDatabase::getEntity() {
-    assert(!sectionName.empty() && sectionType == ast::ENTITY);
     return sectionName;
   }
 

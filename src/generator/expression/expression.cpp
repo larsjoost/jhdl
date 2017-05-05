@@ -106,8 +106,8 @@ namespace generator {
     } else if (e->unaryOperator) {
       e->returnTypes = expressionReturnTypes(e->expression);
     } else if (e->op) {
-      ReturnTypes term = expressionTermReturnTypes(e->term);
       ReturnTypes expr = expressionReturnTypes(e->expression);
+      ReturnTypes term = expressionTermReturnTypes(e->term);
       for (auto& i : term) {
         for (auto& j : expr) {
           ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
@@ -115,9 +115,9 @@ namespace generator {
         }
       }
       if (e->returnTypes.empty()) {
-        exceptions.printError("Could not resolve type of expression " +
-                              returnTypesToString(term) + " " + e->op->op + " " +
-                              returnTypesToString(expr), e->text);
+        exceptions.printError("Could not resolve type of expression \"" +
+                              returnTypesToString(expr) + "\" " + e->op->op + " \"" +
+                              returnTypesToString(term) + "\"", e->text);
       }
     } else {
       e->returnTypes = expressionTermReturnTypes(e->term);
@@ -144,7 +144,8 @@ namespace generator {
     } else if (e->number) {
       e->returnTypes = {ast::ObjectValueContainer(e->number->type)};
     } else if (e->string) {
-      e->returnTypes = {ast::ObjectValueContainer(ast::TEXT)};
+      static ast::ObjectValueContainer stringType = database->getType("STRING", "STANDARD", "STD");
+      e->returnTypes = {stringType};
     } else if (e->identifier) {
       e->returnTypes = basicIdentifierReturnTypes(e->identifier);
     } else if (e->character) {

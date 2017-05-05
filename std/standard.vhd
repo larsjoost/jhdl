@@ -95,6 +95,8 @@ package STANDARD is
   function "/=" (a : integer; b : integer) return boolean;
   attribute foreign of "/="[INTEGER,INTEGER] : function is "vhdl_not_equal";
 
+  function "&" (a : string; b : string) return string;
+  attribute foreign of "&"[STRING,STRING] : function is "vhdl_concat";
   
 end STANDARD;
 
@@ -104,5 +106,8 @@ package body STANDARD is
   begin
   end;
   
+  function "&" (a : string; b : string) return string is
+  begin
+  end;        
 
 end package body STANDARD;

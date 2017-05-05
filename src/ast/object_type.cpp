@@ -17,13 +17,16 @@ namespace ast {
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
       "INTEGER", "REAL", "NUMBER", "CHARACTER", "TEXT",
-      "PHYSICAL", "ARRAY", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
+      "PHYSICAL", "ARRAY", "ENUMERATION", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
     return a[o];
   }
 
   std::string ObjectValueContainer::toString() {
     if (value == USER_TYPE) {
       return typeName + "(User type)";
+    }
+    if (value == ARRAY) {
+      return "ARRAY of " + subtype->toString();
     }
     return ast::toString(value);
   }

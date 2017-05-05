@@ -35,7 +35,7 @@ namespace generator {
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
       ExpressionParser expr(&database);
-      ast::ObjectValueContainer expectedType("STRING");
+      static ast::ObjectValueContainer expectedType = database.getType("STRING", "STANDARD", "STD");
       println(parm, "report(" + expr.toString(p->message, expectedType) + ", " +
               p->severity->toString() + ");");
     }
@@ -47,7 +47,7 @@ namespace generator {
       ExpressionParser expr(&database);
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-	  ast::ObjectValueContainer expectedType("BOOLEAN");
+          static ast::ObjectValueContainer expectedType = database.getType("BOOLEAN", "STANDARD", "STD");
 	  println(parm, command + " (" + expr.toString(c.condition, expectedType) + ") {");
 	} else {
 	  println(parm, "} else {");
