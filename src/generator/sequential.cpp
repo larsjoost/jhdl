@@ -19,6 +19,7 @@ namespace generator {
       auto valid = [&](DatabaseElement* e) { return e->id == ast::VARIABLE; };
       DatabaseResult object;
       if (database.findOne(object, name, valid)) {
+        name = object.getName(true);
 	println(parm, name + " = " + expr.toString(p->expression, object.object->type) + ";");
       } else {
 	exceptions.printError("Cound to find definition of VARIABLE with name " + name, &p->identifier->text);

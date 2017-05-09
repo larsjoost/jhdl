@@ -35,13 +35,15 @@ namespace generator {
     println(parm, "#include \"standard.h\"");
     println(parm, "namespace vhdl {");
     parm.incIndent();
-    // transform(library.begin(), library.end(), library.begin(), toupper);
-    // println(parm, "namespace " + library + " {");
-    // parm.incIndent();
-    //    println(parm, "using namespace STANDARD;");
+    transform(library.begin(), library.end(), library.begin(), toupper);
+    println(parm, "namespace " + library + " {");
+    parm.incIndent();
+    if (library != "STD") {
+      println(parm, "using namespace STD;");
+    }
     parse(parm, designFile, library);
-    // parm.decIndent();
-    // println(parm, "}");
+    parm.decIndent();
+    println(parm, "}");
     parm.decIndent();
     println(parm, "}");
   }
@@ -333,6 +335,7 @@ namespace generator {
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+        type += "<>";
 	if (id == ast::SIGNAL) {
 	  type = "sc_signal<" + type + ">";
 	}

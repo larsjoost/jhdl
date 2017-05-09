@@ -32,6 +32,7 @@ namespace generator {
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";
+        name = object.getName(true);
         ExpressionParser expr(&database);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {

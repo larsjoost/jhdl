@@ -2,6 +2,18 @@
 
 namespace generator {
 
+  std::string Database::globalName(DatabaseResult& object) {
+    std::string name;
+    if (object.object->sectionName != localDatabase.getSection() ||
+        object.object->sectionType != localDatabase.getSectionType()) {
+      name = object.object->sectionName + "::" + name;
+    }
+    if (object.object->id == ast::TYPE) {
+      name = name + "<>";
+    }
+    return name;
+  }
+  
   bool Database::globalName(std::string& name, ast::ObjectType id) {
     bool found = false;
     auto valid = [&](DatabaseElement* e) {
@@ -10,13 +22,7 @@ namespace generator {
     DatabaseResult object;
     if (findOne(object, name, valid)) {
       found = true;
-      if (object.object->sectionName != localDatabase.getSection() ||
-          object.object->sectionType != localDatabase.getSectionType()) {
-        name = object.object->sectionName + "::" + name;
-      }
-      if (id == ast::TYPE) {
-        name = name + "<>";
-      }
+      name = globalName(object);
     } else {
       exceptions.printError("Unable to find " + ast::toString(id) + " " + name);
     }
