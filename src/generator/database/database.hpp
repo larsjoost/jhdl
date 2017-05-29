@@ -43,7 +43,7 @@ namespace generator {
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
     
-    std::string globalName(DatabaseResult& object);
+    std::string globalName(DatabaseResult& object, std::string name);
     bool globalName(std::string& name, ast::ObjectType id);
 
     void setLibrary(std::string& name);
