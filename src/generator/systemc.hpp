@@ -106,7 +106,7 @@ namespace generator {
     // includes.cpp
     void loadPackage(parameters& parm, std::string package, std::string library,
                      std::string identifier, ast::Text* text = NULL);
-    void includes(parameters& parm, ast::ContextClause* contextClause);
+    void includes(parameters& parm, ast::ContextClause* contextClause, bool load);
 
     ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);

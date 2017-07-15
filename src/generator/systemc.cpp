@@ -33,19 +33,8 @@ namespace generator {
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "#include \"standard.h\"");
-    println(parm, "namespace vhdl {");
-    parm.incIndent();
     transform(library.begin(), library.end(), library.begin(), toupper);
-    println(parm, "namespace " + library + " {");
-    parm.incIndent();
-    if (library != "STD") {
-      println(parm, "using namespace STD;");
-    }
     parse(parm, designFile, library);
-    parm.decIndent();
-    println(parm, "}");
-    parm.decIndent();
-    println(parm, "}");
   }
 
   void SystemC::saveLibraryInfo() {
@@ -61,11 +50,25 @@ namespace generator {
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     functionStart("parse");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
-      includes(parm, it.module.contextClause);
+      includes(parm, it.module.contextClause, true);
+    }
+    println(parm, "namespace vhdl {");
+    parm.incIndent();
+    println(parm, "namespace " + library + " {");
+    parm.incIndent();
+    if (library != "STD") {
+      println(parm, "using namespace STD;");
+    }
+    for (ast::DesignUnit& it : designFile.designUnits.list) {
+      includes(parm, it.module.contextClause, false);
       packageDeclaration(parm, it.module.package, library);
       interfaceDeclaration(parm, it.module.interface, library);
       implementationDeclaration(parm, it.module.implementation, library);
     }
+    parm.decIndent();
+    println(parm, "}");
+    parm.decIndent();
+    println(parm, "}");
     functionEnd("parse");
   }
 

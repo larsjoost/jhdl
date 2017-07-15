@@ -18,6 +18,8 @@ class Exceptions {
   
   bool colorsSupported = false;
 
+  bool verbose = false;
+  
   static int numberOfErrors;
   static int numberOfWarnings;
   

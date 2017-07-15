@@ -1,5 +1,18 @@
 #!/bin/bash
 
+usage() { echo "Usage: $0 [-t <name>] " 1>&2; exit 1; }
+
+while getopts ":t:" o; do
+    case $o in
+        t)
+            TEST_NAME=$OPTARG
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
 WORKDIR=$(pwd)
 
 TEST_SCRIPT_NAME=test.sh
@@ -44,6 +57,10 @@ for t in ${TEST[@]}; do
 
     TEST_RUNS=$(find "$t/" -name $TEST_SCRIPT_NAME)
 
+    if [ -n "$TEST_NAME" ]; then
+	TEST_RUNS=$(echo $TEST_RUNS | tr ' ' '\n' | grep $TEST_NAME)
+    fi
+    
     MAX_SIZE=$(max $TEST_RUNS)
 
     if [ "$t" == "success" ]; then
