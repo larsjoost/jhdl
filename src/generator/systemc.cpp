@@ -18,26 +18,39 @@ namespace generator {
     this->verbose |= verbose; 
   }
 
-  
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
     functionStart("SystemC");
     filename = designFile.filename;
-    std::cout << "// Filename : " << std::string(designFile.filename) << std::endl;
     parameters parm;
+    parm.open(filename); 
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
         exceptions.printError("Could not open configuration file " + configurationFilename);
       } else {
-        loadPackage(parm, "STANDARD", "STD", "ALL");
+	loadPackage("STANDARD", "STD", "ALL");
       }
     }
-    println(parm, "#include <string.h>");
-    println(parm, "#include \"systemc.h\"");
-    println(parm, "#include \"vhdl.h\"");
-    println(parm, "#include \"standard.h\"");
     transform(library.begin(), library.end(), library.begin(), toupper);
+    parm.selectFile(parameters::SOURCE_FILE);
+    parm.println("#include \"" + parm.getFileName(parameters::HEADER_FILE) + "\"");
+    namespaceStart(parm, library);
+    parm.selectFile(parameters::HEADER_FILE);
+    std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
+    parm.println("#ifndef " + ifndefName);
+    parm.println("#define " + ifndefName);
+    parm.println("#include <string.h>");
+    parm.println("#include \"systemc.h\"");
+    parm.println("#include \"vhdl.h\"");
+    parm.println("#include \"standard.h\"");
+    namespaceStart(parm, library);
     parse(parm, designFile, library);
+    parm.selectFile(parameters::HEADER_FILE);
+    namespaceEnd(parm);
+    parm.println("#endif");
+    parm.selectFile(parameters::SOURCE_FILE);
+    namespaceEnd(parm);
+    parm.close();
   }
 
   void SystemC::saveLibraryInfo() {
@@ -49,18 +62,28 @@ namespace generator {
       libraryInfo.add(section, name, filename);
     }
   }
-  
+
+  void SystemC::namespaceStart(parameters& parm, std::string& library) {
+    parm.println("namespace vhdl {");
+    parm.incIndent();
+    parm.println("namespace " + library + " {");
+    parm.incIndent();
+  }
+
+  void SystemC::namespaceEnd(parameters& parm) {
+    parm.decIndent();
+    parm.println("}");
+    parm.decIndent();
+    parm.println("}");
+  }
+
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     functionStart("parse");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
     }
-    println(parm, "namespace vhdl {");
-    parm.incIndent();
-    println(parm, "namespace " + library + " {");
-    parm.incIndent();
     if (library != "STD") {
-      println(parm, "using namespace STD;");
+      parm.println("using namespace STD;");
     }
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, false);
@@ -68,10 +91,6 @@ namespace generator {
       interfaceDeclaration(parm, it.module.interface, library);
       implementationDeclaration(parm, it.module.implementation, library);
     }
-    parm.decIndent();
-    println(parm, "}");
-    parm.decIndent();
-    println(parm, "}");
     functionEnd("parse");
   }
 
@@ -89,7 +108,8 @@ namespace generator {
 	  quiet = true;
 	  parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
-	  parse(parm, parserDesignFile, library);
+	  parameters p;
+	  parse(p, parserDesignFile, library);
 	  quiet = q;
 	} else {
 	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename);
@@ -142,17 +162,17 @@ namespace generator {
         EnumerationElement<STATE_T_enum> STATE_T_value[3] = { {IDLE, "idle"}, {'1'}, {STOP, "stop"}};
         using STATE_T = Enumeration<STATE_T_value, 3>;
     */
-    //      println(parm, "vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
+    //      parm.println("vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
     std::string valueName = name + "_value";
     std::string s = std::to_string(size);
-    println(parm, "enum " + enumName + " {" + enumList + "};");
-    println(parm, "struct " + valueName + " {");
+    parm.println("enum " + enumName + " {" + enumList + "};");
+    parm.println("struct " + valueName + " {");
     parm.incIndent();
-    println(parm, "EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
+    parm.println("EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
     parm.decIndent();
-    println(parm, "};");
-    println(parm, "template<typename T=" + enumName+ ", class E=" + valueName + ", int N=" + s + ">");
-    println(parm, "using " + name + " = Enumeration<T, E, N>;");
+    parm.println("};");
+    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ", int N=" + s + ">");
+    parm.println("using " + name + " = Enumeration<T, E, N>;");
     return ast::ObjectValueContainer(ast::ENUMERATION, name);
   }
 
@@ -221,8 +241,8 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::NUMBER);
     rangeToString(r, left, right, type);
-    println(parm, "using " + name + "_type = decltype(" + left + ");"); 
-    println(parm, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
+    parm.println("using " + name + "_type = decltype(" + left + ");"); 
+    parm.println("vhdl_range_type(" + name + ", " + left + ", " + right + ");");
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
@@ -241,7 +261,7 @@ namespace generator {
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
-    println(parm, "enum " + enumName + " {" + s + "};");
+    parm.println("enum " + enumName + " {" + s + "};");
     int size = 0;
     s = listToString(parm, p->elements.list, ", ",
                      [&](ast::PhysicalElement& e){
@@ -254,18 +274,18 @@ namespace generator {
                        return "{" + u + ", " + number + ", " + unit + "}";
                      });
     std::string valueName = name + "_value";
-    println(parm, "struct " + valueName + " {");
+    parm.println("struct " + valueName + " {");
     parm.incIndent();
     {
       std::string x = std::to_string(size);
-      println(parm, "const int size = " + x + ";");
-      println(parm, "const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + s + "};");
+      parm.println("const int size = " + x + ";");
+      parm.println("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + s + "};");
     }
     parm.decIndent();
-    println(parm, "};");
+    parm.println("};");
     std::string typeName = name + "_type";
-    println(parm, "using " + typeName + " = Physical<decltype(" + left + "), " + enumName + ">;"); 
-    println(parm, "vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
+    parm.println("using " + typeName + " = Physical<decltype(" + left + "), " + enumName + ">;"); 
+    parm.println("vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
   }
 
   /*
@@ -283,14 +303,14 @@ namespace generator {
     std::string left, right;
     rangeToString(r, left, right, type);
     std::string rangeName = name + "_range";
-    println(parm, "struct " + rangeName + " {");
+    parm.println("struct " + rangeName + " {");
     parm.incIndent();
-    println(parm, typeName + "_type left = " + left + ";");
-    println(parm, typeName + "_type right = " + right + ";");
+    parm.println(typeName + "_type left = " + left + ";");
+    parm.println(typeName + "_type right = " + right + ";");
     parm.decIndent();
-    println(parm, "};");
-    println(parm, "template<class RANGE = " + rangeName + ">");
-    println(parm, "using " + name + " = " + typeName + "<RANGE>;");
+    parm.println("};");
+    parm.println("template<class RANGE = " + rangeName + ">");
+    parm.println("using " + name + " = " + typeName + "<RANGE>;");
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
@@ -299,10 +319,10 @@ namespace generator {
       std::string left, right;
       ast::ObjectValueContainer type(ast::INTEGER);
       rangeToString(r->range, left, right, type);
-      println(parm, "vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + "<>);");
+      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + "<>);");
     } else if (r->subtype) {
       std::string id = r->subtype->identifier->toString(true);
-      println(parm, "vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + "<>);");
+      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + "<>);");
     }
   }
   
@@ -361,7 +381,7 @@ namespace generator {
     if (v) {
       printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
-      println(parm, s + ";");
+      parm.println(s + ";");
     }
   }
 
@@ -375,17 +395,18 @@ namespace generator {
       database.setPackage(name, body);
       descendHierarchy(parm, name);
       if (!body) {
-        println(parm, "");
-        println(parm, "SC_PACKAGE(" + name + ") {");
+        parm.println("");
+        parm.println("SC_PACKAGE(" + name + ") {");
         parm.incIndent();
-      } else {
-        println(parm, "// Package body of " + name);
-      }
-      declarations(parm, package->declarations, body);
-      if (!body) {
+	declarations(parm, package->declarations, body);
         parm.decIndent();
-        println(parm, "} " + name + ";");
+        parm.println("};");
         database.globalize();
+      } else {
+	parm.selectFile(parameters::SOURCE_FILE);
+	parm.println(name + " " + name + ";");
+	declarations(parm, package->declarations, body);
+	parm.revertSelectFile();
       }
       ascendHierarchy(parm);
       functionEnd("packageDeclaration");
@@ -400,12 +421,12 @@ namespace generator {
       database.setLibrary(library);
       database.setEntity(name);
       descendHierarchy(parm, name);
-      println(parm, "");
-      println(parm, "SC_INTERFACE(" + name + ") {");
-      println(parm, "public:");
+      parm.println("");
+      parm.println("SC_INTERFACE(" + name + ") {");
+      parm.println("public:");
       parm.incIndent();
       if (interface->generics) {
-        println(parm, interfaceListToString(parm, interface->generics, "; ", false) + ";");
+        parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
       }
       if (interface->ports) {
 	auto func = [&](std::string& type, ast::ObjectType id,
@@ -418,10 +439,10 @@ namespace generator {
 	  }
 	  return type;
 	};
-        println(parm, interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
+        parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
       }
       parm.decIndent();
-      println(parm, "};");
+      parm.println("};");
       database.globalize();
       ascendHierarchy(parm);
       functionEnd("interface");

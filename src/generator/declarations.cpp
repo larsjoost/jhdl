@@ -134,12 +134,12 @@ namespace generator {
     if (database.findOne(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
-        println(parm, "/*");
-        println(parm, " * This is the definition of the foreign function set as an attribute.");
-        println(parm, " * The implementation must be defined in a .cpp file in this directory.");
-        println(parm, "*/");
+        parm.println("/*");
+        parm.println(" * This is the definition of the foreign function set as an attribute.");
+        parm.println(" * The implementation must be defined in a .cpp file in this directory.");
+        parm.println("*/");
         foreignName = e->attribute->expression->toString(true);
-        println(parm, returnType + " " + foreignName + interface + ";");
+        parm.println(returnType + " " + foreignName + interface + ";");
       }
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(type) + " \"" + name + "\"", text); 
@@ -182,18 +182,18 @@ namespace generator {
                                                              interface, arguments, returnTypeName,
 							     &text);
         std::string s = (implementation && !operatorName) ? parentName + "::" : "";
-        println(parm, returnTypeName + " " + s + translatedName + interface + "{");
+        parm.println(returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
         if (!foreignFunctionName.empty()) {
-          println(parm, "// Foreign function call");
-          println(parm, "return " + foreignFunctionName + "(" + argumentNames + ");");
+          parm.println("// Foreign function call");
+          parm.println("return " + foreignFunctionName + "(" + argumentNames + ");");
         }
         function_body(parm, f->body);
         parm.decIndent();
-        println(parm, "}");
+        parm.println("}");
       } else {
         database.addFunction(name, arguments, returnType, f);
-        println(parm, (operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
+        parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       ascendHierarchy(parm);
       functionEnd("function_declarations");
@@ -215,20 +215,20 @@ namespace generator {
         std::string foreignFunctionName = function_attribute(parm, name, ast::PROCEDURE,
                                                              interface, arguments, "void", &f->name->text);
         std::string s = implementation ? parentName + "::" : "";
-        println(parm, "void " + s + name + interface + "{");
+        parm.println("void " + s + name + interface + "{");
         parm.incIndent();
         descendHierarchy(parm, name);
         if (!foreignFunctionName.empty()) {
-          println(parm, "// Foreign function call");
-          println(parm, foreignFunctionName + "(" + argumentNames + ");");
+          parm.println("// Foreign function call");
+          parm.println(foreignFunctionName + "(" + argumentNames + ");");
         }
         procedure_body(parm, f->body);
         ascendHierarchy(parm);
         parm.decIndent();
-        println(parm, "}");
+        parm.println("}");
       } else {
         database.addProcedure(name, arguments, f);
-        println(parm, "void " + name + interface + ";");
+        parm.println("void " + name + interface + ";");
       }
       functionEnd("procedure_declarations");
     }

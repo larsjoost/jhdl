@@ -8,7 +8,7 @@ namespace generator {
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
                                 std::string arguments) {
     functionStart("instantiateType");
-    println(parm, type + "(new " + name + "(this" + arguments + "));");
+    parm.println(type + "(new " + name + "(this" + arguments + "));");
   }
 
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
@@ -63,7 +63,7 @@ namespace generator {
         return instanceName + "->" + a.formalPart->name->toString(true) +
         ".bind(" + expr.toString(a.actualPart, ast::UNKNOWN) + ")";
       };
-      println(parm, listToString(parm, l->associationElements.list, "; ", func) + ";");
+      parm.println(listToString(parm, l->associationElements.list, "; ", func) + ";");
     }
   }
   
@@ -81,7 +81,7 @@ namespace generator {
           delimiter = "::";
         }
       }
-      println(parm , "auto " + instanceName + " = new " + componentName + "(\"" + instanceName + "\");");
+      parm.println("auto " + instanceName + " = new " + componentName + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics);
       componentAssociation(parm, instanceName, c->ports);
     }
@@ -116,13 +116,13 @@ namespace generator {
   void SystemC::createConstructor(parameters& parm, std::string& name,
                                   std::string* argument,
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements) {
-    println(parm, getConstructorDeclaration(parm, name, argument) + " {");
+    parm.println(getConstructorDeclaration(parm, name, argument) + " {");
     if (concurrentStatements) {
       parm.incIndent();
       concurrentStatementsInstantiation(parm, *concurrentStatements);
       parm.decIndent();
     }
-    println(parm, "}");
+    parm.println("}");
   }
 
 }

@@ -4,12 +4,6 @@
 
 namespace generator {
 
-  void SystemC::println(parameters& parm, std::string text) {
-    if (!quiet) {
-      std::cout << std::string(parm.indent, ' ') << text << std::endl;
-    }
-  }
-
 
   void SystemC::functionStart(std::string name) {
     if (verbose) {
@@ -32,7 +26,7 @@ namespace generator {
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text& t) {
-    println(parm, "// line " + std::to_string(t.getLine()) + ": " + t.getCurrentLine());
+    parm.println("// line " + std::to_string(t.getLine()) + ": " + t.getCurrentLine());
   }
   
   void SystemC::printSourceLine(parameters& parm, ast::BasicIdentifier* t) {

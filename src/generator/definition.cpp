@@ -34,18 +34,18 @@ namespace generator {
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
                    [&](parameters& parm){
-                     println(parm, "INTEGER<> " + identifier + ";");
+                     parm.println("INTEGER<> " + identifier + ";");
                    });
     }
   }
 
   template <typename Func>
   void SystemC::createProcess(parameters& parm, Func func) {
-    println(parm, "void process() {");
+    parm.println("void process() {");
     parm.incIndent();
     func(parm);
     parm.decIndent();
-    println(parm, "}");
+    parm.println("}");
   }
   
   void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
@@ -65,7 +65,7 @@ namespace generator {
                           auto s = [&](ast::SimpleIdentifier& s) {
                             return s.toString(true);
                           };
-                          println(parm, createWait(parm, method->sensitivity, s));
+                          parm.println(createWait(parm, method->sensitivity, s));
                         }
                         sequentialStatements(parm, method->sequentialStatements);
                       });
@@ -99,7 +99,7 @@ namespace generator {
         auto createBody = [&](parameters& parm) {
           createProcess(parm,
                         [&](parameters& parm) {
-                          println(parm, createWait(parm, sensitivity, func));
+                          parm.println(createWait(parm, sensitivity, func));
                           signalAssignment(parm, s);
                         });
         };

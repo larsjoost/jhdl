@@ -13,18 +13,18 @@ namespace generator {
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              Func bodyCallback) {
     functionStart("defineObject");
-    println(parm, type + "(" + name + ") {");
+    parm.println(type + "(" + name + ") {");
     parm.incIndent();
     std::string parentName = database.getParentName();
     if (parentName.size() > 0) {
-      println(parm, parentName + "* p = NULL;");
+      parm.println(parentName + "* p = NULL;");
     }
     if (declarationList) {
       declarations(parm, *declarationList);
     }
-    println(parm, "public:");
+    parm.println("public:");
     if (constructor) {
-      println(parm, *constructor);
+      parm.println(*constructor);
     }
     if (concurrentStatements) {
       descendHierarchy(parm, name);
@@ -34,7 +34,7 @@ namespace generator {
     bodyCallback(parm);
     createConstructor(parm, name, argument, concurrentStatements);
     parm.decIndent();
-    println(parm, "};");
+    parm.println("};");
     functionEnd("defineObject");
   }
 

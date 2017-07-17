@@ -5,13 +5,14 @@
 
 namespace generator {
 
-  void SystemC::loadPackage(parameters& parm, std::string package,
+  void SystemC::loadPackage(std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
     functionStart("loadPackage(library = " + library + ", name = " + package + ")");
     std::string lib = (library == "WORK") ? database.getLibrary() : library;
     if (!database.exists(lib, package)) {
       exceptions.printNote("Loading package " + library + "." + package);
+      parameters parm;
       parsePackage(parm, package, lib);
     }
     if (database.exists(lib, package)) {
@@ -33,15 +34,15 @@ namespace generator {
         std::string library = useClause.library->toString(true);
 	if (!load) {
 	  if ("WORK" != library) {
-	    println(parm, "using namespace " + library + ";");
+	    parm.println("using namespace " + library + ";");
 	  }
 	} else {
 	  std::string package = useClause.package->toString(true);
 	  std::string p = package;
 	  transform(p.begin(), p.end(), p.begin(), tolower);
-	  println(parm, "#include \"" + p + ".hpp\"");
+	  parm.println("#include \"" + p + ".hpp\"");
 	  std::string identifier = useClause.identifier->toString(true);
-	  loadPackage(parm, package, library, identifier, &useClause.package->text);
+	  loadPackage(package, library, identifier, &useClause.package->text);
 	}
       }
       functionEnd("includes");

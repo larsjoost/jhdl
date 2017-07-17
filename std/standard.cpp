@@ -1,33 +1,26 @@
-#include <iostream>
-
-#include "standard.h"
-#include "env.hpp"
-
+#include "standard.hpp"
 namespace vhdl {
-
-  using namespace STD;
-  
-  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity) {
-    std::ostream* o = &std::cout;
-    if (severity == STANDARD::ERROR || severity == STANDARD::FAILURE) {
-      o = &std::cerr;
-    } 
-    STANDARD::SEVERITY_LEVEL<> s;
-    s = severity;
-    *o << STANDARD::SEVERITY_LEVEL<>::IMAGE(s) << ": " << message << ::std::endl;
-    if (severity == STANDARD::FAILURE) {
-      ENV.FINISH(1);
-    } 
+  namespace STD {
+    STANDARD STANDARD;
+    // line 104:   function "/=" (a : integer; b : integer) return boolean is
+    /*
+     * This is the definition of the foreign function set as an attribute.
+     * The implementation must be defined in a .cpp file in this directory.
+    */
+    STANDARD::BOOLEAN<> vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B);
+    STANDARD::BOOLEAN<> operator !=(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B){
+      // Foreign function call
+      return vhdl_not_equal(A, B);
+    }
+    // line 108:   function "&" (a : string; b : string) return string is
+    /*
+     * This is the definition of the foreign function set as an attribute.
+     * The implementation must be defined in a .cpp file in this directory.
+    */
+    STANDARD::STRING<> vhdl_concat(STANDARD::STRING<> A, STANDARD::STRING<> B);
+    STANDARD::STRING<> operator +(STANDARD::STRING<> A, STANDARD::STRING<> B){
+      // Foreign function call
+      return vhdl_concat(A, B);
+    }
   }
-
-  STANDARD::BOOLEAN<> vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B) {
-    return A != B;
-  }
-
-  STANDARD::STRING<> vhdl_concat(STANDARD::STRING<> A, STANDARD::STRING<> B) {
-    return A + B;
-  }
-
-  
 }
-  

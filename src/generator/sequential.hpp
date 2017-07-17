@@ -9,12 +9,12 @@ namespace generator {
     std::string left = expr.toString(r->left, ast::INTEGER);
     std::string right = expr.toString(r->right, ast::INTEGER);
     std::string rangeName = name + "_range";
-    println(parm, "struct " + rangeName + " { int left = " + left + "; int right = " + right + "; };");
-    println(parm, "for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
+    parm.println("struct " + rangeName + " { int left = " + left + "; int right = " + right + "; };");
+    parm.println("for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
     parm.incIndent();
     callback(parm);
     parm.decIndent();
-    println(parm, "}");
+    parm.println("}");
   }
   
 
@@ -37,20 +37,20 @@ namespace generator {
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
             ast::ObjectValueContainer expectedValue("BOOLEAN");
-            println(parm, command + " (" + expr.toString(s.condition, expectedValue, callback) + ") {");
+            parm.println(command + " (" + expr.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";
             noConditionDelimiter = "}";
           } else {
-            println(parm, noConditionCommand);
+            parm.println(noConditionCommand);
           }
           parm.incIndent();
-          println(parm, name + " = " + expr.toString(s.expression, object.object->type, callback) + ";");
+          parm.println(name + " = " + expr.toString(s.expression, object.object->type, callback) + ";");
           parm.decIndent();
           if (s.condition) {
-            println(parm, "}");
+            parm.println("}");
           } else {
-            println(parm, noConditionDelimiter);
+            parm.println(noConditionDelimiter);
           }
         }
       } else {

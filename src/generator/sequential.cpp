@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
       ExpressionParser expr(&database);
-      println(parm, expr.procedureCallStatementToString(p) + ";");
+      parm.println(expr.procedureCallStatementToString(p) + ";");
     }
   }
   
@@ -20,7 +20,7 @@ namespace generator {
       DatabaseResult object;
       if (database.findOne(object, name, valid)) {
         name = object.getName(true);
-	println(parm, name + " = " + expr.toString(p->expression, object.object->type) + ";");
+	parm.println(name + " = " + expr.toString(p->expression, object.object->type) + ";");
       } else {
 	exceptions.printError("Cound to find definition of VARIABLE with name " + name, &p->identifier->text);
 	database.printAllObjects(name);
@@ -37,7 +37,7 @@ namespace generator {
     if (p) {
       ExpressionParser expr(&database);
       static ast::ObjectValueContainer expectedType = database.getType("STRING", "STANDARD", "STD");
-      println(parm, "report(" + expr.toString(p->message, expectedType) + ", " +
+      parm.println("report(" + expr.toString(p->message, expectedType) + ", " +
               p->severity->toString() + ");");
     }
   }
@@ -49,16 +49,16 @@ namespace generator {
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
           static ast::ObjectValueContainer expectedType = database.getType("BOOLEAN", "STANDARD", "STD");
-	  println(parm, command + " (" + expr.toString(c.condition, expectedType) + ") {");
+	  parm.println(command + " (" + expr.toString(c.condition, expectedType) + ") {");
 	} else {
-	  println(parm, "} else {");
+	  parm.println("} else {");
 	}
 	command = "} elsif";
         parm.incIndent();
         sequentialStatements(parm, c.sequentialStatements);
         parm.decIndent();
       }
-      println(parm, "}");
+      parm.println("}");
     }
   }
 
@@ -77,7 +77,7 @@ namespace generator {
   
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
     if (p) {
-      println(parm, "wait(" + p->physical->number->toString() + ");");
+      parm.println("wait(" + p->physical->number->toString() + ");");
     }
   }
 
@@ -85,7 +85,7 @@ namespace generator {
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
       ExpressionParser expr(&database);
-      println(parm, "return " + expr.toString(r->value, parm.returnType) + ";");
+      parm.println("return " + expr.toString(r->value, parm.returnType) + ";");
     }
   }
 

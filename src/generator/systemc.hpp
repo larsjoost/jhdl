@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <cassert>
+#include <fstream>
 
 #include "config.hpp"
 #include "database/database.hpp"
@@ -42,6 +43,8 @@
 #include "../ast/association_list.hpp"
 #include "../ast/association_element.hpp"
 
+#include "parameters.hpp"
+
 namespace generator {
   
   class SystemC { 
@@ -53,33 +56,26 @@ namespace generator {
     bool verbose = false;
 
     std::string filename;
-    
-    bool quiet = false;
 
+    bool quiet = false;
+    
     // Defined in general.cpp
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
-    struct parameters {
-      int indent = 0;
-      ast::ObjectValueContainer returnType;
-      void incIndent() {
-        indent += 2;
-      }
-      void decIndent() {
-        indent -= 2;
-      }
-    };
-
+    parameters headerParameters;
+    parameters sourceParameters;
+    
     Database database;
     
     Config config;
     Config libraryInfo;
-    
-    void println(parameters& parm, std::string text);
 
     int methodId = 0;
 
+    void namespaceStart(parameters& parm, std::string& library);
+    void namespaceEnd(parameters& parm);
+    
     // general.cpp
     void descendHierarchy(parameters& parm, std::string parentName = "");
     void ascendHierarchy(parameters& parm);
@@ -105,7 +101,7 @@ namespace generator {
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
 
     // includes.cpp
-    void loadPackage(parameters& parm, std::string package, std::string library,
+    void loadPackage(std::string package, std::string library,
                      std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause, bool load);
 
