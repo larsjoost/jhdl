@@ -22,7 +22,7 @@ namespace generator {
 
   bool GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
     auto func = [&](LocalDatabase& l) {
-      l.find(results, name);
+      l.find(results, name, false);
     };
     return traverse(package, library, func);
   }

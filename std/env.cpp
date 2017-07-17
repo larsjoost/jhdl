@@ -10,4 +10,8 @@ namespace vhdl {
     exit(STATUS);
   }
 
+  STANDARD::DELAY_LENGTH<> vhdl_resolution_limit() {
+    return STANDARD::DELAY_LENGTH<>(1, STANDARD::FS);
+  }
+  
 }

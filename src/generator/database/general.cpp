@@ -23,7 +23,8 @@ namespace generator {
   }
 
   std::string DatabaseResult::toString() {
-    return object ? object->toString() : "NIL";
+    return object ? object->toString() + ", local = " + (local ? "true" : "false") +
+      ", hierarchy level = " + std::to_string(hierarchyLevel) : "NIL";
   }
   
   std::string DatabaseResult::getName(bool fullName, std::string library, std::string sectionName) {
@@ -35,7 +36,7 @@ namespace generator {
         }
       } else {
         if ((library != object->library) || (sectionName != object->sectionName)) {
-          name = object->library + "::" + object->sectionName + "::" + name;
+          name = object->library + "::" + object->sectionName + "." + name;
         }
       }
     }

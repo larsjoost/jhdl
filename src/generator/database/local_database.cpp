@@ -48,7 +48,7 @@ namespace generator {
     map.back().add(name, e);
   }
   
-  void LocalDatabase::find(DatabaseResults& results, std::string& name) {
+  void LocalDatabase::find(DatabaseResults& results, std::string& name, bool local) {
     int hierarchyLevel = 0;
     for (auto i = map.begin(); i != map.end(); i++) {
       std::list<DatabaseElement>* e = i->find(name);
@@ -56,6 +56,7 @@ namespace generator {
         for (auto& j : *e) {
           DatabaseResult r;
           r.hierarchyLevel = hierarchyLevel;
+	  r.local = local;
           r.object = &j;
           results.push_back(r);
         }
@@ -142,7 +143,7 @@ namespace generator {
     NameMap m(name);
     map.push_front(m);
   }
-  
+
   void LocalDatabase::ascendHierarchy() {
     map.pop_front();
   }

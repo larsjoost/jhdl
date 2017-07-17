@@ -35,8 +35,10 @@ namespace generator {
     if (findOne(object, name, valid, package, library)) {
       result = object.object->type;
     } else {
-      exceptions.printError("Unable to find type " + name + " in package " + library + "." + package);
+      std::string msg = "Unable to find type " + name + " in package " + library + "." + package;
+      exceptions.printError(msg);
       printAllObjects(name);
+      throw ObjectNotFoundException(msg);
     }
     return result;
   }

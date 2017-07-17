@@ -15,11 +15,19 @@ namespace generator {
     LocalDatabase localDatabase;
     GlobalDatabase globalDatabase;
     Exceptions exceptions;
+
+    bool verbose = false;
     
     template<typename Func>
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
   public:
 
+    class ObjectNotFoundException {
+    public:
+      std::string msg;
+      ObjectNotFoundException(std::string msg) : msg(msg) {};
+    };
+    
     void globalize();
 
     void addAttribute(std::string& name, ast::ObjectArguments& arguments,

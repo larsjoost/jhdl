@@ -14,7 +14,9 @@
 
 namespace generator {
 
-  SystemC::SystemC(bool verbose) : verbose(verbose) {}
+  SystemC::SystemC(bool verbose) {
+    this->verbose |= verbose; 
+  }
 
   
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
@@ -30,6 +32,7 @@ namespace generator {
         loadPackage(parm, "STANDARD", "STD", "ALL");
       }
     }
+    println(parm, "#include <string.h>");
     println(parm, "#include \"systemc.h\"");
     println(parm, "#include \"vhdl.h\"");
     println(parm, "#include \"standard.h\"");
@@ -193,6 +196,7 @@ namespace generator {
     type b_t is array (3 downto -4) of bit;
   */
   ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
+    functionStart("arrayType");
     assert(t); 
     std::string name = identifier->toString(true);
     ast::ObjectValueContainer subtypeValue;
@@ -200,6 +204,7 @@ namespace generator {
     printArrayType(parm, name, t->definition, subtypeName);
     ast::ObjectValueContainer value(ast::ARRAY);
     value.setSubtype(subtypeValue);
+    functionEnd("arrayType");
     return value;
   }
 
@@ -431,10 +436,8 @@ namespace generator {
       database.setLibrary(library);
       database.setArchitecture(name);
       descendHierarchy(parm, name);
-      defineObject(parm,
-                   name,
-                   "SC_MODULE",
-                   NULL,
+      std::string constructor = "SC_CTOR(" + name + ") {}";
+      defineObject(parm, name, "SC_MODULE", &constructor, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){});

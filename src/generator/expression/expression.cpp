@@ -4,13 +4,13 @@ namespace generator {
 
   void ExpressionParser::functionStart(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION START] ExpressionParser." << name << std::endl;
     }
   }
 
   void ExpressionParser::functionEnd(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION END] ExpressionParser." << name << std::endl;
     }
   }
 
@@ -66,7 +66,7 @@ namespace generator {
     };
     DatabaseResult object;
     if (database->findOne(object, name, valid)) {
-      return objectToString(object, p->arguments, [&](DatabaseResult& e) {});
+      name = objectToString(object, p->arguments, [&](DatabaseResult& e) {});
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
       database->printAllObjects(name);

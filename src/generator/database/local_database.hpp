@@ -24,7 +24,7 @@ namespace generator {
 
   public:
            
-    void find(DatabaseResults& results, std::string& name);
+    void find(DatabaseResults& results, std::string& name, bool local = true);
 
     int getHierarchyLevel(std::string& name);
     

@@ -12,10 +12,7 @@ namespace generator {
     if (blockStatement) {
       printSourceLine(parm, blockStatement->name);
       std::string name = blockStatement->name->toString(true);
-      defineObject(parm,
-                   name,
-                   "SC_BLOCK",
-                   NULL,
+      defineObject(parm, name, "SC_BLOCK", NULL, NULL,
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){});
@@ -32,7 +29,8 @@ namespace generator {
       defineObject(parm,
                    name,
                    "SC_FOR_GENERATE",
-                   &identifier,
+		   NULL,
+		   &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
                    [&](parameters& parm){
@@ -72,9 +70,8 @@ namespace generator {
                         sequentialStatements(parm, method->sequentialStatements);
                       });
       };
-      defineObject(parm, methodName, "SC_THREAD", NULL,
-                   &method->declarations,
-                   NULL, createBody);
+      defineObject(parm, methodName, "SC_THREAD", NULL, NULL,
+                   &method->declarations, NULL, createBody);
     }
     functionEnd("methodDefinition");
   }
@@ -106,7 +103,7 @@ namespace generator {
                           signalAssignment(parm, s);
                         });
         };
-        defineObject(parm, name, "SC_THREAD", NULL, NULL, NULL, createBody);
+        defineObject(parm, name, "SC_THREAD", NULL, NULL, NULL, NULL, createBody);
       }
       functionEnd("concurrentSignalAssignment");
     }

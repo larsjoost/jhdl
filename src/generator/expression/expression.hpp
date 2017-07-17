@@ -12,7 +12,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    bool verbose;
+    bool verbose = false;
     Database* database;
 
     void functionStart(std::string name);
@@ -94,7 +94,9 @@ namespace generator {
     
   public:
 
-    ExpressionParser(Database* database, bool verbose = false) : database(database), verbose(verbose) {}
+    ExpressionParser(Database* database, bool verbose = false) : database(database) {
+      this->verbose |= verbose;
+    }
   
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValueContainer& expectedType, Func sensitivityListCallback);
@@ -207,13 +209,18 @@ namespace generator {
   std::string ExpressionParser::objectToString(DatabaseResult& object,
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
+    functionStart("objectToString");
     assert(object.object);
     std::string name = object.getName(true, database->getLibrary(), database->getSection());
+    if (verbose) {
+      std::cout << "name = " << name << ": " << object.toString() << std::endl;
+    }
     if (arguments) {
       assert(object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE);
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
     }
+    functionEnd("objectToString");
     return name;
   }
 

@@ -55,7 +55,8 @@ namespace generator {
     std::string filename;
     
     bool quiet = false;
-    
+
+    // Defined in general.cpp
     void functionStart(std::string name);
     void functionEnd(std::string name);
 
@@ -168,7 +169,8 @@ namespace generator {
     void defineObject(parameters& parm,
                       std::string name,
                       std::string type,
-                      std::string* argument,
+		      std::string* constructor,
+		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
                       Func bodyCallback);

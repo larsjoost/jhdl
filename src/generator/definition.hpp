@@ -7,7 +7,8 @@ namespace generator {
   void SystemC::defineObject(parameters& parm,
                              std::string name,
                              std::string type,
-                             std::string* argument,
+			     std::string* constructor,
+			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              Func bodyCallback) {
@@ -22,6 +23,9 @@ namespace generator {
       declarations(parm, *declarationList);
     }
     println(parm, "public:");
+    if (constructor) {
+      println(parm, *constructor);
+    }
     if (concurrentStatements) {
       descendHierarchy(parm, name);
       concurrentStatementsDefinition(parm, *concurrentStatements);
