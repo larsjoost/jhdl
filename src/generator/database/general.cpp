@@ -36,7 +36,7 @@ namespace generator {
         }
       } else {
         if ((library != object->library) || (sectionName != object->sectionName)) {
-          name = object->library + "::" + object->sectionName + "." + name;
+          name = object->library + "_" + object->sectionName + "." + name;
         }
       }
     }

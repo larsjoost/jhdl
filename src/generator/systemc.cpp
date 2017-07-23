@@ -42,11 +42,9 @@ namespace generator {
     parm.println("#include <string.h>");
     parm.println("#include \"systemc.h\"");
     parm.println("#include \"vhdl.h\"");
-    parm.println("#include \"standard.h\"");
-    namespaceStart(parm, library);
+    parm.println("#include \"standard.hpp\"");
     parse(parm, designFile, library);
     parm.selectFile(parameters::HEADER_FILE);
-    namespaceEnd(parm);
     parm.println("#endif");
     parm.selectFile(parameters::SOURCE_FILE);
     namespaceEnd(parm);
@@ -82,7 +80,9 @@ namespace generator {
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
     }
+    namespaceStart(parm, library);
     if (library != "STD") {
+      parm.println("#include \"standard.h\"");
       parm.println("using namespace STD;");
     }
     for (ast::DesignUnit& it : designFile.designUnits.list) {
@@ -91,6 +91,7 @@ namespace generator {
       interfaceDeclaration(parm, it.module.interface, library);
       implementationDeclaration(parm, it.module.implementation, library);
     }
+    namespaceEnd(parm);
     functionEnd("parse");
   }
 
@@ -404,7 +405,6 @@ namespace generator {
         database.globalize();
       } else {
 	parm.selectFile(parameters::SOURCE_FILE);
-	parm.println(name + " " + name + ";");
 	declarations(parm, package->declarations, body);
 	parm.revertSelectFile();
       }

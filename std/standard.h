@@ -5,9 +5,7 @@
 
 namespace vhdl {
 
-  using namespace STD;
-  
-  void report(::std::string message, STANDARD::SEVERITY_LEVEL_enum severity);
+  void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity);
   
 }
 

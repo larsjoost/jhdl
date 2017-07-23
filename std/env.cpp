@@ -1,7 +1,6 @@
 #include "env.hpp"
 namespace vhdl {
   namespace STD {
-    ENV ENV;
     // line 14:   procedure STOP (STATUS: INTEGER) is
     /*
      * This is the definition of the foreign function set as an attribute.

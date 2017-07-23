@@ -32,12 +32,12 @@ namespace generator {
         assert (useClause.package);
         assert (useClause.library);
         std::string library = useClause.library->toString(true);
+	std::string package = useClause.package->toString(true);
 	if (!load) {
 	  if ("WORK" != library) {
-	    parm.println("using namespace " + library + ";");
+	    parm.println(library + "::" + package + " " + library + "_" + package + ";");
 	  }
 	} else {
-	  std::string package = useClause.package->toString(true);
 	  std::string p = package;
 	  transform(p.begin(), p.end(), p.begin(), tolower);
 	  parm.println("#include \"" + p + ".hpp\"");

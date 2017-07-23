@@ -1,7 +1,6 @@
 #include "standard.hpp"
 namespace vhdl {
   namespace STD {
-    STANDARD STANDARD;
     // line 104:   function "/=" (a : integer; b : integer) return boolean is
     /*
      * This is the definition of the foreign function set as an attribute.
