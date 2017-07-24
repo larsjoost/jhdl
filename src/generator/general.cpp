@@ -25,8 +25,13 @@ namespace generator {
     database.ascendHierarchy();
   }
 
+  void SystemC::printSourceLine(parameters& parm, ast::Text* t) {
+    assert(t);
+    parm.println("// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine());
+  }
+
   void SystemC::printSourceLine(parameters& parm, ast::Text& t) {
-    parm.println("// line " + std::to_string(t.getLine()) + ": " + t.getCurrentLine());
+    printSourceLine(parm, &t);
   }
   
   void SystemC::printSourceLine(parameters& parm, ast::BasicIdentifier* t) {

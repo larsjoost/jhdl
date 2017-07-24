@@ -25,13 +25,19 @@ namespace generator {
 
 
   public:
+    enum Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, NONE};
+    Area area;
+    bool isArea(Area a);
+    int index;
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
     ast::ObjectValueContainer returnType;
     void incIndent();
     void decIndent();
     void open(std::string filename);
     void close();
+    void println(int position, std::string message);
     void println(std::string message);
+    void println(Area a, std::string message);
     void selectFile(FileSelect s);
     void revertSelectFile();
     bool isQuiet();

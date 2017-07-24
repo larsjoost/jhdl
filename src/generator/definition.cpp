@@ -15,7 +15,9 @@ namespace generator {
       defineObject(parm, name, "SC_BLOCK", NULL, NULL,
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
-                   [&](parameters& parm){});
+                   [&](parameters& parm){},
+		   [&](parameters& parm){}
+		   );
     }
   }
 
@@ -26,6 +28,10 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       database.add(ast::VARIABLE, identifier, ast::INTEGER);
+      auto createDeclaration = [&](parameters& parm) {};
+      auto createBody = [&](parameters& parm) {
+	parm.println("INTEGER<> " + identifier + ";");
+      };
       defineObject(parm,
                    name,
                    "SC_FOR_GENERATE",
@@ -33,9 +39,9 @@ namespace generator {
 		   &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
-                   [&](parameters& parm){
-                     parm.println("INTEGER<> " + identifier + ";");
-                   });
+		   createBody,
+		   createDeclaration
+                   );
     }
   }
 
@@ -58,6 +64,10 @@ namespace generator {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
       }
+      auto createDefinition = [&](parameters& parm) {
+	parm.area = parameters::DECLARATION;
+	sequentialStatements(parm, method->sequentialStatements);
+      };
       auto createBody = [&](parameters& parm) {
         createProcess(parm,
                       [&](parameters& parm) {
@@ -65,13 +75,24 @@ namespace generator {
                           auto s = [&](ast::SimpleIdentifier& s) {
                             return s.toString(true);
                           };
-                          parm.println(createWait(parm, method->sensitivity, s));
+                          printSensitivityListWait(parm, method->sensitivity, s);
                         }
+			parm.println("// Wait statements goto tree");
+			parm.area = parameters::INITIALIZATION;
+			parm.index = 1;
+			parm.println("switch (waitIndex) {");
+			parm.incIndent();
+                        sequentialStatements(parm, method->sequentialStatements);
+			parm.println("default: waitIndex = 1;");
+			parm.decIndent();
+			parm.println("}");
+			parm.println("// Implementation area");
+			parm.area = parameters::IMPLEMENTATION;
                         sequentialStatements(parm, method->sequentialStatements);
                       });
       };
       defineObject(parm, methodName, "SC_THREAD", NULL, NULL,
-                   &method->declarations, NULL, createBody);
+                   &method->declarations, NULL, createBody, createDefinition);
     }
     functionEnd("methodDefinition");
   }
@@ -99,11 +120,12 @@ namespace generator {
         auto createBody = [&](parameters& parm) {
           createProcess(parm,
                         [&](parameters& parm) {
-                          parm.println(createWait(parm, sensitivity, func));
+                          printSensitivityListWait(parm, sensitivity, func);
                           signalAssignment(parm, s);
                         });
         };
-        defineObject(parm, name, "SC_THREAD", NULL, NULL, NULL, NULL, createBody);
+        defineObject(parm, name, "SC_THREAD", NULL, NULL, NULL, NULL, createBody,
+		     [&](parameters& parm) {});
       }
       functionEnd("concurrentSignalAssignment");
     }

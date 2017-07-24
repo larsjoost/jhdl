@@ -155,13 +155,13 @@ namespace generator {
     template <typename Func>
     void createProcess(parameters& parm, Func func);
     template <typename Func>
-    std::string createWait(parameters& parm, auto sensitivity, Func func);
+    void printSensitivityListWait(parameters& parm, auto sensitivity, Func func);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
     std::string getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument);
-    template <typename Func>
+    template <typename BodyFunc, typename DeclFunc>
     void defineObject(parameters& parm,
                       std::string name,
                       std::string type,
@@ -169,7 +169,8 @@ namespace generator {
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                      Func bodyCallback);
+                      BodyFunc bodyCallback,
+		      DeclFunc declarationCallback);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
@@ -205,6 +206,7 @@ namespace generator {
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library);
 
+    void printSourceLine(parameters& parm, ast::Text* t);
     void printSourceLine(parameters& parm, ast::Text& t);
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
     void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);

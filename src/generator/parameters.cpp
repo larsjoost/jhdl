@@ -54,9 +54,25 @@ namespace generator {
     fileInfo= previousFileInfo;
   }
 
+  void parameters::println(int position, std::string text) {
+    if (fileInfo) {
+      fileInfo->outputFile << std::string(position, ' ') << text << std::endl;
+    }
+  }
+
   void parameters::println(std::string text) {
     if (fileInfo) {
- 	fileInfo->outputFile << std::string(fileInfo->indent, ' ') << text << std::endl;
+      println(fileInfo->indent, text);
+    }
+  }
+
+  bool parameters::isArea(Area a) {
+    return a == area;
+  }
+  
+  void parameters::println(Area a, std::string text) {
+    if (isArea(a)) {
+      println(text);
     }
   }
 

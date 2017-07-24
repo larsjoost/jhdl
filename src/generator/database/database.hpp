@@ -52,6 +52,7 @@ namespace generator {
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
     
     std::string globalName(DatabaseResult& object, std::string name);
+    std::string globalName(std::string name);
     bool globalName(std::string& name, ast::ObjectType id);
 
     void setLibrary(std::string& name);

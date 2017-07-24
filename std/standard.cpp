@@ -6,8 +6,8 @@ namespace vhdl {
      * This is the definition of the foreign function set as an attribute.
      * The implementation must be defined in a .cpp file in this directory.
     */
-    STANDARD::BOOLEAN<> vhdl_not_equal(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B);
-    STANDARD::BOOLEAN<> operator !=(STANDARD::INTEGER<> A, STANDARD::INTEGER<> B){
+    STD::STANDARD::BOOLEAN<> vhdl_not_equal(STD::STANDARD::INTEGER<> A, STD::STANDARD::INTEGER<> B);
+    STD::STANDARD::BOOLEAN<> operator !=(STD::STANDARD::INTEGER<> A, STD::STANDARD::INTEGER<> B){
       // Foreign function call
       return vhdl_not_equal(A, B);
     }
@@ -16,8 +16,8 @@ namespace vhdl {
      * This is the definition of the foreign function set as an attribute.
      * The implementation must be defined in a .cpp file in this directory.
     */
-    STANDARD::STRING<> vhdl_concat(STANDARD::STRING<> A, STANDARD::STRING<> B);
-    STANDARD::STRING<> operator +(STANDARD::STRING<> A, STANDARD::STRING<> B){
+    STD::STANDARD::STRING<> vhdl_concat(STD::STANDARD::STRING<> A, STD::STANDARD::STRING<> B);
+    STD::STANDARD::STRING<> operator +(STD::STANDARD::STRING<> A, STD::STANDARD::STRING<> B){
       // Foreign function call
       return vhdl_concat(A, B);
     }

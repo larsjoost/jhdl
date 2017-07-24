@@ -86,7 +86,6 @@ namespace generator {
 
     ast::ObjectArguments toObjectArguments(ast::AssociationList* associationList);
 
-    std::string physicalToString(ast::Physical* physical);
 
     std::string returnTypesToString(ReturnTypes& returnTypes);
     
@@ -98,6 +97,8 @@ namespace generator {
       this->verbose |= verbose;
     }
   
+    std::string physicalToString(ast::Physical* physical);
+
     template <typename Func>
     std::string toString(ast::Expression* e, ast::ObjectValueContainer& expectedType, Func sensitivityListCallback);
     std::string toString(ast::Expression* e, ast::ObjectValueContainer& expectedType);
@@ -219,6 +220,8 @@ namespace generator {
       assert(object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE);
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
+    } else if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
+      name += "()";
     }
     functionEnd("objectToString");
     return name;
@@ -352,8 +355,8 @@ namespace generator {
     if (findAttributeMatch(objects, match, expectedType, attributeName)) {
       assert(match.object);
       bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
-      std::string seperator = objectMatch ? "." : "<>::";
-      name = name + seperator + attributeName;
+      std::string seperator = objectMatch ? "." : "::";
+      name = database->globalName(name) + seperator + attributeName;
       std::string a = "";
       if (associationList) {
         std::string delimiter = "";

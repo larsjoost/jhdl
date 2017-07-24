@@ -3,7 +3,7 @@
 namespace generator {
 
 
-  template <typename Func>
+  template <typename BodyFunc, typename DeclFunc>
   void SystemC::defineObject(parameters& parm,
                              std::string name,
                              std::string type,
@@ -11,10 +11,15 @@ namespace generator {
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                             Func bodyCallback) {
+                             BodyFunc bodyCallback,
+			     DeclFunc declarationCallback) {
     functionStart("defineObject");
     parm.println(type + "(" + name + ") {");
     parm.incIndent();
+    parm.println("int waitIndex = 0;");
+    std::string time = database.globalName("TIME");
+    parm.println(time + " waitUntil;");
+    parm.println(time + " waitTime;");
     std::string parentName = database.getParentName();
     if (parentName.size() > 0) {
       parm.println(parentName + "* p = NULL;");
@@ -22,6 +27,7 @@ namespace generator {
     if (declarationList) {
       declarations(parm, *declarationList);
     }
+    declarationCallback(parm);
     parm.println("public:");
     if (constructor) {
       parm.println(*constructor);
@@ -39,12 +45,13 @@ namespace generator {
   }
 
   template<typename Func>
-  std::string SystemC::createWait(parameters& parm, auto sensitivity, Func func) {
+  void SystemC::printSensitivityListWait(parameters& parm, auto sensitivity, Func func) {
     std::string s = listToString(parm, sensitivity, " || ", [&](auto s){return func(s) + ".EVENT()";}); 
-    if (s.size() == 0) {
-      return "wait();";
+    std::string argument = "";
+    if (s.size() > 0) {
+      argument = "[&](){return " + s + ";}";
     }
-    return "wait([&](){return " + s + ";});";
+    parm.println("if (wait(" + argument + ")) {return;}");
   }
 
 }

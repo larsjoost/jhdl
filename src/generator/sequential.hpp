@@ -5,16 +5,24 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
-    ExpressionParser expr(&database);
-    std::string left = expr.toString(r->left, ast::INTEGER);
-    std::string right = expr.toString(r->right, ast::INTEGER);
-    std::string rangeName = name + "_range";
-    parm.println("struct " + rangeName + " { int left = " + left + "; int right = " + right + "; };");
-    parm.println("for (auto " + name + " : INTEGER<" + rangeName + ">()) {");
-    parm.incIndent();
+    std::string typeName = name + "_type";
+    if (parm.isArea(parameters::DECLARATION)) {
+      database.add(ast::VARIABLE, name, ast::INTEGER);
+      printRangeType(parm, typeName, r);
+      parm.println(typeName + "<> " + name + ";");
+    }
+    if (parm.isArea(parameters::IMPLEMENTATION)) {
+      parm.println("for (" +
+		   name + " = " + name + ".LEFT(); " +
+		   name + " <= " + name + ".RIGHT(); " +
+		   name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
+      parm.incIndent();
+    }
     callback(parm);
-    parm.decIndent();
-    parm.println("}");
+    if (parm.isArea(parameters::IMPLEMENTATION)) {
+      parm.decIndent();
+      parm.println("}");
+    }
   }
   
 

@@ -80,10 +80,12 @@ namespace generator {
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
     }
-    namespaceStart(parm, library);
     if (library != "STD") {
       parm.println("#include \"standard.h\"");
-      parm.println("using namespace STD;");
+    }
+    namespaceStart(parm, library);
+    if (library != "STD") {
+      parm.println("STD::STANDARD STD_STANDARD;");
     }
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, false);
@@ -156,14 +158,7 @@ namespace generator {
                    });
     /*
       TYPE state_t IS (IDLE, '1', STOP);
-      
-        vhdl_enum_type(name, enumArray, stringArray)
-        
-        enum STATE_T_enum {IDLE, STOP};
-        EnumerationElement<STATE_T_enum> STATE_T_value[3] = { {IDLE, "idle"}, {'1'}, {STOP, "stop"}};
-        using STATE_T = Enumeration<STATE_T_value, 3>;
     */
-    //      parm.println("vhdl_enum_type(" + name + ", vhdl_array({" + enumList + "}), vhdl_array({" + stringList + "}));");
     std::string valueName = name + "_value";
     std::string s = std::to_string(size);
     parm.println("enum " + enumName + " {" + enumList + "};");
@@ -180,15 +175,9 @@ namespace generator {
   /*
   vhdl:
   type test_t is range 1 to 20;
-  systemc:
-    subtype:
-      using TYPE_T_type = decltype(1);
-    type:
-      struct TYPE_T_range { TYPE_T_type left = 1; TYPE_T_type right = 20; };
-      template<class RANGE = TYPE_T_range>
-      using TYPE_T = Range<TYPE_T_type, RANGE>;
   */
-  ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t) {
+  ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier,
+						ast::NumberType* t) {
     assert(t);
     std::string name = identifier->toString(true);
     ast::ObjectValue value;
@@ -264,14 +253,17 @@ namespace generator {
     std::string enumName = name + "_enum";
     parm.println("enum " + enumName + " {" + s + "};");
     int size = 0;
+    std::string baseUnitName;
+    std::string upperUnitName;
     s = listToString(parm, p->elements.list, ", ",
                      [&](ast::PhysicalElement& e){
                        size++;
                        bool baseUnit = (e.physical == NULL);
                        std::string u = e.unit->toString(true);
-                       std::string number = baseUnit ? "1" : e.physical->number->toString(); 
+		       if (baseUnit) {baseUnitName = u;};
+		       upperUnitName = u;
+		       std::string number = baseUnit ? "1" : e.physical->number->toString(); 
                        std::string unit = baseUnit ? u : e.physical->unit->toString(true);
-                       std::string base = baseUnit ? "true" : "false";
                        return "{" + u + ", " + number + ", " + unit + "}";
                      });
     std::string valueName = name + "_value";
@@ -285,8 +277,20 @@ namespace generator {
     parm.decIndent();
     parm.println("};");
     std::string typeName = name + "_type";
-    parm.println("using " + typeName + " = Physical<decltype(" + left + "), " + enumName + ">;"); 
-    parm.println("vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
+    std::string rangeName = "range_" + name;
+    std::string declType = "decltype(" + left + ")";
+    parm.println("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
+  // #define vhdl_physical_type(name, leftValue, rightValue, enumName, valueName) 
+    parm.println("struct " + rangeName + " {" +
+		 typeName + " left = {" + left + ", " + baseUnitName + "}; " +
+		 typeName + " right = {" + right + ", " + upperUnitName + "};};");
+    parm.println("template <class RANGE = " + rangeName +
+		 ", typename N = " + declType +
+		 ", typename T = " + enumName +
+		 ", class E = " + valueName + ">");
+    parm.println("using " + name + " = PhysicalType<RANGE, N, T, E>;");
+
+    //    parm.println("vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
   }
 
   /*
@@ -461,7 +465,8 @@ namespace generator {
       defineObject(parm, name, "SC_MODULE", &constructor, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
-                   [&](parameters& parm){});
+                   [&](parameters& parm){},
+		   [&](parameters& parm){});
       ascendHierarchy(parm);
       functionEnd("implementation");
     }

@@ -130,7 +130,6 @@ namespace generator {
   }
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
-
     std::string enumName = physical->unit->toString(true);
     database->globalName(enumName, ast::ENUM);
     return "{" + physical->number->toString() + ", " + enumName + "}";

@@ -94,7 +94,17 @@ namespace vhdl {
       RANGE range;
       return range.right;
     }
-    
+    template <class R>
+    static TYPE LEFTOF(Range<TYPE, R> x) {
+      RANGE range;
+      return (range.left < range.right ? x.getValue() - 1 : x.getValue() + 1);
+    }
+    template <class R>
+    static TYPE RIGHTOF(Range<TYPE, R> x) {
+      RANGE range;
+      return (range.left < range.right ? x.getValue() + 1 : x.getValue() - 1);
+    }
+		       
     int getValue() {
       return value;
     }
@@ -168,11 +178,32 @@ namespace vhdl {
 
   template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS>
   class PhysicalType {
+  public:
     VALUE value;
     UNIT unit;
-  public:
-    PhysicalType() {RANGE range; value = range.left.value; unit = range.left.unit;};  
+    PhysicalType() {
+      RANGE range;
+      value = range.left.value;
+      unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS>::getBaseUnit();
+    };  
     PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
+
+    template<class R>
+    PhysicalType<RANGE, VALUE, UNIT, ELEMENTS> operator +(PhysicalType<R, VALUE, UNIT, ELEMENTS> other) {
+      PhysicalType<RANGE, VALUE, UNIT, ELEMENTS> p;
+      p.value = value + other.value;
+      return p;
+    }
+    template<class R>
+    void operator=(const PhysicalType<R, VALUE, UNIT, ELEMENTS>& other) {
+      value = other.value;
+      unit = other.unit;
+    }
+
+    template<class R>
+    bool operator==(const PhysicalType<R, VALUE, UNIT, ELEMENTS>& other) {
+      return (value == other.value && unit == other.unit);
+    }
 
     static UNIT getBaseUnit() {
       ELEMENTS e;
@@ -196,10 +227,16 @@ namespace vhdl {
     
     static Physical<VALUE, UNIT> HIGH() {
       RANGE range;
-      VALUE max = (range.left > range.right) ? range.left : range.right;
+      VALUE max = (range.left.value > range.right.value) ? range.left.value : range.right.value;
       return {max, getHighUnit(getBaseUnit())};
     }
     static Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
+
+    template <class X>
+    static ::std::string IMAGE(X r) {
+      return ::std::to_string(r.value);
+    }
+
   };
   
 
