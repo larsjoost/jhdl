@@ -50,7 +50,7 @@ namespace generator {
   
   void LocalDatabase::find(DatabaseResults& results, std::string& name, bool local) {
     int hierarchyLevel = 0;
-    for (auto i = map.begin(); i != map.end(); i++) {
+    for (auto i = map.rbegin(); i != map.rend(); i++) {
       std::list<DatabaseElement>* e = i->find(name);
       if (e) {
         for (auto& j : *e) {

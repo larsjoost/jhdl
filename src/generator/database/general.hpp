@@ -32,7 +32,7 @@ namespace generator {
   };
   
   struct DatabaseResult {
-    int hierarchyLevel;
+    int hierarchyLevel = 0;
     bool local;
     DatabaseElement* object;
     std::string getName(bool fullName, std::string library = "", std::string package = "");

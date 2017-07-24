@@ -8,26 +8,13 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <vector>
-#include <atomic>
 #include <unistd.h>
 #include <exception>
 
 enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
 
 extern int sc_now;
-
-extern bool runThreads;
-extern bool terminateThreads;
-extern int exitCode;
-
-extern std::mutex mMutex;
-
-extern std::condition_variable masterWait;
-extern std::condition_variable methodWait;
 
 class sc_thread;
 
@@ -37,16 +24,11 @@ public:
   virtual std::string toString() = 0; 
 };
 
-extern std::vector<std::thread*> threads;
 extern std::vector<sc_thread*> methods;
 extern std::vector<sc_signal_base*> signals;
 
-extern std::atomic<int> numberOfMethods;
-extern int numberOfMethodsDone;
 extern int deltaCycle;
 extern bool methodEvent;
-
-extern std::mutex logMutex;
 
 typedef std::ofstream sc_trace_file;
 
@@ -56,44 +38,12 @@ std::string toBinary(int x, int binaryWidth);
 
 void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId);
 
-class TerminateThreads : std::exception {};
-
-void sc_exit(int i);
-
 class sc_thread {
 
  public:
 
   virtual void process() = 0;
   
-  void threadLoop();
-
-  template<typename Func>
-  void wait(Func waitUntil) {
-    // Wait until main() sends data
-    if (terminateThreads) {
-      throw TerminateThreads();
-    }
-    std::unique_lock<std::mutex> lk(mMutex);
-    methodEvent = true;
-    do {
-      if (terminateThreads) {
-        lk.unlock();
-        throw TerminateThreads();
-      }
-      int currentDeltaCycle = deltaCycle;
-      numberOfMethodsDone++;
-      masterWait.notify_all();
-      if (verbose) {std::cout << "[METHOD] waiting on delta cycle " << deltaCycle << std::endl;}
-      methodWait.wait(lk, [&]() {return (currentDeltaCycle != deltaCycle) || terminateThreads;});
-    } while (!waitUntil());
-    lk.unlock();
-    if (verbose) {std::cout << "[METHOD] wait done!!!!!!!!" << std::endl;}
-  }
-  
-  void wait(int i);
-  void wait();
-
 };
 
 class sc_module {
@@ -281,7 +231,7 @@ extern int traceId;
 template<class T>
 void sc_trace(sc_trace_file* fh, sc_signal<T>& s, const char* name);
 
-bool sc_start(int runs);
+void sc_start(int runs);
 
 std::vector<std::string> split(std::string& s, char delimiter);
   

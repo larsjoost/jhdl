@@ -29,6 +29,16 @@ namespace vhdl {
     STANDARD::STRING<> vhdl_concat(STANDARD::STRING<> A, STANDARD::STRING<> B) {
       return A + B;
     }
+
+    STANDARD::TIME<> vhdl_time_add(STANDARD::TIME<> A, STANDARD::TIME<> B) {
+      return A + B;
+    }
+
+    STANDARD::DELAY_LENGTH<> STANDARD::NOW() {
+      STANDARD::DELAY_LENGTH<> t = {sc_now, NS};
+      return t;
+    }
+
   }
   
 }

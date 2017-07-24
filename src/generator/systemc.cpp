@@ -368,13 +368,16 @@ namespace generator {
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-        type += "<>";
-	if (id == ast::SIGNAL) {
-	  type = "sc_signal<" + type + ">";
-	}
-	s = type + " " + name;
-	if (initialization && init.size() > 0) {
-	  s += " = " + init;
+	if (database.globalName(type, ast::TYPE)) {
+	  if (id == ast::SIGNAL) {
+	    type = "sc_signal<" + type + ">";
+	  }
+	  s = type + " " + name;
+	  if (initialization && init.size() > 0) {
+	    s += " = " + init;
+	  }
+	} else {
+	  exceptions.printError("Could not find definition of type " + type);
 	}
       };
       objectDeclaration(parm, v, func);
@@ -461,7 +464,7 @@ namespace generator {
       database.setLibrary(library);
       database.setArchitecture(name);
       descendHierarchy(parm, name);
-      std::string constructor = "SC_CTOR(" + name + ") {}";
+      std::string constructor = "SC_CTOR(" + name + ") {init();}";
       defineObject(parm, name, "SC_MODULE", &constructor, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,

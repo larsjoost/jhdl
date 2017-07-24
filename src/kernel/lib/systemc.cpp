@@ -15,25 +15,13 @@
 
 int sc_now = 0;
 
-bool runThreads = false;
-bool terminateThreads = false;
 int exitCode;
 
-std::mutex mMutex;
-
-std::condition_variable masterWait;
-std::condition_variable methodWait;
-
-std::vector<std::thread*> threads;
 std::vector<sc_thread*> methods;
 std::vector<sc_signal_base*> signals;
 
-std::atomic<int> numberOfMethods;
-int numberOfMethodsDone = 0;
 int deltaCycle = 0;
 bool methodEvent = false;
-
-std::mutex logMutex;
 
 bool verbose = false;
 
@@ -49,53 +37,13 @@ std::string toBinary(int x, int binaryWidth) {
 
 void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId) {
   if (handle) {
-    logMutex.lock();
     *handle << "#" << sc_now << std::endl;
     *handle << "b" << toBinary(value, dataWidth) << " " << std::to_string(traceId) << std::endl;
-    logMutex.unlock();
   }
-}
-
-void sc_exit(int i) {
-  std::lock_guard<std::mutex> lk(mMutex);
-  exitCode = i;
-  terminateThreads = true;
-  masterWait.notify_all();
-  methodWait.notify_all();
-  throw TerminateThreads();
-}
-
-void sc_thread::threadLoop() {
-  if (verbose) {std::cout << "[METHOD] Waiting on start" << std::endl;}
-  std::unique_lock<std::mutex> lk(mMutex);
-  if (!runThreads) {
-    methodWait.wait(lk, []() {return runThreads;});
-  }
-  lk.unlock();
-  if (verbose) {std::cout << "[METHOD] Starting" << std::endl;}
-  try {
-    while (!terminateThreads) {
-      process();
-    }
-  } catch (TerminateThreads e) {
-    if (verbose) {std::cout << "Catched TerminateThreads" << std::endl;}
-  }
-}
- 
-void sc_thread::wait(int i) {
-  int n = sc_now + i;
-  wait([&](){return sc_now >= n;});
-}
-
-void sc_thread::wait() {
-  wait([&](){return false;});
 }
 
 void sc_module::addMethod(sc_thread* c) {
-  std::thread* th = new std::thread(&sc_thread::threadLoop, c);
-  threads.push_back(th);
   methods.push_back(c);
-  numberOfMethods++;
 }
 
  
@@ -124,42 +72,24 @@ void sc_trace(sc_trace_file* fh, sc_signal<T>& s, const char* name) {
   s.fileHandle = fh;
 }
 
-bool sc_start(int runs) {
+void sc_start(int runs) {
   if (verbose) {std::cout << "[MAIN] start" << std::endl;}
-  std::unique_lock<std::mutex> lk(mMutex);
-  if (verbose) {std::cout << "[MAIN] lock" << std::endl;}
   deltaCycle = 0;
   for (int i=0; i<runs; i++) {
     if (verbose) {std::cout << "[MAIN] method event = " << methodEvent << std::endl;}
-    if (methodEvent || (deltaCycle == 0)) {
-      deltaCycle++;
-    } else {
-      deltaCycle = 0;
-      sc_now++;
-    }
+    deltaCycle = 0;
     if (verbose) {std::cout << "[MAIN] delta cycle = " << deltaCycle << ", sc_now = " << sc_now << std::endl;}
-    methodEvent = false;
-    numberOfMethodsDone = 0;
-    runThreads = true;
-    //      vhdl::STANDARD::NOW.value = sc_now;
-    if (terminateThreads) {
-      lk.unlock();
-      return false;
-    }
-    if (verbose) {std::cout << "[MAIN] wait" << std::endl;}
-    methodWait.notify_all();
-    masterWait.wait(lk, []() {return (numberOfMethodsDone == numberOfMethods) || terminateThreads;});
-    if (verbose) {std::cout << "[MAIN] woke up" << std::endl;}
-    if (!terminateThreads) {
-      if (verbose) {std::cout << "[MAIN] latch values" << std::endl;}
-      for (auto i : signals) {
-        i->latchValue();
+    do {
+      methodEvent = false;
+      int i = 0;
+      for (auto t : methods) {
+	t->process();
+	if (verbose) {std::cout << "Methond " << i++ << std::endl;}
       }
-      if (verbose) {std::cout << "[MAIN] latch values done" << std::endl;}
-    }
-    if (verbose) {std::cout << "[MAIN] woke up" << std::endl;}
+      deltaCycle++;
+    } while (methodEvent);
+    sc_now++;
   }
-  return !terminateThreads;
 }
 
 std::vector<std::string> split(std::string& s, char delimiter) {
@@ -173,27 +103,21 @@ std::vector<std::string> split(std::string& s, char delimiter) {
 }
   
 bool parseCommand(std::string& s) {
-  std::vector<std::string> a = split(s, ' ');
-  if (a[0] == "help") {
-    std::cout << "help   : This menu" << std::endl;
-    std::cout << "quit   : Quit simulation" << std::endl;
-    std::cout << "run    : run for one time step" << std::endl;
-  } else if (a[0] == "run") {
-    int number = 1;
-    if (a.size() > 1) {
-      std::istringstream(a[1]) >> number;
-    }
-    bool continueRun = sc_start(number);
-    if (!continueRun) {
-      int i = 0;
-      for (std::thread* th : threads) {
-        if (verbose) {std::cout << "Waiting for thread " << i++ << " to exit" << std::endl;}
-        th->join();
+  if (s.size() > 0) {
+    std::vector<std::string> a = split(s, ' ');
+    if (a[0] == "help") {
+      std::cout << "help   : This menu" << std::endl;
+      std::cout << "quit   : Quit simulation" << std::endl;
+      std::cout << "run    : run for one time step" << std::endl;
+    } else if (a[0] == "run") {
+      int number = 1;
+      if (a.size() > 1) {
+	std::istringstream(a[1]) >> number;
       }
-      return false;
+      sc_start(number);
+    } else if (a[0] == "verbose") {
+      verbose = true;
     }
-  } else if (a[0] == "verbose") {
-    verbose = true;
   }
   return true;
 }

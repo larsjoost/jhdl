@@ -159,15 +159,6 @@ namespace vhdl {
     T1 unit;
   };
   
-#define vhdl_physical_type(name, leftValue, rightValue, enumName, valueName) \
-  using type_##name = decltype(leftValue);                              \
-  struct range_##name {                                                 \
-    type_##name left = leftValue;                                       \
-    type_##name right = rightValue;                                     \
-  };                                                                    \
-  template <class RANGE = range_##name, typename N = type_##name, typename T = enumName, class E = valueName> \
-  using name = PhysicalType<RANGE, N, T, E>
-
   template <class VALUE, typename UNIT>
   struct Physical {
     VALUE value;
