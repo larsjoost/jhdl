@@ -13,7 +13,7 @@
 
 #include "systemc.h"
 
-int sc_now = 0;
+sc_now_t sc_now = {0, SC_NS};
 
 int exitCode;
 
@@ -37,7 +37,7 @@ std::string toBinary(int x, int binaryWidth) {
 
 void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId) {
   if (handle) {
-    *handle << "#" << sc_now << std::endl;
+    *handle << "#" << sc_now.value << std::endl;
     *handle << "b" << toBinary(value, dataWidth) << " " << std::to_string(traceId) << std::endl;
   }
 }
@@ -78,7 +78,7 @@ void sc_start(int runs) {
   for (int i=0; i<runs; i++) {
     if (verbose) {std::cout << "[MAIN] method event = " << methodEvent << std::endl;}
     deltaCycle = 0;
-    if (verbose) {std::cout << "[MAIN] delta cycle = " << deltaCycle << ", sc_now = " << sc_now << std::endl;}
+    if (verbose) {std::cout << "[MAIN] delta cycle = " << deltaCycle << ", sc_now = " << sc_now.toString() << std::endl;}
     do {
       methodEvent = false;
       int i = 0;
@@ -88,7 +88,7 @@ void sc_start(int runs) {
       }
       deltaCycle++;
     } while (methodEvent);
-    sc_now++;
+    sc_now.inc();
   }
 }
 

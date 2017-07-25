@@ -167,7 +167,7 @@ namespace vhdl {
       value(value), unit(unit) { }
   };
 
-  template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS>
+  template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
   class PhysicalType {
   public:
     VALUE value;
@@ -175,24 +175,25 @@ namespace vhdl {
     PhysicalType() {
       RANGE range;
       value = range.left.value;
-      unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS>::getBaseUnit();
+      unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
     PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
 
     template<class R>
-    PhysicalType<RANGE, VALUE, UNIT, ELEMENTS> operator +(PhysicalType<R, VALUE, UNIT, ELEMENTS> other) {
-      PhysicalType<RANGE, VALUE, UNIT, ELEMENTS> p;
+    PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
+    operator +(PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
+      PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
       p.value = value + other.value;
       return p;
     }
     template<class R>
-    void operator=(const PhysicalType<R, VALUE, UNIT, ELEMENTS>& other) {
+    void operator=(const PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       value = other.value;
       unit = other.unit;
     }
 
     template<class R>
-    bool operator==(const PhysicalType<R, VALUE, UNIT, ELEMENTS>& other) {
+    bool operator==(const PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       return (value == other.value && unit == other.unit);
     }
 
@@ -225,7 +226,8 @@ namespace vhdl {
 
     template <class X>
     static ::std::string IMAGE(X r) {
-      return ::std::to_string(r.value);
+      UNIT_STRING_CONVERTER u;
+      return ::std::to_string(r.value) + " " + u.toString(r.unit);
     }
 
   };

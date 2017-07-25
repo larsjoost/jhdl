@@ -244,35 +244,53 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::NUMBER);
     rangeToString(r, left, right, type);
-    std::string s = listToString(parm, p->elements.list, ", ",
+    std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
                                    database.add(ast::ENUM, unit);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
-    parm.println("enum " + enumName + " {" + s + "};");
+    parm.println("enum " + enumName + " {" + enumList + "};");
     int size = 0;
     std::string baseUnitName;
     std::string upperUnitName;
-    s = listToString(parm, p->elements.list, ", ",
-                     [&](ast::PhysicalElement& e){
-                       size++;
-                       bool baseUnit = (e.physical == NULL);
-                       std::string u = e.unit->toString(true);
-		       if (baseUnit) {baseUnitName = u;};
-		       upperUnitName = u;
-		       std::string number = baseUnit ? "1" : e.physical->number->toString(); 
-                       std::string unit = baseUnit ? u : e.physical->unit->toString(true);
-                       return "{" + u + ", " + number + ", " + unit + "}";
-                     });
+    std::string translateList =
+      listToString(parm, p->elements.list, ", ",
+		   [&](ast::PhysicalElement& e){
+		     size++;
+		     bool baseUnit = (e.physical == NULL);
+		     std::string u = e.unit->toString(true);
+		     if (baseUnit) {baseUnitName = u;};
+		     upperUnitName = u;
+		     std::string number = baseUnit ? "1" : e.physical->number->toString(); 
+		     std::string unit = baseUnit ? u : e.physical->unit->toString(true);
+		     return "{" + u + ", " + number + ", " + unit + "}";
+		   });
+    std::string unitName = name + "_unit";
+    std::string unitNameList = listToString(parm, p->elements.list, ", ",
+					    [&](ast::PhysicalElement& e){
+					      return "\"" + e.unit->toString() + "\""; 
+					    });
+    parm.println("struct " + unitName + " {");
+    parm.incIndent();
+    {
+      parm.println("std::string toString(" + enumName + " e) {");
+      parm.incIndent();
+      parm.println("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};");
+      parm.println("return translate[e];");
+      parm.decIndent();
+      parm.println("}");
+    }
+    parm.decIndent();
+    parm.println("};");
     std::string valueName = name + "_value";
     parm.println("struct " + valueName + " {");
     parm.incIndent();
     {
       std::string x = std::to_string(size);
       parm.println("const int size = " + x + ";");
-      parm.println("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + s + "};");
+      parm.println("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
     }
     parm.decIndent();
     parm.println("};");
@@ -280,17 +298,16 @@ namespace generator {
     std::string rangeName = "range_" + name;
     std::string declType = "decltype(" + left + ")";
     parm.println("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
-  // #define vhdl_physical_type(name, leftValue, rightValue, enumName, valueName) 
     parm.println("struct " + rangeName + " {" +
 		 typeName + " left = {" + left + ", " + baseUnitName + "}; " +
 		 typeName + " right = {" + right + ", " + upperUnitName + "};};");
     parm.println("template <class RANGE = " + rangeName +
 		 ", typename N = " + declType +
 		 ", typename T = " + enumName +
-		 ", class E = " + valueName + ">");
-    parm.println("using " + name + " = PhysicalType<RANGE, N, T, E>;");
+		 ", class E = " + valueName +
+		 ", class S = " + unitName + ">");
+    parm.println("using " + name + " = PhysicalType<RANGE, N, T, E, S>;");
 
-    //    parm.println("vhdl_physical_type(" + name + ", " + left + ", " + right + ", " + enumName + ", " + valueName + ");");
   }
 
   /*

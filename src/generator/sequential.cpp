@@ -106,7 +106,7 @@ namespace generator {
 	parm.println("waitUntil = " + now + " + waitTime;");
 	parm.println(0, label + ":");
 	printSourceLine(parm, p->waitText);
-	parm.println("if (" + now + " == waitUntil) {waitIndex++;} else {return;};");
+	parm.println("if (wait(waitUntil)) {waitIndex++;} else {return;};");
       }
     }
   }

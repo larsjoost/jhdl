@@ -20,10 +20,23 @@ namespace vhdl {
     } 
   }
 
+  STD::STANDARD::TIME_enum convert(SC_UNITS u) {
+    switch (u) {
+    case SC_FS : return STD::STANDARD::FS;
+    case SC_PS : return STD::STANDARD::PS;
+    case SC_NS : return STD::STANDARD::NS;
+    case SC_US : return STD::STANDARD::US;
+    case SC_MS : return STD::STANDARD::MS;
+    case SC_SEC : return STD::STANDARD::SEC;
+    case SC_MIN : return STD::STANDARD::MIN;
+    case SC_HR : return STD::STANDARD::HR;
+    }
+  };
+ 
   namespace STD {
 
     STANDARD::DELAY_LENGTH<> STANDARD::NOW() {
-      STANDARD::DELAY_LENGTH<> t = {sc_now, NS};
+      STANDARD::DELAY_LENGTH<> t = {sc_now.value, convert(sc_now.unit)};
       return t;
     }
 

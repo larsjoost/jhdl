@@ -12,9 +12,22 @@
 #include <unistd.h>
 #include <exception>
 
-enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR};
+enum SC_UNITS {SC_FS, SC_PS, SC_NS, SC_US, SC_MS, SC_SEC, SC_MIN, SC_HR, NUMBER_OF_SC_UNITS};
 
-extern int sc_now;
+struct sc_now_t {
+  int value;
+  SC_UNITS unit;
+  void inc() {
+    value++;
+  }
+  std::string toString() {
+    static std::string a[NUMBER_OF_SC_UNITS] = {
+      "fs", "ps", "ns", "us", "ms", "sec", "min", "hr"};
+    return std::to_string(value) + " " + a[unit];
+  }
+};
+
+extern sc_now_t sc_now;
 
 class sc_thread;
 
