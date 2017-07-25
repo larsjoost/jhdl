@@ -80,15 +80,15 @@ namespace generator {
 			parm.println("// Wait statements goto tree");
 			parm.area = parameters::INITIALIZATION;
 			parm.index = 1;
-			parm.println("switch (waitIndex) {");
+			parm.println("switch (w.index) {");
 			parm.incIndent();
                         sequentialStatements(parm, method->sequentialStatements);
-			parm.println("default: waitIndex = 1;");
 			parm.decIndent();
 			parm.println("}");
 			parm.println("// Implementation area");
 			parm.area = parameters::IMPLEMENTATION;
-                        sequentialStatements(parm, method->sequentialStatements);
+                        parm.index = 1;
+			sequentialStatements(parm, method->sequentialStatements);
                       });
       };
       defineObject(parm, methodName, "SC_THREAD", NULL, NULL,

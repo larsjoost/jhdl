@@ -15,7 +15,18 @@ namespace vhdl {
     return (s.NOW() == t);
   };
 
-  bool wait(STD::STANDARD::DELAY_LENGTH<> t);
+  class Wait {
+    STD::STANDARD s;
+    STD::STANDARD::TIME<> timeout;
+  public:
+    int index = 0;
+    void waitFor(STD::STANDARD::TIME<> t) {
+      timeout = s.NOW() + t;
+    }
+    bool done() {
+      return s.NOW() == timeout;
+    }
+  };
   
 }
 

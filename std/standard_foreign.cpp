@@ -31,6 +31,7 @@ namespace vhdl {
     case SC_MIN : return STD::STANDARD::MIN;
     case SC_HR : return STD::STANDARD::HR;
     }
+    assert(false);
   };
  
   namespace STD {

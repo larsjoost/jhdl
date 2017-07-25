@@ -16,10 +16,7 @@ namespace generator {
     functionStart("defineObject");
     parm.println(type + "(" + name + ") {");
     parm.incIndent();
-    parm.println("int waitIndex = 0;");
-    std::string time = database.globalName("TIME");
-    parm.println(time + " waitUntil;");
-    parm.println(time + " waitTime;");
+    parm.println("Wait w;");
     std::string parentName = database.getParentName();
     if (parentName.size() > 0) {
       parm.println(parentName + "* p = NULL;");

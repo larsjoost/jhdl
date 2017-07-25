@@ -95,19 +95,20 @@ namespace generator {
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
     if (p) {
       assert(p->waitText);
+      std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
       if (parm.isArea(parameters::INITIALIZATION)) {
-	parm.println("case " + std::to_string(parm.index++) + ": goto " + label + ";");
+	parm.println("case " + index + ": goto " + label + ";");
       }
       if (parm.isArea(parameters::IMPLEMENTATION)) {
 	ExpressionParser expr(&database);
 	std::string now = database.globalName("NOW") + "()";
-	parm.println("waitTime = " + expr.physicalToString(p->physical) + ";"); 
-	parm.println("waitUntil = " + now + " + waitTime;");
+	parm.println("w.waitFor(" + expr.physicalToString(p->physical) + ");"); 
 	parm.println(0, label + ":");
 	printSourceLine(parm, p->waitText);
-	parm.println("if (wait(waitUntil)) {waitIndex++;} else {return;};");
+	parm.println("if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
       }
+      parm.index++;
     }
   }
 

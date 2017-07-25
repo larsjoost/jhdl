@@ -58,6 +58,8 @@ namespace vhdl {
     template <class T>
     bool operator !=(const Range<TYPE, T> &other) { return value != other.value; }
     bool operator ==(TYPE other) { return value == other; }
+    bool operator <=(TYPE other) { return value <= other; }
+    bool operator >=(TYPE other) { return value >= other; }
     bool operator !=(TYPE other) { return value != other; }
     TYPE operator +(TYPE other) { return value + other; }
     TYPE operator -(TYPE other) { return value - other; }
@@ -169,6 +171,14 @@ namespace vhdl {
 
   template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
   class PhysicalType {
+    VALUE scale(VALUE v, UNIT u, UNIT l) {
+      ELEMENTS e;
+      assert(l >= u);
+      if (u == l) {
+	return v;
+      } 
+      return scale(v * e.array[u].number, e.array[u+1].base, l);
+    }
   public:
     VALUE value;
     UNIT unit;
@@ -178,12 +188,14 @@ namespace vhdl {
       unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
     PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
-
+    
     template<class R>
     PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
     operator +(PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
       PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
-      p.value = value + other.value;
+      UNIT lowestUnit = unit < other.unit ? unit : other.unit;
+      p.value = scale(value, unit, lowestUnit) + scale(other.value, other.unit, lowestUnit);
+      p.unit = lowestUnit;
       return p;
     }
     template<class R>
@@ -199,28 +211,18 @@ namespace vhdl {
 
     static UNIT getBaseUnit() {
       ELEMENTS e;
-      for (int i=0; i < e.size; i++) {
-        if (e.array[i].base == e.array[i].unit) {
-          return e.array[i].base;
-        }
-      }
-      assert(false);
+      return e.array[0].base;
     }
 
-    static UNIT getHighUnit(UNIT u) {
+    static UNIT getHighUnit() {
       ELEMENTS e;
-      for (int i=0; i < e.size; i++) {
-        if (e.array[i].unit == u && e.array[i].base != u) {
-          return getHighUnit(e.array[i].base);
-        }
-      }
-      return u;
+      return e.array[e.size - 1].base;
     }
     
     static Physical<VALUE, UNIT> HIGH() {
       RANGE range;
       VALUE max = (range.left.value > range.right.value) ? range.left.value : range.right.value;
-      return {max, getHighUnit(getBaseUnit())};
+      return {max, getHighUnit()};
     }
     static Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
 
