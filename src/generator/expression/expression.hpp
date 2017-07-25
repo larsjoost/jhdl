@@ -28,8 +28,11 @@ namespace generator {
     using ReturnTypes = std::list<ast::ObjectValueContainer>;
 
     template<typename Func>
-    ReturnTypes getReturnTypes(std::string& name, Func valid);
-    
+    ReturnTypes getReturnTypes(std::string& name, Func valid); 
+    ReturnTypes getStandardOperatorReturnTypes(std::string& name,
+					       ast::ObjectValueContainer& l,
+					       ast::ObjectValueContainer& r);
+   
     // First-pass functions
     ReturnTypes expressionReturnTypes(ast::Expression* e);   
     ReturnTypes expressionTermReturnTypes(ast::ExpressionTerm* e);  

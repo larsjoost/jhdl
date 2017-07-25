@@ -17,7 +17,8 @@ namespace ast {
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
       "INTEGER", "REAL", "NUMBER", "CHARACTER", "TEXT",
-      "PHYSICAL", "ARRAY", "ENUMERATION", "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
+      "PHYSICAL", "ARRAY", "ENUMERATION", "BOOLEAN",
+      "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
     return a[o];
   }
 

@@ -86,6 +86,40 @@ namespace generator {
     }
     return result;
   }
+
+  
+  
+  ExpressionParser::ReturnTypes ExpressionParser::getStandardOperatorReturnTypes(std::string& name,
+										 ast::ObjectValueContainer& l,
+										 ast::ObjectValueContainer& r) {
+    struct Map {
+      ast::ObjectValue l;
+      ast::ObjectValue r;
+      ast::ObjectValue result;};
+    static std::unordered_map<std::string, Map> translate =
+      { {"&", {ast::ARRAY, ast::ARRAY, ast::ARRAY}},
+	{"+", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
+      };
+    ReturnTypes result;
+    if (l.value == r.value) {
+      auto i = translate.find(name);
+      if (i != translate.end()) {
+	Map& m = i->second;
+	if ((m.l == ast::DONT_CARE || m.l == l.value) &&
+	    (m.r == ast::DONT_CARE || m.r == r.value)) {
+	  ast::ObjectValue v;
+	  if (m.result == ast::DONT_CARE) {
+	    v = l.value;
+	  } else {
+	    v = m.result;
+	  }
+	  ast::ObjectValueContainer x(v);
+	  result.push_back(v);
+	}
+      }
+    }
+    return result;
+  }
   
   ExpressionParser::ReturnTypes ExpressionParser::operatorReturnTypes(std::string& name,
                                                                       ast::ObjectValueContainer& l,
@@ -95,7 +129,10 @@ namespace generator {
     auto valid = [&](DatabaseElement* e) {
       return x.equals(e->arguments);
     };
-    return getReturnTypes(name, valid);
+    ReturnTypes t = getReturnTypes(name, valid);
+    ReturnTypes s = getStandardOperatorReturnTypes(name, l, r);
+    t.insert(t.end(), s.begin(), s.end());
+    return t;
   }
 
   ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {

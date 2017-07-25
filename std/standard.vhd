@@ -90,38 +90,5 @@ package STANDARD is
   
   type BIT_VECTOR is array (NATURAL range <>) of BIT;
   
-  attribute FOREIGN: STRING;
-
-  -- Integer functions
-  
-  function "/=" (a : integer; b : integer) return boolean;
-  attribute foreign of "/="[INTEGER,INTEGER] : function is "vhdl_not_equal";
-
-  -- String functions
-
-  function "&" (a : string; b : string) return string;
-  attribute foreign of "&"[STRING,STRING] : function is "vhdl_concat";
-
-  -- Time functions
-  
-  function "+" (a : time; b : time) return time;
-  attribute foreign of "+"[TIME,TIME] : function is "vhdl_time_add";
-
-  
 end STANDARD;
 
-package body STANDARD is
-
-  function "/=" (a : integer; b : integer) return boolean is
-  begin
-  end;
-  
-  function "&" (a : string; b : string) return string is
-  begin
-  end;        
-
-  function "+" (a : time; b : time) return time is
-  begin
-  end;
-
-end package body STANDARD;
