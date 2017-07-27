@@ -27,16 +27,15 @@ namespace generator {
   bool ExpressionParser::getType(ast::Expression* e,
                                  ast::ObjectValueContainer& expectedType,
                                  ast::ObjectValueContainer& actualType) {
-    bool ok = true;
+    bool ok = false;
     ReturnTypes o = expressionReturnTypes(e);
     for (auto i : o) {
-      if (!i.equals(expectedType)) {
-        ok = false;
+      if (i.equals(expectedType)) {
+        ok = true;
+        actualType = i;
       }
     }
-    if (ok) {
-      actualType = o.back();
-    } else {
+    if (!ok) {
       std::string found = returnTypesToString(o);
       if (o.size() > 1) {
         exceptions.printError("Could not resolve expected type " + expectedType.toString() +
@@ -198,7 +197,11 @@ namespace generator {
     } else if (e->identifier) {
       e->returnTypes = basicIdentifierReturnTypes(e->identifier);
     } else if (e->character) {
-      e->returnTypes = {ast::ObjectValueContainer(ast::CHARACTER)};
+      std::string n = e->character->toString();
+      auto valid = [&](DatabaseElement* e) {
+        return true;
+      };
+      e->returnTypes = getReturnTypes(n, valid);
     } else {
       exceptions.printInternal("Unknown expression term", e->text);
     }

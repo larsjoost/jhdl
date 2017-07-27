@@ -131,6 +131,9 @@ namespace generator {
                      if (e.identifier) {
                        s = e.identifier->toString();
                        database.add(ast::ENUM, s, type);
+                     } else if (e.character) {
+                       std::string name = e.character->toString();
+                       database.add(ast::ENUM, name, type); 
                      }
                      return s;
                    });
