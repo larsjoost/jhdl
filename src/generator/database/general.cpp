@@ -3,8 +3,9 @@
 #include "general.hpp"
 
 namespace generator {
-  
+
   void DatabaseElement::print() {
+    std::cout << "      Hierarchy = " << hierarchyLevel << std::endl;
     std::cout << "      library   = " << library << std::endl;
     std::cout << "      " << ast::toString(sectionType) << "   = " << sectionName << std::endl;
     std::cout << "      name      = " << name << std::endl;
@@ -23,15 +24,14 @@ namespace generator {
   }
 
   std::string DatabaseResult::toString() {
-    return object ? object->toString() + ", local = " + (local ? "true" : "false") +
-      ", hierarchy level = " + std::to_string(hierarchyLevel) : "NIL";
+    return object ? object->toString() : "NIL";
   }
   
-  std::string DatabaseResult::getName(bool fullName, std::string library, std::string sectionName) {
+  std::string DatabaseResult::getName(bool fullName, int hierarchyLevel, std::string library, std::string sectionName) {
     std::string name = object->name;
     if (fullName) {
       if (local) {
-        for (int i=0; i < hierarchyLevel; i++) {
+        for (int i=object->hierarchyLevel; i < hierarchyLevel; i++) {
           name = "p->" + name;
         }
       } else {

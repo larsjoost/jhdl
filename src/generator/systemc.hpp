@@ -57,8 +57,6 @@ namespace generator {
 
     std::string filename;
 
-    bool quiet = false;
-    
     // Defined in general.cpp
     void functionStart(std::string name);
     void functionEnd(std::string name);
@@ -117,6 +115,8 @@ namespace generator {
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);
+
+    // declarations.hpp
     template<typename Func>
     void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback);
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
@@ -161,11 +161,12 @@ namespace generator {
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
     std::string getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument);
+    bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
+    bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
     void defineObject(parameters& parm,
                       std::string name,
                       std::string type,
-		      std::string* constructor,
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
@@ -195,7 +196,8 @@ namespace generator {
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
-    void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l);
+    void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
+                              std::string& entityName, std::string& library);
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
     void createConstructor(parameters& parm, std::string& name,
                            std::string* argument,
@@ -215,7 +217,7 @@ namespace generator {
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
     void parsePackage(parameters& parm, std::string name, std::string library);
 
-    void addLibraryInfo(std::string section, std::string name, std::string filename);
+    void addLibraryInfo(parameters& parm, std::string section, std::string name, std::string filename);
 
   public:
     SystemC(bool verbose = false);
@@ -299,12 +301,11 @@ namespace generator {
   void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback) {
     functionStart("traverseInterfaceList");
     if (l) {
-      bool q = quiet;
-      quiet = !printEnable;
+      bool q = parm.setQuiet(!printEnable);
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.object) {objectDeclaration(parm, i.object, callback);}
       }
-      quiet = q;
+      parm.setQuiet(q);
     }
     functionEnd("traverseInterfaceList");
   }

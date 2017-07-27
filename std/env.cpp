@@ -1,4 +1,5 @@
 #include "env.hpp"
+
 namespace vhdl {
   namespace STD {
     // line 14:   procedure STOP (STATUS: INTEGER) is

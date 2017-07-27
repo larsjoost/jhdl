@@ -7,21 +7,27 @@ namespace generator {
 
   void SystemC::functionStart(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION START] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION START] SystemC." << name << std::endl;
     }
   }
 
   void SystemC::functionEnd(std::string name) {
     if (verbose) {
-      std::cout << std::endl << "[FUNCTION END] " << name << std::endl;
+      std::cout << std::endl << "[FUNCTION END] SystemC." << name << std::endl;
     }
   }
 
   void SystemC::descendHierarchy(parameters& parm, std::string parentName) {
     database.descendHierarchy(parentName);
+    if (verbose) {
+      parm.println("// Hierarchy start = " + std::to_string(database.getHierarchyLevel()));
+    }
   }
 
   void SystemC::ascendHierarchy(parameters& parm) {
+    if (verbose) {
+      parm.println("// Hierarchy end = " + std::to_string(database.getHierarchyLevel()));
+    }
     database.ascendHierarchy();
   }
 

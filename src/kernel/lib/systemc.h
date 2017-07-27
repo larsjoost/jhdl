@@ -73,6 +73,7 @@ class sc_module {
 
 template<class T>
 class sc_signal : public sc_signal_base {
+  bool verbose = false;
  public:
   std::string name;
   sc_trace_file* fileHandle = NULL;
@@ -87,7 +88,13 @@ class sc_signal : public sc_signal_base {
 
   void latchValue() {
     event = (currentValue == nextValue) ? false : true;
-    // std::cerr << "LatchValue of " << name << ", current " << currentValue.toString() << ", next = " << nextValue.toString() << ", event = " << event << std::endl;
+    if (verbose) {
+      std::cerr << sc_now.toString() <<
+        ": LatchValue of " << name <<
+        ", current " << currentValue.toString() <<
+        ", next = " << nextValue.toString() <<
+        ", event = " << event << std::endl;
+    }
     currentValue = nextValue;
     if (event) {
       log(fileHandle, currentValue.getValue(), currentValue.LENGTH(), traceId);
@@ -137,6 +144,19 @@ class sc_signal : public sc_signal_base {
   T operator+(sc_signal<T>& other) {
     T r;
     r = currentValue + other.currentValue;
+    if (verbose) {
+      std::cerr << currentValue.toString() << " + " << other.currentValue.toString() << " = " << r.toString() << std::endl;
+    }
+    return r;
+  }
+
+  template<typename TYPE>
+  T operator+(TYPE other) {
+    T r;
+    r = currentValue + other;
+    if (verbose) {
+      std::cerr << currentValue.toString() << " + " << other << " = " << r.toString() << std::endl;
+    }
     return r;
   }
 

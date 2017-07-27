@@ -1,11 +1,14 @@
 #!/bin/bash
 
-usage() { echo "Usage: $0 [-t <name>] " 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-t <name>] [-v]" 1>&2; exit 1; }
 
-while getopts ":t:" o; do
+while getopts ":t:v" o; do
     case $o in
         t)
             TEST_NAME=$OPTARG
+            ;;
+        v)
+            VERBOSE=true
             ;;
         *)
             usage
@@ -78,8 +81,13 @@ for t in ${TEST[@]}; do
         MESSAGE=""
 	if [ "$t" == "success" ]; then
 	    if [ -n "$ERROR_MESSAGE" ]; then
-	       MESSAGE="(Unexpected error message: $ERROR_MESSAGE)"
-	       RESULT=1
+		if [ -n "$VERBOSE" ]; then
+		    p="$ERROR_MESSAGE"
+		else
+		    p=""
+		fi
+		MESSAGE="(Unexpected error message: $p)"
+		RESULT=1
 	    fi
 	else
 	    if [ -z "$ERROR_MESSAGE" ]; then

@@ -16,7 +16,7 @@ namespace generator {
     GlobalDatabase globalDatabase;
     Exceptions exceptions;
 
-    bool verbose = false;
+    bool verbose = true;
     
     template<typename Func>
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
@@ -66,15 +66,16 @@ namespace generator {
     
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
-
+    int getHierarchyLevel();
+    
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
 
-    std::string getParentName(int hierarchy = 0);
+    std::string getParentName();
 
     bool exists(std::string& library, std::string& package);
 
     void print(std::string name = "");
-    void printAllObjects(std::string& name);
+    void printAllObjects(std::string name);
   };
 
   template<typename Func>
@@ -82,10 +83,11 @@ namespace generator {
                                DatabaseResult& bestMatch,
                                Func valid) {
     int found = 0;
-    bestMatch = {-1, false, NULL};
+    bestMatch = {false, NULL};
     for (auto& i : matches) {
       if (valid(i.object)) {
-        if (bestMatch.object == NULL || (!bestMatch.local && i.local) || (bestMatch.hierarchyLevel > i.local)) {
+        if (bestMatch.object == NULL || (!bestMatch.local && i.local) ||
+            (bestMatch.object->hierarchyLevel < i.object->hierarchyLevel)) {
           bestMatch = i;
           if (found) {
             if (found == 1) {

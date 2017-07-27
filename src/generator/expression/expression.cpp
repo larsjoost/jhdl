@@ -27,17 +27,26 @@ namespace generator {
   bool ExpressionParser::getType(ast::Expression* e,
                                  ast::ObjectValueContainer& expectedType,
                                  ast::ObjectValueContainer& actualType) {
-    bool result;
+    bool ok = true;
     ReturnTypes o = expressionReturnTypes(e);
-    if (o.size() == 1 && o.back().equals(expectedType)) {
-      actualType = o.back();
-      result = true;
-    } else {
-      exceptions.printError("Expected " + expectedType.toString() +
-                            ", but found " + returnTypesToString(o), e->text);
-      result = false;
+    for (auto i : o) {
+      if (!i.equals(expectedType)) {
+        ok = false;
+      }
     }
-    return result;
+    if (ok) {
+      actualType = o.back();
+    } else {
+      std::string found = returnTypesToString(o);
+      if (o.size() > 1) {
+        exceptions.printError("Could not resolve expected type " + expectedType.toString() +
+                              ". Found the following types: " + found, e->text);
+      } else {
+        exceptions.printError("Expected " + expectedType.toString() +
+                              ", but found " + found, e->text);
+      }
+    }
+    return ok;
   }
   
   std::string ExpressionParser::toString(ast::Expression* e, ast::ObjectValueContainer& expectedType) {
@@ -99,6 +108,10 @@ namespace generator {
     static std::unordered_map<std::string, Map> translate =
       { {"&", {ast::ARRAY, ast::ARRAY, ast::ARRAY}},
 	{"+", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
+	{"=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
+	{"/=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
+	{"<=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
+	{">=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}}
       };
     ReturnTypes result;
     if (l.value == r.value) {

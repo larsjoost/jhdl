@@ -55,7 +55,7 @@ namespace generator {
   }
 
   void parameters::println(int position, std::string text) {
-    if (fileInfo) {
+    if (fileInfo && !isQuiet()) {
       fileInfo->outputFile << std::string(position, ' ') << text << std::endl;
     }
   }
@@ -70,6 +70,16 @@ namespace generator {
     return a == area;
   }
   
+  void parameters::setArea(Area a) {
+    index = 1;
+    area = a;
+  }
+
+  void parameters::printArea(std::string name) {
+    const static std::string translate[AREA_SIZE] = {"declaration", "initialization", "implementation", "none"};
+    println("// " + name + " area: " + translate[area]);
+  }
+  
   void parameters::println(Area a, std::string text) {
     if (isArea(a)) {
       println(text);
@@ -77,9 +87,15 @@ namespace generator {
   }
 
   bool parameters::isQuiet() {
-    return (fileInfo ? true : false);
+    return quiet;
   }
-  
+
+  bool parameters::setQuiet(bool quiet) {
+    bool q = this->quiet;
+    this->quiet = quiet;
+    return q;
+  }
+
   std::string parameters::getFileName(FileSelect s) {
     selectFile(s);
     std::string name = fileInfo->fileName;

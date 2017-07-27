@@ -86,6 +86,9 @@ void sc_start(int runs) {
 	t->process();
 	if (verbose) {std::cout << "Methond " << i++ << std::endl;}
       }
+      for (auto t : signals) {
+        t->latchValue();
+      }
       deltaCycle++;
     } while (methodEvent);
     sc_now.inc();

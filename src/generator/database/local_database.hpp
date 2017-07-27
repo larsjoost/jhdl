@@ -16,6 +16,8 @@ namespace generator {
     std::list<ast::Attribute*> packageAttributes;
     std::list<NameMap> map;
 
+    bool verbose = true;
+    
     Exceptions exceptions;
 
     void add(std::string& name, DatabaseElement& e);
@@ -26,7 +28,7 @@ namespace generator {
            
     void find(DatabaseResults& results, std::string& name, bool local = true);
 
-    int getHierarchyLevel(std::string& name);
+    int getHierarchyLevel();
     
     bool setVisible(std::string name = "");
 
@@ -57,7 +59,7 @@ namespace generator {
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
 
-    std::string getParentName(int hierarchy = 0);
+    std::string getParentName();
     void print();
   };
   

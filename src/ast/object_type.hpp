@@ -25,7 +25,15 @@ namespace ast {
     std::string typeName;
     ObjectValueContainer* subtype;
     bool equals(ObjectValueContainer& other);
-    ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") : value(value), typeName(typeName) {}
+    ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") {
+      if (value == BOOLEAN) {
+        this->value = ENUMERATION;
+        this->typeName = "BOOLEAN";
+      } else {
+        this->value = value;
+        this->typeName = typeName;
+      }
+    }
     void setSubtype(ObjectValueContainer& subtype) {
       this->subtype = new ObjectValueContainer();
       *this->subtype = subtype;

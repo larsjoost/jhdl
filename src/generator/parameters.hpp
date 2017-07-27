@@ -21,15 +21,18 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
+    bool quiet = false;
+    
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);
 
-
   public:
-    enum Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, NONE};
+    enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    enum Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, NONE, AREA_SIZE};
+    int index;
     Area area;
     bool isArea(Area a);
-    int index;
-    enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    void setArea(Area a);
+    void printArea(std::string name);
     ast::ObjectValueContainer returnType;
     void incIndent();
     void decIndent();
@@ -41,6 +44,7 @@ namespace generator {
     void selectFile(FileSelect s);
     void revertSelectFile();
     bool isQuiet();
+    bool setQuiet(bool quiet);
     std::string getFileName(FileSelect s); 
     std::string replaceFileExtension(std::string filename, std::string extension);
     std::string baseName(std::string filename);

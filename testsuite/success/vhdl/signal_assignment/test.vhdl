@@ -26,13 +26,21 @@ begin
        2 when (c = 3);
   
   process is
+    variable x : integer;
   begin
     a <= 0;
+    x := 0;
     for i in 0 to 3 loop
       wait for 5 ns;
       a <= a + 10;
+      x := x + 10;
       wait for 5 ns;
-      report "a = " & integer'image(a) severity note;
+      if (a /= x) then
+        report "now = " & time'image(now) &
+          ", a = " & integer'image(a) &
+          ", but expected = " & integer'image(x)
+          severity failure;
+      end if;
     end loop;
     finish(0);
   end process;

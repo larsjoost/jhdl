@@ -1,3 +1,4 @@
+#include <cassert>
 #include "database.hpp"
 
 namespace generator {
@@ -55,14 +56,11 @@ namespace generator {
       result = object.object->type;
     } else {
       std::string msg = "Unable to find type " + name + " in package " + library + "." + package;
-      exceptions.printError(msg);
-      printAllObjects(name);
       throw ObjectNotFoundException(msg);
     }
     return result;
   }
 
-  
   void Database::setLibrary(std::string& name) {
     localDatabase.setLibrary(name);
   }
@@ -96,11 +94,12 @@ namespace generator {
   }
 
   void Database::globalize() {
+    assert(localDatabase.getHierarchyLevel() == 0);
     globalDatabase.append(localDatabase);
   }
 
-  std::string Database::getParentName(int hierarchy) {
-    return localDatabase.getParentName(hierarchy);
+  std::string Database::getParentName() {
+    return localDatabase.getParentName();
   }
   
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
@@ -135,6 +134,10 @@ namespace generator {
     localDatabase.ascendHierarchy();
   }
 
+  int Database::getHierarchyLevel() {
+    return localDatabase.getHierarchyLevel();
+  }
+  
   bool Database::setVisible(std::string& name, std::string package, std::string library) {
     std::string n = (name == "ALL") ? "" : name;
     return globalDatabase.setVisible(n, package, library);
@@ -151,7 +154,7 @@ namespace generator {
     globalDatabase.print(name);
   }
 
-  void Database::printAllObjects(std::string& name) {
+  void Database::printAllObjects(std::string name) {
     auto valid = [&](DatabaseElement* e) { return true; };
     DatabaseResults objects;
     findAll(objects, name, valid);

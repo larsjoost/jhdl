@@ -12,22 +12,36 @@ namespace generator {
       }
     }
   }
+
+  bool SystemC::getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text) {
+    bool result = false;
+    auto valid = [&](DatabaseElement* e) { return e->id == id; };
+    DatabaseResult object;
+    if (database.findOne(object, name, valid)) {
+      name = object.getName(true, database.getHierarchyLevel());
+      type = object.object->type;
+      result = true;
+    } else {
+      exceptions.printError("Cound to find definition of " + ast::toString(id) + " with name " + name, text);
+      database.printAllObjects(name);
+    }
+    return result;
+  }
   
+  bool SystemC::getObjectName(std::string& name, ast::ObjectType id, ast::Text* text) {
+    ast::ObjectValueContainer o;
+    return getObjectName(name, o, id, text);
+  }
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       if (parm.isArea(parameters::IMPLEMENTATION)) {
 	printSourceLine(parm, p->identifier);
 	ExpressionParser expr(&database);
 	std::string name = p->identifier->toString(true);
-	auto valid = [&](DatabaseElement* e) { return e->id == ast::VARIABLE; };
-	DatabaseResult object;
-	if (database.findOne(object, name, valid)) {
-	  name = object.getName(true);
-	  parm.println(name + " = " + expr.toString(p->expression, object.object->type) + ";");
-	} else {
-	  exceptions.printError("Cound to find definition of VARIABLE with name " + name, &p->identifier->text);
-	  database.printAllObjects(name);
-	}
+        ast::ObjectValueContainer type;
+        if (getObjectName(name, type, ast::VARIABLE, &p->identifier->text)) {
+          parm.println(name + " = " + expr.toString(p->expression, type) + ";");
+        }
       }
     }
   }
@@ -61,7 +75,7 @@ namespace generator {
       ExpressionParser expr(&database);
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-          static ast::ObjectValueContainer expectedType = database.getType("BOOLEAN", "STANDARD", "STD");
+          static ast::ObjectValueContainer expectedType(ast::BOOLEAN);
 	  parm.println(parameters::IMPLEMENTATION, command + " (" + expr.toString(c.condition, expectedType) + ") {");
 	} else {
 	  parm.println(parameters::IMPLEMENTATION, "} else {");
@@ -79,16 +93,10 @@ namespace generator {
     if (f) {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
-	descendHierarchy(parm);
-      }
       auto callback = [&](parameters& parm) {
 	sequentialStatements(parm, f->sequentialStatements);
       };
       forLoop(parm, name, f->range, callback);
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
-	ascendHierarchy(parm);
-      }
     }
   }
   

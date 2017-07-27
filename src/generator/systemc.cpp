@@ -39,6 +39,7 @@ namespace generator {
     std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
     parm.println("#ifndef " + ifndefName);
     parm.println("#define " + ifndefName);
+    parm.println("");
     parm.println("#include <string.h>");
     parm.println("#include \"systemc.h\"");
     parm.println("#include \"vhdl.h\"");
@@ -55,13 +56,14 @@ namespace generator {
     libraryInfo.save();
   }
 
-  void SystemC::addLibraryInfo(std::string section, std::string name, std::string filename) {
-    if (!quiet) {
+  void SystemC::addLibraryInfo(parameters& parm, std::string section, std::string name, std::string filename) {
+    if (!parm.isQuiet()) {
       libraryInfo.add(section, name, filename);
     }
   }
 
   void SystemC::namespaceStart(parameters& parm, std::string& library) {
+    parm.println("");
     parm.println("namespace vhdl {");
     parm.incIndent();
     parm.println("namespace " + library + " {");
@@ -76,7 +78,7 @@ namespace generator {
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
-    functionStart("parse");
+    functionStart("parse(library = " + library + ")");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
     }
@@ -107,13 +109,11 @@ namespace generator {
       if (!filename.empty()) {
 	if (filename != this->filename) {
 	  filename = stdPath + "/" + filename;
-	  bool q = quiet;
-	  quiet = true;
 	  parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
 	  parameters p;
+          p.setQuiet(true);
 	  parse(p, parserDesignFile, library);
-	  quiet = q;
 	} else {
 	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename);
 	}
@@ -412,10 +412,11 @@ namespace generator {
 
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {
-      functionStart("packageDeclaration(library = " + library + ")");
       std::string name = package->name->toString(true);
       bool body = (package->body) ? true : false;
-      addLibraryInfo(body ? "body" : "package", name, filename);
+      functionStart("packageDeclaration(library = " + library +
+		    ", packet = " + name + ", body = " + (body ? "true" : "false") + ")");
+      addLibraryInfo(parm, body ? "body" : "package", name, filename);
       database.setLibrary(library);
       database.setPackage(name, body);
       descendHierarchy(parm, name);
@@ -439,9 +440,9 @@ namespace generator {
 
   void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {
     if (interface) {
-      functionStart("interface");
+      functionStart("interfaceDeclaration");
       std::string name = interface->name->toString(true);
-      addLibraryInfo("entity", name, filename);
+      addLibraryInfo(parm, "entity", name, filename);
       database.setLibrary(library);
       database.setEntity(name);
       descendHierarchy(parm, name);
@@ -450,45 +451,46 @@ namespace generator {
       parm.println("public:");
       parm.incIndent();
       if (interface->generics) {
+        parm.println("// Generics");
         parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
       }
       if (interface->ports) {
 	auto func = [&](std::string& type, ast::ObjectType id,
 			ast::ObjectDeclaration::Direction direction) {
-	  switch (direction) {
-	  case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
+          std::string t = type;
+          database.globalName(t, ast::TYPE);
+          switch (direction) {
+	  case ast::ObjectDeclaration::IN: return "sc_in<" + t + ">";
 	  case ast::ObjectDeclaration::OUT: 
 	  case ast::ObjectDeclaration::INOUT: 
-	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + t + ">";
 	  }
-	  return type;
+	  return t;
 	};
+        parm.println("// Ports");
         parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
       }
       parm.decIndent();
       parm.println("};");
       database.globalize();
       ascendHierarchy(parm);
-      functionEnd("interface");
+      functionEnd("interfaceDeclaration");
     }
   }
 
   void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
-      functionStart("implementation");
+      functionStart("implementationDeclaration");
       std::string name = implementation->name->toString(true);
-      addLibraryInfo("architecture", name, filename);
+      addLibraryInfo(parm, "architecture", name, filename);
       database.setLibrary(library);
       database.setArchitecture(name);
-      descendHierarchy(parm, name);
-      std::string constructor = "SC_CTOR(" + name + ") {init();}";
-      defineObject(parm, name, "SC_MODULE", &constructor, NULL,
+      defineObject(parm, name, "SC_MODULE", NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},
 		   [&](parameters& parm){});
-      ascendHierarchy(parm);
-      functionEnd("implementation");
+      functionEnd("implementationDeclaration");
     }
   }
 

@@ -170,7 +170,6 @@ namespace generator {
       ast::ObjectValueContainer returnType;
       findType(f->returnType, returnType);
       parm.returnType = returnType;
-      descendHierarchy(parm, name);
       printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
       database.globalName(returnTypeName, ast::TYPE);
@@ -178,6 +177,7 @@ namespace generator {
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
         std::string parentName = database.getParentName();
+        descendHierarchy(parm, name);
         std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
                                                              interface, arguments, returnTypeName,
 							     &text);
@@ -191,11 +191,11 @@ namespace generator {
         function_body(parm, f->body);
         parm.decIndent();
         parm.println("}");
+        ascendHierarchy(parm);
       } else {
         database.addFunction(name, arguments, returnType, f);
         parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
-      ascendHierarchy(parm);
       functionEnd("function_declarations");
     }
   }

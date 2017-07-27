@@ -45,23 +45,21 @@ namespace generator {
 
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
     assert(!map.empty());
-    map.back().add(name, e);
+    e.hierarchyLevel = getHierarchyLevel();
+    map.front().add(name, e);
   }
   
   void LocalDatabase::find(DatabaseResults& results, std::string& name, bool local) {
-    int hierarchyLevel = 0;
-    for (auto i = map.rbegin(); i != map.rend(); i++) {
+    for (auto i = map.begin(); i != map.end(); i++) {
       std::list<DatabaseElement>* e = i->find(name);
       if (e) {
         for (auto& j : *e) {
           DatabaseResult r;
-          r.hierarchyLevel = hierarchyLevel;
 	  r.local = local;
           r.object = &j;
           results.push_back(r);
         }
       }
-      hierarchyLevel++;
     }
   }
 
@@ -74,8 +72,11 @@ namespace generator {
   }
 
   void LocalDatabase::print() {
-    for (auto& i : map) {
-      i.print();
+    int hierarchyLevel = 0;
+    for (auto i = map.begin(); i != map.end(); i++) {
+      std::cout << "# Hierarchy level = " << hierarchyLevel << std::endl;
+      i->print();
+      hierarchyLevel++;
     }
   }
 
@@ -106,6 +107,9 @@ namespace generator {
       if (!found) {
         exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
 	printAllObjects(name);
+        if (verbose) {
+          print();
+        }
       }
     }
   };
@@ -148,10 +152,13 @@ namespace generator {
     map.pop_front();
   }
 
-  std::string LocalDatabase::getParentName(int hierarchy) {
-    if (map.size() > hierarchy) {
-      auto i = map.end();
-      auto p = std::prev(i, hierarchy + 1);
+  int LocalDatabase::getHierarchyLevel() {
+    return map.size() - 1; 
+  }
+  
+  std::string LocalDatabase::getParentName() {
+    if (map.size() > 1) {
+      auto p = std::next(map.begin());
       return p->getSection();
     }
     return "";

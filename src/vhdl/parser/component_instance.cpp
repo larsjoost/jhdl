@@ -12,7 +12,11 @@ namespace vhdl {
       instanceName = scanner->accept<SimpleIdentifier>();
       scanner->accept(":");
       scanner->optional(scanner::Scanner::VHDL_ENTITY);
-      componentName = scanner->accept<List<SimpleIdentifier, ::ast::SimpleIdentifier, '.'>>();
+      componentName = scanner->expect<SimpleIdentifier>();
+      if (scanner->optional(".")) {
+        libraryName = componentName;
+        componentName = scanner->expect<SimpleIdentifier>();
+      }
       if (scanner->optional("(")) {
         architectureName = scanner->expect<SimpleIdentifier>();
         scanner->expect(")");

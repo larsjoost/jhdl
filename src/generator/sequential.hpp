@@ -28,8 +28,8 @@ namespace generator {
 
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
-    functionStart("signalAssignment");
     if (p) {
+      functionStart("signalAssignment");
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       DatabaseResult object;
@@ -40,11 +40,11 @@ namespace generator {
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";
-        name = object.getName(true);
+        name = object.getName(true, database.getHierarchyLevel());
         ExpressionParser expr(&database);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
-            ast::ObjectValueContainer expectedValue("BOOLEAN");
+            static ast::ObjectValueContainer expectedValue(ast::BOOLEAN);
             parm.println(command + " (" + expr.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";
@@ -65,7 +65,7 @@ namespace generator {
         exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
 	database.printAllObjects(name);
       }
+      functionEnd("signalAssignment");
     }
-    functionEnd("signalAssignment");
   }
 }

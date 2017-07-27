@@ -9,11 +9,12 @@ namespace generator {
                                 std::string arguments) {
     functionStart("instantiateType");
     parm.println(type + "(new " + name + "(this" + arguments + "));");
+    functionEnd("instantiateType");
   }
 
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
-    functionStart("methodInstantiation");
     if (method) {
+      functionStart("methodInstantiation");
       std::string methodName;
       if (method->label) {
         methodName = method->label->toString(true);
@@ -21,23 +22,24 @@ namespace generator {
         methodName = method->noname;
       }
       instantiateType(parm, "SC_NEW_THREAD", methodName);
+      functionEnd("methodInstantiation");
     }
-    functionEnd("methodInstantiation");
   }
 
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
-    functionStart("signalInstantiation");
     if (s) {
+      functionStart("signalInstantiation");
       instantiateType(parm, "SC_NEW_THREAD", s->name);
+      functionEnd("signalInstantiation");
     }
-    functionEnd("signalInstantiation");
   }
 
   void SystemC::blockStatementInstantiation(parameters& parm,
                                             ast::BlockStatement* blockStatement) {
-    functionStart("blockStatementInstantiation");
     if (blockStatement) {
+      functionStart("blockStatementInstantiation");
       instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
+      functionEnd("blockStatementInstantiation");
     }
   }
 
@@ -55,13 +57,23 @@ namespace generator {
     }
   }
 
-  void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l) {
+  void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
+                                     std::string& entityName, std::string& library) {
     if (l) {
-      // TODO: resolve ast::UNKNOWN
       auto func = [&](ast::AssociationElement a){
         ExpressionParser expr(&database);
-        return instanceName + "->" + a.formalPart->name->toString(true) +
-        ".bind(" + expr.toString(a.actualPart, ast::UNKNOWN) + ")";
+        std::string formalName = a.formalPart->name->toString(true);
+        auto valid = [&] (DatabaseElement* e) { return true; };
+        DatabaseResult object;
+        if (database.findOne(object, formalName, valid, entityName, library)) {
+          ast::ObjectValueContainer formalType = object.object->type;
+          return instanceName + "->" + formalName +
+            ".bind(" + expr.toString(a.actualPart, formalType) + ")";
+        } else {
+          exceptions.printError("Formal name " + formalName + " not found in entity " + library + "::" + entityName);
+          database.printAllObjects(formalName);
+        }
+        return std::string();
       };
       parm.println(listToString(parm, l->associationElements.list, "; ", func) + ";");
     }
@@ -72,18 +84,18 @@ namespace generator {
       assert(c->instanceName);
       printSourceLine(parm, c->instanceName->text);
       std::string instanceName = c->instanceName->toString(true);
-      std::string componentName = "";
-      std::string delimiter = "";
-      for (ast::SimpleIdentifier i : c->componentName->list) {
-        std::string n = i.toString(true);
-        if (n != "WORK") {
-          componentName += delimiter + n;
-          delimiter = "::";
+      std::string componentName = c->componentName->toString(true);
+      std::string s = componentName;
+      std::string libraryName;
+      if (c->libraryName) {
+        libraryName = c->libraryName->toString(true);
+        if (libraryName != "WORK") {
+          s = libraryName + "::" + s;
         }
       }
-      parm.println("auto " + instanceName + " = new " + componentName + "(\"" + instanceName + "\");");
-      componentAssociation(parm, instanceName, c->generics);
-      componentAssociation(parm, instanceName, c->ports);
+      parm.println("auto " + instanceName + " = new " + s + "(\"" + instanceName + "\");");
+      componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
+      componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
   }
   

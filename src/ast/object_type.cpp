@@ -8,17 +8,17 @@ namespace ast {
 
   std::string toString(ObjectType o) {
     static std::string a[NUMBER_OF_OBJECT_TYPES] = {
-      "SIGNAL", "VARIABLE", "CONSTANT", "FUNCTION", "PROCEDURE", "PORT", "TYPE",
-      "ENUM", "ENTITY", "CONFIGURATION", "SUBTYPE", "FILE", "GROUP", "ARCHITECTURE",
-      "PACKAGE", "PACKAGE BODY", "COMPONENT"};
+      "signal", "variable", "constant", "function", "procedure", "port", "type",
+      "enum", "entity", "configuration", "subtype", "file", "group", "architecture",
+      "package", "package body", "component"};
     return a[o];
   }
   
   std::string toString(ObjectValue o) {
     static std::string a[NUMBER_OF_OBJECT_VALUES] = {
-      "INTEGER", "REAL", "NUMBER", "CHARACTER", "TEXT",
-      "PHYSICAL", "ARRAY", "ENUMERATION", "BOOLEAN",
-      "USER_TYPE", "UNKNOWN", "NONE", "DONT_CARE"};
+      "integer", "real", "number", "character", "text",
+      "physical", "array", "enumeration", "boolean",
+      "user_type", "unknown", "none", "dont_care"};
     return a[o];
   }
 
@@ -27,7 +27,10 @@ namespace ast {
       return typeName + "(User type)";
     }
     if (value == ARRAY) {
-      return "ARRAY of " + subtype->toString();
+      return "array of " + subtype->toString();
+    }
+    if (value == ENUMERATION) {
+      return "enumeration " + typeName;
     }
     return ast::toString(value);
   }
@@ -38,7 +41,7 @@ namespace ast {
     if (value == NUMBER) return (other.value == INTEGER || other.value == REAL || other.value == NUMBER);
     if (other.value == NUMBER) return (value == INTEGER || value == REAL || value == NUMBER);
     if (value != other.value) return false;
-    if (value == USER_TYPE) {
+    if (value == USER_TYPE || value == ENUMERATION) {
       return typeName == other.typeName;
     }
     return true;

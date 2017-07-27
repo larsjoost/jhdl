@@ -9,14 +9,15 @@ namespace generator {
                             std::string library, std::string identifier,
                             ast::Text* text) {
     functionStart("loadPackage(library = " + library + ", name = " + package + ")");
-    std::string lib = (library == "WORK") ? database.getLibrary() : library;
-    if (!database.exists(lib, package)) {
+    bool packageExists = database.exists(library, package);
+    if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
       parameters parm;
-      parsePackage(parm, package, lib);
+      parsePackage(parm, package, library);
+      packageExists = database.exists(library, package);
     }
-    if (database.exists(lib, package)) {
-      if (!database.setVisible(identifier, package, lib)) {
+    if (packageExists) {
+      if (!database.setVisible(identifier, package, library)) {
         exceptions.printError("Could not find " + identifier + " in package " + package + " of library " + library, text);
       }
     } else {
@@ -37,12 +38,12 @@ namespace generator {
 	  if ("WORK" != library) {
 	    parm.println(library + "::" + package + " " + library + "_" + package + ";");
 	  }
+	  std::string identifier = useClause.identifier->toString(true);
+	  loadPackage(package, library, identifier, &useClause.package->text);
 	} else {
 	  std::string p = package;
 	  transform(p.begin(), p.end(), p.begin(), tolower);
 	  parm.println("#include \"" + p + ".hpp\"");
-	  std::string identifier = useClause.identifier->toString(true);
-	  loadPackage(package, library, identifier, &useClause.package->text);
 	}
       }
       functionEnd("includes");

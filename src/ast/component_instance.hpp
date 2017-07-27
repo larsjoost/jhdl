@@ -13,7 +13,8 @@ namespace ast {
   public:
 
     SimpleIdentifier* instanceName = NULL;
-    List<SimpleIdentifier>* componentName = NULL;
+    SimpleIdentifier* componentName = NULL;
+    SimpleIdentifier* libraryName = NULL;
     SimpleIdentifier* architectureName = NULL;
     AssociationList* generics = NULL;
     AssociationList* ports = NULL; 

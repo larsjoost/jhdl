@@ -27,15 +27,15 @@ namespace generator {
     ast::FunctionDeclaration* function;
     ast::ProcedureDeclaration* procedure;
     ast::Text* text;
+    int hierarchyLevel = 0;
     void print();
     std::string toString();
   };
   
   struct DatabaseResult {
-    int hierarchyLevel = 0;
     bool local;
     DatabaseElement* object;
-    std::string getName(bool fullName, std::string library = "", std::string package = "");
+    std::string getName(bool fullName, int hierarchyLevel, std::string library = "", std::string package = "");
     std::string toString();
   };
 

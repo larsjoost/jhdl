@@ -215,7 +215,8 @@ namespace generator {
                                                Func sensitivityListCallback) {
     functionStart("objectToString");
     assert(object.object);
-    std::string name = object.getName(true, database->getLibrary(), database->getSection());
+    std::string name = object.getName(true, database->getHierarchyLevel(),
+                                      database->getLibrary(), database->getSection());
     if (verbose) {
       std::cout << "name = " << name << ": " << object.toString() << std::endl;
     }
