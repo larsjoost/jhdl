@@ -162,6 +162,7 @@ namespace generator {
     parm.println("enum " + enumName + " {" + enumList + "};");
     parm.println("struct " + valueName + " {");
     parm.incIndent();
+    parm.println("const int size = " + s + ";");
     parm.println("EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
     parm.decIndent();
     parm.println("};");

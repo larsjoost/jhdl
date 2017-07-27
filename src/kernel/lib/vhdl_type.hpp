@@ -250,18 +250,40 @@ namespace vhdl {
 
   template <typename T, class E, int N>
   struct Enumeration {
+    int* char_position_lookup() {
+      E valueArray;
+      const static int CHAR_TRANSLATE_SIZE =  256;
+      int* a = new int[CHAR_TRANSLATE_SIZE];
+      for (int i=0; i<CHAR_TRANSLATE_SIZE; i++) {
+        a[i] = -1;
+      }
+      for (int i=0; i<valueArray.size; i++) {
+        if (valueArray.array[i].c != 0) {
+          a[valueArray.array[i].c] = i;
+        }
+      }
+      return a;
+    }
+
+    int char_position(char c) {
+      static int* l = char_position_lookup();
+      return l[(int)c];
+    }
   public:
     int value = 0;
-    E valueArray;
-    
+
     void operator=(T v) {
       value = v;
     }
   
     void operator=(char c) {
-      value = c;
+      if (char_position(c) < 0) {
+        std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
+      } else {
+        value = char_position(c);
+      }
     }
-
+    
     void operator=(bool v) {
       value = v ? (T)1 : (T)0;
     }
@@ -275,10 +297,11 @@ namespace vhdl {
     }
 
     std::string toString() {
+      E valueArray;
       if (valueArray.array[value].c == 0) {
         return valueArray.array[value].s;
       }
-      return "'" + std::to_string(valueArray.array[value].c) + "'";
+      return "'" + std::string(1, valueArray.array[value].c) + "'";
     }
 
     int getValue() {
