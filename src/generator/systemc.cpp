@@ -123,13 +123,14 @@ namespace generator {
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     assert(t); 
     std::string name = identifier->toString(true);
+    ast::ObjectValueContainer type(ast::ENUMERATION, name);
     std::string enumList =
       listToString(parm, t->enumerations, ", ",
                    [&](ast::EnumerationElement& e){
                      std::string s = "";
                      if (e.identifier) {
                        s = e.identifier->toString();
-                       database.add(ast::ENUM, s);
+                       database.add(ast::ENUM, s, type);
                      }
                      return s;
                    });
