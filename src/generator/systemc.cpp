@@ -471,11 +471,13 @@ namespace generator {
       std::string name = implementation->name->toString(true);
       const ast::ObjectType type = ast::ARCHITECTURE;
       topHierarchyStart(parm, library, name, type, filename);
+      std::string constructor = "SC_CTOR(" + name + ") {init();}";
       defineObject(parm, name, "SC_MODULE", NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},
-		   [&](parameters& parm){});
+		   [&](parameters& parm){},
+                   &constructor);
       topHierarchyEnd(parm, false);
       functionEnd("implementationDeclaration");
     }

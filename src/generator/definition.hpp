@@ -11,7 +11,8 @@ namespace generator {
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              BodyFunc bodyCallback,
-			     DeclFunc declarationCallback) {
+			     DeclFunc declarationCallback,
+                             std::string* constructor) {
     functionStart("defineObject");
     descendHierarchy(parm, name);
     parm.println(type + "(" + name + ") {");
@@ -34,7 +35,7 @@ namespace generator {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    createConstructor(parm, name, argument, concurrentStatements);
+    createConstructor(parm, name, argument, concurrentStatements, constructor);
     parm.decIndent();
     parm.println("};");
     ascendHierarchy(parm);

@@ -127,7 +127,8 @@ namespace generator {
 
   void SystemC::createConstructor(parameters& parm, std::string& name,
                                   std::string* argument,
-                                  ast::List<ast::ConcurrentStatement>* concurrentStatements) {
+                                  ast::List<ast::ConcurrentStatement>* concurrentStatements,
+                                  std::string* constructor) {
     parm.println("void init() {");
     if (concurrentStatements) {
       parm.incIndent();
@@ -140,6 +141,9 @@ namespace generator {
     parm.println("init();");
     parm.decIndent();
     parm.println("}");
+    if (constructor) {
+      parm.println(*constructor);
+    }
   }
 
 }

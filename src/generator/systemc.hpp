@@ -173,7 +173,8 @@ namespace generator {
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
                       BodyFunc bodyCallback,
-		      DeclFunc declarationCallback);
+		      DeclFunc declarationCallback,
+                      std::string* constructor = NULL);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
@@ -203,7 +204,8 @@ namespace generator {
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
     void createConstructor(parameters& parm, std::string& name,
                            std::string* argument,
-                           ast::List<ast::ConcurrentStatement>* concurrentStatements);
+                           ast::List<ast::ConcurrentStatement>* concurrentStatements,
+                           std::string* constructor);
 
     // systemc.cpp
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
