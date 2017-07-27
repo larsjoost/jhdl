@@ -16,8 +16,6 @@ namespace generator {
       int indent = 0;
     };
 
-    FileInfo* fileInfo = NULL;
-    FileInfo* previousFileInfo;
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
@@ -25,8 +23,13 @@ namespace generator {
     
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);
 
+    FileInfo& getFileInfo();
+    
   public:
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
+  private:
+    FileSelect a_file_select;
+  public:
     enum Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, NONE, AREA_SIZE};
     int index;
     Area area;
@@ -41,8 +44,7 @@ namespace generator {
     void println(int position, std::string message);
     void println(std::string message);
     void println(Area a, std::string message);
-    void selectFile(FileSelect s);
-    void revertSelectFile();
+    FileSelect selectFile(FileSelect s);
     bool isQuiet();
     bool setQuiet(bool quiet);
     std::string getFileName(FileSelect s); 

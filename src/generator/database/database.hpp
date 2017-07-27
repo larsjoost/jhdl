@@ -20,6 +20,9 @@ namespace generator {
     
     template<typename Func>
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
+
+    void Globalize();
+
   public:
 
     class ObjectNotFoundException {
@@ -28,8 +31,6 @@ namespace generator {
       ObjectNotFoundException(std::string msg) : msg(msg) {};
     };
     
-    void globalize();
-
     void addAttribute(std::string& name, ast::ObjectArguments& arguments,
                       ast::ObjectType id, ast::Attribute* attribute,
                       ast::Text* text = NULL);
@@ -55,15 +56,12 @@ namespace generator {
     std::string globalName(std::string name);
     bool globalName(std::string& name, ast::ObjectType id);
 
-    void setLibrary(std::string& name);
     std::string getLibrary();
-    void setPackage(std::string& name, bool body);
-    std::string getPackage();
-    void setEntity(std::string& name);
-    std::string getEntity();
-    void setArchitecture(std::string& name);
-    std::string getSection();
+    std::string getName();
+    ast::ObjectType getType();
     
+    void topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type);
+    void topHierarchyEnd(bool globalize);
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
     int getHierarchyLevel();
@@ -112,7 +110,7 @@ namespace generator {
   
   template<typename Func>
   void Database::findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package, std::string library) {
-    if ((package.empty() || package == localDatabase.getPackage()) &&
+    if ((package.empty() || package == localDatabase.getName()) &&
         (library.empty() || library == localDatabase.getLibrary())) {
       localDatabase.find(objects, name);
     }

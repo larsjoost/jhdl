@@ -56,12 +56,6 @@ namespace generator {
     libraryInfo.save();
   }
 
-  void SystemC::addLibraryInfo(parameters& parm, std::string section, std::string name, std::string filename) {
-    if (!parm.isQuiet()) {
-      libraryInfo.add(section, name, filename);
-    }
-  }
-
   void SystemC::namespaceStart(parameters& parm, std::string& library) {
     parm.println("");
     parm.println("namespace vhdl {");
@@ -413,27 +407,23 @@ namespace generator {
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {
       std::string name = package->name->toString(true);
-      bool body = (package->body) ? true : false;
+      ast::ObjectType type = package->body ? ast::PACKAGE_BODY : ast::PACKAGE;
       functionStart("packageDeclaration(library = " + library +
-		    ", packet = " + name + ", body = " + (body ? "true" : "false") + ")");
-      addLibraryInfo(parm, body ? "body" : "package", name, filename);
-      database.setLibrary(library);
-      database.setPackage(name, body);
-      descendHierarchy(parm, name);
-      if (!body) {
+		    ", packet = " + name + ", type = " + toString(type) + ")");
+      topHierarchyStart(parm, library, name, type, filename);
+      if (type == ast::PACKAGE) {
         parm.println("");
         parm.println("SC_PACKAGE(" + name + ") {");
         parm.incIndent();
-	declarations(parm, package->declarations, body);
+	declarations(parm, package->declarations, false);
         parm.decIndent();
         parm.println("};");
-        database.globalize();
       } else {
-	parm.selectFile(parameters::SOURCE_FILE);
-	declarations(parm, package->declarations, body);
-	parm.revertSelectFile();
+        parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
+	declarations(parm, package->declarations, true);
+	parm.selectFile(file_select);
       }
-      ascendHierarchy(parm);
+      topHierarchyEnd(parm, (type == ast::PACKAGE));
       functionEnd("packageDeclaration");
     }
   }
@@ -442,10 +432,8 @@ namespace generator {
     if (interface) {
       functionStart("interfaceDeclaration");
       std::string name = interface->name->toString(true);
-      addLibraryInfo(parm, "entity", name, filename);
-      database.setLibrary(library);
-      database.setEntity(name);
-      descendHierarchy(parm, name);
+      const ast::ObjectType type = ast::ENTITY;
+      topHierarchyStart(parm, library, name, type, filename);
       parm.println("");
       parm.println("SC_INTERFACE(" + name + ") {");
       parm.println("public:");
@@ -472,8 +460,7 @@ namespace generator {
       }
       parm.decIndent();
       parm.println("};");
-      database.globalize();
-      ascendHierarchy(parm);
+      topHierarchyEnd(parm, true);
       functionEnd("interfaceDeclaration");
     }
   }
@@ -482,14 +469,14 @@ namespace generator {
     if (implementation) {
       functionStart("implementationDeclaration");
       std::string name = implementation->name->toString(true);
-      addLibraryInfo(parm, "architecture", name, filename);
-      database.setLibrary(library);
-      database.setArchitecture(name);
+      const ast::ObjectType type = ast::ARCHITECTURE;
+      topHierarchyStart(parm, library, name, type, filename);
       defineObject(parm, name, "SC_MODULE", NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},
 		   [&](parameters& parm){});
+      topHierarchyEnd(parm, false);
       functionEnd("implementationDeclaration");
     }
   }

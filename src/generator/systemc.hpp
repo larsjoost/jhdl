@@ -75,6 +75,8 @@ namespace generator {
     void namespaceEnd(parameters& parm);
     
     // general.cpp
+    void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
+    void topHierarchyEnd(parameters& parm, bool globalize);
     void descendHierarchy(parameters& parm, std::string parentName = "");
     void ascendHierarchy(parameters& parm);
 
@@ -213,11 +215,8 @@ namespace generator {
     void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
     void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);
 
-
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
     void parsePackage(parameters& parm, std::string name, std::string library);
-
-    void addLibraryInfo(parameters& parm, std::string section, std::string name, std::string filename);
 
   public:
     SystemC(bool verbose = false);

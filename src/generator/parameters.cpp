@@ -3,16 +3,19 @@
 
 namespace generator {
 
+  parameters::FileInfo& parameters::getFileInfo() {
+    if (a_file_select == HEADER_FILE) {
+      return headerFileInfo;
+    } 
+    return sourceFileInfo;    
+  }
+  
   void parameters::incIndent() {
-    if (fileInfo) {
-      fileInfo->indent += 2;
-    }
+    getFileInfo().indent += 2;
   }
 
   void parameters::decIndent() {
-    if (fileInfo) {
-      fileInfo->indent -= 2;
-    }
+    getFileInfo().indent -= 2;
   }
 
   std::string parameters::replaceFileExtension(std::string filename, std::string extension) {
@@ -41,29 +44,20 @@ namespace generator {
     sourceFileInfo.outputFile.close();
   }
   
-  void parameters::selectFile(FileSelect s) {
-    previousFileInfo = fileInfo;
-    if (s == HEADER_FILE) {
-      fileInfo = &headerFileInfo;
-    } else {
-      fileInfo = &sourceFileInfo;
-    }
-  }
-
-  void parameters::revertSelectFile() {
-    fileInfo= previousFileInfo;
+  parameters::FileSelect parameters::selectFile(FileSelect file_select) {
+    FileSelect a = a_file_select;
+    a_file_select = file_select;
+    return a;
   }
 
   void parameters::println(int position, std::string text) {
-    if (fileInfo && !isQuiet()) {
-      fileInfo->outputFile << std::string(position, ' ') << text << std::endl;
+    if (!isQuiet()) {
+      getFileInfo().outputFile << std::string(position, ' ') << text << std::endl;
     }
   }
 
   void parameters::println(std::string text) {
-    if (fileInfo) {
-      println(fileInfo->indent, text);
-    }
+    println(getFileInfo().indent, text);
   }
 
   bool parameters::isArea(Area a) {
@@ -96,10 +90,10 @@ namespace generator {
     return q;
   }
 
-  std::string parameters::getFileName(FileSelect s) {
-    selectFile(s);
-    std::string name = fileInfo->fileName;
-    revertSelectFile();
+  std::string parameters::getFileName(FileSelect file_select) {
+    FileSelect tmp_file_select = selectFile(file_select);
+    std::string name = getFileInfo().fileName;
+    selectFile(tmp_file_select);
     return name;
   }
 

@@ -216,7 +216,7 @@ namespace generator {
     functionStart("objectToString");
     assert(object.object);
     std::string name = object.getName(true, database->getHierarchyLevel(),
-                                      database->getLibrary(), database->getSection());
+                                      database->getLibrary(), database->getName());
     if (verbose) {
       std::cout << "name = " << name << ": " << object.toString() << std::endl;
     }

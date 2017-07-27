@@ -10,15 +10,15 @@
 namespace generator {
 
   class LocalDatabase {
-    std::string library;
-    ast::ObjectType sectionType;
-    std::string sectionName;
-    std::list<ast::Attribute*> packageAttributes;
-    std::list<NameMap> map;
+    std::string a_library;
+    ast::ObjectType a_type;
+    std::string a_name;
+    std::list<ast::Attribute*> a_package_attributes;
+    std::list<NameMap> a_map;
 
-    bool verbose = true;
+    bool a_verbose = true;
     
-    Exceptions exceptions;
+    Exceptions a_exceptions;
 
     void add(std::string& name, DatabaseElement& e);
 
@@ -46,15 +46,10 @@ namespace generator {
                       ast::ProcedureDeclaration* procedures,
                       ast::Text* text = NULL);
 
-    void setLibrary(std::string& name);
+    void initialize(std::string& library, std::string& name, ast::ObjectType type);
     std::string getLibrary();
-    void setPackage(std::string& name, bool body);
-    std::string getPackage();
-    void setEntity(std::string& name);
-    std::string getEntity();
-    void setArchitecture(std::string& name);
-    std::string getSection();
-    ast::ObjectType getSectionType();
+    std::string getName();
+    ast::ObjectType getType();
     
     void descendHierarchy(std::string& name);
     void ascendHierarchy();
@@ -62,7 +57,6 @@ namespace generator {
     std::string getParentName();
     void print();
   };
-  
   
 }
 

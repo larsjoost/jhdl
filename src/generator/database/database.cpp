@@ -4,8 +4,8 @@
 namespace generator {
 
   std::string Database::globalName(DatabaseResult& object, std::string name) {
-    if (object.object->sectionName != localDatabase.getSection() ||
-        object.object->sectionType != localDatabase.getSectionType()) {
+    if (object.object->sectionName != localDatabase.getName() ||
+        object.object->sectionType != localDatabase.getType()) {
       std::string separator1 = "::";
       std::string separator2 = "::";
       if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
@@ -61,39 +61,19 @@ namespace generator {
     return result;
   }
 
-  void Database::setLibrary(std::string& name) {
-    localDatabase.setLibrary(name);
-  }
-
   std::string Database::getLibrary() {
     return localDatabase.getLibrary();
   }
   
-  void Database::setPackage(std::string& name, bool body) {
-    localDatabase.setPackage(name, body);
+  std::string Database::getName() {
+    return localDatabase.getName();
   }
 
-  std::string Database::getPackage() {
-    return localDatabase.getPackage();
+  ast::ObjectType Database::getType() {
+    return localDatabase.getType();
   }
 
-  void Database::setEntity(std::string& name) {
-    localDatabase.setEntity(name);
-  }
-
-  std::string Database::getEntity() {
-    return localDatabase.getEntity();
-  }
-
-  void Database::setArchitecture(std::string& name) {
-    localDatabase.setArchitecture(name);
-  }
-
-  std::string Database::getSection() {
-    return localDatabase.getSection();
-  }
-
-  void Database::globalize() {
+  void Database::Globalize() {
     assert(localDatabase.getHierarchyLevel() == 0);
     globalDatabase.append(localDatabase);
   }
@@ -125,6 +105,18 @@ namespace generator {
   void Database::addProcedure(std::string& name, ast::ObjectArguments& arguments,
                               ast::ProcedureDeclaration* procedures, ast::Text* text) {
     localDatabase.addProcedure(name, arguments, procedures, text);
+  }
+
+  void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
+    localDatabase.initialize(library, name, type);
+    descendHierarchy(name);
+  }
+  
+  void Database::topHierarchyEnd(bool globalize) {
+    if (globalize) {
+      Globalize();
+    }
+    ascendHierarchy();
   }
 
   void Database::descendHierarchy(std::string& name) {

@@ -8,14 +8,14 @@ namespace generator {
   void GlobalDatabase::append(LocalDatabase& d) {
     auto l = map.find(d.getLibrary());
     if (l != map.end()) {
-      if (l->second.find(d.getSection()) == l->second.end()) {
-        l->second[d.getSection()] = d;
+      if (l->second.find(d.getName()) == l->second.end()) {
+        l->second[d.getName()] = d;
       } else {
-        exceptions.printError(ast::toString(d.getSectionType()) + " " + d.getLibrary() + "." + d.getSection() + " is already defined");
+        exceptions.printError(ast::toString(d.getType()) + " " + d.getLibrary() + "." + d.getName() + " is already defined");
       }
     } else {
       std::unordered_map<std::string, LocalDatabase> l;
-      l[d.getSection()] = d;
+      l[d.getName()] = d;
       map[d.getLibrary()] = l;
     }
   }

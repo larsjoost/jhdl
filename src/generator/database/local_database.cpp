@@ -4,53 +4,33 @@
 
 namespace generator {
   
-  void LocalDatabase::setLibrary(std::string& name) {
-    library = name;
+  void LocalDatabase::initialize(std::string& library, std::string& name, ast::ObjectType type) {
+    assert(a_map.empty());
+    a_library = library;
+    a_name = name;
+    a_type = type;
   }
 
   std::string LocalDatabase::getLibrary() {
-    return library;
+    return a_library;
   }
 
-  void LocalDatabase::setPackage(std::string& name, bool body) {
-    sectionName = name;
-    sectionType = body ? ast::PACKAGE_BODY : ast::PACKAGE;
+  std::string LocalDatabase::getName() {
+    return a_name;
   }
 
-  std::string LocalDatabase::getPackage() {
-    return sectionName;
-  }
-
-  void LocalDatabase::setEntity(std::string& name) {
-    sectionName = name;
-    sectionType = ast::ENTITY;
-  }
-
-  std::string LocalDatabase::getEntity() {
-    return sectionName;
-  }
-
-  void LocalDatabase::setArchitecture(std::string& name) {
-    sectionName = name;
-    sectionType = ast::ARCHITECTURE;
-  }
-  
-  std::string LocalDatabase::getSection() {
-    return sectionName;
-  }
-
-  ast::ObjectType LocalDatabase::getSectionType() {
-    return sectionType;
+  ast::ObjectType LocalDatabase::getType() {
+    return a_type;
   }
 
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
-    assert(!map.empty());
+    assert(!a_map.empty());
     e.hierarchyLevel = getHierarchyLevel();
-    map.front().add(name, e);
+    a_map.front().add(name, e);
   }
   
   void LocalDatabase::find(DatabaseResults& results, std::string& name, bool local) {
-    for (auto i = map.begin(); i != map.end(); i++) {
+    for (auto i = a_map.begin(); i != a_map.end(); i++) {
       std::list<DatabaseElement>* e = i->find(name);
       if (e) {
         for (auto& j : *e) {
@@ -65,34 +45,34 @@ namespace generator {
 
   bool LocalDatabase::setVisible(std::string name) {
     bool found = false;
-    for (auto& i : map) {
+    for (auto& i : a_map) {
       found |= i.setVisible(name);
     }
     return found;
   }
 
   void LocalDatabase::print() {
-    int hierarchyLevel = 0;
-    for (auto i = map.begin(); i != map.end(); i++) {
-      std::cout << "# Hierarchy level = " << hierarchyLevel << std::endl;
+    int hierarchy_level = 0;
+    for (auto i = a_map.begin(); i != a_map.end(); i++) {
+      std::cout << "# Hierarchy level = " << hierarchy_level << std::endl;
       i->print();
-      hierarchyLevel++;
+      hierarchy_level++;
     }
   }
 
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                           ast::ObjectArguments arguments, ast::Text* text) {
-    DatabaseElement e = {id, library, sectionType, sectionName, name, arguments, type, false, NULL, NULL, NULL, text};
+    DatabaseElement e = {id, a_library, a_type, a_name, name, arguments, type, false, NULL, NULL, NULL, text};
     add(name, e);
   }
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    if (id == sectionType) {
-      if (name == sectionName) {
-        packageAttributes.push_back(attribute);
+    if (id == a_type) {
+      if (name == a_name) {
+        a_package_attributes.push_back(attribute);
       } else {
-        exceptions.printError("Could not find " + ast::toString(id) + "\"" + name + "\"", text);
+        a_exceptions.printError("Could not find " + ast::toString(id) + "\"" + name + "\"", text);
       }
     } else {
       bool found = false;
@@ -105,9 +85,9 @@ namespace generator {
 	}
       }
       if (!found) {
-        exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
+        a_exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
 	printAllObjects(name);
-        if (verbose) {
+        if (a_verbose) {
           print();
         }
       }
@@ -131,7 +111,8 @@ namespace generator {
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {ast::FUNCTION, library, sectionType, sectionName, name, arguments, returnType, false, NULL, function, NULL, text};
+    DatabaseElement e = {ast::FUNCTION, a_library, a_type, a_name, name, arguments,
+                         returnType, false, NULL, function, NULL, text};
     add(name, e);
   };
 
@@ -139,29 +120,30 @@ namespace generator {
                                    ast::ProcedureDeclaration* procedure,
                                    ast::Text* text) {
     ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::NONE);
-    DatabaseElement e = {ast::PROCEDURE, library, sectionType, sectionName, name, arguments, c, false, NULL, NULL, procedure, text};
+    DatabaseElement e = {ast::PROCEDURE, a_library, a_type, a_name, name, arguments, c, false, NULL, NULL, procedure, text};
     add(name, e);
   };
 
   void LocalDatabase::descendHierarchy(std::string& name) {
     NameMap m(name);
-    map.push_front(m);
+    a_map.push_front(m);
   }
 
   void LocalDatabase::ascendHierarchy() {
-    map.pop_front();
+    a_map.pop_front();
   }
 
   int LocalDatabase::getHierarchyLevel() {
-    return map.size() - 1; 
+    return a_map.size() - 1; 
   }
   
   std::string LocalDatabase::getParentName() {
-    if (map.size() > 1) {
-      auto p = std::next(map.begin());
-      return p->getSection();
+    std::string name = a_name;
+    if (a_map.size() > 1) {
+      auto p = std::next(a_map.begin());
+      name = p->getSection();
     }
-    return "";
+    return name;
   }
   
 }
