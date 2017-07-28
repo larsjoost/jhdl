@@ -53,8 +53,11 @@ namespace generator {
 
   void LocalDatabase::print() {
     int hierarchy_level = 0;
+    std::cout << "  [LOCAL] library = " << a_library <<
+      ", name = " << a_name <<
+      ", type = " << ast::toString(a_type) << std::endl;
     for (auto i = a_map.begin(); i != a_map.end(); i++) {
-      std::cout << "# Hierarchy level = " << hierarchy_level << std::endl;
+      std::cout << "  # Hierarchy level = " << hierarchy_level << std::endl;
       i->print();
       hierarchy_level++;
     }
@@ -124,6 +127,12 @@ namespace generator {
     add(name, e);
   };
 
+  void LocalDatabase::add(LocalDatabase* other) {
+    NameMap& m = a_map.front();
+    assert(other->getHierarchyLevel() == 0);
+    m.add(other->a_map.front());
+  }
+  
   void LocalDatabase::descendHierarchy(std::string& name) {
     NameMap m(name);
     a_map.push_front(m);

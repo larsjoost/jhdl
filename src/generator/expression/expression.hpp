@@ -93,6 +93,8 @@ namespace generator {
     std::string returnTypesToString(ReturnTypes& returnTypes);
     
     bool getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result);
+
+    bool exists(ReturnTypePair& pair, std::list<ReturnTypePair>& typePairs);
     
   public:
 
@@ -256,7 +258,10 @@ namespace generator {
           ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
           for (auto& x : t) {
             if (x.equals(expectedType)) {
-              typePairs.push_back({i, j});
+              ReturnTypePair pair = {i, j};
+              if (!exists(pair, typePairs)) {
+                typePairs.push_back(pair);
+              }
             }
           }
         }

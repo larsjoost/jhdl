@@ -35,11 +35,18 @@ namespace ast {
     return ast::toString(value);
   }
 
+  bool ObjectValueContainer::numberEquals(ObjectValue l, ObjectValue r) {
+    return (l == NUMBER) && (r == INTEGER || r == REAL || r == NUMBER);
+  }
+  
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
-    // std::cout << "this = " + toString() << std::endl;
-    // std::cout << "other = " + other.toString() << std::endl;
-    if (value == NUMBER) return (other.value == INTEGER || other.value == REAL || other.value == NUMBER);
-    if (other.value == NUMBER) return (value == INTEGER || value == REAL || value == NUMBER);
+    bool verbose = false;
+    if (verbose) {
+      std::cout << "this = " + toString() << std::endl;
+      std::cout << "other = " + other.toString() << std::endl;
+    }
+    if (numberEquals(value, other.value)) return true;
+    if (numberEquals(other.value, value)) return true;
     if (value != other.value) return false;
     if (value == USER_TYPE || value == ENUMERATION) {
       return typeName == other.typeName;

@@ -1,7 +1,4 @@
 
--- Testing
-
-use lib.pack.all;
 
 -- Test 2
 

@@ -6,8 +6,8 @@
 namespace generator {
   
   void GlobalDatabase::append(LocalDatabase& d) {
-    auto l = map.find(d.getLibrary());
-    if (l != map.end()) {
+    auto l = a_map.find(d.getLibrary());
+    if (l != a_map.end()) {
       if (l->second.find(d.getName()) == l->second.end()) {
         l->second[d.getName()] = d;
       } else {
@@ -16,8 +16,19 @@ namespace generator {
     } else {
       std::unordered_map<std::string, LocalDatabase> l;
       l[d.getName()] = d;
-      map[d.getLibrary()] = l;
+      a_map[d.getLibrary()] = l;
     }
+  }
+
+  LocalDatabase* GlobalDatabase::find(std::string& library, std::string& name) {
+    auto l = a_map.find(library);
+    if (l != a_map.end()) {
+      auto x = l->second.find(name);
+      if (x != l->second.end()) {
+        return &x->second;
+      }
+    }
+    return NULL;
   }
 
   bool GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
@@ -35,31 +46,26 @@ namespace generator {
   }
 
   bool GlobalDatabase::exists(std::string& library, std::string& package) {
-    auto i = map.find(library);
-    if (i != map.end()) {
-      auto j = i->second.find(package);
-      return j == i->second.end() ? false : true;
-    }
-    return false;
+    return (find(library, package) ? true : false);
   }
 
   void GlobalDatabase::print(std::unordered_map<std::string, LocalDatabase>& m) {
     for (auto& i : m) {
-      std::cout << "[GLOBAL PACKAGE] = " << i.first << std::endl;
+      std::cout << "[GLOBAL] name = " << i.first << std::endl;
       i.second.print();
     }
   }
   
   void GlobalDatabase::print(std::string name) {
     if (name.empty()) {
-      for (auto& i : map) {
-        std::cout << "[GLOBAL LIBRARY] = " << i.first << std::endl;
+      for (auto& i : a_map) {
+        std::cout << "[GLOBAL] library = " << i.first << std::endl;
         print(i.second);
       }
     } else {
-      auto i = map.find(name);
-      if (i != map.end()) {
-        std::cout << "[GLOBAL] = " << i->first << std::endl;
+      auto i = a_map.find(name);
+      if (i != a_map.end()) {
+        std::cout << "[GLOBAL] library = " << i->first << std::endl;
         print(i->second);
       } else {
         std::cerr << "Did not find " + name + " in global database" << std::endl;

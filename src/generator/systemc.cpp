@@ -469,6 +469,13 @@ namespace generator {
       std::string name = implementation->name->toString(true);
       const ast::ObjectType type = ast::ARCHITECTURE;
       topHierarchyStart(parm, library, name, type, filename);
+      if (!database.localize(library, name, ast::ENTITY)) {
+        exceptions.printError("Could not find " + ast::toString(ast::ENTITY) + " " +
+                              library + "." + name, &implementation->name->text);
+        if (verbose) {
+          database.print(library);
+        }
+      }
       std::string constructor = "SC_CTOR(" + name + ") {init();}";
       defineObject(parm, name, "SC_MODULE", NULL,
                    &implementation->declarations,

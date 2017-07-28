@@ -16,7 +16,7 @@ namespace generator {
     GlobalDatabase globalDatabase;
     Exceptions exceptions;
 
-    bool verbose = true;
+    bool verbose = false;
     
     template<typename Func>
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
@@ -52,6 +52,8 @@ namespace generator {
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
+
+    bool localize(std::string& library, std::string& name, ast::ObjectType type);
     
     std::string namePrefix(DatabaseResult& object);
     std::string globalName(DatabaseResult& object, std::string name);

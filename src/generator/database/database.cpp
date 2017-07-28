@@ -81,6 +81,25 @@ namespace generator {
     globalDatabase.append(localDatabase);
   }
 
+  bool Database::localize(std::string& library, std::string& name, ast::ObjectType type) {
+    LocalDatabase* l = globalDatabase.find(library, name);
+    if (l) {
+      if (l->getType() == type) {
+        localDatabase.add(l);
+        return true;
+      }
+      if (verbose) {
+        std::cout << "Expected type = " << ast::toString(type) << ", but found = " << ast::toString(l->getType()) << std::endl;
+      }
+      return false;
+    }
+      if (verbose) {
+        std::cout << "Did not find " + ast::toString(type) + " " + library + "." + name << std::endl;
+      }
+    return false;
+  }
+
+  
   std::string Database::getParentName() {
     return localDatabase.getParentName();
   }

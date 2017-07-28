@@ -23,6 +23,16 @@ namespace generator {
     }
     return found;
   }
+
+  bool ExpressionParser::exists(ReturnTypePair& pair, std::list<ReturnTypePair>& typePairs) {
+    for (auto& i : typePairs) {
+      if ((i.left.equals(pair.left) && i.right.equals(pair.right)) ||
+          (i.left.equals(pair.right) && i.right.equals(pair.left))) {
+        return true;
+      }
+    }
+    return false;
+  }
   
   bool ExpressionParser::getType(ast::Expression* e,
                                  ast::ObjectValueContainer& expectedType,
@@ -33,6 +43,7 @@ namespace generator {
       if (i.equals(expectedType)) {
         ok = true;
         actualType = i;
+        break;
       }
     }
     if (!ok) {
@@ -41,8 +52,7 @@ namespace generator {
         exceptions.printError("Could not resolve expected type " + expectedType.toString() +
                               ". Found the following types: " + found, e->text);
       } else {
-        exceptions.printError("Expected " + expectedType.toString() +
-                              ", but found " + found, e->text);
+        actualType = o.back();
       }
     }
     return ok;
@@ -297,7 +307,7 @@ namespace generator {
                                                                std::string attributeName) {
     ast::ObjectValueContainer result(ast::UNKNOWN);
     if (!getStaticAttributeType(attributeName, result)) {
-      if (attributeName == "HIGH" || attributeName == "LOW") {
+      if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
         switch(type.value) {
         case ast::INTEGER: result = ast::ObjectValueContainer(ast::INTEGER); break;
         case ast::PHYSICAL: result = ast::ObjectValueContainer(ast::PHYSICAL); break;

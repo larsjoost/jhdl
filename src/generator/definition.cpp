@@ -70,14 +70,6 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
         createProcess(parm,
                       [&](parameters& parm) {
-                        if (method->sensitivity) {
-                          auto s = [&](ast::SimpleIdentifier& name) {
-                            std::string x = name.toString(true);
-                            getObjectName(x, ast::SIGNAL);
-                            return x;
-                          };
-                          printSensitivityListWait(parm, method->sensitivity, s);
-                        }
                         parm.println("// Wait statements goto tree");
 			parm.setArea(parameters::INITIALIZATION);
 			parm.printArea("Process");
@@ -87,7 +79,15 @@ namespace generator {
 			parm.decIndent();
 			parm.println("}");
 			parm.setArea(parameters::IMPLEMENTATION);
-			parm.printArea("Process");
+			if (method->sensitivity) {
+                          auto s = [&](ast::SimpleIdentifier& name) {
+                            std::string x = name.toString(true);
+                            getObjectName(x, ast::SIGNAL);
+                            return x;
+                          };
+                          printSensitivityListWait(parm, method->sensitivity, s);
+                        }
+                        parm.printArea("Process");
 			sequentialStatements(parm, method->sequentialStatements);
                       });
       };

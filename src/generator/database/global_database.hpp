@@ -15,7 +15,7 @@ namespace generator {
     
     Exceptions exceptions;
 
-    std::unordered_map<std::string, std::unordered_map<std::string, LocalDatabase>> map;
+    std::unordered_map<std::string, std::unordered_map<std::string, LocalDatabase>> a_map;
 
     void print(std::unordered_map<std::string, LocalDatabase>& m);
 
@@ -27,6 +27,7 @@ namespace generator {
   public:
     void append(LocalDatabase& d);
     bool find(DatabaseResults& results, std::string& name, std::string package = "", std::string library = "");
+    LocalDatabase* find(std::string& name, std::string& library);
     bool setVisible(std::string name = "", std::string package = "", std::string library = "");
     bool exists(std::string& library, std::string& package);
     void print(std::string name = "");
@@ -36,12 +37,12 @@ namespace generator {
   bool GlobalDatabase::traverse(std::string& package, std::string& library, Func func) {
     bool found = false;
     if (library.empty()) {
-      for (auto& i : map) {
+      for (auto& i : a_map) {
         found |= traverse(i.second, package, func);
       }
     } else {
-      auto i = map.find(library);
-      if (i != map.end()) {
+      auto i = a_map.find(library);
+      if (i != a_map.end()) {
         found |= traverse(i->second, package, func);
       }
     }

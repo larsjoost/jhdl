@@ -17,7 +17,8 @@ namespace generator {
     }
   }
 
-  void SystemC::topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename) {
+  void SystemC::topHierarchyStart(parameters& parm, std::string& library, std::string& name,
+                                  ast::ObjectType type, std::string& filename) {
     if (!parm.isQuiet()) {
       std::string s;
       switch (type) {
@@ -31,7 +32,9 @@ namespace generator {
     }
     database.topHierarchyStart(library, name, type);
     if (verbose) {
-      parm.println("// Hierarchy top start = " + std::to_string(database.getHierarchyLevel()));
+      parm.println("// Hierarchy top start, library = " + library +
+                   ", name = " + name + ", type = " + ast::toString(type) +
+                   ", hierarchy = " + std::to_string(database.getHierarchyLevel()));
     }
   }
   

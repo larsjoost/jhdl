@@ -46,6 +46,8 @@ namespace generator {
                       ast::ProcedureDeclaration* procedures,
                       ast::Text* text = NULL);
 
+    void add(LocalDatabase* other);
+    
     void initialize(std::string& library, std::string& name, ast::ObjectType type);
     std::string getLibrary();
     std::string getName();

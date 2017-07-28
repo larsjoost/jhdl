@@ -24,6 +24,7 @@ namespace ast {
     ObjectValue value;
     std::string typeName;
     ObjectValueContainer* subtype;
+    bool numberEquals(ObjectValue l, ObjectValue r);
     bool equals(ObjectValueContainer& other);
     ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") {
       if (value == BOOLEAN) {
