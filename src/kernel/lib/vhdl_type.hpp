@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <algorithm>
 
 namespace vhdl {
 
@@ -254,9 +255,7 @@ namespace vhdl {
       const static E valueArray;
       const static int CHAR_TRANSLATE_SIZE =  256;
       int* a = new int[CHAR_TRANSLATE_SIZE];
-      for (int i=0; i<CHAR_TRANSLATE_SIZE; i++) {
-        a[i] = -1;
-      }
+      std::fill_n(a, CHAR_TRANSLATE_SIZE, -1);
       for (int i=0; i<valueArray.size; i++) {
         if (valueArray.array[i].c != 0) {
           a[valueArray.array[i].c] = i;

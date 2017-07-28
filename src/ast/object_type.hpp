@@ -56,7 +56,8 @@ namespace ast {
 
   class ObjectArguments {
     bool isInterface;
-    int match(ObjectArguments& interface, ObjectArgument& association, int index);
+    void setDefaultValues(bool m[], ObjectArguments& interface);
+    int match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose);
   public:
     std::list<ObjectArgument> list;
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};

@@ -55,6 +55,7 @@ begin
         ", but expected = " & integer'image(e)
         severity failure;
     end if;
+    report "Simulation done" severity note;
     finish(0);
   end process;
 

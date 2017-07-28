@@ -54,13 +54,17 @@ namespace ast {
     return true;
   }
 
-  int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index) {
+  int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose) {
     auto it = interface.list.begin();
-    // std::cout << "association.name.empty() " << (association.name.empty() ? "true" : "false") << std::endl;
+    if (verbose) {
+      std::cout << "association.name.empty() " << (association.name.empty() ? "true" : "false") << std::endl;
+    }
     if (association.name.empty() && index >= 0 && interface.list.size() > index) {
       std::advance(it, index);
-      // std::cout << "it->type = " + it->type.toString() << std::endl;
-      // std::cout << "association.type = " + association.type.toString() << std::endl;
+      if (verbose) {
+        std::cout << "it->type = " + it->type.toString() << std::endl;
+        std::cout << "association.type = " + association.type.toString() << std::endl;
+      }
       return it->type.equals(association.type) ? index : -1;
     } else {
       for (int i = 0; i < interface.list.size(); i++, it++) {
@@ -72,6 +76,18 @@ namespace ast {
     return -1;
   }
 
+  void ObjectArguments::setDefaultValues(bool m[], ObjectArguments& interface) {
+    int index = 0;
+    for (auto& i : interface.list) {
+      if (i.defaultValue.empty()) {
+        m[index] = false;
+      } else {
+        m[index] = true;
+      }
+      index++;
+    }
+  }
+  
   /*
    *    interface      association       
    *    a : type1      a : type1   
@@ -80,17 +96,23 @@ namespace ast {
    */
   
   bool ObjectArguments::equals(ObjectArguments& other) {
+    bool verbose = false;
     ObjectArguments& interface = isInterface ? *this : other;
     ObjectArguments& association = isInterface ? other : *this;
-    // std::cout << "Interface = " << interface.toString() << std::endl;
-    // std::cout << "Association = " << association.toString() << std::endl;
+    if (verbose) {
+      std::cout << "Interface = " << interface.toString() << std::endl;
+      std::cout << "Association = " << association.toString() << std::endl;
+    }
     int size = interface.list.size();
-    bool m[size] {};
+    bool m[size];
+    setDefaultValues(m, interface);
     int index = 0;
     for (ObjectArgument& a : association.list) {
-      int i = match(interface, a, index);
-      // std::cout << "i = " << std::to_string(i) << std::endl;
-      // std::cout << "index = " << std::to_string(index) << std::endl;
+      int i = match(interface, a, index, verbose);
+      if (verbose) {
+        std::cout << "i = " << std::to_string(i) << std::endl;
+        std::cout << "index = " << std::to_string(index) << std::endl;
+      }
       if (i < 0) {
         return false;
       }

@@ -337,8 +337,8 @@ namespace generator {
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
-        exceptions.printError("Could not find definition of \"" + name + args +
-			      "\" with type " + expectedType.toString(), &identifier->text);
+        exceptions.printError("Could not find definition of " + name + args +
+			      " with type " + expectedType.toString(), &identifier->text);
 	database->printAllObjects(name);
       }
     } 
