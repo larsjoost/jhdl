@@ -15,9 +15,8 @@ namespace generator {
 
   bool SystemC::getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text) {
     bool result = false;
-    auto valid = [&](DatabaseElement* e) { return e->id == id; };
     DatabaseResult object;
-    if (database.findOne(object, name, valid)) {
+    if (database.findOne(object, name, id)) {
       name = object.getName(true, database.getHierarchyLevel());
       type = object.object->type;
       result = true;

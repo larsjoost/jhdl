@@ -33,10 +33,7 @@ namespace generator {
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       DatabaseResult object;
-      auto valid = [&](DatabaseElement* e) {
-        return e->id == ast::SIGNAL;
-      };
-      if (database.findOne(object, name, valid)) {  
+      if (database.findOne(object, name, ast::SIGNAL)) {  
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";

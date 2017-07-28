@@ -113,7 +113,8 @@ namespace generator {
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type);
-    std::string subtypeIndication(parameters& parm, ast::ObjectValueContainer& value, std::string& name, ast::SubtypeIndication* t);
+    std::string subtypeIndication(parameters& parm, DatabaseResult& database_result, std::string& name,
+                                  ast::SubtypeIndication* t, bool& subtype);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);
@@ -304,7 +305,9 @@ namespace generator {
     if (l) {
       bool q = parm.setQuiet(!printEnable);
       for (ast::InterfaceElement i : l->interfaceElements.list) {
-        if (i.object) {objectDeclaration(parm, i.object, callback);}
+        if (i.object) {
+          objectDeclaration(parm, i.object, callback);
+        }
       }
       parm.setQuiet(q);
     }

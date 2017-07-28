@@ -208,11 +208,12 @@ namespace generator {
     functionStart("arrayType");
     assert(t); 
     std::string name = identifier->toString(true);
-    ast::ObjectValueContainer subtypeValue;
-    std::string subtypeName = subtypeIndication(parm, subtypeValue, name, t->type);
+    DatabaseResult database_result;
+    bool subtype;
+    std::string subtypeName = subtypeIndication(parm, database_result, name, t->type, subtype);
     printArrayType(parm, name, t->definition, subtypeName);
     ast::ObjectValueContainer value(ast::ARRAY);
-    value.setSubtype(subtypeValue);
+    value.setSubtype(database_result.object->type);
     functionEnd("arrayType");
     return value;
   }
@@ -356,23 +357,21 @@ namespace generator {
     template<class T = TYPE_T_range>
     using TYPE_T = INTEGER<T>;
   */
-  std::string SystemC::subtypeIndication(parameters& parm, ast::ObjectValueContainer& value,
-                                         std::string& name, ast::SubtypeIndication* t) {
+  std::string SystemC::subtypeIndication(parameters& parm, DatabaseResult& database_result,
+                                         std::string& name, ast::SubtypeIndication* t, bool& subtype) {
     assert(t);
     std::string typeName = t->name->toString(true);
-    auto valid = [&](DatabaseElement* e) {
-      return e->id == ast::TYPE;
-    };
-    DatabaseResult object;
-    if (database.findOne(object, typeName, valid)) { 
-      value = object.object->type;
+    if (database.findOne(database_result, typeName, ast::TYPE)) { 
       if (t->range) {
-        printSubtype(parm, name, t->range, typeName, value);
-        return name;
+        typeName = database.namePrefix(database_result) + typeName;
+        printSubtype(parm, name, t->range, typeName, database_result.object->type);
+        subtype = true;
+        return name + "<>";
       }
     } else {
       exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
     }
+    subtype = false;
     return typeName;
   }
     
@@ -384,17 +383,13 @@ namespace generator {
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-	if (database.globalName(type, ast::TYPE)) {
-	  if (id == ast::SIGNAL) {
-	    type = "sc_signal<" + type + ">";
-	  }
-	  s = type + " " + name;
-	  if (initialization && init.size() > 0) {
-	    s += " = " + init;
-	  }
-	} else {
-	  exceptions.printError("Could not find definition of type " + type);
-	}
+        if (id == ast::SIGNAL) {
+          type = "sc_signal<" + type + ">";
+        }
+        s = type + " " + name;
+        if (initialization && init.size() > 0) {
+          s += " = " + init;
+        }
       };
       objectDeclaration(parm, v, func);
     }
@@ -450,15 +445,13 @@ namespace generator {
       if (interface->ports) {
 	auto func = [&](std::string& type, ast::ObjectType id,
 			ast::ObjectDeclaration::Direction direction) {
-          std::string t = type;
-          database.globalName(t, ast::TYPE);
           switch (direction) {
-	  case ast::ObjectDeclaration::IN: return "sc_in<" + t + ">";
+	  case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
 	  case ast::ObjectDeclaration::OUT: 
 	  case ast::ObjectDeclaration::INOUT: 
-	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + t + ">";
+	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
 	  }
-	  return t;
+	  return type;
 	};
         parm.println("// Ports");
         parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");

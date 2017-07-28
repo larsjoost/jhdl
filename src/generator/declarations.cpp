@@ -29,11 +29,8 @@ namespace generator {
   bool SystemC::findType(ast::SimpleIdentifier* identifier, ast::ObjectValueContainer& type) {
     assert(identifier);
     std::string name = identifier->toString(true);
-    auto valid = [&](DatabaseElement* e) {
-      return e->id == ast::TYPE;
-    };
     DatabaseResult object;
-    if (database.findOne(object, name, valid)) {
+    if (database.findOne(object, name, ast::TYPE)) {
       type = object.object->type;
       return true;
     }
@@ -108,13 +105,7 @@ namespace generator {
 
   std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
     if (interface) {
-      auto func = [&](std::string& type, ast::ObjectType id,
-                      ast::ObjectDeclaration::Direction direction) {
-        std::string s = type;
-        database.globalName(s, ast::TYPE);
-        return s;
-      };
-      return interfaceListToString(parm, interface, ", ", false, func);
+      return interfaceListToString(parm, interface, ", ", false);
     }
     return "";
   }
@@ -275,9 +266,10 @@ namespace generator {
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
       std::string name = t->identifier->toString(true);
-      ast::ObjectValueContainer value;
-      subtypeIndication(parm, value, name, t->type);
-      database.add(ast::TYPE, name, value);
+      DatabaseResult database_result;
+      bool subtype;
+      subtypeIndication(parm, database_result, name, t->type, subtype);
+      database.add(ast::TYPE, name, database_result.object->type);
     }
   }
 

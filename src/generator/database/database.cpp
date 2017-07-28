@@ -3,7 +3,8 @@
 
 namespace generator {
 
-  std::string Database::globalName(DatabaseResult& object, std::string name) {
+  std::string Database::namePrefix(DatabaseResult& object) {
+    std::string prefix;
     if (object.object->sectionName != localDatabase.getName() ||
         object.object->sectionType != localDatabase.getType()) {
       std::string separator1 = "::";
@@ -12,8 +13,13 @@ namespace generator {
 	separator1 = "_";
 	separator2 = ".";
       }
-      name = object.object->library + separator1 + object.object->sectionName + separator2 + name;
+      prefix = object.object->library + separator1 + object.object->sectionName + separator2;
     }
+    return prefix;
+  }
+  
+  std::string Database::globalName(DatabaseResult& object, std::string name) {
+    name = namePrefix(object) + name;
     if (object.object->id == ast::TYPE) {
       name = name + "<>";
     }
@@ -22,11 +28,8 @@ namespace generator {
   
   bool Database::globalName(std::string& name, ast::ObjectType id) {
     bool found = false;
-    auto valid = [&](DatabaseElement* e) {
-      return e->id == id;
-    };
     DatabaseResult object;
-    if (findOne(object, name, valid)) {
+    if (findOne(object, name, id)) {
       found = true;
       name = globalName(object, name);
     } else {
@@ -107,6 +110,14 @@ namespace generator {
     localDatabase.addProcedure(name, arguments, procedures, text);
   }
 
+  bool Database::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type,
+                         std::string package, std::string library) {
+    auto valid = [&](DatabaseElement* e) {
+      return e->id == type;
+    };
+    return findOne(object, name, valid, package, library);
+  }
+  
   void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
     localDatabase.initialize(library, name, type);
     descendHierarchy(name);

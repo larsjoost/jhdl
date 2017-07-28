@@ -251,7 +251,7 @@ namespace vhdl {
   template <typename T, class E, int N>
   struct Enumeration {
     int* char_position_lookup() {
-      E valueArray;
+      const static E valueArray;
       const static int CHAR_TRANSLATE_SIZE =  256;
       int* a = new int[CHAR_TRANSLATE_SIZE];
       for (int i=0; i<CHAR_TRANSLATE_SIZE; i++) {
@@ -297,7 +297,7 @@ namespace vhdl {
     }
 
     std::string toString() {
-      E valueArray;
+      const static E valueArray;
       if (valueArray.array[value].c == 0) {
         return valueArray.array[value].s;
       }
