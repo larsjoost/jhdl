@@ -27,10 +27,11 @@ namespace generator {
       printSourceLine(parm, forGenerateStatement->name);
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
-      database.add(ast::VARIABLE, identifier, ast::INTEGER);
-      auto createDeclaration = [&](parameters& parm) {};
+      auto createDeclaration = [&](parameters& parm) {
+        database.add(ast::VARIABLE, identifier, ast::INTEGER);
+      };
       auto createBody = [&](parameters& parm) {
-	parm.println("INTEGER<> " + identifier + ";");
+      	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
       };
       defineObject(parm, false, name,
                    "SC_FOR_GENERATE",
