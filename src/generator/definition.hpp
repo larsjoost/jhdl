@@ -5,6 +5,7 @@ namespace generator {
 
   template <typename BodyFunc, typename DeclFunc>
   void SystemC::defineObject(parameters& parm,
+                             bool topHierarchy,
                              std::string name,
                              std::string type,
 			     std::string* argument,
@@ -14,13 +15,13 @@ namespace generator {
 			     DeclFunc declarationCallback,
                              std::string* constructor) {
     functionStart("defineObject");
-    descendHierarchy(parm, name);
+    if (!topHierarchy) {descendHierarchy(parm, name);}
     parm.println(type + "(" + name + ") {");
     parm.incIndent();
     parm.println("// Wait is support class of wait statements"); 
     parm.println("Wait w;");
     std::string parentName = database.getParentName();
-    if (parentName.size() > 0) {
+    if (!topHierarchy) {
       parm.println("// p is used to access parent class");
       parm.println(parentName + "* p = NULL;");
     }
@@ -35,10 +36,10 @@ namespace generator {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    createConstructor(parm, name, argument, concurrentStatements, constructor);
+    createConstructor(parm, topHierarchy, name, argument, concurrentStatements, constructor);
     parm.decIndent();
     parm.println("};");
-    ascendHierarchy(parm);
+    if (!topHierarchy) {ascendHierarchy(parm);}
     functionEnd("defineObject");
   }
 

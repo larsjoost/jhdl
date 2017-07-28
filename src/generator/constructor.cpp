@@ -125,7 +125,7 @@ namespace generator {
     return "SC_CTOR(" + name + ")";
   }
 
-  void SystemC::createConstructor(parameters& parm, std::string& name,
+  void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& name,
                                   std::string* argument,
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements,
                                   std::string* constructor) {
@@ -136,13 +136,15 @@ namespace generator {
       parm.decIndent();
     }
     parm.println("}");
-    parm.println(getConstructorDeclaration(parm, name, argument) + " {");
-    parm.incIndent();
-    parm.println("init();");
-    parm.decIndent();
-    parm.println("}");
     if (constructor) {
       parm.println(*constructor);
+    }
+    if (!topHierarchy) {
+      parm.println(getConstructorDeclaration(parm, name, argument) + " {");
+      parm.incIndent();
+      parm.println("init();");
+      parm.decIndent();
+      parm.println("}");
     }
   }
 

@@ -477,7 +477,7 @@ namespace generator {
         }
       }
       std::string constructor = "SC_CTOR(" + name + ") {init();}";
-      defineObject(parm, name, "SC_MODULE", NULL,
+      defineObject(parm, true, name, "SC_MODULE", NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

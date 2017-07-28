@@ -168,6 +168,7 @@ namespace generator {
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
     void defineObject(parameters& parm,
+                      bool topHierarchy,
                       std::string name,
                       std::string type,
 		      std::string* argument,
@@ -203,7 +204,7 @@ namespace generator {
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                               std::string& entityName, std::string& library);
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
-    void createConstructor(parameters& parm, std::string& name,
+    void createConstructor(parameters& parm, bool toopHierarchy, std::string& name,
                            std::string* argument,
                            ast::List<ast::ConcurrentStatement>* concurrentStatements,
                            std::string* constructor);
