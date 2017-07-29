@@ -199,7 +199,7 @@ namespace generator {
   std::string ExpressionParser::parametersToString(ast::ObjectArguments& interface,
                                                    ast::AssociationList* associationList,
                                                    Func sensitivityListCallback) { 
-    debug.functionStart("parametersToString");
+    debug.functionStart("parametersToString", true);
     std::string s = "";
     /*
       Association list can either be:
@@ -220,7 +220,7 @@ namespace generator {
       delimiter = ", ";
       argumentNumber++;
     };
-    debug.functionEnd("parametersToString");
+    debug.functionEnd("parametersToString", true);
     return s;
   }
 
@@ -228,12 +228,24 @@ namespace generator {
   std::string ExpressionParser::objectToString(DatabaseResult& object,
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
-    debug.functionStart("objectToString");
+    debug.functionStart("objectToString", true);
     assert(object.object);
     std::string name = object.getName(true, database->getHierarchyLevel(),
                                       database->getLibrary(), database->getName());
     debug.debug("name = " + name + ": " + object.toString());
-    if (arguments) {
+    if (object.object->type.value == ast::ARRAY) {
+      std::string parameters;
+      if (arguments) {
+        std::string delimiter = "";
+        ast::ObjectValueContainer* subtype = object.object->type.subtype;
+        assert(subtype);
+        for (auto& i : arguments->associationElements.list) {
+          parameters = delimiter + expressionToString(i.actualPart, *subtype, sensitivityListCallback);
+          delimiter = ", ";
+        }
+      }
+      name += "[" + parameters + "]";
+    } else if (arguments) {
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
     } else if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
@@ -288,7 +300,7 @@ namespace generator {
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback) {
-    debug.functionStart("expressionToString");
+    debug.functionStart("expressionToString", true);
     assert(e);
     std::string result;
     if (e->parenthis) {
@@ -307,8 +319,8 @@ namespace generator {
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
-    debug.debug("Result = " + result);
-    debug.functionEnd("expressionToString");
+    debug.debug("Result = " + result, true);
+    debug.functionEnd("expressionToString", true);
     return result;
   }
 

@@ -3,43 +3,37 @@
 int Exceptions::numberOfErrors = 0;
 int Exceptions::numberOfWarnings = 0;
 
-std::string Exceptions::colorCode(int color) {
-  if (colorsSupported) {
-    return "\x1b[" + std::to_string(color) + "m";
-  }
-  return "";
-}
-
 void Exceptions::print(std::string severity, int color, std::string& message, ast::Text* text) {
-  std::cerr << colorCode(color);
-  std::string location = text ?
+  auto func = [&](std::ostream* out) {
+    std::string location = text ?
     (" in " + text->getFilename() + " at " +
      std::to_string(text->getLine()) + ", " +
      std::to_string(text->getColumn())) : ""; 
-  std::cerr << "#" << severity << location << ": " << message << std::endl;
-  if (text) {
-    std::cerr << text->getCurrentLine() << std::endl;
-    std::cerr << text->getCurrentLinePositionMarker() << std::endl;
-  }
-  std::cerr << colorCode(RESET);
+    *out << "#" << severity << location << ": " << message << std::endl;
+    if (text) {
+      *out << text->getCurrentLine() << std::endl;
+      *out << text->getCurrentLinePositionMarker() << std::endl;
+    }
+  };
+  a_output.print(color, func);
 }
 
 void Exceptions::printInternal(std::string message, ast::Text* text) {
-  print("Internal", RED, message, text);
+  print("Internal", Output::RED, message, text);
 }
 
 void Exceptions::printNote(std::string message, ast::Text* text) {
   if (verbose) {
-    print("Note", YELLOW, message, text);
+    print("Note", Output::YELLOW, message, text);
   }
 }
 
 void Exceptions::printError(std::string message, ast::Text* text) {
   numberOfErrors++;
-  print("Error", RED, message, text);
+  print("Error", Output::RED, message, text);
 }
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
   numberOfWarnings++;
-  print("Warning", BLUE, message, text);
+  print("Warning", Output::BLUE, message, text);
 }

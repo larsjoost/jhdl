@@ -320,7 +320,8 @@ namespace generator {
    * using TYPE_T = Array<TYPE_T_type, T>;
   */
   
-  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type) {
+  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r,
+                             std::string typeName, ast::ObjectValueContainer& type) {
     std::string left, right;
     rangeToString(r, left, right, type);
     std::string rangeName = name + "_range";
@@ -364,11 +365,10 @@ namespace generator {
     assert(t);
     std::string typeName = t->name->toString(true);
     if (database.findOne(database_result, typeName, ast::TYPE)) { 
+      typeName = database.namePrefix(database_result) + typeName;
       if (t->range) {
-        typeName = database.namePrefix(database_result) + typeName;
         printSubtype(parm, name, t->range, typeName, database_result.object->type);
-        return database.globalName(database_result, name);
-      }
+      } 
     } else {
       exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
     }
@@ -381,11 +381,14 @@ namespace generator {
                                                  bool initialization) {
     std::string s = "";
     if (v) {
+      debug.functionStart("objectDeclarationToString");
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
         if (id == ast::SIGNAL) {
           type = "sc_signal<" + type + ">";
+        } else {
+          type += "<>";
         }
         s = type + " " + name;
         if (initialization && init.size() > 0) {
@@ -393,6 +396,7 @@ namespace generator {
         }
       };
       objectDeclaration(parm, v, func);
+      debug.functionEnd("objectDeclarationToString");
     }
     return s;
   }

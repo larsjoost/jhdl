@@ -268,6 +268,16 @@ namespace vhdl {
       static int* l = char_position_lookup();
       return l[(int)c];
     }
+
+  protected:
+    void set(char c) {
+      if (char_position(c) < 0) {
+        std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
+      } else {
+        value = char_position(c);
+      }
+    }
+    
   public:
     int value = 0;
 
@@ -276,13 +286,20 @@ namespace vhdl {
     }
   
     void operator=(char c) {
-      if (char_position(c) < 0) {
-        std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
-      } else {
-        value = char_position(c);
-      }
+      set(c);
+    }
+
+    bool operator!=(char c) {
+      Enumeration<T, E, N> other;
+      other.set(c);
+      return value != other.value;
     }
     
+    bool operator==(char c) {
+      Enumeration<T, E, N> other = c;
+      return value == other.value;
+    }
+
     void operator=(bool v) {
       value = v ? (T)1 : (T)0;
     }
