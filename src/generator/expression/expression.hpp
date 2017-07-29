@@ -6,6 +6,7 @@
 
 #include "../../ast/object_type.hpp"
 #include "../../exceptions/exceptions.hpp"
+#include "../../debug/debug.hpp"
 #include "../database/database.hpp"
 
 namespace generator {
@@ -14,12 +15,9 @@ namespace generator {
 
     bool verbose = false;
     Database* database;
-
-    void functionStart(std::string name);
-    void functionEnd(std::string name);
-
     Exceptions exceptions;
-
+    Debug debug = Debug("ExpressionParser", false);
+    
     struct ReturnTypePair {
       ast::ObjectValueContainer left;
       ast::ObjectValueContainer right;
@@ -44,6 +42,10 @@ namespace generator {
     ReturnTypes attributeReturnTypes(std::string& name, std::string& attribute, ast::AssociationList* associationList);
     
     // Second-pass functions 
+    template <typename Func>
+    std::string operationToString(ast::Expression* e,
+                                  ast::ObjectValueContainer& expectedType,
+                                  Func sensitivityListCallback);
     template <typename Func>
     std::string expressionToString(ast::Expression* e,
                                    ast::ObjectValueContainer& expectedType,
@@ -96,6 +98,9 @@ namespace generator {
 
     bool exists(ReturnTypePair& pair, std::list<ReturnTypePair>& typePairs);
     
+    bool objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
+                             ast::ObjectValueContainer* expectedReturnType = NULL);
+
   public:
 
     ExpressionParser(Database* database, bool verbose = false) : database(database) {
@@ -125,13 +130,13 @@ namespace generator {
   std::string ExpressionParser::toString(ast::Expression* e,
                                          ast::ObjectValueContainer& expectedType,
                                          Func sensitivityListCallback) {
-    functionStart("toString");
+    debug.functionStart("toString");
     // First-pass: Collect the possible return types
     ast::ObjectValueContainer actualType;
     getType(e, expectedType, actualType);
     // Second-pass: Resolve the return type and convert to string
     std::string s = expressionToString(e, actualType, sensitivityListCallback);
-    functionEnd("toString");
+    debug.functionEnd("toString");
     return s;
   }
 
@@ -139,10 +144,10 @@ namespace generator {
   std::string ExpressionParser::toString(ast::Expression* expr,
                                          ast::ObjectValue expectedType,
                                          Func sensitivityListCallback) {
-    functionStart("toString");
+    debug.functionStart("toString");
     ast::ObjectValueContainer e(expectedType);
     std::string s = toString(expr, e, sensitivityListCallback);
-    functionEnd("toString");
+    debug.functionEnd("toString");
     return s;
   }
     
@@ -163,24 +168,30 @@ namespace generator {
                                                   int argumentNumber,
                                                   ast::AssociationList* l,
                                                   Func sensitivityListCallback) { 
-    functionStart("associateArgument");
+    debug.functionStart("associateArgument");
     std::string argument = interfaceElement.defaultValue;
     if (l) {
       int associationElementNumber = 0;
       for (auto& e : l->associationElements.list) {
         std::string actualPart = expressionToString(e.actualPart, interfaceElement.type, sensitivityListCallback);
+        debug.debug("Actual part = " + actualPart);
         if (e.formalPart) {
           std::string formalPart = e.formalPart->toString(true);
+          debug.debug("Formal part = " + formalPart + ", interface element = " + interfaceElement.name);
           if (formalPart == interfaceElement.name) {
-            return actualPart;
+            argument = actualPart;
+            break;
           }
         } else if (associationElementNumber == argumentNumber) {
-          return actualPart;
+          debug.debug("Association number " + std::to_string(associationElementNumber) + " match");
+          argument = actualPart;
+          break;
         }
         associationElementNumber++;
       }
     }
-    functionEnd("associateArgument");
+    debug.debug("Result = " + argument);
+    debug.functionEnd("associateArgument");
     return argument;
   }
 
@@ -188,13 +199,15 @@ namespace generator {
   std::string ExpressionParser::parametersToString(ast::ObjectArguments& interface,
                                                    ast::AssociationList* associationList,
                                                    Func sensitivityListCallback) { 
-    functionStart("parametersToString");
+    debug.functionStart("parametersToString");
     std::string s = "";
     /*
       Association list can either be:
       func(formalPart => actualPart, a => w, b => x, c => y)
       or
       func(actualPart, w, x, y)
+      or array
+      a(0)
     */
     std::string delimiter = "";
     int argumentNumber = 0;
@@ -207,7 +220,7 @@ namespace generator {
       delimiter = ", ";
       argumentNumber++;
     };
-    functionEnd("parametersToString");
+    debug.functionEnd("parametersToString");
     return s;
   }
 
@@ -215,29 +228,67 @@ namespace generator {
   std::string ExpressionParser::objectToString(DatabaseResult& object,
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
-    functionStart("objectToString");
+    debug.functionStart("objectToString");
     assert(object.object);
     std::string name = object.getName(true, database->getHierarchyLevel(),
                                       database->getLibrary(), database->getName());
-    if (verbose) {
-      std::cout << "name = " << name << ": " << object.toString() << std::endl;
-    }
+    debug.debug("name = " + name + ": " + object.toString());
     if (arguments) {
-      assert(object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE);
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
     } else if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
       name += "()";
     }
-    functionEnd("objectToString");
+    debug.functionEnd("objectToString");
     return name;
   }
 
   template <typename Func>
+  std::string ExpressionParser::operationToString(ast::Expression* e,
+                                                  ast::ObjectValueContainer& expectedType,
+                                                  Func sensitivityListCallback) {
+    debug.functionStart("operationToString");
+    std::string result;
+    std::list<ReturnTypePair> typePairs;
+    for (auto& i : e->term->returnTypes) {
+      for (auto& j : e->expression->returnTypes) {
+        ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
+        for (auto& x : t) {
+          if (x.equals(expectedType)) {
+            ReturnTypePair pair = {i, j};
+            if (!exists(pair, typePairs)) {
+              typePairs.push_back(pair);
+            }
+          }
+        }
+      }
+    }
+    if (typePairs.size() != 1) {
+      exceptions.printError("Cound not resolve expected type " + expectedType.toString(), e->text);
+      if (typePairs.empty()) {
+        std::cerr << "Did not find anything" << std::endl;
+      } else {
+        std::cerr << "Found the following types:" << std::endl;
+        for (auto& i : typePairs) {
+          std::cerr << i.left.toString() + " " + e->op->op + " " + i.right.toString() + " = " + expectedType.toString() << std::endl;
+        }
+      }
+    } else {
+      std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback);
+      std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback);
+      std::string op;
+      translateOperator(e->op->op, op);
+      result = term + " " + op + " " + expr;
+    }
+    debug.functionEnd("operationToString");
+    return result;
+  }
+  
+  template <typename Func>
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback) {
-    functionStart("expressionToString");
+    debug.functionStart("expressionToString");
     assert(e);
     std::string result;
     if (e->parenthis) {
@@ -252,41 +303,12 @@ namespace generator {
       }
       result = op + expr;
     } else if (e->op) {
-      std::list<ReturnTypePair> typePairs;
-      for (auto& i : e->term->returnTypes) {
-        for (auto& j : e->expression->returnTypes) {
-          ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
-          for (auto& x : t) {
-            if (x.equals(expectedType)) {
-              ReturnTypePair pair = {i, j};
-              if (!exists(pair, typePairs)) {
-                typePairs.push_back(pair);
-              }
-            }
-          }
-        }
-      }
-      if (typePairs.size() != 1) {
-        exceptions.printError("Cound not resolve expected type " + expectedType.toString(), e->text);
-        if (typePairs.empty()) {
-          std::cerr << "Did not find anything" << std::endl;
-        } else {
-          std::cerr << "Found the following types:" << std::endl;
-          for (auto& i : typePairs) {
-            std::cerr << i.left.toString() + " " + e->op->op + " " + i.right.toString() + " = " + expectedType.toString() << std::endl;
-          }
-        }
-      } else {
-        std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback);
-        std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback);
-        std::string op;
-        translateOperator(e->op->op, op);
-        result = term + " " + op + " " + expr;
-      }
+      result = operationToString(e, expectedType, sensitivityListCallback);
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
-    functionEnd("expressionToString");
+    debug.debug("Result = " + result);
+    debug.functionEnd("expressionToString");
     return result;
   }
 
@@ -294,46 +316,51 @@ namespace generator {
   std::string ExpressionParser::expressionTermToString(ast::ExpressionTerm* e,
                                                        ast::ObjectValueContainer& expectedType,
                                                        Func sensitivityListCallback) {
+    std::string result = "";
     if (e) {
+      debug.functionStart("expressionTermToString");
       if (e->physical) {
-        return physicalToString(e->physical);
+        debug.debug("Physical");
+        result = physicalToString(e->physical);
+      } else if (e->number) {
+        debug.debug("Number");
+        result = e->number->toString();
+      } else if (e->string) {
+        debug.debug("String");
+        result = e->string->toString();
+      } else if (e->identifier) {
+        result = basicIdentifierToString(e->identifier, expectedType, sensitivityListCallback);
+      } else if (e->character) {
+        debug.debug("Character");
+        result = e->character->toString();
+      } else {
+        assert(false);
       }
-      if (e->number) {
-        return e->number->toString();
-      }
-      if (e->string) {
-        return e->string->toString();
-      }
-      if (e->identifier) {
-        return basicIdentifierToString(e->identifier, expectedType, sensitivityListCallback);
-      }
-      if (e->character) {
-        return e->character->toString();
-      }
+      debug.functionEnd("expressionTermToString");
     }
-    return "";
+    return result;
   }
 
   template <typename Func>
   std::string ExpressionParser::basicIdentifierToString(ast::BasicIdentifier* identifier,
                                                         ast::ObjectValueContainer& expectedType,
                                                         Func sensitivityListCallback) {
-    // functionStart("basicIdentifierToString");
+    debug.functionStart("basicIdentifierToString");
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
     if (identifier->attribute) {
-      return attributeToString(name, arguments, expectedType, identifier->attribute,
+      name = attributeToString(name, arguments, expectedType, identifier->attribute,
                                identifier->arguments, sensitivityListCallback);
     } else {
       auto valid = [&](DatabaseElement* e) {
-        return (e->arguments.equals(arguments) && e->type.equals(expectedType)) ? true : false;
+        return objectWithArguments(e, arguments, &expectedType);
       };
       DatabaseResult object;
       if (database->findOne(object, name, valid)) {
         if (object.object->id == ast::SIGNAL) {
           sensitivityListCallback(object);
         }
-        return objectToString(object, identifier->arguments, sensitivityListCallback);
+        name = objectToString(object, identifier->arguments, sensitivityListCallback);
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
@@ -342,7 +369,7 @@ namespace generator {
 	database->printAllObjects(name);
       }
     } 
-    // functionEnd("basicIdentifierToString");
+    debug.functionEnd("basicIdentifierToString");
     return name;
   }
 

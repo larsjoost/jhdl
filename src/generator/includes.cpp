@@ -8,7 +8,7 @@ namespace generator {
   void SystemC::loadPackage(std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
-    functionStart("loadPackage(library = " + library + ", name = " + package + ")");
+    debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")");
     bool packageExists = database.exists(library, package);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
@@ -23,12 +23,12 @@ namespace generator {
     } else {
       exceptions.printError("Did not find package " + package + " in library " + library, text);
     }
-    functionEnd("loadPackage");
+    debug.functionEnd("loadPackage");
   }
   
   void SystemC::includes(parameters& parm, ast::ContextClause* contextClause, bool load) {
     if (contextClause) {
-      functionStart("includes");
+      debug.functionStart("includes");
       for (ast::UseClause& useClause : contextClause->useClauses.list) {
         assert (useClause.package);
         assert (useClause.library);
@@ -46,7 +46,7 @@ namespace generator {
 	  parm.println("#include \"" + p + ".hpp\"");
 	}
       }
-      functionEnd("includes");
+      debug.functionEnd("includes");
     }    
   }
 

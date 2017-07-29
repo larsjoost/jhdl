@@ -7,15 +7,15 @@ namespace generator {
 
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
                                 std::string arguments) {
-    functionStart("instantiateType");
+    debug.functionStart("instantiateType");
     parm.println(type + "(new " + name + "(this" + arguments + "));");
-    functionEnd("instantiateType");
+    debug.functionEnd("instantiateType");
   }
 
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
     if (method) {
       if (parm.area == parameters::IMPLEMENTATION) {
-        functionStart("methodInstantiation");
+        debug.functionStart("methodInstantiation");
         std::string methodName;
         if (method->label) {
           methodName = method->label->toString(true);
@@ -23,7 +23,7 @@ namespace generator {
           methodName = method->noname;
         }
         instantiateType(parm, "SC_NEW_THREAD", methodName);
-        functionEnd("methodInstantiation");
+        debug.functionEnd("methodInstantiation");
       }
     }
   }
@@ -31,9 +31,9 @@ namespace generator {
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
       if (parm.area == parameters::IMPLEMENTATION) {
-        functionStart("signalInstantiation");
+        debug.functionStart("signalInstantiation");
         instantiateType(parm, "SC_NEW_THREAD", s->name);
-        functionEnd("signalInstantiation");
+        debug.functionEnd("signalInstantiation");
       }
     }
   }
@@ -42,9 +42,9 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
       if (parm.area == parameters::IMPLEMENTATION) {
-        functionStart("blockStatementInstantiation");
+        debug.functionStart("blockStatementInstantiation");
         instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
-        functionEnd("blockStatementInstantiation");
+        debug.functionEnd("blockStatementInstantiation");
       }
     }
   }
@@ -113,7 +113,7 @@ namespace generator {
   
   void SystemC::concurrentStatementsInstantiation(parameters& parm,
                                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    functionStart("concurrentStatementsInstantiation");
+    debug.functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodInstantiation(parm, c.method);
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);

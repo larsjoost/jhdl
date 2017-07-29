@@ -11,6 +11,7 @@
 #include "database/database.hpp"
 
 #include "../exceptions/exceptions.hpp"
+#include "../debug/debug.hpp"
 
 #include "../ast/text.hpp"
 #include "../ast/design_file.hpp"
@@ -50,16 +51,13 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
+    Debug debug = Debug("SystemC", true);
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     
     bool verbose = false;
 
     std::string filename;
-
-    // Defined in general.cpp
-    void functionStart(std::string name);
-    void functionEnd(std::string name);
 
     parameters headerParameters;
     parameters sourceParameters;
@@ -114,7 +112,7 @@ namespace generator {
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type);
     std::string subtypeIndication(parameters& parm, DatabaseResult& database_result, std::string& name,
-                                  ast::SubtypeIndication* t, bool& subtype);
+                                  ast::SubtypeIndication* t);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);
@@ -302,7 +300,7 @@ namespace generator {
 
   template<typename Func>
   void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback) {
-    functionStart("traverseInterfaceList");
+    debug.functionStart("traverseInterfaceList");
     if (l) {
       bool q = parm.setQuiet(!printEnable);
       for (ast::InterfaceElement i : l->interfaceElements.list) {
@@ -312,7 +310,7 @@ namespace generator {
       }
       parm.setQuiet(q);
     }
-    functionEnd("traverseInterfaceList");
+    debug.functionEnd("traverseInterfaceList");
   }
 
 

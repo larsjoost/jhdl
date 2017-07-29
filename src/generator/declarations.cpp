@@ -8,7 +8,7 @@ namespace generator {
 
    void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
      if (t) {
-       functionStart("type_declarations");
+       debug.functionStart("type_declarations");
        assert(t->typeDefinition);
        std::string name = t->identifier->toString(true);
        ast::ObjectValueContainer value;
@@ -22,7 +22,7 @@ namespace generator {
          assert(false);
        }
        database.add(ast::TYPE, name, value);
-       functionEnd("type_declarations");
+       debug.functionEnd("type_declarations");
      }
   }
 
@@ -142,7 +142,7 @@ namespace generator {
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
                                       bool implementation) {
     if (f) {
-      functionStart("function_declarations");
+      debug.functionStart("function_declarations");
       bool operatorName = (f->name == NULL);
       ast::Text& text = operatorName ? f->string->text : f->name->text;
       std::string name;
@@ -187,14 +187,14 @@ namespace generator {
         database.addFunction(name, arguments, returnType, f);
         parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
-      functionEnd("function_declarations");
+      debug.functionEnd("function_declarations");
     }
   }
 
   void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
                                       bool implementation) {
     if (f) {
-      functionStart("procedure_declarations");
+      debug.functionStart("procedure_declarations");
       printSourceLine(parm, f->name->text);
       std::string name = f->name->toString(true);
       ast::ObjectArguments arguments(true);
@@ -221,29 +221,29 @@ namespace generator {
         database.addProcedure(name, arguments, f);
         parm.println("void " + name + interface + ";");
       }
-      functionEnd("procedure_declarations");
+      debug.functionEnd("procedure_declarations");
     }
     }
 
   void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
     assert(f);
-    functionStart("function_body");
+    debug.functionStart("function_body");
     declarations(parm, f->declarations);
     sequentialStatements(parm, f->sequentialStatements);
-    functionEnd("function_body");
+    debug.functionEnd("function_body");
   }
   
   void SystemC::procedure_body(parameters& parm, ast::ProcedureBody* f) {
     assert(f);
-    functionStart("procedure_body");
+    debug.functionStart("procedure_body");
     declarations(parm, f->declarations);
     sequentialStatements(parm, f->sequentialStatements);
-    functionEnd("procedure_body");
+    debug.functionEnd("procedure_body");
   }
   
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
-      functionStart("attribute_declarations");
+      debug.functionStart("attribute_declarations");
       if (a->item || a->string) {
 	ast::Text* text = a->item ? &a->item->text : &a->string->text;
 	std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
@@ -252,7 +252,7 @@ namespace generator {
 	ast::ObjectType id = a->objectType;
 	database.addAttribute(name, arguments, id, a, text);
       }
-      functionEnd("attribute_declarations");
+      debug.functionEnd("attribute_declarations");
     }
   }
       /*
@@ -267,15 +267,14 @@ namespace generator {
     if (t) {
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
-      bool subtype;
-      subtypeIndication(parm, database_result, name, t->type, subtype);
+      subtypeIndication(parm, database_result, name, t->type);
       database.add(ast::TYPE, name, database_result.object->type);
     }
   }
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
                              bool implementation) {
-    functionStart("declarations");
+    debug.functionStart("declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       subtype_declarations(parm, i.subtype);
@@ -286,7 +285,7 @@ namespace generator {
       procedure_declarations(parm, i.procedure, implementation);
       attribute_declarations(parm, i.attribute);
     }
-    functionEnd("declarations");
+    debug.functionEnd("declarations");
   }
 
 }

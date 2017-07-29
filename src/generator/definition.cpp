@@ -8,7 +8,7 @@ namespace generator {
 
   void SystemC::blockStatementDefinition(parameters& parm,
                                          ast::BlockStatement* blockStatement) {
-    functionStart("blockStatementDefinition");
+    debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
       printSourceLine(parm, blockStatement->name);
       std::string name = blockStatement->name->toString(true);
@@ -54,7 +54,7 @@ namespace generator {
   }
   
   void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
-    functionStart("methodDefinition");
+    debug.functionStart("methodDefinition");
     if (method) {
       std::string methodName;
       if (method->label) {
@@ -94,13 +94,13 @@ namespace generator {
       defineObject(parm, false, methodName, "SC_THREAD", NULL,
                    &method->declarations, NULL, createBody, createDefinition);
     }
-    functionEnd("methodDefinition");
+    debug.functionEnd("methodDefinition");
   }
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
     
     if (s) {
-      functionStart("concurrentSignalAssignment");
+      debug.functionStart("concurrentSignalAssignment");
       std::string name;
       if (s->label) {
         name = s->label->toString(true);
@@ -134,20 +134,20 @@ namespace generator {
         defineObject(parm, false, name, "SC_THREAD", NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {});
       }
-      functionEnd("concurrentSignalAssignment");
+      debug.functionEnd("concurrentSignalAssignment");
     }
   }
   
   void SystemC::concurrentStatementsDefinition(parameters& parm,
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    functionStart("concurrentStatementsDefinition");
+    debug.functionStart("concurrentStatementsDefinition");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       methodDefinition(parm, c.method);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
       concurrentSignalAssignment(parm, c.signalAssignment);
     }
-    functionEnd("concurrentStatementsDefinition");
+    debug.functionEnd("concurrentStatementsDefinition");
   }
 
 

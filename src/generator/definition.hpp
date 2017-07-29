@@ -14,7 +14,7 @@ namespace generator {
                              BodyFunc bodyCallback,
 			     DeclFunc declarationCallback,
                              std::string* constructor) {
-    functionStart("defineObject");
+    debug.functionStart("defineObject");
     if (!topHierarchy) {descendHierarchy(parm, name);}
     parm.println(type + "(" + name + ") {");
     parm.incIndent();
@@ -40,7 +40,7 @@ namespace generator {
     parm.decIndent();
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
-    functionEnd("defineObject");
+    debug.functionEnd("defineObject");
   }
 
   template<typename Func>

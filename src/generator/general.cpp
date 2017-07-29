@@ -4,19 +4,6 @@
 
 namespace generator {
 
-
-  void SystemC::functionStart(std::string name) {
-    if (verbose) {
-      std::cout << std::endl << "[FUNCTION START] SystemC." << name << std::endl;
-    }
-  }
-
-  void SystemC::functionEnd(std::string name) {
-    if (verbose) {
-      std::cout << std::endl << "[FUNCTION END] SystemC." << name << std::endl;
-    }
-  }
-
   void SystemC::topHierarchyStart(parameters& parm, std::string& library, std::string& name,
                                   ast::ObjectType type, std::string& filename) {
     if (!parm.isQuiet()) {

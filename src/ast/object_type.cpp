@@ -41,17 +41,20 @@ namespace ast {
   
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
     bool verbose = false;
+    bool result;
+    if (numberEquals(value, other.value) || numberEquals(other.value, value)) {
+      result = true;
+    } else if (value != other.value) {
+      result = false;
+    } else if (value == USER_TYPE || value == ENUMERATION) {
+      result = (typeName == other.typeName);
+    } else {
+      result = true;
+    }
     if (verbose) {
-      std::cout << "this = " + toString() << std::endl;
-      std::cout << "other = " + other.toString() << std::endl;
+      std::cout << "ObjectValueContainer::equals: " << toString() << (result ? " == " : " != ") << other.toString() << std::endl;
     }
-    if (numberEquals(value, other.value)) return true;
-    if (numberEquals(other.value, value)) return true;
-    if (value != other.value) return false;
-    if (value == USER_TYPE || value == ENUMERATION) {
-      return typeName == other.typeName;
-    }
-    return true;
+    return result;
   }
 
   int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose) {

@@ -137,6 +137,21 @@ namespace generator {
     return findOne(object, name, valid, package, library);
   }
   
+  bool Database::findOne(DatabaseResult& object, std::string& name, 
+                         std::string package, std::string library) {
+    auto valid = [&](DatabaseElement* e) {
+      return true;
+    };
+    return findOne(object, name, valid, package, library);
+  }
+
+  void Database::findAll(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
+    auto valid = [&](DatabaseElement* e) {
+      return true;
+    };
+    return findAll(objects, name, valid, package, library);
+  }
+
   void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
     localDatabase.initialize(library, name, type);
     descendHierarchy(name);

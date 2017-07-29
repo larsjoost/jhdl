@@ -19,7 +19,7 @@ namespace generator {
   }
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
-    functionStart("SystemC");
+    debug.functionStart("SystemC");
     filename = designFile.filename;
     parameters parm;
     parm.open(filename); 
@@ -72,7 +72,7 @@ namespace generator {
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
-    functionStart("parse(library = " + library + ")");
+    debug.functionStart("parse(library = " + library + ")");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
     }
@@ -90,11 +90,11 @@ namespace generator {
       implementationDeclaration(parm, it.module.implementation, library);
     }
     namespaceEnd(parm);
-    functionEnd("parse");
+    debug.functionEnd("parse");
   }
 
   void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
-    functionStart("parsePackage(library = " + library + ", name = " + name + ")");
+    debug.functionStart("parsePackage(library = " + library + ", name = " + name + ")");
     std::string stdPath = (library == "WORK") ? "." : config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
@@ -117,7 +117,7 @@ namespace generator {
     } else {
       exceptions.printError("Could not find library \"" + library + "\" is [hdl] section of config file");
     }
-    functionEnd("parsePackage");
+    debug.functionEnd("parsePackage");
   }
   
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
@@ -205,16 +205,15 @@ namespace generator {
     type b_t is array (3 downto -4) of bit;
   */
   ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
-    functionStart("arrayType");
+    debug.functionStart("arrayType");
     assert(t); 
     std::string name = identifier->toString(true);
     DatabaseResult database_result;
-    bool subtype;
-    std::string subtypeName = subtypeIndication(parm, database_result, name, t->type, subtype);
+    std::string subtypeName = subtypeIndication(parm, database_result, name, t->type);
     printArrayType(parm, name, t->definition, subtypeName);
     ast::ObjectValueContainer value(ast::ARRAY);
     value.setSubtype(database_result.object->type);
-    functionEnd("arrayType");
+    debug.functionEnd("arrayType");
     return value;
   }
 
@@ -336,6 +335,7 @@ namespace generator {
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
+    debug.functionStart("printArrayType");
     assert(r);
     if (r->range) {
       std::string left, right;
@@ -346,6 +346,7 @@ namespace generator {
       std::string id = r->subtype->identifier->toString(true);
       parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + "<>);");
     }
+    debug.functionEnd("printArrayType");
   }
   
   /*
@@ -358,20 +359,20 @@ namespace generator {
     using TYPE_T = INTEGER<T>;
   */
   std::string SystemC::subtypeIndication(parameters& parm, DatabaseResult& database_result,
-                                         std::string& name, ast::SubtypeIndication* t, bool& subtype) {
+                                         std::string& name, ast::SubtypeIndication* t) {
+    debug.functionStart("subtypeIndication");
     assert(t);
     std::string typeName = t->name->toString(true);
     if (database.findOne(database_result, typeName, ast::TYPE)) { 
       if (t->range) {
         typeName = database.namePrefix(database_result) + typeName;
         printSubtype(parm, name, t->range, typeName, database_result.object->type);
-        subtype = true;
-        return name + "<>";
+        return database.globalName(database_result, name);
       }
     } else {
       exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
     }
-    subtype = false;
+    debug.functionEnd("subtypeIndication");
     return typeName;
   }
     
@@ -408,7 +409,7 @@ namespace generator {
     if (package) {
       std::string name = package->name->toString(true);
       ast::ObjectType type = package->body ? ast::PACKAGE_BODY : ast::PACKAGE;
-      functionStart("packageDeclaration(library = " + library +
+      debug.functionStart("packageDeclaration(library = " + library +
 		    ", packet = " + name + ", type = " + toString(type) + ")");
       topHierarchyStart(parm, library, name, type, filename);
       if (type == ast::PACKAGE) {
@@ -424,13 +425,13 @@ namespace generator {
 	parm.selectFile(file_select);
       }
       topHierarchyEnd(parm, (type == ast::PACKAGE));
-      functionEnd("packageDeclaration");
+      debug.functionEnd("packageDeclaration");
     }
   }
 
   void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {
     if (interface) {
-      functionStart("interfaceDeclaration");
+      debug.functionStart("interfaceDeclaration");
       std::string name = interface->name->toString(true);
       const ast::ObjectType type = ast::ENTITY;
       topHierarchyStart(parm, library, name, type, filename);
@@ -459,13 +460,13 @@ namespace generator {
       parm.decIndent();
       parm.println("};");
       topHierarchyEnd(parm, true);
-      functionEnd("interfaceDeclaration");
+      debug.functionEnd("interfaceDeclaration");
     }
   }
 
   void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
-      functionStart("implementationDeclaration");
+      debug.functionStart("implementationDeclaration");
       std::string name = implementation->name->toString(true);
       const ast::ObjectType type = ast::ARCHITECTURE;
       topHierarchyStart(parm, library, name, type, filename);
@@ -484,7 +485,7 @@ namespace generator {
 		   [&](parameters& parm){},
                    &constructor);
       topHierarchyEnd(parm, false);
-      functionEnd("implementationDeclaration");
+      debug.functionEnd("implementationDeclaration");
     }
   }
 

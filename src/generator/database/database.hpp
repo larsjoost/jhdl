@@ -49,8 +49,10 @@ namespace generator {
     template<typename Func>
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
+    bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
+    void findAll(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
 
     bool localize(std::string& library, std::string& name, ast::ObjectType type);

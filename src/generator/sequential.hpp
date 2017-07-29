@@ -29,7 +29,7 @@ namespace generator {
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
     if (p) {
-      functionStart("signalAssignment");
+      debug.functionStart("signalAssignment");
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       DatabaseResult object;
@@ -62,7 +62,7 @@ namespace generator {
         exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
 	database.printAllObjects(name);
       }
-      functionEnd("signalAssignment");
+      debug.functionEnd("signalAssignment");
     }
   }
 }
