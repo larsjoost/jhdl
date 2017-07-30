@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <exception>
 
+#include "omp.h"
+
 #include "systemc.h"
 
 sc_now_t sc_now = {0, SC_NS};
@@ -81,13 +83,17 @@ void sc_start(int runs) {
     if (verbose) {std::cout << "[MAIN] delta cycle = " << deltaCycle << ", sc_now = " << sc_now.toString() << std::endl;}
     do {
       methodEvent = false;
-      int i = 0;
-      for (auto t : methods) {
-	t->process();
-	if (verbose) {std::cout << "Methond " << i++ << std::endl;}
+      unsigned int i;
+      unsigned int size;
+      size = methods.size();
+#pragma omp parallel for        
+      for (i = 0; i < size; i++) {
+        methods[i]->process();
       }
-      for (auto t : signals) {
-        t->latchValue();
+      size = signals.size();
+#pragma omp parallel for        
+      for (i = 0; i < size; i++) {
+        signals[i]->latchValue();
       }
       deltaCycle++;
     } while (methodEvent);

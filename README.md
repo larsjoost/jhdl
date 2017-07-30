@@ -39,6 +39,8 @@ Regression tests are located in ./testsuite
 TODO:
 
 * Basic VHDL syntax
-* Implement foreign calls
 * Generation of makefiles
-* Error/warning color codes
+* Class enums
+* Function and procedure calls as classes
+* Implemented OpenMP support
+* Changed jhdl name to chdl
