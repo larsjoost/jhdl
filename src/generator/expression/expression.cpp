@@ -87,25 +87,26 @@ namespace generator {
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
     static ast::ObjectValueContainer arrayType(ast::ARRAY);
-    bool result = false;
-    if (e->id == ast::FUNCTION && e->arguments.equals(arguments)) {
-      result = true;
-    } else if (e->type.equals(arrayType)) {
-      // TODO: Check argumentsreturn true;}
-      result = true;
-    }
-    ast::ObjectValueContainer* type;
-    bool return_type_ok = true;
-    if (expectedReturnType) {
-      if (e->type.subtype) {
-        type = e->type.subtype;
+    bool result;
+    if (e->id == ast::FUNCTION && !e->arguments.equals(arguments)) {
+      result = false;
+    } else {
+      // TODO: Check Array arguments
+      if (expectedReturnType) {
+        ast::ObjectValueContainer* type;
+        if (e->type.equals(arrayType)) {
+          type = e->type.subtype;
+        } else {
+          type = &e->type;
+        }
+        assert(type);
+        result = type->equals(*expectedReturnType); 
+        debug.debug("Return type " + type->toString() + (result ? " == " : " != ") +
+                    expectedReturnType->toString());
       } else {
-        type = &e->type;
+        result = true;
       }
-      return_type_ok = type->equals(*expectedReturnType); 
-      debug.debug("Return type " + type->toString() + (return_type_ok ? " == " : " != ") + expectedReturnType->toString());
     }
-    result &= return_type_ok;
     debug.debug("e = " + e->toString() + ", result = " + (result ? "true" : "false"));
     debug.functionEnd("objectWithArguments");
     return result;

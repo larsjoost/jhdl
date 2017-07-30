@@ -295,7 +295,7 @@ namespace vhdl {
       return value != other.value;
     }
     
-    bool operator==(char c) {
+    bool operator==(char c) const {
       Enumeration<T, E, N> other = c;
       return value == other.value;
     }

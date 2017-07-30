@@ -342,10 +342,10 @@ namespace generator {
       std::string left, right;
       ast::ObjectValueContainer type(ast::INTEGER);
       rangeToString(r->range, left, right, type);
-      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + "<>);");
+      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
     } else if (r->subtype) {
       std::string id = r->subtype->identifier->toString(true);
-      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + "<>);");
+      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
     }
     debug.functionEnd("printArrayType");
   }
@@ -368,7 +368,9 @@ namespace generator {
       typeName = database.namePrefix(database_result) + typeName;
       if (t->range) {
         printSubtype(parm, name, t->range, typeName, database_result.object->type);
-      } 
+        typeName = name;
+      }
+      typeName += "<>";
     } else {
       exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
     }
@@ -377,37 +379,6 @@ namespace generator {
   }
     
 
-  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                                 bool initialization) {
-    std::string s = "";
-    if (v) {
-      debug.functionStart("objectDeclarationToString");
-      auto func = [&](std::string& name,
-		      std::string& type, std::string& init,
-		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-        if (id == ast::SIGNAL) {
-          type = "sc_signal<" + type + ">";
-        } else {
-          type += "<>";
-        }
-        s = type + " " + name;
-        if (initialization && init.size() > 0) {
-          s += " = " + init;
-        }
-      };
-      objectDeclaration(parm, v, func);
-      debug.functionEnd("objectDeclarationToString");
-    }
-    return s;
-  }
-
-  void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
-    if (v) {
-      printSourceLine(parm, v->identifier->text);
-      std::string s = objectDeclarationToString(parm, v, true);
-      parm.println(s + ";");
-    }
-  }
 
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {

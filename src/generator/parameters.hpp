@@ -6,6 +6,8 @@
 
 #include "../ast/object_type.hpp"
 
+#include "../debug/debug.hpp"
+
 namespace generator {
 
   class parameters {
@@ -14,10 +16,13 @@ namespace generator {
       std::string fileName;
       std::ofstream outputFile;
       int indent = 0;
+      int line_number = 1;
     };
 
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
+
+    Debug debug = Debug("parameters", false);
 
     bool quiet = false;
     

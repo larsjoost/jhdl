@@ -52,7 +52,15 @@ namespace generator {
 
   void parameters::println(int position, std::string text) {
     if (!isQuiet()) {
-      getFileInfo().outputFile << std::string(position, ' ') << text << std::endl;
+      std::string indent = std::string(position, ' ');
+      getFileInfo().outputFile << indent << text << std::endl;
+      std::string line = std::to_string(getFileInfo().line_number);
+      int spaces = 3 - line.size();
+      if (spaces > 0) {
+        line = std::string(spaces, ' ') + line;
+      }
+      debug.debug("line " + line + ": " + indent + text, true, Output::BLUE);
+      getFileInfo().line_number++;
     }
   }
 

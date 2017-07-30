@@ -272,6 +272,38 @@ namespace generator {
     }
   }
 
+  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
+                                                 bool initialization) {
+    std::string s = "";
+    if (v) {
+      debug.functionStart("objectDeclarationToString");
+      auto func = [&](std::string& name,
+		      std::string& type, std::string& init,
+		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+        if (id == ast::SIGNAL) {
+          type = "sc_signal<" + type + ">";
+        } 
+        s = type + " " + name;
+        if (initialization && init.size() > 0) {
+          s += " = " + init;
+        }
+      };
+      objectDeclaration(parm, v, func);
+      debug.functionEnd("objectDeclarationToString");
+    }
+    return s;
+  }
+
+  void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
+    if (v) {
+      debug.functionStart("object_declarations");
+      printSourceLine(parm, v->identifier->text);
+      std::string s = objectDeclarationToString(parm, v, true);
+      parm.println(s + ";");
+      debug.functionEnd("object_declarations");
+    }
+  }
+
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
                              bool implementation) {
     debug.functionStart("declarations");
