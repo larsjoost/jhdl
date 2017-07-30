@@ -339,6 +339,10 @@ namespace vhdl {
     int POS() {
       return value;
     }
+
+    int getValue() {
+      return value;
+    }
     
     template <class X>
     static ::std::string IMAGE(X& r) {
