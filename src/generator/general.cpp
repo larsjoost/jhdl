@@ -17,33 +17,33 @@ namespace generator {
       }
       libraryInfo.add(s, name, filename);
     }
-    database.topHierarchyStart(library, name, type);
+    a_database.topHierarchyStart(library, name, type);
     if (verbose) {
       parm.println("// Hierarchy top start, library = " + library +
                    ", name = " + name + ", type = " + ast::toString(type) +
-                   ", hierarchy = " + std::to_string(database.getHierarchyLevel()));
+                   ", hierarchy = " + std::to_string(a_database.getHierarchyLevel()));
     }
   }
   
   void SystemC::topHierarchyEnd(parameters& parm, bool globalize) {
     if (verbose) {
-      parm.println("// Hierarchy top end = " + std::to_string(database.getHierarchyLevel()));
+      parm.println("// Hierarchy top end = " + std::to_string(a_database.getHierarchyLevel()));
     }
-    database.topHierarchyEnd(globalize);
+    a_database.topHierarchyEnd(globalize);
   }
 
   void SystemC::descendHierarchy(parameters& parm, std::string parentName) {
-    database.descendHierarchy(parentName);
+    a_database.descendHierarchy(parentName);
     if (verbose) {
-      parm.println("// Hierarchy start = " + std::to_string(database.getHierarchyLevel()));
+      parm.println("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
     }
   }
 
   void SystemC::ascendHierarchy(parameters& parm) {
     if (verbose) {
-      parm.println("// Hierarchy end = " + std::to_string(database.getHierarchyLevel()));
+      parm.println("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
     }
-    database.ascendHierarchy();
+    a_database.ascendHierarchy();
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text* t) {

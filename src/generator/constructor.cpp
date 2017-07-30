@@ -57,7 +57,7 @@ namespace generator {
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
       if (parm.area == parameters::DECLARATION) {
-        database.add(ast::VARIABLE, identifier, ast::INTEGER);
+        a_database.add(ast::VARIABLE, identifier, ast::INTEGER);
       }
       forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
           if (parm.area == parameters::IMPLEMENTATION) {
@@ -71,17 +71,16 @@ namespace generator {
                                      std::string& entityName, std::string& library) {
     if (l) {
       auto func = [&](ast::AssociationElement a){
-        ExpressionParser expr(&database);
         std::string formalName = a.formalPart->name->toString(true);
         auto valid = [&] (DatabaseElement* e) { return true; };
         DatabaseResult object;
-        if (database.findOne(object, formalName, valid, entityName, library)) {
+        if (a_database.findOne(object, formalName, valid, entityName, library)) {
           ast::ObjectValueContainer formalType = object.object->type;
           return instanceName + "->" + formalName +
-            ".bind(" + expr.toString(a.actualPart, formalType) + ")";
+            ".bind(" + a_expression.toString(a.actualPart, formalType) + ")";
         } else {
           exceptions.printError("Formal name " + formalName + " not found in entity " + library + "::" + entityName);
-          database.printAllObjects(formalName);
+          a_database.printAllObjects(formalName);
         }
         return std::string();
       };
@@ -124,7 +123,7 @@ namespace generator {
   }
 
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument) {
-    std::string parentName = database.getParentName();
+    std::string parentName = a_database.getParentName();
     if (parentName.size() > 0) {
       std::string p1 = parentName +"* parent";
       std::string p2 = " : p(parent)";

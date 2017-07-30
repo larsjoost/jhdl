@@ -21,7 +21,7 @@ namespace generator {
        } else {
          assert(false);
        }
-       database.add(ast::TYPE, name, value);
+       a_database.add(ast::TYPE, name, value);
        debug.functionEnd("type_declarations");
      }
   }
@@ -30,7 +30,7 @@ namespace generator {
     assert(identifier);
     std::string name = identifier->toString(true);
     DatabaseResult object;
-    if (database.findOne(object, name, ast::TYPE)) {
+    if (a_database.findOne(object, name, ast::TYPE)) {
       type = object.object->type;
       return true;
     }
@@ -44,8 +44,7 @@ namespace generator {
         ast::ObjectArgument a;
         a.name = i.object->identifier->toString(true);
         findType(i.object->type->name, a.type);
-        ExpressionParser expr(&database);
-        a.defaultValue = (i.object->initialization) ? expr.toString(i.object->initialization->value, a.type) : "";
+        a.defaultValue = (i.object->initialization) ? a_expression.toString(i.object->initialization->value, a.type) : "";
         arguments.push_back(a);
       }
     }
@@ -122,7 +121,7 @@ namespace generator {
       return (e->id == type) && (e->arguments.equals(arguments));
     };
     DatabaseResult object;
-    if (database.findOne(object, name, valid)) {
+    if (a_database.findOne(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
         parm.println("/*");
@@ -134,7 +133,7 @@ namespace generator {
       }
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(type) + " \"" + name + "\"", text); 
-      database.printAllObjects(name);
+      a_database.printAllObjects(name);
     }
     return foreignName;
   };
@@ -148,9 +147,8 @@ namespace generator {
       std::string name;
       std::string translatedName;
       if (operatorName) {
-        ExpressionParser expr(&database);
         name = f->string->toString(true);
-        expr.translateOperator(name, translatedName);
+        a_expression.translateOperator(name, translatedName);
         translatedName = "operator " + translatedName;
       } else {
         name = f->name->toString(true);
@@ -163,11 +161,11 @@ namespace generator {
       parm.returnType = returnType;
       printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
-      database.globalName(returnTypeName, ast::TYPE);
+      a_database.globalName(returnTypeName, ast::TYPE);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
-        std::string parentName = database.getParentName();
+        std::string parentName = a_database.getParentName();
         descendHierarchy(parm, name);
         std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
                                                              interface, arguments, returnTypeName,
@@ -184,7 +182,7 @@ namespace generator {
         parm.println("}");
         ascendHierarchy(parm);
       } else {
-        database.addFunction(name, arguments, returnType, f);
+        a_database.addFunction(name, arguments, returnType, f);
         parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       debug.functionEnd("function_declarations");
@@ -202,7 +200,7 @@ namespace generator {
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
-        std::string parentName = database.getParentName();
+        std::string parentName = a_database.getParentName();
         std::string foreignFunctionName = function_attribute(parm, name, ast::PROCEDURE,
                                                              interface, arguments, "void", &f->name->text);
         std::string s = implementation ? parentName + "::" : "";
@@ -218,7 +216,7 @@ namespace generator {
         parm.decIndent();
         parm.println("}");
       } else {
-        database.addProcedure(name, arguments, f);
+        a_database.addProcedure(name, arguments, f);
         parm.println("void " + name + interface + ";");
       }
       debug.functionEnd("procedure_declarations");
@@ -250,7 +248,7 @@ namespace generator {
 	ast::ObjectArguments arguments(false);
 	generateObjectArguments(a->arguments, arguments);
 	ast::ObjectType id = a->objectType;
-	database.addAttribute(name, arguments, id, a, text);
+	a_database.addAttribute(name, arguments, id, a, text);
       }
       debug.functionEnd("attribute_declarations");
     }
@@ -268,7 +266,7 @@ namespace generator {
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
       subtypeIndication(parm, database_result, name, t->type);
-      database.add(ast::TYPE, name, database_result.object->type);
+      a_database.add(ast::TYPE, name, database_result.object->type);
     }
   }
 

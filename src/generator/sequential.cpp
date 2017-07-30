@@ -7,8 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
       if (parm.isArea(parameters::IMPLEMENTATION)) {
-	ExpressionParser expr(&database);
-	parm.println(expr.procedureCallStatementToString(p) + ";");
+	parm.println(a_expression.procedureCallStatementToString(p) + ";");
       }
     }
   }
@@ -16,13 +15,13 @@ namespace generator {
   bool SystemC::getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text) {
     bool result = false;
     DatabaseResult object;
-    if (database.findOne(object, name, id)) {
-      name = object.getName(true, database.getHierarchyLevel());
+    if (a_database.findOne(object, name, id)) {
+      name = a_name_converter.getName(object, true);
       type = object.object->type;
       result = true;
     } else {
       exceptions.printError("Cound to find definition of " + ast::toString(id) + " with name " + name, text);
-      database.printAllObjects(name);
+      a_database.printAllObjects(name);
     }
     return result;
   }
@@ -35,11 +34,10 @@ namespace generator {
     if (p) {
       if (parm.isArea(parameters::IMPLEMENTATION)) {
 	printSourceLine(parm, p->identifier);
-	ExpressionParser expr(&database);
 	std::string name = p->identifier->toString(true);
         ast::ObjectValueContainer type;
         if (getObjectName(name, type, ast::VARIABLE, &p->identifier->text)) {
-          parm.println(name + " = " + expr.toString(p->expression, type) + ";");
+          parm.println(name + " = " + a_expression.toString(p->expression, type) + ";");
         }
       }
     }
@@ -54,15 +52,16 @@ namespace generator {
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
       if (parm.isArea(parameters::IMPLEMENTATION)) {
-	ExpressionParser expr(&database);
-	static ast::ObjectValueContainer expectedType = database.getType("STRING", "STANDARD", "STD");
+	static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
 	std::string severity = p->severity->toString(true);
-	if (database.globalName(severity, ast::ENUM)) {
-	  parm.println("report(" + expr.toString(p->message, expectedType) + ", " +
-		       severity + ");");
+        DatabaseResult object;
+        if (a_database.findOne(object, severity, ast::ENUM)) {
+          std::string name = a_name_converter.getName(object, true);
+	  parm.println("report(" + a_expression.toString(p->message, expectedType) + ", " +
+		       name + ");");
 	} else {
 	  exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
-	  database.printAllObjects(severity);
+	  a_database.printAllObjects(severity);
 	}
       }
     }
@@ -71,11 +70,10 @@ namespace generator {
   void SystemC::ifStatement(parameters& parm, ast::IfStatement* p) {
     if (p) {
       std::string command = "if ";
-      ExpressionParser expr(&database);
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
           static ast::ObjectValueContainer expectedType(ast::BOOLEAN);
-	  parm.println(parameters::IMPLEMENTATION, command + " (" + expr.toString(c.condition, expectedType) + ") {");
+	  parm.println(parameters::IMPLEMENTATION, command + " (" + a_expression.toString(c.condition, expectedType) + ") {");
 	} else {
 	  parm.println(parameters::IMPLEMENTATION, "} else {");
 	}
@@ -108,9 +106,8 @@ namespace generator {
 	parm.println("case " + index + ": goto " + label + ";");
       }
       if (parm.isArea(parameters::IMPLEMENTATION)) {
-	ExpressionParser expr(&database);
-	std::string now = database.globalName("NOW") + "()";
-	parm.println("w.waitFor(" + expr.physicalToString(p->physical) + ");"); 
+	std::string now = a_database.globalName("NOW") + "()";
+	parm.println("w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
 	parm.println(0, label + ":");
 	printSourceLine(parm, p->waitText);
 	parm.println("if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
@@ -122,8 +119,7 @@ namespace generator {
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
       if (parm.isArea(parameters::IMPLEMENTATION)) {
-	ExpressionParser expr(&database);
-	parm.println("return " + expr.toString(r->value, parm.returnType) + ";");
+	parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
       }
     }
   }

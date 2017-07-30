@@ -73,11 +73,11 @@ namespace generator {
       return e->id == ast::PROCEDURE && e->arguments.equals(arguments);
     };
     DatabaseResult object;
-    if (database->findOne(object, name, valid)) {
+    if (a_database->findOne(object, name, valid)) {
       name = objectToString(object, p->arguments, [&](DatabaseResult& e) {});
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
-      database->printAllObjects(name);
+      a_database->printAllObjects(name);
     }
     debug.functionEnd("procedureCallStatementToString");
     return name;
@@ -122,7 +122,7 @@ namespace generator {
       return objectWithArguments(e, arguments);
     };
     DatabaseResults objects;
-    database->findAll(objects, name, valid);
+    a_database->findAll(objects, name, valid);
     for (auto& i : objects) {
       ast::ObjectValueContainer* subtype = i.object->type.subtype;
       if (subtype) {
@@ -233,7 +233,7 @@ namespace generator {
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
     std::string enumName = physical->unit->toString(true);
-    database->globalName(enumName, ast::ENUM);
+    a_database->globalName(enumName, ast::ENUM);
     return "{" + physical->number->toString() + ", " + enumName + "}";
   }
   
@@ -245,7 +245,7 @@ namespace generator {
     } else if (e->number) {
       e->returnTypes = {ast::ObjectValueContainer(e->number->type)};
     } else if (e->string) {
-      static ast::ObjectValueContainer stringType = database->getType("STRING", "STANDARD", "STD");
+      static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
       e->returnTypes = {stringType};
     } else if (e->identifier) {
       e->returnTypes = basicIdentifierReturnTypes(e->identifier);
@@ -294,7 +294,7 @@ namespace generator {
     ReturnTypes result;
     // ast::ObjectArguments arguments = toObjectArguments(associationList);
     DatabaseResult object;
-    if (database->findOne(object, name)) {
+    if (a_database->findOne(object, name)) {
       ast::ObjectValueContainer type = getAttributeType(object.object->type, attribute);
       result.push_back(type);
     } else {
@@ -326,7 +326,7 @@ namespace generator {
   }
 
   bool ExpressionParser::getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result) {
-    static ast::ObjectValueContainer stringType = database->getType("STRING", "STANDARD", "STD");
+    static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
       {{"IMAGE", stringType},
        {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)}};

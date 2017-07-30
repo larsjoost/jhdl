@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
     std::string typeName = name + "_type";
     if (parm.isArea(parameters::DECLARATION)) {
-      database.add(ast::VARIABLE, name, ast::INTEGER);
+      a_database.add(ast::VARIABLE, name, ast::INTEGER);
       printRangeType(parm, typeName, r);
       parm.println(typeName + "<> " + name + ";");
     }
@@ -33,16 +33,15 @@ namespace generator {
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       DatabaseResult object;
-      if (database.findOne(object, name, ast::SIGNAL)) {  
+      if (a_database.findOne(object, name, ast::SIGNAL)) {  
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";
-        name = object.getName(true, database.getHierarchyLevel());
-        ExpressionParser expr(&database);
+        name = a_name_converter.getName(object, true);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
             static ast::ObjectValueContainer expectedValue(ast::BOOLEAN);
-            parm.println(command + " (" + expr.toString(s.condition, expectedValue, callback) + ") {");
+            parm.println(command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";
             noConditionDelimiter = "}";
@@ -50,7 +49,7 @@ namespace generator {
             parm.println(noConditionCommand);
           }
           parm.incIndent();
-          parm.println(name + " = " + expr.toString(s.expression, object.object->type, callback) + ";");
+          parm.println(name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
           parm.decIndent();
           if (s.condition) {
             parm.println("}");
@@ -60,7 +59,7 @@ namespace generator {
         }
       } else {
         exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
-	database.printAllObjects(name);
+	a_database.printAllObjects(name);
       }
       debug.functionEnd("signalAssignment");
     }

@@ -9,6 +9,7 @@
 
 #include "config.hpp"
 #include "database/database.hpp"
+#include "expression/expression.hpp"
 
 #include "../exceptions/exceptions.hpp"
 #include "../debug/debug.hpp"
@@ -45,6 +46,7 @@
 #include "../ast/association_element.hpp"
 
 #include "parameters.hpp"
+#include "name_converter.hpp"
 
 namespace generator {
   
@@ -62,7 +64,9 @@ namespace generator {
     parameters headerParameters;
     parameters sourceParameters;
     
-    Database database;
+    Database a_database;
+    NameConverter a_name_converter = NameConverter(a_database);
+    ExpressionParser a_expression = ExpressionParser(a_database, a_name_converter); 
     
     Config config;
     Config libraryInfo;

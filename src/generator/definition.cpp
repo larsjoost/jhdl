@@ -28,7 +28,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       auto createDeclaration = [&](parameters& parm) {
-        database.add(ast::VARIABLE, identifier, ast::INTEGER);
+        a_database.add(ast::VARIABLE, identifier, ast::INTEGER);
       };
       auto createBody = [&](parameters& parm) {
       	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
@@ -113,7 +113,7 @@ namespace generator {
         bool q = parm.setQuiet(true);
         std::list<std::string> sensitivity;
         auto sensitivityListGenerator = [&](DatabaseResult& object) {
-          sensitivity.push_back(object.getName(false, database.getHierarchyLevel()));
+          sensitivity.push_back(a_name_converter.getName(object, false));
         };
         signalAssignment(parm, s, sensitivityListGenerator);
         parm.setQuiet(q);

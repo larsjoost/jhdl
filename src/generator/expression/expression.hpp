@@ -8,13 +8,15 @@
 #include "../../exceptions/exceptions.hpp"
 #include "../../debug/debug.hpp"
 #include "../database/database.hpp"
+#include "../name_converter.hpp"
 
 namespace generator {
 
   class ExpressionParser {
 
     bool verbose = false;
-    Database* database;
+    Database* a_database;
+    NameConverter* a_name_converter;
     Exceptions exceptions;
     Debug debug = Debug("ExpressionParser", false);
     
@@ -103,7 +105,9 @@ namespace generator {
 
   public:
 
-    ExpressionParser(Database* database, bool verbose = false) : database(database) {
+    ExpressionParser(Database& database, NameConverter& name_converter, bool verbose = false) {
+      a_database = &database;
+      a_name_converter = &name_converter;
       this->verbose |= verbose;
     }
   
@@ -154,7 +158,7 @@ namespace generator {
   template<typename Func>
   ExpressionParser::ReturnTypes ExpressionParser::getReturnTypes(std::string& name, Func valid) {
     DatabaseResults objects;
-    database->findAll(objects, name, valid);
+    a_database->findAll(objects, name, valid);
     ReturnTypes result;
     for (auto& i : objects) {
       result.push_back(i.object->type);
@@ -230,8 +234,7 @@ namespace generator {
                                                Func sensitivityListCallback) {
     debug.functionStart("objectToString", true);
     assert(object.object);
-    std::string name = object.getName(true, database->getHierarchyLevel(),
-                                      database->getLibrary(), database->getName());
+    std::string name = a_name_converter->getName(object, true);
     debug.debug("name = " + name + ": " + object.toString());
     if (object.object->type.value == ast::ARRAY) {
       std::string parameters;
@@ -368,7 +371,7 @@ namespace generator {
         return objectWithArguments(e, arguments, &expectedType);
       };
       DatabaseResult object;
-      if (database->findOne(object, name, valid)) {
+      if (a_database->findOne(object, name, valid)) {
         if (object.object->id == ast::SIGNAL) {
           sensitivityListCallback(object);
         }
@@ -378,7 +381,7 @@ namespace generator {
 	args = args.empty() ? "" : "(" + args + ")";
         exceptions.printError("Could not find definition of " + name + args +
 			      " with type " + expectedType.toString(), &identifier->text);
-	database->printAllObjects(name);
+	a_database->printAllObjects(name);
       }
     } 
     debug.functionEnd("basicIdentifierToString");
@@ -397,14 +400,14 @@ namespace generator {
       return e->arguments.equals(arguments);
     };
     DatabaseResults objects;
-    database->findAll(objects, name, valid);
+    a_database->findAll(objects, name, valid);
     std::string attributeName = attribute->toString(true);
     DatabaseResult match;
     if (findAttributeMatch(objects, match, expectedType, attributeName)) {
       assert(match.object);
       bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
       std::string seperator = objectMatch ? "." : "::";
-      name = database->globalName(name) + seperator + attributeName;
+      name = a_database->globalName(name) + seperator + attributeName;
       std::string a = "";
       if (associationList) {
         std::string delimiter = "";

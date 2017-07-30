@@ -20,7 +20,7 @@ namespace generator {
     parm.incIndent();
     parm.println("// Wait is support class of wait statements"); 
     parm.println("Wait w;");
-    std::string parentName = database.getParentName();
+    std::string parentName = a_database.getParentName();
     if (!topHierarchy) {
       parm.println("// p is used to access parent class");
       parm.println(parentName + "* p = NULL;");

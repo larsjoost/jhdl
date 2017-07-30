@@ -35,7 +35,6 @@ namespace generator {
   struct DatabaseResult {
     bool local;
     DatabaseElement* object;
-    std::string getName(bool fullName, int hierarchyLevel, std::string library = "", std::string package = "");
     std::string toString();
   };
 

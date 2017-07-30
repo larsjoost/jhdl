@@ -124,30 +124,32 @@ namespace generator {
     assert(t); 
     std::string name = identifier->toString(true);
     ast::ObjectValueContainer type(ast::ENUMERATION, name);
+    int enum_size = 0;
     std::string enumList =
       listToString(parm, t->enumerations, ", ",
                    [&](ast::EnumerationElement& e){
                      std::string s = "";
                      if (e.identifier) {
+                       enum_size++;
                        s = e.identifier->toString();
-                       database.add(ast::ENUM, s, type);
+                       a_database.add(ast::ENUM, s, type);
                      } else if (e.character) {
                        std::string name = e.character->toString();
-                       database.add(ast::ENUM, name, type); 
+                       a_database.add(ast::ENUM, name, type); 
                      }
                      return s;
                    });
-    int size = 0;
+    int total_size = 0;
     std::string enumName = name + "_enum";
     std::string structList =
       listToString(parm, t->enumerations, ", ",
                    [&](ast::EnumerationElement& e){
-                     size++;
+                     total_size++;
                      std::string s;
                      if (e.identifier) {
                        std::string a = e.identifier->toString(true);
                        std::string b = e.identifier->toString();
-                       s =  a + ", 0, \"" + b + "\"";
+                       s =  enumName + "::" + a + ", 0, \"" + b + "\"";
                      } else if (e.character) {
                        s = "(" + enumName + ")0, " + e.character->toString() + ", \"\"";
                      } 
@@ -158,16 +160,17 @@ namespace generator {
       TYPE state_t IS (IDLE, '1', STOP);
     */
     std::string valueName = name + "_value";
-    std::string s = std::to_string(size);
-    parm.println("enum " + enumName + " {" + enumList + "};");
+    std::string s = std::to_string(total_size);
+    parm.println("enum class " + enumName + " {" + enumList + "};");
     parm.println("struct " + valueName + " {");
     parm.incIndent();
-    parm.println("const int size = " + s + ";");
-    parm.println("EnumerationElement<" + enumName + "> array[" + s + "] {" + structList + "};");
+    parm.println("const static int size = " + s + ";");
+    parm.println("const static int enum_size = " + std::to_string(enum_size) + ";");
+    parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
     parm.decIndent();
     parm.println("};");
-    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ", int N=" + s + ">");
-    parm.println("using " + name + " = Enumeration<T, E, N>;");
+    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ">");
+    parm.println("using " + name + " = Enumeration<T, E>;");
     return ast::ObjectValueContainer(ast::ENUMERATION, name);
   }
 
@@ -220,10 +223,9 @@ namespace generator {
   void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
     assert(r);
     ast::ObjectValueContainer actualType;
-    ExpressionParser expr(&database);
-    expr.getType(r->left, expectedType, actualType);
-    left = expr.toString(r->left, actualType);
-    right = expr.toString(r->right, actualType);
+    a_expression.getType(r->left, expectedType, actualType);
+    left = a_expression.toString(r->left, actualType);
+    right = a_expression.toString(r->right, actualType);
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
@@ -246,7 +248,7 @@ namespace generator {
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
-                                   database.add(ast::ENUM, unit);
+                                   a_database.add(ast::ENUM, unit);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
@@ -364,8 +366,8 @@ namespace generator {
     debug.functionStart("subtypeIndication");
     assert(t);
     std::string typeName = t->name->toString(true);
-    if (database.findOne(database_result, typeName, ast::TYPE)) { 
-      typeName = database.namePrefix(database_result) + typeName;
+    if (a_database.findOne(database_result, typeName, ast::TYPE)) { 
+      typeName = a_database.namePrefix(database_result) + typeName;
       if (t->range) {
         printSubtype(parm, name, t->range, typeName, database_result.object->type);
         typeName = name;
@@ -445,11 +447,11 @@ namespace generator {
       std::string name = implementation->name->toString(true);
       const ast::ObjectType type = ast::ARCHITECTURE;
       topHierarchyStart(parm, library, name, type, filename);
-      if (!database.localize(library, name, ast::ENTITY)) {
+      if (!a_database.localize(library, name, ast::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ENTITY) + " " +
                               library + "." + name, &implementation->name->text);
         if (verbose) {
-          database.print(library);
+          a_database.print(library);
         }
       }
       std::string constructor = "SC_CTOR(" + name + ") {init();}";

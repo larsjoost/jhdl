@@ -7,6 +7,7 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
+#include <type_traits>
 
 namespace vhdl {
 
@@ -249,16 +250,33 @@ namespace vhdl {
     std::string s;
   };
 
-  template <typename T, class E, int N>
+  template <typename T, class E>
   struct Enumeration {
     int* char_position_lookup() {
       const static E valueArray;
-      const static int CHAR_TRANSLATE_SIZE =  256;
-      int* a = new int[CHAR_TRANSLATE_SIZE];
-      std::fill_n(a, CHAR_TRANSLATE_SIZE, -1);
+      const static int SIZE =  256;
+      int* a = new int[SIZE];
+      std::fill_n(a, SIZE, -1);
       for (int i=0; i<valueArray.size; i++) {
         if (valueArray.array[i].c != 0) {
           a[valueArray.array[i].c] = i;
+        }
+      }
+      return a;
+    }
+
+    int underlying_index(T e) {
+      return static_cast<std::underlying_type_t<T>>(e);
+    }
+    
+    int* enum_position_lookup() {
+      const static E valueArray;
+      const static int SIZE =  valueArray.enum_size;
+      int* a = new int[SIZE];
+      for (int i=0; i<valueArray.size; i++) {
+        if (valueArray.array[i].c == 0) {
+          int index = underlying_index(valueArray.array[i].e);
+          a[index] = i;
         }
       }
       return a;
@@ -269,6 +287,12 @@ namespace vhdl {
       return l[(int)c];
     }
 
+    int enum_position(T e) {
+      static int* l = enum_position_lookup();
+      int index = underlying_index(e);
+      return l[index];
+    }
+    
   protected:
     void set(char c) {
       if (char_position(c) < 0) {
@@ -277,27 +301,19 @@ namespace vhdl {
         value = char_position(c);
       }
     }
+    void set(T e) {
+      value = enum_position(e);
+    }
     
   public:
     int value = 0;
 
     void operator=(T v) {
-      value = v;
+      set(v);
     }
   
     void operator=(char c) {
       set(c);
-    }
-
-    bool operator!=(char c) {
-      Enumeration<T, E, N> other;
-      other.set(c);
-      return value != other.value;
-    }
-    
-    bool operator==(char c) const {
-      Enumeration<T, E, N> other = c;
-      return value == other.value;
     }
 
     void operator=(bool v) {
@@ -320,7 +336,7 @@ namespace vhdl {
       return "'" + std::string(1, valueArray.array[value].c) + "'";
     }
 
-    int getValue() {
+    int POS() {
       return value;
     }
     
@@ -331,8 +347,12 @@ namespace vhdl {
 
     int LENGTH() { return 1; }
     
-    bool operator ==(const Enumeration<T, E, N> &other) const { return value == other.value; }
-    bool operator !=(const Enumeration<T, E, N> &other) const { return value != other.value; }
+    bool operator==(T e) const {Enumeration<T, E> other; other.set(e); return value == other.value;}
+    bool operator!=(T e) const {Enumeration<T, E> other; other.set(e); return value != other.value;}
+    bool operator==(char c) const {Enumeration<T, E> other; other.set(c); return value == other.value;}
+    bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return value != other.value;}
+    bool operator ==(const Enumeration<T, E> &other) const { return value == other.value; }
+    bool operator !=(const Enumeration<T, E> &other) const { return value != other.value; }
   };
 
 
