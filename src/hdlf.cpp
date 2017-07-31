@@ -8,9 +8,12 @@
 #include "parser/design_file.hpp"
 #include "generator/file_info.hpp"
 #include "ast/scanner.hpp"
+#include "version/version.h"
 
 void usage() {
+  version::Version v;
   printf("hdlf -f <filename> -e <expression> [-v]\n");
+  std::cout << "Version " << v.version << " (" << v.date << "), id " << v.id << std::endl;
   printf("  -v : Verbose\n");
 }
 

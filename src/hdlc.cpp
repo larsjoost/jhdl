@@ -8,9 +8,12 @@
 #include "parser/design_file.hpp"
 #include "generator/systemc.hpp"
 #include "ast/scanner.hpp"
+#include "version/version.h"
 
 void usage() {
+  version::Version v;
   printf("hdlc -f <name> [-l <name>] [-s <name>] [-v]\n");
+  std::cout << "Version " << v.version << " (" << v.date << "), id " << v.id << std::endl;
   printf("  -f <name> : File name\n");
   printf("  -l <name> : Library name\n");
   printf("  -c <name> : Configuration file name\n");
