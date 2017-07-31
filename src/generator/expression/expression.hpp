@@ -103,6 +103,8 @@ namespace generator {
     bool objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                              ast::ObjectValueContainer* expectedReturnType = NULL);
 
+    void removeDuplicates(ReturnTypes& r);
+    
   public:
 
     ExpressionParser(Database& database, NameConverter& name_converter, bool verbose = false) {

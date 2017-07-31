@@ -22,7 +22,7 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
-    Debug debug = Debug("parameters", false);
+    Debug debug = Debug("parameters", true);
 
     bool quiet = false;
     

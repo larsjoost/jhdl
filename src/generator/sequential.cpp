@@ -118,13 +118,16 @@ namespace generator {
 
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
-	parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
-      }
+       debug.functionStart("returnStatement");
+       if (parm.isArea(parameters::IMPLEMENTATION)) {
+         parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
+       }
+       debug.functionEnd("returnStatement");
     }
   }
 
   void SystemC::sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l) {
+    debug.functionStart("sequentialStatements");
     for (ast::SequentialStatement s : l.list) {
       procedureCallStatement(parm, s.procedureCallStatement);
       variableAssignment(parm, s.variableAssignment);
@@ -135,6 +138,7 @@ namespace generator {
       waitStatement(parm, s.waitStatement);
       returnStatement(parm, s.returnStatement);
     }
+    debug.functionEnd("sequentialStatements");
   }
 
 }

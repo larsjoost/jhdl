@@ -104,7 +104,7 @@ namespace generator {
 
   std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
     if (interface) {
-      return interfaceListToString(parm, interface, ", ", false);
+      return interfaceListToString(parm, interface, ", ", true);
     }
     return "";
   }
@@ -164,12 +164,13 @@ namespace generator {
       a_database.globalName(returnTypeName, ast::TYPE);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
+      a_database.addFunction(name, arguments, returnType, f);
       if (f->body) {
-        std::string parentName = a_database.getParentName();
-        descendHierarchy(parm, name);
         std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
                                                              interface, arguments, returnTypeName,
 							     &text);
+        std::string parentName = a_database.getParentName();
+        //        descendHierarchy(parm, name);
         std::string s = (implementation && !operatorName) ? parentName + "::" : "";
         parm.println(returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
@@ -177,12 +178,11 @@ namespace generator {
           parm.println("// Foreign function call");
           parm.println("return " + foreignFunctionName + "(" + argumentNames + ");");
         }
-        function_body(parm, f->body);
+        FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
         parm.decIndent();
         parm.println("}");
-        ascendHierarchy(parm);
+        // ascendHierarchy(parm);
       } else {
-        a_database.addFunction(name, arguments, returnType, f);
         parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       debug.functionEnd("function_declarations");
@@ -211,7 +211,7 @@ namespace generator {
           parm.println("// Foreign function call");
           parm.println(foreignFunctionName + "(" + argumentNames + ");");
         }
-        procedure_body(parm, f->body);
+        FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
         ascendHierarchy(parm);
         parm.decIndent();
         parm.println("}");
@@ -223,20 +223,15 @@ namespace generator {
     }
     }
 
-  void SystemC::function_body(parameters& parm, ast::FunctionBody* f) {
-    assert(f);
+  void SystemC::FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
+                             ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("function_body");
-    declarations(parm, f->declarations);
-    sequentialStatements(parm, f->sequentialStatements);
+    parameters::Area area = parm.area;
+    parm.area = parameters::IMPLEMENTATION;
+    declarations(parm, d);
+    sequentialStatements(parm, s);
+    parm.area = area;
     debug.functionEnd("function_body");
-  }
-  
-  void SystemC::procedure_body(parameters& parm, ast::ProcedureBody* f) {
-    assert(f);
-    debug.functionStart("procedure_body");
-    declarations(parm, f->declarations);
-    sequentialStatements(parm, f->sequentialStatements);
-    debug.functionEnd("procedure_body");
   }
   
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {

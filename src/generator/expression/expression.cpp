@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "expression.hpp"
 
 namespace generator {
@@ -83,6 +85,14 @@ namespace generator {
     return name;
   }
 
+  void ExpressionParser::removeDuplicates(ReturnTypes& r) {
+    auto equal = [](ast::ObjectValueContainer& l, ast::ObjectValueContainer& r) {
+      return l.equals(r);
+    };
+    auto it = std::unique(r.begin(), r.end(), equal);
+    r.erase(it, r.end());
+  }
+  
   bool ExpressionParser::objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
@@ -157,6 +167,7 @@ namespace generator {
     static std::unordered_map<std::string, Map> translate =
       { {"&", {ast::ARRAY, ast::ARRAY, ast::ARRAY}},
 	{"+", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
+	{"-", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
 	{"=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
 	{"/=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
 	{"<=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
@@ -266,24 +277,29 @@ namespace generator {
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(ast::AssociationList* associationList) {
+    debug.functionStart("toObjectArguments");
     ast::ObjectArguments result(false);
     if (associationList) {
       for (auto& i : associationList->associationElements.list) {
         ast::ObjectArgument x;
         x.name = (i.formalPart && i.formalPart->name) ? i.formalPart->name->toString(true) : "";
         ReturnTypes r = expressionReturnTypes(i.actualPart);
+        removeDuplicates(r);
         if (r.size() == 1) {
           x.type = *(r.begin());
           result.push_back(x);
         } else {
+          ast::Text* text = i.formalPart ? &i.formalPart->name->text : NULL;
           if (r.empty()) {
-            exceptions.printError("Could not resolve argument type", &i.formalPart->name->text);
+            exceptions.printError("Could not resolve argument type", text);
           } else {
-            exceptions.printError("More than one type for argument", &i.formalPart->name->text);
+            std::string found = returnTypesToString(r);
+            exceptions.printError("More than one type for argument. Found the following types " + found, text);
           }
         }
       }
     }
+    debug.functionEnd("toObjectArguments");
     return result;
   }
  

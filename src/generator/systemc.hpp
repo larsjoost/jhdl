@@ -53,7 +53,7 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
-    Debug debug = Debug("SystemC", false);
+    Debug debug = Debug("SystemC", true);
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     
@@ -150,9 +150,9 @@ namespace generator {
                                    std::string returnType, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
-    void function_body(parameters& parm, ast::FunctionBody* f);
+    void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
+                      ast::List<ast::SequentialStatement>& s);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);
-    void procedure_body(parameters& parm, ast::ProcedureBody* f);
     void attribute_declarations(parameters& parm, ast::Attribute* a);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d, bool implementation = false);
 
@@ -294,7 +294,8 @@ namespace generator {
                             [&](std::string& name,
                                 std::string& type, std::string& init,
                                 ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-                              s += d + typeConverter(type, id, direction) + " " + name;
+                              std::string x = initialization ? " = " + init : "";
+                              s += d + typeConverter(type, id, direction) + " " + name + x;
           d = delimiter;
         }
         );
