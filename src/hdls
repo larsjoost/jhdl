@@ -82,7 +82,7 @@ for i in $templatefiles; do
         sed -i "s/%include%/$sourcefile/g" $target
     fi
 done
-g++ -std=c++14 -g -pthread -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase $sourcefile $targets $KERNEL/*.o $SCRIPTPATH/../std/*.o
+g++ -std=c++14 -g -lgomp -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase $sourcefile $targets $KERNEL/*.o $SCRIPTPATH/../std/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME
