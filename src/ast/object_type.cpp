@@ -1,42 +1,72 @@
 #include <cassert>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <type_traits>
 
 #include "object_type.hpp"
 
 namespace ast {
 
   std::string toString(ObjectType o) {
-    static std::string a[NUMBER_OF_OBJECT_TYPES] = {
-      "signal", "variable", "constant", "function", "procedure", "port", "type",
-      "enum", "entity", "configuration", "subtype", "file", "group", "architecture",
-      "package", "package body", "component"};
-    return a[o];
+    switch (o) {
+    case ObjectType::SIGNAL: return "signal";
+    case ObjectType::VARIABLE: return "variable";
+    case ObjectType::CONSTANT: return "constant";
+    case ObjectType::FUNCTION: return "function";
+    case ObjectType::PROCEDURE: return "procedure";
+    case ObjectType::PORT: return "port";
+    case ObjectType::TYPE: return "type";
+    case ObjectType::ENUM: return "enum";
+    case ObjectType::ENTITY: return "entity";
+    case ObjectType::CONFIGURATION: return "configuration";
+    case ObjectType::SUBTYPE: return "subtype";
+    case ObjectType::FILE: return "file";
+    case ObjectType::GROUP: return "group";
+    case ObjectType::ARCHITECTURE: return "architecture";
+    case ObjectType::PACKAGE: return "package";
+    case ObjectType::PACKAGE_BODY: return "package_body";
+    case ObjectType::COMPONENT: return "component";
+    default: assert(false);
+    }
   }
   
   std::string toString(ObjectValue o) {
-    static std::string a[NUMBER_OF_OBJECT_VALUES] = {
-      "integer", "real", "number", "character", "text",
-      "physical", "array", "enumeration", "boolean",
-      "user_type", "unknown", "none", "dont_care"};
-    return a[o];
+    switch (o) {
+    case ObjectValue::INTEGER: return "integer"; 
+    case ObjectValue::REAL: return "real";
+    case ObjectValue::NUMBER: return "number";
+    case ObjectValue::CHARACTER: return "character";
+    case ObjectValue::TEXT: return "text";
+    case ObjectValue::PHYSICAL: return "physical";
+    case ObjectValue::ARRAY: return "array";
+    case ObjectValue::ENUMERATION: return "enumeration";
+    case ObjectValue::BOOLEAN: return "boolean";
+    case ObjectValue::USER_TYPE: return "user_type";
+    case ObjectValue::UNKNOWN: return "unknown";
+    case ObjectValue::NONE: return "none";
+    case ObjectValue::DONT_CARE: return "dont_care";
+    default: assert(false);
+    };
   }
 
   std::string ObjectValueContainer::toString() {
-    if (value == USER_TYPE) {
+    if (value == ObjectValue::USER_TYPE) {
       return typeName + "(User type)";
     }
-    if (value == ARRAY) {
+    if (value == ObjectValue::ARRAY) {
       return "array of " + subtype->toString();
     }
-    if (value == ENUMERATION) {
+    if (value == ObjectValue::ENUMERATION) {
       return "enumeration " + typeName;
     }
     return ast::toString(value);
   }
 
   bool ObjectValueContainer::numberEquals(ObjectValue l, ObjectValue r) {
-    return (l == NUMBER) && (r == INTEGER || r == REAL || r == NUMBER);
+    return
+      (l == ObjectValue::NUMBER) &&
+      (r == ObjectValue::INTEGER || r == ObjectValue::REAL || r == ObjectValue::NUMBER);
   }
   
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
@@ -46,7 +76,8 @@ namespace ast {
       result = true;
     } else if (value != other.value) {
       result = false;
-    } else if (value == USER_TYPE || value == ENUMERATION) {
+    } else if (value == ObjectValue::USER_TYPE ||
+               value == ObjectValue::ENUMERATION) {
       result = (typeName == other.typeName);
     } else {
       result = true;
@@ -151,3 +182,5 @@ namespace ast {
   }
   
 }
+
+ 

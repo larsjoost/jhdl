@@ -9,10 +9,10 @@ namespace generator {
     if (!parm.isQuiet()) {
       std::string s;
       switch (type) {
-      case ast::PACKAGE_BODY: {s = "body"; break;}
-      case ast::PACKAGE : {s = "package"; break;}
-      case ast::ENTITY : {s = "entity"; break;}
-      case ast::ARCHITECTURE : {s = "architecture"; break; }
+      case ast::ObjectType::PACKAGE_BODY: {s = "body"; break;}
+      case ast::ObjectType::PACKAGE : {s = "package"; break;}
+      case ast::ObjectType::ENTITY : {s = "entity"; break;}
+      case ast::ObjectType::ARCHITECTURE : {s = "architecture"; break; }
       default: assert(false);
       }
       libraryInfo.add(s, name, filename);

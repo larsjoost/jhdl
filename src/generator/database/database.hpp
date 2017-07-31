@@ -43,7 +43,7 @@ namespace generator {
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
              ast::ObjectArguments arguments = ast::ObjectArguments(false),
              ast::Text* text = NULL);
-    void add(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::NONE,
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::ObjectValue::NONE,
              ast::Text* text = NULL);
 
     template<typename Func>

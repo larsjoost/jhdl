@@ -1,4 +1,4 @@
-DIRS := src std
+DIRS := src std src/kernel/lib
 
 .PHONY: all test clean 
 

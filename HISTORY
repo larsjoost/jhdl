@@ -1,0 +1,10 @@
+Version:
+0.0.1 Minimal VHDL compile and simulation support.
+0.0.2 Support of OpenMP
+
+Future:
+* Basic VHDL syntax
+* Generation of makefiles
+* Function and procedure calls as classes
+* Changed jhdl name to chdl
+* Support of std_logic_1164

@@ -123,7 +123,7 @@ namespace generator {
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
     assert(t); 
     std::string name = identifier->toString(true);
-    ast::ObjectValueContainer type(ast::ENUMERATION, name);
+    ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
     int enum_size = 0;
     std::string enumList =
       listToString(parm, t->enumerations, ", ",
@@ -132,10 +132,10 @@ namespace generator {
                      if (e.identifier) {
                        enum_size++;
                        s = e.identifier->toString();
-                       a_database.add(ast::ENUM, s, type);
+                       a_database.add(ast::ObjectType::ENUM, s, type);
                      } else if (e.character) {
                        std::string name = e.character->toString();
-                       a_database.add(ast::ENUM, name, type); 
+                       a_database.add(ast::ObjectType::ENUM, name, type); 
                      }
                      return s;
                    });
@@ -171,7 +171,7 @@ namespace generator {
     parm.println("};");
     parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ">");
     parm.println("using " + name + " = Enumeration<T, E>;");
-    return ast::ObjectValueContainer(ast::ENUMERATION, name);
+    return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
   /*
@@ -185,10 +185,10 @@ namespace generator {
     ast::ObjectValue value;
     if (t->physical) {
       printPhysicalType(parm, name, t);
-      value = ast::PHYSICAL;
+      value = ast::ObjectValue::PHYSICAL;
     } else {
       printRangeType(parm, name, t->range);
-      value = ast::INTEGER;
+      value = ast::ObjectValue::INTEGER;
     }
     return ast::ObjectValueContainer(value, name);
   }
@@ -214,7 +214,7 @@ namespace generator {
     DatabaseResult database_result;
     std::string subtypeName = subtypeIndication(parm, database_result, name, t->type);
     printArrayType(parm, name, t->definition, subtypeName);
-    ast::ObjectValueContainer value(ast::ARRAY);
+    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY);
     value.setSubtype(database_result.object->type);
     debug.functionEnd("arrayType");
     return value;
@@ -230,7 +230,7 @@ namespace generator {
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     std::string left, right;
-    ast::ObjectValueContainer type(ast::NUMBER);
+    ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
     parm.println("using " + name + "_type = decltype(" + left + ");"); 
     parm.println("vhdl_range_type(" + name + ", " + left + ", " + right + ");");
@@ -243,12 +243,12 @@ namespace generator {
     ast::PhysicalType* p = n->physical;
     assert(p);
     std::string left, right;
-    ast::ObjectValueContainer type(ast::NUMBER);
+    ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
-                                   a_database.add(ast::ENUM, unit);
+                                   a_database.add(ast::ObjectType::ENUM, unit);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
@@ -342,7 +342,7 @@ namespace generator {
     assert(r);
     if (r->range) {
       std::string left, right;
-      ast::ObjectValueContainer type(ast::INTEGER);
+      ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
       rangeToString(r->range, left, right, type);
       parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
     } else if (r->subtype) {
@@ -366,7 +366,7 @@ namespace generator {
     debug.functionStart("subtypeIndication");
     assert(t);
     std::string typeName = t->name->toString(true);
-    if (a_database.findOne(database_result, typeName, ast::TYPE)) { 
+    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
       typeName = a_database.namePrefix(database_result) + typeName;
       if (t->range) {
         printSubtype(parm, name, t->range, typeName, database_result.object->type);
@@ -385,11 +385,11 @@ namespace generator {
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {
       std::string name = package->name->toString(true);
-      ast::ObjectType type = package->body ? ast::PACKAGE_BODY : ast::PACKAGE;
+      ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
       debug.functionStart("packageDeclaration(library = " + library +
 		    ", packet = " + name + ", type = " + toString(type) + ")");
       topHierarchyStart(parm, library, name, type, filename);
-      if (type == ast::PACKAGE) {
+      if (type == ast::ObjectType::PACKAGE) {
         parm.println("");
         parm.println("SC_PACKAGE(" + name + ") {");
         parm.incIndent();
@@ -401,7 +401,7 @@ namespace generator {
 	declarations(parm, package->declarations, true);
 	parm.selectFile(file_select);
       }
-      topHierarchyEnd(parm, (type == ast::PACKAGE));
+      topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");
     }
   }
@@ -410,7 +410,7 @@ namespace generator {
     if (interface) {
       debug.functionStart("interfaceDeclaration");
       std::string name = interface->name->toString(true);
-      const ast::ObjectType type = ast::ENTITY;
+      const ast::ObjectType type = ast::ObjectType::ENTITY;
       topHierarchyStart(parm, library, name, type, filename);
       parm.println("");
       parm.println("SC_INTERFACE(" + name + ") {");
@@ -445,10 +445,10 @@ namespace generator {
     if (implementation) {
       debug.functionStart("implementationDeclaration");
       std::string name = implementation->name->toString(true);
-      const ast::ObjectType type = ast::ARCHITECTURE;
+      const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
       topHierarchyStart(parm, library, name, type, filename);
-      if (!a_database.localize(library, name, ast::ENTITY)) {
-        exceptions.printError("Could not find " + ast::toString(ast::ENTITY) + " " +
+      if (!a_database.localize(library, name, ast::ObjectType::ENTITY)) {
+        exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
                               library + "." + name, &implementation->name->text);
         if (verbose) {
           a_database.print(library);

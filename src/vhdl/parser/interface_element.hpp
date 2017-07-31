@@ -19,11 +19,11 @@ namespace vhdl {
       
       InterfaceElement<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
         if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_VARIABLE, defaultType == scanner::Scanner::VHDL_VARIABLE>>()) {
-          object->objectType = ast::VARIABLE;
+          object->objectType = ast::ObjectType::VARIABLE;
         } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL, defaultType == scanner::Scanner::VHDL_SIGNAL>>()) {
-          object->objectType = ast::SIGNAL;
+          object->objectType = ast::ObjectType::SIGNAL;
         } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT, defaultType == scanner::Scanner::VHDL_CONSTANT>>()) {
-          object->objectType = ast::CONSTANT;
+          object->objectType = ast::ObjectType::CONSTANT;
         }
         return this;
       }

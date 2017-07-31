@@ -9,7 +9,8 @@ namespace generator {
         object.object->sectionType != localDatabase.getType()) {
       std::string separator1 = "::";
       std::string separator2 = "::";
-      if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
+      if (object.object->id == ast::ObjectType::FUNCTION ||
+          object.object->id == ast::ObjectType::PROCEDURE) {
 	separator1 = "_";
 	separator2 = ".";
       }
@@ -20,7 +21,7 @@ namespace generator {
   
   std::string Database::globalName(DatabaseResult& object, std::string name) {
     name = namePrefix(object) + name;
-    if (object.object->id == ast::TYPE) {
+    if (object.object->id == ast::ObjectType::TYPE) {
       name = name + "<>";
     }
     return name;
@@ -52,8 +53,8 @@ namespace generator {
   }
 
   ast::ObjectValueContainer Database::getType(std::string name, std::string package, std::string library) {
-    auto valid = [&] (DatabaseElement* e) { return e->id == ast::TYPE; };
-    ast::ObjectValueContainer result(ast::UNKNOWN);
+    auto valid = [&] (DatabaseElement* e) { return e->id == ast::ObjectType::TYPE; };
+    ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     DatabaseResult object;
     if (findOne(object, name, valid, package, library)) {
       result = object.object->type;

@@ -53,7 +53,7 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
-    Debug debug = Debug("SystemC", false);
+    DisableDebug debug = DisableDebug("SystemC");
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     

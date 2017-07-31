@@ -5,30 +5,33 @@
 #include <list>
 #include <string>
 
+#include "../debug/debug.hpp"
+
 namespace ast {
 
-  enum ObjectType {
+  enum class ObjectType {
     SIGNAL, VARIABLE, CONSTANT, FUNCTION, PROCEDURE, PORT, TYPE,
     ENUM, ENTITY, CONFIGURATION, SUBTYPE, FILE, GROUP, ARCHITECTURE,
-    PACKAGE, PACKAGE_BODY, COMPONENT, NUMBER_OF_OBJECT_TYPES};
+    PACKAGE, PACKAGE_BODY, COMPONENT};
 
   std::string toString(ObjectType o);
 
-  enum ObjectValue {
+  enum class ObjectValue {
     INTEGER, REAL, NUMBER, CHARACTER, TEXT,  PHYSICAL, ARRAY, ENUMERATION,
-    BOOLEAN, USER_TYPE, UNKNOWN, NONE, DONT_CARE, NUMBER_OF_OBJECT_VALUES};
+    BOOLEAN, USER_TYPE, UNKNOWN, NONE, DONT_CARE};
 
   std::string toString(ObjectValue o);
 
   struct ObjectValueContainer {
     ObjectValue value;
     std::string typeName;
-    ObjectValueContainer* subtype;
+    ObjectValueContainer* subtype = NULL;
     bool numberEquals(ObjectValue l, ObjectValue r);
     bool equals(ObjectValueContainer& other);
-    ObjectValueContainer(ObjectValue value = UNKNOWN, std::string typeName = "") {
-      if (value == BOOLEAN) {
-        this->value = ENUMERATION;
+    ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN,
+                         std::string typeName = "") {
+      if (value == ObjectValue::BOOLEAN) {
+        this->value = ObjectValue::ENUMERATION;
         this->typeName = "BOOLEAN";
       } else {
         this->value = value;
@@ -39,7 +42,9 @@ namespace ast {
       this->subtype = new ObjectValueContainer();
       *this->subtype = subtype;
     };
-    ObjectValueContainer(std::string typeName) : typeName(typeName) { value = USER_TYPE; }
+    ObjectValueContainer(std::string typeName) : typeName(typeName) {
+      value = ObjectValue::USER_TYPE;
+    }
     std::string toString();
   };
   
@@ -48,8 +53,8 @@ namespace ast {
     ObjectValueContainer type;
     std::string defaultValue = "";
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
-    ObjectArgument(std::string name) : name(name) { type = USER_TYPE; }
-    ObjectArgument() { type = UNKNOWN; }
+    ObjectArgument(std::string name) : name(name) { type = ObjectValue::USER_TYPE; }
+    ObjectArgument() { type = ObjectValue::UNKNOWN; }
     std::string toString();
   };
 

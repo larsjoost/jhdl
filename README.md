@@ -36,9 +36,3 @@ Unit tests are located in ./test
 
 Regression tests are located in ./testsuite
 
-TODO:
-
-* Basic VHDL syntax
-* Generation of makefiles
-* Function and procedure calls as classes
-* Changed jhdl name to chdl

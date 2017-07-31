@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
     std::string typeName = name + "_type";
     if (parm.isArea(parameters::DECLARATION)) {
-      a_database.add(ast::VARIABLE, name, ast::INTEGER);
+      a_database.add(ast::ObjectType::VARIABLE, name, ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
       parm.println(typeName + "<> " + name + ";");
     }
@@ -33,14 +33,14 @@ namespace generator {
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       DatabaseResult object;
-      if (a_database.findOne(object, name, ast::SIGNAL)) {  
+      if (a_database.findOne(object, name, ast::ObjectType::SIGNAL)) {  
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";
         name = a_name_converter.getName(object, true);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
-            static ast::ObjectValueContainer expectedValue(ast::BOOLEAN);
+            static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
             parm.println(command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";

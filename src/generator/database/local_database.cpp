@@ -114,7 +114,7 @@ namespace generator {
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {ast::FUNCTION, a_library, a_type, a_name, name, arguments,
+    DatabaseElement e = {ast::ObjectType::FUNCTION, a_library, a_type, a_name, name, arguments,
                          returnType, false, NULL, function, NULL, text};
     add(name, e);
   };
@@ -122,8 +122,8 @@ namespace generator {
   void LocalDatabase::addProcedure(std::string& name, ast::ObjectArguments& arguments,
                                    ast::ProcedureDeclaration* procedure,
                                    ast::Text* text) {
-    ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::NONE);
-    DatabaseElement e = {ast::PROCEDURE, a_library, a_type, a_name, name, arguments, c, false, NULL, NULL, procedure, text};
+    ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::ObjectValue::NONE);
+    DatabaseElement e = {ast::ObjectType::PROCEDURE, a_library, a_type, a_name, name, arguments, c, false, NULL, NULL, procedure, text};
     add(name, e);
   };
 

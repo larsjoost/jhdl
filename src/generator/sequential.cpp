@@ -36,7 +36,7 @@ namespace generator {
 	printSourceLine(parm, p->identifier);
 	std::string name = p->identifier->toString(true);
         ast::ObjectValueContainer type;
-        if (getObjectName(name, type, ast::VARIABLE, &p->identifier->text)) {
+        if (getObjectName(name, type, ast::ObjectType::VARIABLE, &p->identifier->text)) {
           parm.println(name + " = " + a_expression.toString(p->expression, type) + ";");
         }
       }
@@ -55,7 +55,7 @@ namespace generator {
 	static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
 	std::string severity = p->severity->toString(true);
         DatabaseResult object;
-        if (a_database.findOne(object, severity, ast::ENUM)) {
+        if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {
           std::string name = a_name_converter.getName(object, true);
 	  parm.println("report(" + a_expression.toString(p->message, expectedType) + ", " +
 		       name + ");");
@@ -72,7 +72,7 @@ namespace generator {
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-          static ast::ObjectValueContainer expectedType(ast::BOOLEAN);
+          static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
 	  parm.println(parameters::IMPLEMENTATION, command + " (" + a_expression.toString(c.condition, expectedType) + ") {");
 	} else {
 	  parm.println(parameters::IMPLEMENTATION, "} else {");

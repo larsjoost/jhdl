@@ -57,7 +57,7 @@ namespace generator {
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
       if (parm.area == parameters::DECLARATION) {
-        a_database.add(ast::VARIABLE, identifier, ast::INTEGER);
+        a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       }
       forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
           if (parm.area == parameters::IMPLEMENTATION) {

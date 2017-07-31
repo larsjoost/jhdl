@@ -22,8 +22,8 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
-    Debug debug = Debug("parameters", false);
-
+    DisableDebug debug = DisableDebug("parameters");
+    
     bool quiet = false;
     
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);

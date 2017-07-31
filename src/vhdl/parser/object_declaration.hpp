@@ -28,9 +28,9 @@ namespace vhdl {
           scanner->accept(keyword);
         }
         switch (keyword) {
-        case scanner::Scanner::VHDL_CONSTANT: objectType = ast::CONSTANT; break;
-        case scanner::Scanner::VHDL_SIGNAL: objectType = ast::SIGNAL; break;
-        case scanner::Scanner::VHDL_VARIABLE: objectType = ast::VARIABLE; break;
+        case scanner::Scanner::VHDL_CONSTANT: objectType = ast::ObjectType::CONSTANT; break;
+        case scanner::Scanner::VHDL_SIGNAL: objectType = ast::ObjectType::SIGNAL; break;
+        case scanner::Scanner::VHDL_VARIABLE: objectType = ast::ObjectType::VARIABLE; break;
         default: assert(false);
         }
         identifier = scanner->accept<SimpleIdentifier>();

@@ -5,12 +5,15 @@
 namespace generator {
 
   std::string ExpressionParser::returnTypesToString(ReturnTypes& returnTypes) {
+    debug.functionStart("returnTypesToString", true);
     std::string found = "";
     std::string delimiter;
     for (auto& i : returnTypes) {
       found += delimiter + i.toString();
       delimiter = ", ";
     }
+    debug.debug("Result = " + found, true);
+    debug.functionEnd("returnTypesToString");
     return found;
   }
 
@@ -72,7 +75,8 @@ namespace generator {
     std::string name = p->name->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(p->arguments);
     auto valid = [&](DatabaseElement* e) {
-      return e->id == ast::PROCEDURE && e->arguments.equals(arguments);
+      return ((e->id == ast::ObjectType::PROCEDURE) &&
+              e->arguments.equals(arguments));
     };
     DatabaseResult object;
     if (a_database->findOne(object, name, valid)) {
@@ -96,9 +100,9 @@ namespace generator {
   bool ExpressionParser::objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
-    static ast::ObjectValueContainer arrayType(ast::ARRAY);
+    static ast::ObjectValueContainer arrayType(ast::ObjectValue::ARRAY);
     bool result;
-    if (e->id == ast::FUNCTION && !e->arguments.equals(arguments)) {
+    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments)) {
       result = false;
     } else {
       // TODO: Check Array arguments
@@ -164,25 +168,28 @@ namespace generator {
       ast::ObjectValue l;
       ast::ObjectValue r;
       ast::ObjectValue result;};
+    const static ast::ObjectValue BOOLEAN = ast::ObjectValue::BOOLEAN;
+    const static ast::ObjectValue ARRAY = ast::ObjectValue::ARRAY;
+    const static ast::ObjectValue DONT_CARE = ast::ObjectValue::DONT_CARE;
     static std::unordered_map<std::string, Map> translate =
-      { {"&", {ast::ARRAY, ast::ARRAY, ast::ARRAY}},
-	{"+", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
-	{"-", {ast::DONT_CARE, ast::DONT_CARE, ast::DONT_CARE}},
-	{"=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
-	{"/=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
-	{"<=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}},
-	{">=", {ast::DONT_CARE, ast::DONT_CARE, ast::BOOLEAN}}
+      { {"&", {ARRAY, ARRAY, ARRAY}},
+	{"+", {DONT_CARE, DONT_CARE, DONT_CARE}},
+	{"-", {DONT_CARE, DONT_CARE, DONT_CARE}},
+	{"=", {DONT_CARE, DONT_CARE, BOOLEAN}},
+	{"/=", {DONT_CARE, DONT_CARE, BOOLEAN}},
+	{"<=", {DONT_CARE, DONT_CARE, BOOLEAN}},
+	{">=", {DONT_CARE, DONT_CARE, BOOLEAN}}
       };
     ReturnTypes result;
     if (l.value == r.value) {
       auto i = translate.find(name);
       if (i != translate.end()) {
 	Map& m = i->second;
-	if ((m.l == ast::DONT_CARE || m.l == l.value) &&
-	    (m.r == ast::DONT_CARE || m.r == r.value) &&
+	if ((m.l == DONT_CARE || m.l == l.value) &&
+	    (m.r == DONT_CARE || m.r == r.value) &&
             l.equals(r)) {
 	  ast::ObjectValue v;
-	  if (m.result == ast::DONT_CARE) {
+	  if (m.result == DONT_CARE) {
 	    v = l.value;
 	  } else {
 	    v = m.result;
@@ -244,7 +251,7 @@ namespace generator {
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
     std::string enumName = physical->unit->toString(true);
-    a_database->globalName(enumName, ast::ENUM);
+    a_database->globalName(enumName, ast::ObjectType::ENUM);
     return "{" + physical->number->toString() + ", " + enumName + "}";
   }
   
@@ -252,7 +259,7 @@ namespace generator {
     debug.functionStart("expressionTermReturnTypes");
     assert(e);
     if (e->physical) {
-      e->returnTypes = {ast::ObjectValueContainer(ast::PHYSICAL, e->physical->unit->toString(true))};
+      e->returnTypes = {ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true))};
     } else if (e->number) {
       e->returnTypes = {ast::ObjectValueContainer(e->number->type)};
     } else if (e->string) {
@@ -345,7 +352,7 @@ namespace generator {
     static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
       {{"IMAGE", stringType},
-       {"LENGTH", ast::ObjectValueContainer(ast::INTEGER)}};
+       {"LENGTH", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)}};
     bool found = false;
     auto i = fixedAttributeTypes.find(attributeName);
     if (i != fixedAttributeTypes.end()) {
@@ -357,12 +364,12 @@ namespace generator {
   
   ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
                                                                std::string attributeName) {
-    ast::ObjectValueContainer result(ast::UNKNOWN);
+    ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(attributeName, result)) {
       if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
         switch(type.value) {
-        case ast::INTEGER: result = ast::ObjectValueContainer(ast::INTEGER); break;
-        case ast::PHYSICAL: result = ast::ObjectValueContainer(ast::PHYSICAL); break;
+        case ast::ObjectValue::INTEGER: result = ast::ObjectValueContainer(ast::ObjectValue::INTEGER); break;
+        case ast::ObjectValue::PHYSICAL: result = ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL); break;
         default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {

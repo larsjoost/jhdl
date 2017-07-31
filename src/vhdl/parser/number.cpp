@@ -10,10 +10,10 @@ namespace vhdl {
       ::ast::Text* v;
       if (v = scanner->optional(::ast::TOKEN_INTEGER)) {
         value = *v;
-        type = ast::INTEGER;
+        type = ast::ObjectValue::INTEGER;
       } else if (v = scanner->optional(::ast::TOKEN_REAL)) {
         value = *v;
-        type = ast::REAL;
+        type = ast::ObjectValue::REAL;
       }
       return this;
     }

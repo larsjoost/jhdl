@@ -28,7 +28,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       auto createDeclaration = [&](parameters& parm) {
-        a_database.add(ast::VARIABLE, identifier, ast::INTEGER);
+        a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       };
       auto createBody = [&](parameters& parm) {
       	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
@@ -82,7 +82,7 @@ namespace generator {
 			if (method->sensitivity) {
                           auto s = [&](ast::SimpleIdentifier& name) {
                             std::string x = name.toString(true);
-                            getObjectName(x, ast::SIGNAL);
+                            getObjectName(x, ast::ObjectType::SIGNAL);
                             return x;
                           };
                           printSensitivityListWait(parm, method->sensitivity, s);
@@ -119,7 +119,7 @@ namespace generator {
         parm.setQuiet(q);
         auto func = [&](std::string& s) {
           std::string name = s;
-          getObjectName(name, ast::SIGNAL);
+          getObjectName(name, ast::ObjectType::SIGNAL);
           return name;
         };
         auto createBody = [&](parameters& parm) {

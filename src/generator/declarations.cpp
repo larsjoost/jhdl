@@ -21,7 +21,7 @@ namespace generator {
        } else {
          assert(false);
        }
-       a_database.add(ast::TYPE, name, value);
+       a_database.add(ast::ObjectType::TYPE, name, value);
        debug.functionEnd("type_declarations");
      }
   }
@@ -30,7 +30,7 @@ namespace generator {
     assert(identifier);
     std::string name = identifier->toString(true);
     DatabaseResult object;
-    if (a_database.findOne(object, name, ast::TYPE)) {
+    if (a_database.findOne(object, name, ast::ObjectType::TYPE)) {
       type = object.object->type;
       return true;
     }
@@ -161,12 +161,12 @@ namespace generator {
       parm.returnType = returnType;
       printSourceLine(parm, text);
       std::string returnTypeName = f->returnType->toString(true);
-      a_database.globalName(returnTypeName, ast::TYPE);
+      a_database.globalName(returnTypeName, ast::ObjectType::TYPE);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       a_database.addFunction(name, arguments, returnType, f);
       if (f->body) {
-        std::string foreignFunctionName = function_attribute(parm, name, ast::FUNCTION,
+        std::string foreignFunctionName = function_attribute(parm, name, ast::ObjectType::FUNCTION,
                                                              interface, arguments, returnTypeName,
 							     &text);
         std::string parentName = a_database.getParentName();
@@ -201,7 +201,7 @@ namespace generator {
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
       if (f->body) {
         std::string parentName = a_database.getParentName();
-        std::string foreignFunctionName = function_attribute(parm, name, ast::PROCEDURE,
+        std::string foreignFunctionName = function_attribute(parm, name, ast::ObjectType::PROCEDURE,
                                                              interface, arguments, "void", &f->name->text);
         std::string s = implementation ? parentName + "::" : "";
         parm.println("void " + s + name + interface + "{");
@@ -261,7 +261,7 @@ namespace generator {
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
       subtypeIndication(parm, database_result, name, t->type);
-      a_database.add(ast::TYPE, name, database_result.object->type);
+      a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
     }
   }
 
@@ -273,7 +273,7 @@ namespace generator {
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-        if (id == ast::SIGNAL) {
+        if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
         } 
         s = type + " " + name;

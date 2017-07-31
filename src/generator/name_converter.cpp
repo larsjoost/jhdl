@@ -20,7 +20,7 @@ namespace generator {
     int hierarchyLevel = a_database->getHierarchyLevel();
     a_debug.debug("Object = " + object.toString());
     if (fullName) {
-      if (object.object->id == ast::ENUM && object.object->type.value == ast::ENUMERATION) {
+      if (object.object->id == ast::ObjectType::ENUM && object.object->type.value == ast::ObjectValue::ENUMERATION) {
         name = getPrefix(object, "::", "::") + object.object->type.typeName + "_enum::" + name;
       } else {
         if (object.local) {

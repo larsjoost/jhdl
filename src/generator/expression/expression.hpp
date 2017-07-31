@@ -18,7 +18,7 @@ namespace generator {
     Database* a_database;
     NameConverter* a_name_converter;
     Exceptions exceptions;
-    Debug debug = Debug("ExpressionParser", false);
+    DisableDebug debug = DisableDebug("ExpressionParser");
     
     struct ReturnTypePair {
       ast::ObjectValueContainer left;
@@ -205,7 +205,7 @@ namespace generator {
   std::string ExpressionParser::parametersToString(ast::ObjectArguments& interface,
                                                    ast::AssociationList* associationList,
                                                    Func sensitivityListCallback) { 
-    debug.functionStart("parametersToString", true);
+    debug.functionStart("parametersToString");
     std::string s = "";
     /*
       Association list can either be:
@@ -226,7 +226,7 @@ namespace generator {
       delimiter = ", ";
       argumentNumber++;
     };
-    debug.functionEnd("parametersToString", true);
+    debug.functionEnd("parametersToString");
     return s;
   }
 
@@ -234,11 +234,11 @@ namespace generator {
   std::string ExpressionParser::objectToString(DatabaseResult& object,
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback) {
-    debug.functionStart("objectToString", true);
+    debug.functionStart("objectToString");
     assert(object.object);
     std::string name = a_name_converter->getName(object, true);
     debug.debug("name = " + name + ": " + object.toString());
-    if (object.object->type.value == ast::ARRAY) {
+    if (object.object->type.value == ast::ObjectValue::ARRAY) {
       std::string parameters;
       if (arguments) {
         std::string delimiter = "";
@@ -253,7 +253,8 @@ namespace generator {
     } else if (arguments) {
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
-    } else if (object.object->id == ast::FUNCTION || object.object->id == ast::PROCEDURE) {
+    } else if (object.object->id == ast::ObjectType::FUNCTION ||
+               object.object->id == ast::ObjectType::PROCEDURE) {
       name += "()";
     }
     debug.functionEnd("objectToString");
@@ -305,7 +306,7 @@ namespace generator {
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback) {
-    debug.functionStart("expressionToString", true);
+    debug.functionStart("expressionToString");
     assert(e);
     std::string result;
     if (e->parenthis) {
@@ -324,8 +325,8 @@ namespace generator {
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
-    debug.debug("Result = " + result, true);
-    debug.functionEnd("expressionToString", true);
+    debug.debug("Result = " + result);
+    debug.functionEnd("expressionToString");
     return result;
   }
 
@@ -374,7 +375,7 @@ namespace generator {
       };
       DatabaseResult object;
       if (a_database->findOne(object, name, valid)) {
-        if (object.object->id == ast::SIGNAL) {
+        if (object.object->id == ast::ObjectType::SIGNAL) {
           sensitivityListCallback(object);
         }
         name = objectToString(object, identifier->arguments, sensitivityListCallback);
@@ -407,7 +408,8 @@ namespace generator {
     DatabaseResult match;
     if (findAttributeMatch(objects, match, expectedType, attributeName)) {
       assert(match.object);
-      bool objectMatch = (match.object->id == ast::VARIABLE) || (match.object->id == ast::SIGNAL);
+      bool objectMatch = (match.object->id == ast::ObjectType::VARIABLE) ||
+        (match.object->id == ast::ObjectType::SIGNAL);
       std::string seperator = objectMatch ? "." : "::";
       name = a_database->globalName(name) + seperator + attributeName;
       std::string a = "";
