@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION=0.0.2
-GIT_HASH=$(git rev-parse --short HEAD)
+VERSION=0.0.3
+ID=$(git rev-parse --short HEAD)
 DATE=$(date -I)
 
 echo "#ifndef _VERSION_H" 
@@ -12,7 +12,7 @@ echo
 echo "namespace version {"
 echo
 echo "  struct Version {";
-echo "    const std::string id = \"${GIT_HASH}\";" 
+echo "    const std::string id = \"$ID\";" 
 echo "    const std::string date = \"$DATE\";"
 echo "    const std::string version = \"$VERSION\";"
 echo

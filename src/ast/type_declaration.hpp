@@ -11,6 +11,8 @@ namespace ast {
     
   public:
 
+    SimpleIdentifier* accessType = NULL;
+    SimpleIdentifier* fileType = NULL;
     SimpleIdentifier* identifier;
     TypeDefinition* typeDefinition;
     

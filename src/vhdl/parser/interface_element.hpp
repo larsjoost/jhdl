@@ -24,6 +24,8 @@ namespace vhdl {
           object->objectType = ast::ObjectType::SIGNAL;
         } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT, defaultType == scanner::Scanner::VHDL_CONSTANT>>()) {
           object->objectType = ast::ObjectType::CONSTANT;
+        } else if (object = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_FILE, defaultType == scanner::Scanner::VHDL_FILE>>()) {
+          object->objectType = ast::ObjectType::FILE;
         }
         return this;
       }

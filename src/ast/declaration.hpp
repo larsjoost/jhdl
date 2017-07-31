@@ -9,6 +9,7 @@
 #include "object_declaration.hpp"
 #include "function_declaration.hpp"
 #include "procedure_declaration.hpp"
+#include "file_declaration.hpp"
 #include "attribute.hpp"
 
 namespace ast {
@@ -27,6 +28,7 @@ namespace ast {
     ObjectDeclaration* constant;
     FunctionDeclaration* function;
     ProcedureDeclaration* procedure;
+    FileDeclaration* file;
     Attribute* attribute;
     
   };

@@ -1,4 +1,4 @@
-
+  
 #ifndef AST_OBJECT_DECLARATION_H_
 #define AST_OBJECT_DECLARATION_H_
 

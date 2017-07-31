@@ -12,7 +12,14 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_TYPE);
       identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
-      typeDefinition = scanner->expect<TypeDefinition>();
+      if (scanner->optional(scanner::Scanner::VHDL_ACCESS)) {
+        accessType = scanner->expect<SimpleIdentifier>();
+      } else if (scanner->optional(scanner::Scanner::VHDL_FILE)) {
+        scanner->expect(scanner::Scanner::VHDL_OF);
+        fileType = scanner->expect<SimpleIdentifier>();
+      } else {
+        typeDefinition = scanner->expect<TypeDefinition>();
+      }
       return this;
     }
 

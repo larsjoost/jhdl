@@ -11,14 +11,17 @@ standard.hpp: standard.vhd ../src/hdlc
 env.hpp: env.vhd ../src/hdlc
 	../src/hdlc.sh -f env.vhd -l std -s
 
-%.o: %.cpp standard.hpp env.hpp
+textio.hpp: textio.vhd ../src/hdlc
+	../src/hdlc.sh -f textio.vhd -l std -s
+
+%.o: %.cpp standard.hpp env.hpp textio.hpp
 	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib 
 
 -include $(DEPS)
 
 clean:
 	find . -name "*.o" -type f -delete
-	rm standard.hpp env.hpp
+	rm standard.hpp env.hpp textio.hpp
 
 print-%:
 	@echo '$*=$($*)'

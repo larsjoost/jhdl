@@ -5,6 +5,7 @@
 #include "object_declaration.hpp"
 #include "function_declaration.hpp"
 #include "procedure_declaration.hpp"
+#include "file_declaration.hpp"
 #include "declaration.hpp"
 #include "attribute.hpp"
 
@@ -19,6 +20,7 @@ namespace vhdl {
           (constant = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT>>()) || 
           (function = scanner->optional<FunctionDeclaration>()) ||
           (procedure = scanner->optional<ProcedureDeclaration>()) ||
+          (file = scanner->optional<FileDeclaration>()) ||
           (attribute = scanner->optional<Attribute>())) {
         scanner->expect(";");
       }
