@@ -53,7 +53,7 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
-    Debug debug = Debug("SystemC", true);
+    Debug debug = Debug("SystemC", false);
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     
@@ -294,7 +294,7 @@ namespace generator {
                             [&](std::string& name,
                                 std::string& type, std::string& init,
                                 ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-                              std::string x = initialization ? " = " + init : "";
+                              std::string x = (initialization && !init.empty()) ? " = " + init : "";
                               s += d + typeConverter(type, id, direction) + " " + name + x;
           d = delimiter;
         }
