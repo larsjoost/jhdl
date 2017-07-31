@@ -40,7 +40,7 @@ TODO:
 
 * Basic VHDL syntax
 * Generation of makefiles
-* Class enums
 * Function and procedure calls as classes
-* Implemented OpenMP support
+* Implemented OpenMP support (implemented, but does not work)
 * Changed jhdl name to chdl
+* Date, version and Git hash stamped in executable
