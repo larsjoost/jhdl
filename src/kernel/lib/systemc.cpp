@@ -86,12 +86,12 @@ void sc_start(int runs) {
       unsigned int i;
       unsigned int size;
       size = methods.size();
-#pragma omp parallel for        
+      // #pragma omp parallel for        
       for (i = 0; i < size; i++) {
         methods[i]->process();
       }
       size = signals.size();
-#pragma omp parallel for        
+      // #pragma omp parallel for        
       for (i = 0; i < size; i++) {
         signals[i]->latchValue();
       }
