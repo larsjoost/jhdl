@@ -186,12 +186,16 @@ namespace generator {
   }
 
   void Database::print(std::string name) {
-    std::cout << "Local Database:" << std::endl;
-    localDatabase.print();
+    PrintLocal();
     std::cout << "Global Database:" << std::endl;
     globalDatabase.print(name);
   }
 
+  void Database::PrintLocal() {
+    std::cout << "Local Database:" << std::endl;
+    localDatabase.print();
+  }
+  
   void Database::printAllObjects(std::string name) {
     auto valid = [&](DatabaseElement* e) { return true; };
     DatabaseResults objects;

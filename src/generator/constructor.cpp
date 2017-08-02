@@ -14,7 +14,7 @@ namespace generator {
 
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
     if (method) {
-      if (parm.area == parameters::IMPLEMENTATION) {
+      if (parm.area == parameters::Area::IMPLEMENTATION) {
         debug.functionStart("methodInstantiation");
         std::string methodName;
         if (method->label) {
@@ -30,7 +30,7 @@ namespace generator {
 
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
-      if (parm.area == parameters::IMPLEMENTATION) {
+      if (parm.area == parameters::Area::IMPLEMENTATION) {
         debug.functionStart("signalInstantiation");
         instantiateType(parm, "SC_NEW_THREAD", s->name);
         debug.functionEnd("signalInstantiation");
@@ -41,7 +41,7 @@ namespace generator {
   void SystemC::blockStatementInstantiation(parameters& parm,
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
-      if (parm.area == parameters::IMPLEMENTATION) {
+      if (parm.area == parameters::Area::IMPLEMENTATION) {
         debug.functionStart("blockStatementInstantiation");
         instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
         debug.functionEnd("blockStatementInstantiation");
@@ -56,11 +56,11 @@ namespace generator {
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
-      if (parm.area == parameters::DECLARATION) {
+      if (parm.area == parameters::Area::DECLARATION) {
         a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       }
       forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
-          if (parm.area == parameters::IMPLEMENTATION) {
+          if (parm.area == parameters::Area::IMPLEMENTATION) {
             instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
           }
         });
@@ -90,7 +90,7 @@ namespace generator {
   
   void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
     if (c) {
-      if (parm.area == parameters::IMPLEMENTATION) {
+      if (parm.area == parameters::Area::IMPLEMENTATION) {
         assert(c->instanceName);
         printSourceLine(parm, c->instanceName->text);
         std::string instanceName = c->instanceName->toString(true);
@@ -141,11 +141,11 @@ namespace generator {
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements,
                                   std::string* constructor) {
     parameters::Area area = parm.area;
-    parm.area = parameters::DECLARATION;
+    parm.area = parameters::Area::DECLARATION;
     if (concurrentStatements) {
       concurrentStatementsInstantiation(parm, *concurrentStatements);
     }
-    parm.area = parameters::IMPLEMENTATION;
+    parm.area = parameters::Area::IMPLEMENTATION;
     parm.println("void init() {");
     if (concurrentStatements) {
       parm.incIndent();

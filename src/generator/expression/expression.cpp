@@ -343,6 +343,7 @@ namespace generator {
     }
     if (b->returnTypes.empty()) {
       exceptions.printError("Could not resolve type of " + name, &b->text);
+      a_database->printAllObjects(name);
     }
     debug.functionEnd("basicIdentifierReturnTypes");
     return b->returnTypes;

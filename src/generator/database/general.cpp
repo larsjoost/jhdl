@@ -19,8 +19,9 @@ namespace generator {
   std::string DatabaseElement::toString() {
     std::string args = arguments.toString();
     args = args.empty() ? "" : "(" + args + ")";
-    return ast::toString(id) + " " + library + "." + sectionName + "." +
-      name + args + " : " + type.toString() + (attribute ? " [ATTRIBUTE]" : "");
+    std::string attr = (attribute ? " [ATTRIBUTE]" : "");
+    return "[ id = " + ast::toString(id) + ", name = " + library + "." + sectionName + "." +
+      name + args + ", type = " + type.toString() + attr + " ]";
   }
 
   std::string DatabaseResult::toString() {

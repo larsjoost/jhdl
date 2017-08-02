@@ -30,9 +30,10 @@ main (int argc, char **argv)
   std::string library = "WORK";
   std::string configurationFilename = "";
   bool saveLibraryInfo = false;
+  bool standardPackage = false;
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:l:c:sv")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:c:svp")) != -1) {
     switch (c)
       {
       case 'f':
@@ -46,6 +47,9 @@ main (int argc, char **argv)
         break;
       case 's':
         saveLibraryInfo = true;
+        break;
+      case 'p':
+        standardPackage = true;
         break;
       case 'v':
         verbose = true;
@@ -70,7 +74,7 @@ main (int argc, char **argv)
     auto parserDesignFile = parser::DesignFile();
     parserDesignFile.parse(filename);
     auto systemC = generator::SystemC(verbose);
-    systemC.generate(parserDesignFile, library, configurationFilename);
+    systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
     if (saveLibraryInfo) {
       systemC.saveLibraryInfo();
     }

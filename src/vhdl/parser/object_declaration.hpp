@@ -31,6 +31,7 @@ namespace vhdl {
         case scanner::Scanner::VHDL_CONSTANT: objectType = ast::ObjectType::CONSTANT; break;
         case scanner::Scanner::VHDL_SIGNAL: objectType = ast::ObjectType::SIGNAL; break;
         case scanner::Scanner::VHDL_VARIABLE: objectType = ast::ObjectType::VARIABLE; break;
+        case scanner::Scanner::VHDL_FILE: objectType = ast::ObjectType::FILE; break;
         default: assert(false);
         }
         identifier = scanner->accept<SimpleIdentifier>();

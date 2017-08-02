@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <list>
 
+#include "../../debug/debug.hpp"
 #include "general.hpp"
 #include "name_map.hpp"
 
@@ -16,7 +17,7 @@ namespace generator {
     std::list<ast::Attribute*> a_package_attributes;
     std::list<NameMap> a_map;
 
-    bool a_verbose = true;
+    bool a_verbose = false;
     
     Exceptions a_exceptions;
 

@@ -1,3 +1,4 @@
+#include <cassert>
 
 #include "parameters.hpp"
 
@@ -77,9 +78,19 @@ namespace generator {
     area = a;
   }
 
+  std::string parameters::AreaToString(Area a) {
+    switch (area) {
+    case Area::DECLARATION: return "declaration";
+    case Area::INITIALIZATION: return "initialization";
+    case Area::IMPLEMENTATION: return "implementation";
+    case Area::INTERFACE: return "interface";
+    case Area::NONE: return "none";
+    }
+    assert(false);
+  }
+  
   void parameters::printArea(std::string name) {
-    const static std::string translate[AREA_SIZE] = {"declaration", "initialization", "implementation", "none"};
-    println("// " + name + " area: " + translate[area]);
+    println("// " + name + " area: " + AreaToString(area));
   }
   
   void parameters::println(Area a, std::string text) {

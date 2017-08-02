@@ -6,26 +6,200 @@
 
 namespace generator {
 
-   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
-     if (t) {
-       debug.functionStart("type_declarations");
-       assert(t->typeDefinition);
-       std::string name = t->identifier->toString(true);
-       ast::ObjectValueContainer value;
-       if (t->typeDefinition->numberType) {
-         value = numberType(parm, t->identifier, t->typeDefinition->numberType);
-       } else if (t->typeDefinition->enumerationType) {
-         value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
-       } else if (t->typeDefinition->arrayType) {
-         value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
-       } else {
-         assert(false);
-       }
-       a_database.add(ast::ObjectType::TYPE, name, value);
-       debug.functionEnd("type_declarations");
-     }
+  /*
+    vhdl:
+    type test_t is range 1 to 20;
+  */
+  ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier,
+						ast::NumberType* t) {
+    assert(t);
+    std::string name = identifier->toString(true);
+    ast::ObjectValue value;
+    if (t->physical) {
+      printPhysicalType(parm, name, t);
+      value = ast::ObjectValue::PHYSICAL;
+    } else {
+      printRangeType(parm, name, t->range);
+      value = ast::ObjectValue::INTEGER;
+    }
+    return ast::ObjectValueContainer(value, name);
+  }
+  
+  ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
+    assert(t); 
+    std::string name = identifier->toString(true);
+    ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
+    int enum_size = 0;
+    std::string enumList =
+      listToString(parm, t->enumerations, ", ",
+                   [&](ast::EnumerationElement& e){
+                     std::string s = "";
+                     if (e.identifier) {
+                       enum_size++;
+                       s = e.identifier->toString(true);
+                       a_database.add(ast::ObjectType::ENUM, s, type);
+                     } else if (e.character) {
+                       std::string name = e.character->toString();
+                       a_database.add(ast::ObjectType::ENUM, name, type); 
+                     }
+                     return s;
+                   });
+    int total_size = 0;
+    std::string enumName = name + "_enum";
+    std::string structList =
+      listToString(parm, t->enumerations, ", ",
+                   [&](ast::EnumerationElement& e){
+                     total_size++;
+                     std::string s;
+                     if (e.identifier) {
+                       std::string a = e.identifier->toString(true);
+                       std::string b = e.identifier->toString();
+                       s =  enumName + "::" + a + ", 0, \"" + b + "\"";
+                     } else if (e.character) {
+                       s = "(" + enumName + ")0, " + e.character->toString() + ", \"\"";
+                     } 
+                     s = "{" + s + "}";
+                     return s;
+                   });
+    /*
+      TYPE state_t IS (IDLE, '1', STOP);
+    */
+    std::string valueName = name + "_value";
+    std::string s = std::to_string(total_size);
+    parm.println("enum class " + enumName + " {" + enumList + "};");
+    parm.println("struct " + valueName + " {");
+    parm.incIndent();
+    parm.println("const static int size = " + s + ";");
+    parm.println("const static int enum_size = " + std::to_string(enum_size) + ";");
+    parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
+    parm.decIndent();
+    parm.println("};");
+    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ">");
+    parm.println("using " + name + " = Enumeration<T, E>;");
+    return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
+    debug.functionStart("printArrayType");
+    assert(r);
+    if (r->range) {
+      std::string left, right;
+      ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
+      rangeToString(r->range, left, right, type);
+      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
+    } else if (r->subtype) {
+      std::string id = r->subtype->identifier->toString(true);
+      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
+    }
+    debug.functionEnd("printArrayType");
+  }
+  
+  std::string SystemC::ArraySubtype(parameters& parm, DatabaseResult& database_result,
+                                    std::string& name, ast::SubtypeIndication* t) {
+    debug.functionStart("ArraySubtype");
+    assert(t);
+    std::string typeName = t->name->toString(true);
+    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
+      typeName = a_database.namePrefix(database_result) + typeName;
+      if (t->range) {
+        printSubtype(parm, name, t->range, typeName, database_result.object->type);
+        typeName = name;
+      }
+      typeName += "<>";
+    } else {
+      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
+    }
+    debug.functionEnd("ArraySubtype");
+    return typeName;
+  }
+
+  /*
+  vhdl:
+    type type_t is array (0 to 4) of integer range 0 to 10;
+  systemc:
+    subtype (subtype_declaration):
+      struct TYPE_T_subtype { int left = 0; int right = 10; };
+      using TYPE_T_type = INTEGER<TYPE_T_subtype>;
+    type (printSubtype):
+      struct TYPE_T_range { int left = 0; int right = 4; };
+      template<class T = TYPE_T_range>
+      using TYPE_T = Array<TYPE_T_type, T>;
+  vhdl:
+    type b_t is array (3 downto -4) of bit;
+  */
+  ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
+    debug.functionStart("arrayType");
+    assert(t); 
+    std::string name = identifier->toString(true);
+    DatabaseResult database_result;
+    std::string subtypeName = ArraySubtype(parm, database_result, name, t->type);
+    printArrayType(parm, name, t->definition, subtypeName);
+    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY);
+    value.setSubtype(database_result.object->type);
+    debug.functionEnd("arrayType");
+    return value;
+  }
+
+  ast::ObjectValueContainer SystemC::SimpleType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type,
+                                                ast::ObjectValue object_value, std::string definition) {
+    debug.functionStart("SimpleType");
+    std::string name = identifier->toString(true);
+    std::string type_name = type->toString(true);
+    DatabaseResult database_result;
+    ast::ObjectValueContainer value(object_value);
+    if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
+      value.setSubtype(database_result.object->type);
+      std::string n = a_name_converter.getName(database_result, true);
+      parm.println("template<class T = " + n + ">");
+      parm.println("using " + name + " = " + definition + "<T>;"); 
+    } else {
+      exceptions.printError("Could not find type " + type_name, &type->text);
+    }
+    debug.functionEnd("SimpleType");
+    return value;
+  }
+
+  ast::ObjectValueContainer SystemC::AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
+    debug.functionStart("AccessType");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "sc_access");
+    debug.functionEnd("AccessType");
+    return value;
+  }
+
+  ast::ObjectValueContainer SystemC::FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
+    debug.functionStart("FileType");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "sc_file");
+    debug.functionEnd("FileType");
+    return value;
+  }
+
+  void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
+    if (t) {
+      debug.functionStart("type_declarations");
+      printSourceLine(parm, t->identifier);
+      ast::ObjectValueContainer value;
+      if (t->accessType) {
+        value = AccessType(parm, t->identifier, t->accessType);
+      } else if (t->fileType) {
+        value = FileType(parm, t->identifier, t->fileType);
+      } else {
+        assert(t->typeDefinition);
+        if (t->typeDefinition->numberType) {
+          value = numberType(parm, t->identifier, t->typeDefinition->numberType);
+        } else if (t->typeDefinition->enumerationType) {
+          value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
+        } else if (t->typeDefinition->arrayType) {
+          value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
+        } else {
+          assert(false);
+        }
+      }
+      std::string name = t->identifier->toString(true);
+      a_database.add(ast::ObjectType::TYPE, name, value);
+      debug.functionEnd("type_declarations");
+    }
+  }
+  
   bool SystemC::findType(ast::SimpleIdentifier* identifier, ast::ObjectValueContainer& type) {
     assert(identifier);
     std::string name = identifier->toString(true);
@@ -93,20 +267,25 @@ namespace generator {
   }
 
   std::string SystemC::getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments) {
+    std::string result;
     if (arguments) {
-      return listToString(parm, arguments, ", ", 
-                          [](ast::SimpleIdentifier& s) {
-                            return s.toString(true);
-                          });
+      result = listToString(parm, arguments, ", ", 
+                            [](ast::SimpleIdentifier& s) {
+                              return s.toString(true);
+                            });
     }
-    return "";
+    return result;
   }
 
   std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
+    std::string result;
     if (interface) {
-      return interfaceListToString(parm, interface, ", ", true);
+      parameters::Area area = parm.area;
+      parm.setArea(parameters::Area::INTERFACE);
+      result = interfaceListToString(parm, interface, ", ", true);
+      parm.setArea(area);
     }
-    return "";
+    return result;
   }
   
   std::string SystemC::function_attribute(parameters& parm,
@@ -138,8 +317,7 @@ namespace generator {
     return foreignName;
   };
   
-  void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f,
-                                      bool implementation) {
+  void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
       debug.functionStart("function_declarations");
       bool operatorName = (f->name == NULL);
@@ -171,6 +349,7 @@ namespace generator {
 							     &text);
         std::string parentName = a_database.getParentName();
         //        descendHierarchy(parm, name);
+        bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
         std::string s = (implementation && !operatorName) ? parentName + "::" : "";
         parm.println(returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
@@ -189,8 +368,7 @@ namespace generator {
     }
   }
 
-  void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f,
-                                      bool implementation) {
+  void SystemC::procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f) {
     if (f) {
       debug.functionStart("procedure_declarations");
       printSourceLine(parm, f->name->text);
@@ -203,6 +381,7 @@ namespace generator {
         std::string parentName = a_database.getParentName();
         std::string foreignFunctionName = function_attribute(parm, name, ast::ObjectType::PROCEDURE,
                                                              interface, arguments, "void", &f->name->text);
+        bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
         std::string s = implementation ? parentName + "::" : "";
         parm.println("void " + s + name + interface + "{");
         parm.incIndent();
@@ -227,7 +406,7 @@ namespace generator {
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("function_body");
     parameters::Area area = parm.area;
-    parm.area = parameters::IMPLEMENTATION;
+    parm.area = parameters::Area::IMPLEMENTATION;
     declarations(parm, d);
     sequentialStatements(parm, s);
     parm.area = area;
@@ -248,9 +427,74 @@ namespace generator {
       debug.functionEnd("attribute_declarations");
     }
   }
-      /*
+
+    /*
+   * vhdl_range_subtype examples:
+   *
+   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
+   * subtype DELAY is TIME range 0 fs to TIME'HIGH;
+
+   * struct TYPE_T_range { int left = 0; int right = 4; };
+   * template<class T = TYPE_T_range>
+   * using TYPE_T = Array<TYPE_T_type, T>;
+  */
+  
+  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r,
+                             std::string typeName, ast::ObjectValueContainer& type) {
+    debug.functionStart("printSubtype");
+    std::string rangeName;
+    std::string left, right;
+    rangeToString(r, left, right, type);
+    rangeName = name + "_range";
+    parm.println("struct " + rangeName + " {");
+    parm.incIndent();
+    parm.println(typeName + "_type left = " + left + ";");
+    parm.println(typeName + "_type right = " + right + ";");
+    parm.decIndent();
+    parm.println("};");
+    parm.println("template<class RANGE = " + rangeName + ">");
+    parm.println("using " + name + " = " + typeName + "<RANGE>;");
+    debug.functionEnd("printSubtype");
+  }
+  
+
+  /*
+  vhdl:
+    <name>        <range>
+    integer range 0 to 10;
+  systemc:
+    struct TYPE_T_range { int left = 0; int right = 4; };
+    template<class T = TYPE_T_range>
+    using TYPE_T = INTEGER<T>;
+  */
+  std::string SystemC::subtypeIndication(parameters& parm, DatabaseResult& database_result,
+                                         std::string& name, ast::SubtypeIndication* t) {
+    debug.functionStart("subtypeIndication");
+    assert(t);
+    std::string typeName = t->name->toString(true);
+    debug.debug("Search for " + typeName);
+    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
+      typeName = a_database.namePrefix(database_result) + typeName;
+      debug.debug("Found typeName = " + typeName);
+      if (t->range) {
+        printSubtype(parm, name, t->range, typeName, database_result.object->type);
+      } else if (!parm.isArea(parameters::Area::INTERFACE)) {
+        parm.println("template <class RANGE = " + typeName + "_range>");
+        parm.println("using " + name + " = " + typeName + "<>;");
+      } 
+      typeName += "<>";
+    } else {
+      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
+    }
+    debug.debug("typeName = " + typeName);
+    debug.functionEnd("subtypeIndication");
+    return typeName;
+  }
+
+  /*
   vhdl:
     subtype type_t is integer range 0 to 10;
+    subtype type_t is natural;
   systemc:
     struct TYPE_T_range { int left = 0; int right = 4; };
     template<class T = TYPE_T_range>
@@ -258,6 +502,7 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
+      printSourceLine(parm, t->identifier);
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
       subtypeIndication(parm, database_result, name, t->type);
@@ -297,8 +542,7 @@ namespace generator {
     }
   }
 
-  void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d,
-                             bool implementation) {
+  void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     debug.functionStart("declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
@@ -306,8 +550,8 @@ namespace generator {
       object_declarations(parm, i.variable);
       object_declarations(parm, i.signal);
       object_declarations(parm, i.constant);
-      function_declarations(parm, i.function, implementation);
-      procedure_declarations(parm, i.procedure, implementation);
+      function_declarations(parm, i.function);
+      procedure_declarations(parm, i.procedure);
       attribute_declarations(parm, i.attribute);
     }
     debug.functionEnd("declarations");

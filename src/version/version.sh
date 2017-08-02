@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=0.0.3
+VERSION=0.2.0
 ID=$(git rev-parse --short HEAD)
 DATE=$(date -I)
 

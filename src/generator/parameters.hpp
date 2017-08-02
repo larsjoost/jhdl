@@ -22,7 +22,8 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
-    DisableDebug debug = DisableDebug("parameters");
+    EnableDebug debug = EnableDebug("parameters");
+    // DisableDebug debug = DisableDebug("parameters");
     
     bool quiet = false;
     
@@ -32,10 +33,11 @@ namespace generator {
     
   public:
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    enum class Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
   private:
     FileSelect a_file_select;
+    std::string AreaToString(Area a);
   public:
-    enum Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, NONE, AREA_SIZE};
     int index;
     Area area;
     bool isArea(Area a);

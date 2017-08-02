@@ -18,7 +18,7 @@ namespace ast {
 
   enum class ObjectValue {
     INTEGER, REAL, NUMBER, CHARACTER, TEXT,  PHYSICAL, ARRAY, ENUMERATION,
-    BOOLEAN, USER_TYPE, UNKNOWN, NONE, DONT_CARE};
+    ACCESS, FILE, BOOLEAN, USER_TYPE, UNKNOWN, NONE, DONT_CARE};
 
   std::string toString(ObjectValue o);
 
@@ -67,7 +67,7 @@ namespace ast {
     std::list<ObjectArgument> list;
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
     void push_back(ObjectArgument& o) {list.push_back(o);}
-    bool equals(ObjectArguments& other);
+    bool equals(ObjectArguments& other, bool verbose = false);
     bool empty() { return list.empty(); }
     std::string toString();
   };  

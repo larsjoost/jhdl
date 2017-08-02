@@ -79,6 +79,7 @@ namespace generator {
     bool exists(std::string& library, std::string& package);
 
     void print(std::string name = "");
+    void PrintLocal();
     void printAllObjects(std::string name);
   };
 

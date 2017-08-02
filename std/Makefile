@@ -1,12 +1,13 @@
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -MMD # -Wall -ansi
+MAX_ERRORS := 5
+CXXFLAGS := -std=c++14 -g -MMD -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
 
 all: $(OBJS)
 
 standard.hpp: standard.vhd ../src/hdlc
-	../src/hdlc -f standard.vhd -l std -s
+	../src/hdlc -f standard.vhd -l std -s -p
 
 env.hpp: env.vhd ../src/hdlc
 	../src/hdlc.sh -f env.vhd -l std -s

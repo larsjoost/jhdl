@@ -24,32 +24,14 @@ namespace vhdl {
     RANGE range;
     TYPE value;
 
-    class iterator {
-      friend class Range;
-      Range<TYPE, RANGE>* parent;
-      TYPE index;
-    public:
-      Range<TYPE, RANGE> operator *() const { parent->value = index; return *parent; }
-      const iterator &operator ++() { ++index; return *this; }
-      Range<TYPE, RANGE> operator ++(TYPE) { iterator copy(*this); ++index; return copy; }
-      
-      bool operator ==(const iterator &other) const { return index == other.index; }
-      bool operator !=(const iterator &other) const { return index != other.index; }
-
-    protected:
-      iterator(Range<TYPE, RANGE>* parent, TYPE start) : parent(parent), index(start) { }
-    };
-    
   public:
 
-    explicit Range<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) { }
+    explicit Range<TYPE, RANGE>() { }
 
-    Range<TYPE, RANGE>(TYPE v) :
-    value(v), begin_(this, range.left), end_(this, range.right + 1) { }
+    Range<TYPE, RANGE>(TYPE v) : value(v) { }
 
     template<class T>
-    Range<TYPE, RANGE>(Range<TYPE, T>& other) : value(other.value),
-      begin_(this, range.left), end_(this, range.right + 1) {};
+    Range<TYPE, RANGE>(Range<TYPE, T>& other) : value(other.value) {};
     
     void operator=(const TYPE other) { value = other; }
     template <class T>
@@ -126,13 +108,6 @@ namespace vhdl {
       return std::to_string(r);
     }
 
-    iterator begin() const { return begin_; }
-    iterator end() const { return end_; }
-
-  private:
-    iterator begin_;
-    iterator end_;
-
   };
   /*
    * vhdl_range_type examples:
@@ -190,6 +165,7 @@ namespace vhdl {
       unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
     PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
+    PhysicalType(UNIT u) {unit = u;}
     
     template<class R>
     PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
@@ -294,6 +270,7 @@ namespace vhdl {
     }
     
   protected:
+
     void set(char c) {
       if (char_position(c) < 0) {
         std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
@@ -307,6 +284,10 @@ namespace vhdl {
     
   public:
     int value = 0;
+
+    Enumeration<T, E>(T v) {
+      set(v);
+    }
 
     void operator=(T v) {
       set(v);

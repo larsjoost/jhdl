@@ -41,6 +41,8 @@ namespace ast {
     case ObjectValue::PHYSICAL: return "physical";
     case ObjectValue::ARRAY: return "array";
     case ObjectValue::ENUMERATION: return "enumeration";
+    case ObjectValue::ACCESS: return "access";
+    case ObjectValue::FILE: return "file";
     case ObjectValue::BOOLEAN: return "boolean";
     case ObjectValue::USER_TYPE: return "user_type";
     case ObjectValue::UNKNOWN: return "unknown";
@@ -129,8 +131,7 @@ namespace ast {
    *    c : type3                  
    */
   
-  bool ObjectArguments::equals(ObjectArguments& other) {
-    bool verbose = false;
+  bool ObjectArguments::equals(ObjectArguments& other, bool verbose) {
     ObjectArguments& interface = isInterface ? *this : other;
     ObjectArguments& association = isInterface ? other : *this;
     if (verbose) {

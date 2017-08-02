@@ -6,7 +6,7 @@ namespace generator {
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
+      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
 	parm.println(a_expression.procedureCallStatementToString(p) + ";");
       }
     }
@@ -32,7 +32,7 @@ namespace generator {
   }
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
+      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
 	printSourceLine(parm, p->identifier);
 	std::string name = p->identifier->toString(true);
         ast::ObjectValueContainer type;
@@ -44,14 +44,14 @@ namespace generator {
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
-    if (parm.isArea(parameters::IMPLEMENTATION)) {
+    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
       signalAssignment(parm, p,  [](DatabaseResult& object) {});
     }
   }
 
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
+      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
 	static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
 	std::string severity = p->severity->toString(true);
         DatabaseResult object;
@@ -73,16 +73,16 @@ namespace generator {
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
           static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
-	  parm.println(parameters::IMPLEMENTATION, command + " (" + a_expression.toString(c.condition, expectedType) + ") {");
+	  parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(c.condition, expectedType) + ") {");
 	} else {
-	  parm.println(parameters::IMPLEMENTATION, "} else {");
+	  parm.println(parameters::Area::IMPLEMENTATION, "} else {");
 	}
 	command = "} elsif";
         parm.incIndent();
         sequentialStatements(parm, c.sequentialStatements);
         parm.decIndent();
       }
-      parm.println(parameters::IMPLEMENTATION, "}");
+      parm.println(parameters::Area::IMPLEMENTATION, "}");
     }
   }
 
@@ -102,10 +102,10 @@ namespace generator {
       assert(p->waitText);
       std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
-      if (parm.isArea(parameters::INITIALIZATION)) {
+      if (parm.isArea(parameters::Area::INITIALIZATION)) {
 	parm.println("case " + index + ": goto " + label + ";");
       }
-      if (parm.isArea(parameters::IMPLEMENTATION)) {
+      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
 	std::string now = a_database.globalName("NOW") + "()";
 	parm.println("w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
 	parm.println(0, label + ":");
@@ -119,7 +119,7 @@ namespace generator {
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
        debug.functionStart("returnStatement");
-       if (parm.isArea(parameters::IMPLEMENTATION)) {
+       if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
          parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
        }
        debug.functionEnd("returnStatement");

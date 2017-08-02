@@ -18,7 +18,8 @@ namespace generator {
     this->verbose |= verbose; 
   }
 
-  void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename) {
+  void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
+                         bool standardPackage) {
     debug.functionStart("SystemC");
     filename = designFile.filename;
     parameters parm;
@@ -44,6 +45,7 @@ namespace generator {
     parm.println("#include \"systemc.h\"");
     parm.println("#include \"vhdl.h\"");
     parm.println("#include \"standard.hpp\"");
+    if (!standardPackage) {parm.println("#include \"standard.h\"");}
     parse(parm, designFile, library);
     parm.selectFile(parameters::HEADER_FILE);
     parm.println("#endif");
@@ -75,9 +77,6 @@ namespace generator {
     debug.functionStart("parse(library = " + library + ")");
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, true);
-    }
-    if (library != "STD") {
-      parm.println("#include \"standard.h\"");
     }
     namespaceStart(parm, library);
     if (library != "STD") {
@@ -120,105 +119,7 @@ namespace generator {
     debug.functionEnd("parsePackage");
   }
   
-  ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
-    assert(t); 
-    std::string name = identifier->toString(true);
-    ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
-    int enum_size = 0;
-    std::string enumList =
-      listToString(parm, t->enumerations, ", ",
-                   [&](ast::EnumerationElement& e){
-                     std::string s = "";
-                     if (e.identifier) {
-                       enum_size++;
-                       s = e.identifier->toString();
-                       a_database.add(ast::ObjectType::ENUM, s, type);
-                     } else if (e.character) {
-                       std::string name = e.character->toString();
-                       a_database.add(ast::ObjectType::ENUM, name, type); 
-                     }
-                     return s;
-                   });
-    int total_size = 0;
-    std::string enumName = name + "_enum";
-    std::string structList =
-      listToString(parm, t->enumerations, ", ",
-                   [&](ast::EnumerationElement& e){
-                     total_size++;
-                     std::string s;
-                     if (e.identifier) {
-                       std::string a = e.identifier->toString(true);
-                       std::string b = e.identifier->toString();
-                       s =  enumName + "::" + a + ", 0, \"" + b + "\"";
-                     } else if (e.character) {
-                       s = "(" + enumName + ")0, " + e.character->toString() + ", \"\"";
-                     } 
-                     s = "{" + s + "}";
-                     return s;
-                   });
-    /*
-      TYPE state_t IS (IDLE, '1', STOP);
-    */
-    std::string valueName = name + "_value";
-    std::string s = std::to_string(total_size);
-    parm.println("enum class " + enumName + " {" + enumList + "};");
-    parm.println("struct " + valueName + " {");
-    parm.incIndent();
-    parm.println("const static int size = " + s + ";");
-    parm.println("const static int enum_size = " + std::to_string(enum_size) + ";");
-    parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
-    parm.decIndent();
-    parm.println("};");
-    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ">");
-    parm.println("using " + name + " = Enumeration<T, E>;");
-    return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
-  }
 
-  /*
-  vhdl:
-  type test_t is range 1 to 20;
-  */
-  ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier,
-						ast::NumberType* t) {
-    assert(t);
-    std::string name = identifier->toString(true);
-    ast::ObjectValue value;
-    if (t->physical) {
-      printPhysicalType(parm, name, t);
-      value = ast::ObjectValue::PHYSICAL;
-    } else {
-      printRangeType(parm, name, t->range);
-      value = ast::ObjectValue::INTEGER;
-    }
-    return ast::ObjectValueContainer(value, name);
-  }
-
-  /*
-  vhdl:
-    type type_t is array (0 to 4) of integer range 0 to 10;
-  systemc:
-    subtype (subtype_declaration):
-      struct TYPE_T_subtype { int left = 0; int right = 10; };
-      using TYPE_T_type = INTEGER<TYPE_T_subtype>;
-    type (printSubtype):
-      struct TYPE_T_range { int left = 0; int right = 4; };
-      template<class T = TYPE_T_range>
-      using TYPE_T = Array<TYPE_T_type, T>;
-  vhdl:
-    type b_t is array (3 downto -4) of bit;
-  */
-  ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
-    debug.functionStart("arrayType");
-    assert(t); 
-    std::string name = identifier->toString(true);
-    DatabaseResult database_result;
-    std::string subtypeName = subtypeIndication(parm, database_result, name, t->type);
-    printArrayType(parm, name, t->definition, subtypeName);
-    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY);
-    value.setSubtype(database_result.object->type);
-    debug.functionEnd("arrayType");
-    return value;
-  }
 
   void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
     assert(r);
@@ -244,11 +145,12 @@ namespace generator {
     assert(p);
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
+    ast::ObjectValueContainer physical_type(ast::ObjectValue::PHYSICAL, name);
     rangeToString(r, left, right, type);
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
-                                   a_database.add(ast::ObjectType::ENUM, unit);
+                                   a_database.add(ast::ObjectType::ENUM, unit, physical_type);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
@@ -311,77 +213,6 @@ namespace generator {
 
   }
 
-  /*
-   * vhdl_range_subtype examples:
-   *
-   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
-   * subtype DELAY is TIME range 0 fs to TIME'HIGH;
-
-   * struct TYPE_T_range { int left = 0; int right = 4; };
-   * template<class T = TYPE_T_range>
-   * using TYPE_T = Array<TYPE_T_type, T>;
-  */
-  
-  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r,
-                             std::string typeName, ast::ObjectValueContainer& type) {
-    std::string left, right;
-    rangeToString(r, left, right, type);
-    std::string rangeName = name + "_range";
-    parm.println("struct " + rangeName + " {");
-    parm.incIndent();
-    parm.println(typeName + "_type left = " + left + ";");
-    parm.println(typeName + "_type right = " + right + ";");
-    parm.decIndent();
-    parm.println("};");
-    parm.println("template<class RANGE = " + rangeName + ">");
-    parm.println("using " + name + " = " + typeName + "<RANGE>;");
-  }
-  
-  void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
-    debug.functionStart("printArrayType");
-    assert(r);
-    if (r->range) {
-      std::string left, right;
-      ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
-      rangeToString(r->range, left, right, type);
-      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
-    } else if (r->subtype) {
-      std::string id = r->subtype->identifier->toString(true);
-      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
-    }
-    debug.functionEnd("printArrayType");
-  }
-  
-  /*
-  vhdl:
-    <name>        <range>
-    integer range 0 to 10;
-  systemc:
-    struct TYPE_T_range { int left = 0; int right = 4; };
-    template<class T = TYPE_T_range>
-    using TYPE_T = INTEGER<T>;
-  */
-  std::string SystemC::subtypeIndication(parameters& parm, DatabaseResult& database_result,
-                                         std::string& name, ast::SubtypeIndication* t) {
-    debug.functionStart("subtypeIndication");
-    assert(t);
-    std::string typeName = t->name->toString(true);
-    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
-      typeName = a_database.namePrefix(database_result) + typeName;
-      if (t->range) {
-        printSubtype(parm, name, t->range, typeName, database_result.object->type);
-        typeName = name;
-      }
-      typeName += "<>";
-    } else {
-      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
-    }
-    debug.functionEnd("subtypeIndication");
-    return typeName;
-  }
-    
-
-
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     if (package) {
       std::string name = package->name->toString(true);
@@ -393,13 +224,19 @@ namespace generator {
         parm.println("");
         parm.println("SC_PACKAGE(" + name + ") {");
         parm.incIndent();
-	declarations(parm, package->declarations, false);
+        parameters::Area area = parm.area;
+        parm.setArea(parameters::Area::DECLARATION);
+	declarations(parm, package->declarations);
+        parm.setArea(area);
         parm.decIndent();
         parm.println("};");
       } else {
         parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
-	declarations(parm, package->declarations, true);
-	parm.selectFile(file_select);
+	parameters::Area area = parm.area;
+        parm.setArea(parameters::Area::IMPLEMENTATION);
+	declarations(parm, package->declarations);
+	parm.setArea(area);
+        parm.selectFile(file_select);
       }
       topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");

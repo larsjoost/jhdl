@@ -6,12 +6,12 @@ namespace generator {
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
     std::string typeName = name + "_type";
-    if (parm.isArea(parameters::DECLARATION)) {
+    if (parm.isArea(parameters::Area::DECLARATION)) {
       a_database.add(ast::ObjectType::VARIABLE, name, ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
       parm.println(typeName + "<> " + name + ";");
     }
-    if (parm.isArea(parameters::IMPLEMENTATION)) {
+    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
       parm.println("for (" +
 		   name + " = " + name + ".LEFT(); " +
 		   name + " <= " + name + ".RIGHT(); " +
@@ -19,7 +19,7 @@ namespace generator {
       parm.incIndent();
     }
     callback(parm);
-    if (parm.isArea(parameters::IMPLEMENTATION)) {
+    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
       parm.decIndent();
       parm.println("}");
     }

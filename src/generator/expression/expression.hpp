@@ -18,7 +18,8 @@ namespace generator {
     Database* a_database;
     NameConverter* a_name_converter;
     Exceptions exceptions;
-    DisableDebug debug = DisableDebug("ExpressionParser");
+    EnableDebug debug = EnableDebug("ExpressionParser");
+    // DisableDebug debug = DisableDebug("ExpressionParser");
     
     struct ReturnTypePair {
       ast::ObjectValueContainer left;
@@ -159,12 +160,14 @@ namespace generator {
     
   template<typename Func>
   ExpressionParser::ReturnTypes ExpressionParser::getReturnTypes(std::string& name, Func valid) {
+    debug.functionStart("getReturnTypes");
     DatabaseResults objects;
     a_database->findAll(objects, name, valid);
     ReturnTypes result;
     for (auto& i : objects) {
       result.push_back(i.object->type);
     }
+    debug.functionEnd("getReturnTypes");
     return result;
   }
   

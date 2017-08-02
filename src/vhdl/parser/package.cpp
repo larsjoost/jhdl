@@ -17,11 +17,11 @@ namespace vhdl {
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_PACKAGE);
       bool delimiterBody = scanner->optional(scanner::Scanner::VHDL_BODY);
-      if (delimiterBody != body) {
-        scanner->error("Unexpected package body termination");
+      if (delimiterBody && !body) {
+        scanner->error("Found package body termination, but not a body declaration");
       }
-      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
-      if (!name->equals(i)) {
+      SimpleIdentifier* i = scanner->optional<SimpleIdentifier>();
+      if (i && !name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match package name '" +
                        name->toString() + "'");

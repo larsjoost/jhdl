@@ -255,6 +255,16 @@ public:
   
 };
 
+template<class T>
+class sc_access {
+
+};
+
+template<class T>
+class sc_file {
+
+};
+
 sc_trace_file* sc_create_vcd_trace_file(const char* name);
 
 void sc_close_vcd_trace_file(sc_trace_file* fp);

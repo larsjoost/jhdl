@@ -53,7 +53,8 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
-    DisableDebug debug = DisableDebug("SystemC");
+    EnableDebug debug = EnableDebug("SystemC");
+    // DisableDebug debug = DisableDebug("SystemC");
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     
@@ -107,8 +108,14 @@ namespace generator {
                      std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause, bool load);
 
+    ast::ObjectValueContainer SimpleType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type,
+                                         ast::ObjectValue object_value, std::string definition);
+    ast::ObjectValueContainer FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
+    ast::ObjectValueContainer AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
     ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
+    std::string ArraySubtype(parameters& parm, DatabaseResult& database_result, std::string& name,
+                             ast::SubtypeIndication* t);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
     void rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
@@ -149,12 +156,12 @@ namespace generator {
                                    std::string& interface, ast::ObjectArguments& arguments,
                                    std::string returnType, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
-    void function_declarations(parameters& parm, ast::FunctionDeclaration* f, bool implementation);
+    void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
                       ast::List<ast::SequentialStatement>& s);
-    void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f, bool implementation);
+    void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f);
     void attribute_declarations(parameters& parm, ast::Attribute* a);
-    void declarations(parameters& parm, ast::List<ast::Declaration>& d, bool implementation = false);
+    void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     // definition.cpp
     template <typename Func>
@@ -226,7 +233,8 @@ namespace generator {
 
   public:
     SystemC(bool verbose = false);
-    void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename);
+    void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
+                  bool standardPackage);
     void saveLibraryInfo();
   };
 
