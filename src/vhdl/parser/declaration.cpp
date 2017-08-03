@@ -19,7 +19,7 @@ namespace vhdl {
           (signal = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_SIGNAL>>()) || 
           (constant = scanner->optional<ObjectDeclaration<scanner::Scanner::VHDL_CONSTANT>>()) || 
           (function = scanner->optional<FunctionDeclaration>()) ||
-          (procedure = scanner->optional<ProcedureDeclaration>()) ||
+          (function = scanner->optional<ProcedureDeclaration>()) ||
           (file = scanner->optional<FileDeclaration>()) ||
           (attribute = scanner->optional<Attribute>())) {
         scanner->expect(";");

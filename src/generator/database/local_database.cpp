@@ -65,7 +65,7 @@ namespace generator {
 
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                           ast::ObjectArguments arguments, ast::Text* text) {
-    DatabaseElement e = {id, a_library, a_type, a_name, name, arguments, type, false, NULL, NULL, NULL, text};
+    DatabaseElement e = {id, a_library, a_type, a_name, name, arguments, type, false, NULL, NULL, text};
     add(name, e);
   }
 
@@ -115,20 +115,12 @@ namespace generator {
       }
   }
   
-  void LocalDatabase::addFunction(std::string& name, ast::ObjectArguments& arguments,
+  void LocalDatabase::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {ast::ObjectType::FUNCTION, a_library, a_type, a_name, name, arguments,
-                         returnType, false, NULL, function, NULL, text};
-    add(name, e);
-  };
-
-  void LocalDatabase::addProcedure(std::string& name, ast::ObjectArguments& arguments,
-                                   ast::ProcedureDeclaration* procedure,
-                                   ast::Text* text) {
-    ast::ObjectValueContainer c = ast::ObjectValueContainer(ast::ObjectValue::NONE);
-    DatabaseElement e = {ast::ObjectType::PROCEDURE, a_library, a_type, a_name, name, arguments, c, false, NULL, NULL, procedure, text};
+    DatabaseElement e = {type, a_library, a_type, a_name, name, arguments,
+                         returnType, false, NULL, function, text};
     add(name, e);
   };
 

@@ -119,15 +119,10 @@ namespace generator {
                               ast::Attribute* attribute, ast::Text* text) {
     localDatabase.addAttribute(name, arguments, id, attribute, text);
   }
-  void Database::addFunction(std::string& name, ast::ObjectArguments& arguments,
+  void Database::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
                              ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
                              ast::Text* text) {
-    localDatabase.addFunction(name, arguments, returnType, function, text);
-  }
-
-  void Database::addProcedure(std::string& name, ast::ObjectArguments& arguments,
-                              ast::ProcedureDeclaration* procedures, ast::Text* text) {
-    localDatabase.addProcedure(name, arguments, procedures, text);
+    localDatabase.addFunction(type, name, arguments, returnType, function, text);
   }
 
   bool Database::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type,

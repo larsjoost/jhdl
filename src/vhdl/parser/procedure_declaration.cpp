@@ -1,6 +1,7 @@
 
 #include "../../ast/scanner.hpp"
 #include "../../ast/text.hpp"
+#include "../../ast/object_type.hpp"
 #include "../scanner/scanner.hpp"
 #include "procedure_declaration.hpp"
 #include "procedure_body.hpp"
@@ -14,6 +15,7 @@ namespace vhdl {
   
     ProcedureDeclaration* ProcedureDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_PROCEDURE);
+      type = ast::ObjectType::PROCEDURE;
       name = scanner->expect<SimpleIdentifier>();
       interface = scanner->optional<InterfaceList<scanner::Scanner::VHDL_VARIABLE>>();
       body = scanner->optional<ProcedureBody>();

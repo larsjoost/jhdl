@@ -9,7 +9,6 @@
 #include "../../ast/object_type.hpp"
 #include "../../ast/attribute.hpp"
 #include "../../ast/function_declaration.hpp"
-#include "../../ast/procedure_declaration.hpp"
 #include "../../ast/text.hpp"
 
 namespace generator {
@@ -25,7 +24,6 @@ namespace generator {
     bool visible;
     ast::Attribute* attribute = NULL;
     ast::FunctionDeclaration* function;
-    ast::ProcedureDeclaration* procedure;
     ast::Text* text;
     int hierarchyLevel = 0;
     void print();

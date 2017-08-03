@@ -1,6 +1,7 @@
 
 #include "../../ast/scanner.hpp"
 #include "../../ast/text.hpp"
+#include "../../ast/object_type.hpp"
 #include "../scanner/scanner.hpp"
 #include "function_declaration.hpp"
 #include "function_body.hpp"
@@ -15,6 +16,7 @@ namespace vhdl {
   
     FunctionDeclaration* FunctionDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_FUNCTION);
+      type = ast::ObjectType::FUNCTION;
       if (!(string = scanner->optional<String>())) {
         name = scanner->expect<SimpleIdentifier>();
       }

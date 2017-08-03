@@ -4,13 +4,13 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/procedure_body.hpp"
+#include "../../ast/function_body.hpp"
 
 namespace vhdl {
   namespace parser {
 
     class ProcedureBody :
-      public ::ast::ProcedureBody  {
+      public ::ast::FunctionBody  {
 
     public:
 

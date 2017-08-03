@@ -17,7 +17,7 @@ namespace ast {
   public:
     
     SimpleIdentifier* name;
-    SimpleIdentifier* returnType;
+    SimpleIdentifier* returnType = NULL;
     List<Declaration> declarations;
     List<SequentialStatement> sequentialStatements;
     

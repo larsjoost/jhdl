@@ -15,9 +15,10 @@ namespace ast {
   class FunctionDeclaration {
     
   public:
-    
+
+    ObjectType type;
     SimpleIdentifier* name;
-    String* string;
+    String* string = NULL;
     SimpleIdentifier* returnType;
     InterfaceList* interface;
     FunctionBody* body;
