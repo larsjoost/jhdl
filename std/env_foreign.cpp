@@ -3,12 +3,12 @@
 namespace vhdl {
   namespace STD {
   
-    void vhdl_stop(STANDARD::INTEGER<> STATUS) {
+    void ENV::vhdl_stop(STANDARD::INTEGER<> STATUS) {
       // std::cout << "Stop" << std::endl;
       exit(STATUS);
     }
   
-    void vhdl_finish(STANDARD::INTEGER<> STATUS) {
+    void ENV::vhdl_finish(STANDARD::INTEGER<> STATUS) {
       // std::cout << "Finish" << std::endl;
       exit(STATUS);
     }

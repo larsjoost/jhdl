@@ -3,7 +3,7 @@
 int Exceptions::numberOfErrors = 0;
 int Exceptions::numberOfWarnings = 0;
 
-void Exceptions::print(std::string severity, int color, std::string& message, ast::Text* text) {
+void Exceptions::print(std::string severity, Output::Color color, std::string& message, ast::Text* text) {
   auto func = [&](std::ostream* out) {
     std::string location = text ?
     (" in " + text->getFilename() + " at " +
@@ -19,21 +19,21 @@ void Exceptions::print(std::string severity, int color, std::string& message, as
 }
 
 void Exceptions::printInternal(std::string message, ast::Text* text) {
-  print("Internal", Output::RED, message, text);
+  print("Internal", Output::Color::RED, message, text);
 }
 
 void Exceptions::printNote(std::string message, ast::Text* text) {
   if (verbose) {
-    print("Note", Output::YELLOW, message, text);
+    print("Note", Output::Color::YELLOW, message, text);
   }
 }
 
 void Exceptions::printError(std::string message, ast::Text* text) {
   numberOfErrors++;
-  print("Error", Output::RED, message, text);
+  print("Error", Output::Color::RED, message, text);
 }
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
   numberOfWarnings++;
-  print("Warning", Output::BLUE, message, text);
+  print("Warning", Output::Color::YELLOW, message, text);
 }

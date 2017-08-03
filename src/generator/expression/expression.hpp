@@ -18,8 +18,7 @@ namespace generator {
     Database* a_database;
     NameConverter* a_name_converter;
     Exceptions exceptions;
-    EnableDebug debug = EnableDebug("ExpressionParser");
-    // DisableDebug debug = DisableDebug("ExpressionParser");
+    Debug<false> debug = Debug<false>("ExpressionParser");
     
     struct ReturnTypePair {
       ast::ObjectValueContainer left;

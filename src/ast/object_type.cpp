@@ -168,8 +168,32 @@ namespace ast {
     return true;
   }
 
+  bool ObjectArguments::ExactMatch(ObjectArguments& other) {
+    Debug<false> debug = Debug<false>("ObjectArgument");
+    debug.functionStart("ExactMatch");
+    bool result = true;
+    if (size() == other.size()) {
+      auto l = list.begin();
+      auto r = other.list.begin();
+      while (l != list.end() && r != other.list.end()) {
+        if (l->type_name != r->type_name) {
+          result = false;
+          break;
+        }
+        l++;
+        r++;
+      }
+    } else {
+      result = false;
+    }
+    debug.debug("(" + toString() + ")" + (result ? " == " : " /= ") + "(" + other.toString() + ")",
+                true, result ? Output::Color::GREEN : Output::Color::RED);
+    debug.functionEnd("ExactMatch");
+    return result;
+  }
+
   std::string ObjectArgument::toString() {
-    return name + " : " + type.toString() + " := " + defaultValue;
+    return name + " : " + type_name + "(" + type.toString() + ") := " + defaultValue;
   }
   
   std::string ObjectArguments::toString() {

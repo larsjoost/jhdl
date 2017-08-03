@@ -60,7 +60,7 @@ namespace generator {
       if (spaces > 0) {
         line = std::string(spaces, ' ') + line;
       }
-      debug.debug("line " + line + ": " + indent + text, true, Output::BLUE);
+      debug.debug("line " + line + ": " + indent + text, true, Output::Color::BLUE);
       getFileInfo().line_number++;
     }
   }

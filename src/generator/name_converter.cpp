@@ -29,6 +29,9 @@ namespace generator {
           for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
             name = "p->" + name;
           }
+          if (object.object->id == ast::ObjectType::TYPE) {
+            name += "<>";
+          }
         } else {
           if (object.object->id == ast::ObjectType::TYPE) {
             name = getPrefix(object, "::", "::") + name + "<>";

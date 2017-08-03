@@ -71,7 +71,7 @@ namespace generator {
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    DisableDebug debug = DisableDebug("LocalDatabase");
+    Debug<false> debug = Debug<false>("LocalDatabase");
     debug.functionStart("addAttribute");
     if (id == a_type) {
       if (name == a_name) {
@@ -85,8 +85,9 @@ namespace generator {
       find(results, name);
       for (auto& i : results) {
         debug.debug("i = " + i.toString());
-	if (id == i.object->id && (arguments.empty() || i.object->arguments.equals(arguments))) {
-	  i.object->attribute = attribute;
+	if (id == i.object->id && (arguments.empty() || i.object->arguments.ExactMatch(arguments))) {
+          assert(!i.object->attribute);
+          i.object->attribute = attribute;
 	  found = true;
 	}
       }

@@ -53,8 +53,8 @@ namespace generator {
   class SystemC { 
 
     Exceptions exceptions;
-    EnableDebug debug = EnableDebug("SystemC");
-    // DisableDebug debug = DisableDebug("SystemC");
+    
+    Debug<false> debug = Debug<false>("SystemC");
 
     const std::string libraryInfoFilename = ".jhdl.ini";
     
@@ -145,21 +145,22 @@ namespace generator {
     // declarations.cpp
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
-    std::string getInterface(parameters& parm, ast::InterfaceList* interface);
+    std::string getInterface(parameters& parm, ast::InterfaceList* interface, bool initialization = true);
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
-    bool findType(ast::SimpleIdentifier* name, ast::ObjectValueContainer& type);
     void generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
     void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
-    std::string function_attribute(parameters& parm, std::string& name, ast::ObjectType type,
-                                   std::string& interface, ast::ObjectArguments& arguments,
-                                   std::string returnType, ast::Text* text);
+    std::string FunctionAttribute(parameters& parm, std::string& name, ast::ObjectType type,
+                                  std::string& interface, ast::ObjectArguments& arguments,
+                                  ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
                       ast::List<ast::SequentialStatement>& s);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f);
+    std::string AttributeName(ast::Attribute* a);
+    void ForeignAttribute(parameters& parm, ast::Attribute* a);
     void attribute_declarations(parameters& parm, ast::Attribute* a);
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 

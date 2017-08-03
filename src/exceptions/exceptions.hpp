@@ -18,7 +18,7 @@ class Exceptions {
   static int numberOfErrors;
   static int numberOfWarnings;
 
-  void print(std::string severity, int color, std::string& message, ast::Text* text);
+  void print(std::string severity, Output::Color color, std::string& message, ast::Text* text);
 
 public:
   

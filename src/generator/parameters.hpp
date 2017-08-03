@@ -22,8 +22,7 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
-    EnableDebug debug = EnableDebug("parameters");
-    // DisableDebug debug = DisableDebug("parameters");
+    Debug<false> debug = Debug<false>("parameters");
     
     bool quiet = false;
     

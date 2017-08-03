@@ -4,7 +4,7 @@ package ENV is
   procedure FINISH (STATUS: INTEGER);
   procedure FINISH;
   function RESOLUTION_LIMIT return DELAY_LENGTH;
-  attribute foreign of ENV: package is "NO C code generation";
+  -- attribute foreign of ENV: package is "NO C code generation";
   attribute foreign of STOP[INTEGER] : procedure is "vhdl_stop";
   attribute foreign of FINISH[INTEGER] : procedure is "vhdl_finish";
   attribute foreign of RESOLUTION_LIMIT : function is "vhdl_resolution_limit";

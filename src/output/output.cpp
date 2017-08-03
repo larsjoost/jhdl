@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "output.hpp"
 
 bool Output::colorsSupported() {
@@ -15,9 +17,20 @@ bool Output::isColorsSupported() {
   return s;
 }
 
-std::string Output::colorCode(int color) {
+int Output::ConvertColor(Color color) {
+  switch (color) {
+  case Color::RESET: return RESET;
+  case Color::RED: return RED;
+  case Color::GREEN: return GREEN;
+  case Color::YELLOW: return YELLOW;
+  case Color::BLUE: return BLUE;
+  }
+  assert(false);
+}
+
+std::string Output::colorCode(Color color) {
   if (isColorsSupported()) {
-    return "\x1b[" + std::to_string(color) + "m";
+    return "\x1b[" + std::to_string(ConvertColor(color)) + "m";
   }
   return "";
 }

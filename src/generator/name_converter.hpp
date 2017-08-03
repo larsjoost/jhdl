@@ -10,8 +10,8 @@ namespace generator {
 
   class NameConverter {
 
-    EnableDebug a_debug = EnableDebug("NameConverter");
-    // DisableDebug a_debug = DisableDebug("NameConverter");
+    Debug<false> a_debug = Debug<false>("NameConverter");
+
     Database *a_database;
   
   public:

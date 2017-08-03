@@ -1,7 +1,5 @@
-Version:
-0.0.1 Minimal VHDL compile and simulation support.
-0.0.2 Support of OpenMP
-0.0.3 Support of ACCESS and FILE types
+News:
+0.2.0 Support of ASSERT, ACCESS and FILE types
 
 Future:
 * Basic VHDL syntax

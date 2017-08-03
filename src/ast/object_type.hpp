@@ -49,9 +49,10 @@ namespace ast {
   };
   
   struct ObjectArgument {
-    std::string name = "";
+    std::string name;
+    std::string type_name;
     ObjectValueContainer type;
-    std::string defaultValue = "";
+    std::string defaultValue;
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
     ObjectArgument(std::string name) : name(name) { type = ObjectValue::USER_TYPE; }
     ObjectArgument() { type = ObjectValue::UNKNOWN; }
@@ -68,7 +69,9 @@ namespace ast {
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
     void push_back(ObjectArgument& o) {list.push_back(o);}
     bool equals(ObjectArguments& other, bool verbose = false);
+    bool ExactMatch(ObjectArguments& other);
     bool empty() { return list.empty(); }
+    int size() { return list.size(); }
     std::string toString();
   };  
 

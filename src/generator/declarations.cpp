@@ -200,24 +200,15 @@ namespace generator {
     }
   }
   
-  bool SystemC::findType(ast::SimpleIdentifier* identifier, ast::ObjectValueContainer& type) {
-    assert(identifier);
-    std::string name = identifier->toString(true);
-    DatabaseResult object;
-    if (a_database.findOne(object, name, ast::ObjectType::TYPE)) {
-      type = object.object->type;
-      return true;
-    }
-    exceptions.printError("Could not find declaration of type \"" + name + "\"", &identifier->text);
-    return false;
-  }
-
   void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
     if (interface) {
       for (ast::InterfaceElement& i : interface->interfaceElements.list) {
         ast::ObjectArgument a;
         a.name = i.object->identifier->toString(true);
-        findType(i.object->type->name, a.type);
+        DatabaseResult result;
+        a.type_name = i.object->type->name->toString(true);
+        a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
+        a.type = result.object->type;
         a.defaultValue = (i.object->initialization) ? a_expression.toString(i.object->initialization->value, a.type) : "";
         arguments.push_back(a);
       }
@@ -229,7 +220,10 @@ namespace generator {
       for (ast::SimpleIdentifier& i : args->list) {
         ast::ObjectArgument a;
         a.name = "";
-        findType(&i, a.type);
+        DatabaseResult result;
+        a.type_name = i.toString(true);
+        a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
+        a.type = result.object->type;
         a.defaultValue = "";
         arguments.push_back(a);
       }
@@ -277,46 +271,49 @@ namespace generator {
     return result;
   }
 
-  std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface) {
+  std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface, bool initialization) {
     std::string result;
     if (interface) {
       parameters::Area area = parm.area;
       parm.setArea(parameters::Area::INTERFACE);
-      result = interfaceListToString(parm, interface, ", ", true);
+      result = interfaceListToString(parm, interface, ", ", initialization);
       parm.setArea(area);
     }
     return result;
   }
+
+  std::string SystemC::AttributeName(ast::Attribute* a) {
+    return a->expression->toString(true);
+  }
   
-  std::string SystemC::function_attribute(parameters& parm,
-                                          std::string &name,
-                                          ast::ObjectType type,
-                                          std::string& interface,
-                                          ast::ObjectArguments& arguments,
-					  std::string returnType,
-                                          ast::Text* text) {
+  std::string SystemC::FunctionAttribute(parameters& parm,
+                                         std::string &name,
+                                         ast::ObjectType type,
+                                         std::string& interface,
+                                         ast::ObjectArguments& arguments,
+                                         ast::Text* text) {
+    debug.functionStart("FunctionAttribute, name = " + name + ", arguments = " + arguments.toString());
     std::string foreignName = "";
     auto valid = [&](DatabaseElement* e) {
-      return (e->id == type) && (e->arguments.equals(arguments));
+      bool match = (e->id == type) && e->attribute && e->arguments.ExactMatch(arguments);
+      debug.debug((match ? "Match = " : "Different = ") + e->toString(), true,
+                  match ? Output::Color::GREEN : Output::Color::RED);
+      return match;
     };
     DatabaseResult object;
     if (a_database.findOne(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
-        parm.println("/*");
-        parm.println(" * This is the definition of the foreign function set as an attribute.");
-        parm.println(" * The implementation must be defined in a .cpp file in this directory.");
-        parm.println("*/");
-        foreignName = e->attribute->expression->toString(true);
-        parm.println(returnType + " " + foreignName + interface + ";");
+        foreignName = AttributeName(e->attribute);
       }
     } else {
-      exceptions.printError("Did not find declaration of " + ast::toString(type) + " \"" + name + "\"", text); 
-      a_database.printAllObjects(name);
+      debug.debug("Did not find attribute of function " + name);
     }
+    debug.debug("Foreign name = " + foreignName);
+    debug.functionEnd("FunctionAttribute");
     return foreignName;
   };
-  
+
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
       debug.functionStart("function_declarations");
@@ -334,19 +331,17 @@ namespace generator {
       }
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
-      ast::ObjectValueContainer returnType;
-      findType(f->returnType, returnType);
-      parm.returnType = returnType;
+      DatabaseResult returnType;
+      a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE);
+      std::string returnTypeName = a_name_converter.getName(returnType, true);
+      parm.returnType = returnTypeName;
       printSourceLine(parm, text);
-      std::string returnTypeName = f->returnType->toString(true);
-      a_database.globalName(returnTypeName, ast::ObjectType::TYPE);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
-      a_database.addFunction(name, arguments, returnType, f);
+      a_database.addFunction(name, arguments, returnType.object->type, f);
       if (f->body) {
-        std::string foreignFunctionName = function_attribute(parm, name, ast::ObjectType::FUNCTION,
-                                                             interface, arguments, returnTypeName,
-							     &text);
+        std::string foreignFunctionName = FunctionAttribute(parm, name, ast::ObjectType::FUNCTION,
+                                                            interface, arguments, &text);
         std::string parentName = a_database.getParentName();
         //        descendHierarchy(parm, name);
         bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
@@ -377,25 +372,28 @@ namespace generator {
       generateObjectArguments(f->interface, arguments);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
+      a_database.addProcedure(name, arguments, f);
       if (f->body) {
         std::string parentName = a_database.getParentName();
-        std::string foreignFunctionName = function_attribute(parm, name, ast::ObjectType::PROCEDURE,
-                                                             interface, arguments, "void", &f->name->text);
+        std::string foreignFunctionName = FunctionAttribute(parm, name, ast::ObjectType::PROCEDURE,
+                                                             interface, arguments, &f->name->text);
         bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
+        if (implementation) {
+          interface = "(" + getInterface(parm, f->interface, false) + ")";
+        }
         std::string s = implementation ? parentName + "::" : "";
         parm.println("void " + s + name + interface + "{");
         parm.incIndent();
-        descendHierarchy(parm, name);
+        // descendHierarchy(parm, name);
         if (!foreignFunctionName.empty()) {
           parm.println("// Foreign function call");
           parm.println(foreignFunctionName + "(" + argumentNames + ");");
         }
         FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
-        ascendHierarchy(parm);
+        // ascendHierarchy(parm);
         parm.decIndent();
         parm.println("}");
       } else {
-        a_database.addProcedure(name, arguments, f);
         parm.println("void " + name + interface + ";");
       }
       debug.functionEnd("procedure_declarations");
@@ -413,16 +411,58 @@ namespace generator {
     debug.functionEnd("function_body");
   }
   
+  void SystemC::ForeignAttribute(parameters& parm, ast::Attribute* a) {
+    debug.functionStart("ForeignAttribute");
+    ast::Text* text = a->item ? &a->item->text : &a->string->text;
+    std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
+    ast::ObjectArguments arguments(false);
+    generateObjectArguments(a->arguments, arguments);
+    ast::ObjectType id = a->objectType;
+    debug.debug("id = " + ast::toString(id) + ", name = " + name + ", arguments = " + arguments.toString());
+    a_database.addAttribute(name, arguments, id, a, text);
+    auto valid = [&](DatabaseElement* e) {
+      bool arguments_match = arguments.empty() || e->arguments.ExactMatch(arguments);
+      bool match = (e->id == id) && arguments_match;
+      std::string s = (match ? "Match" : "Different"); 
+      debug.debug(s + ": " + e->toString());
+      return match;
+    };
+    DatabaseResult object;
+    if (a_database.findOne(object, name, valid)) {
+      DatabaseElement* e = object.object;
+      id == ast::ObjectType::FUNCTION ? assert(e->function) : assert(e->procedure);
+      ast::InterfaceList* i = (id == ast::ObjectType::FUNCTION ? e->function->interface : e->procedure->interface);
+      std::string interface = "(" + getInterface(parm, i) + ")";
+      std::string returnName = "void";
+      if (id == ast::ObjectType::FUNCTION) {
+        DatabaseResult result;
+        a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE);
+        returnName = a_name_converter.getName(result, true);
+      }
+      parm.println("/*");
+      parm.println(" * This is the definition of the foreign function set as an attribute.");
+      parm.println(" * The implementation must be defined in a .cpp file in this directory.");
+      parm.println("*/");
+      std::string foreignName = AttributeName(a);
+      parm.println(returnName + " " + foreignName + interface + ";");
+    } else {
+      exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
+      a_database.printAllObjects(name);
+    }
+    debug.functionEnd("ForeignAttribute");
+  }
+  
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
       debug.functionStart("attribute_declarations");
       if (a->item || a->string) {
-	ast::Text* text = a->item ? &a->item->text : &a->string->text;
-	std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
-	ast::ObjectArguments arguments(false);
-	generateObjectArguments(a->arguments, arguments);
-	ast::ObjectType id = a->objectType;
-	a_database.addAttribute(name, arguments, id, a, text);
+        assert(a->identifier);
+        std::string identifier = a->identifier->toString(true);
+        if (identifier == "FOREIGN") {
+          ForeignAttribute(parm, a);
+        } else {
+          exceptions.printWarning("Unknown attribute " + identifier, &a->identifier->text);
+        }
       }
       debug.functionEnd("attribute_declarations");
     }

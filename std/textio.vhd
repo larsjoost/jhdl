@@ -90,7 +90,7 @@ package TEXTIO is
 	      FIELD: in WIDTH := 0;
 	      UNIT: in TIME := ns);
 
-    attribute foreign of TEXTIO: package is "NO C code generation";
+    -- attribute foreign of TEXTIO: package is "NO C code generation";
 
     -- File position  Predicates predicate 
     

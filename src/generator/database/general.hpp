@@ -23,7 +23,7 @@ namespace generator {
     ast::ObjectArguments arguments;
     ast::ObjectValueContainer type;
     bool visible;
-    ast::Attribute* attribute;
+    ast::Attribute* attribute = NULL;
     ast::FunctionDeclaration* function;
     ast::ProcedureDeclaration* procedure;
     ast::Text* text;

@@ -137,7 +137,17 @@ namespace generator {
     };
     return findOne(object, name, valid, package, library);
   }
-  
+
+  bool Database::findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type) {
+    assert(identifier);
+    std::string name = identifier->toString(true);
+    if (!findOne(result, name, type)) {
+      exceptions.printError("Could not find declaration of " + ast::toString(type) + "\"" + name + "\"", &identifier->text);
+      return false;
+    }
+    return true;
+  }
+    
   bool Database::findOne(DatabaseResult& object, std::string& name, 
                          std::string package, std::string library) {
     auto valid = [&](DatabaseElement* e) {
