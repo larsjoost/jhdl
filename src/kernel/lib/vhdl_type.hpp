@@ -285,6 +285,9 @@ namespace vhdl {
   public:
     int value = 0;
 
+    Enumeration<T, E>() {
+    }
+    
     Enumeration<T, E>(T v) {
       set(v);
     }

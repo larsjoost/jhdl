@@ -122,8 +122,9 @@ namespace generator {
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type);
-    std::string subtypeIndication(parameters& parm, DatabaseResult& database_result, std::string& name,
-                                  ast::SubtypeIndication* t);
+    template<typename Func>
+    std::string Subtype(parameters& parm, DatabaseResult& database_result, std::string& name,
+                        ast::SubtypeIndication* t, Func func);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);

@@ -98,17 +98,12 @@ namespace generator {
                                     std::string& name, ast::SubtypeIndication* t) {
     debug.functionStart("ArraySubtype");
     assert(t);
-    std::string typeName = t->name->toString(true);
-    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
-      typeName = a_database.namePrefix(database_result) + typeName;
-      if (t->range) {
-        printSubtype(parm, name, t->range, typeName, database_result.object->type);
-        typeName = name;
-      }
-      typeName += "<>";
-    } else {
-      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
-    }
+    auto func = [](ast::RangeType* r, std::string& name, std::string& type_name) {
+      std::string s = type_name;
+      if (r) {s = name;}
+      return s;
+    };
+    std::string typeName =  Subtype(parm, database_result, name, t, func);
     debug.functionEnd("ArraySubtype");
     return typeName;
   }
@@ -331,10 +326,12 @@ namespace generator {
       }
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
+      std::string returnTypeName;
       DatabaseResult returnType;
-      a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE);
-      std::string returnTypeName = a_name_converter.getName(returnType, true);
-      parm.returnType = returnTypeName;
+      if (a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
+        returnTypeName = a_name_converter.getName(returnType, true);
+        parm.returnType = returnType.object->type;
+      }
       printSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       std::string interface = "(" + getInterface(parm, f->interface) + ")";
@@ -498,38 +495,6 @@ namespace generator {
   }
   
 
-  /*
-  vhdl:
-    <name>        <range>
-    integer range 0 to 10;
-  systemc:
-    struct TYPE_T_range { int left = 0; int right = 4; };
-    template<class T = TYPE_T_range>
-    using TYPE_T = INTEGER<T>;
-  */
-  std::string SystemC::subtypeIndication(parameters& parm, DatabaseResult& database_result,
-                                         std::string& name, ast::SubtypeIndication* t) {
-    debug.functionStart("subtypeIndication");
-    assert(t);
-    std::string typeName = t->name->toString(true);
-    debug.debug("Search for " + typeName);
-    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
-      typeName = a_database.namePrefix(database_result) + typeName;
-      debug.debug("Found typeName = " + typeName);
-      if (t->range) {
-        printSubtype(parm, name, t->range, typeName, database_result.object->type);
-      } else if (!parm.isArea(parameters::Area::INTERFACE)) {
-        parm.println("template <class RANGE = " + typeName + "_range>");
-        parm.println("using " + name + " = " + typeName + "<>;");
-      } 
-      typeName += "<>";
-    } else {
-      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
-    }
-    debug.debug("typeName = " + typeName);
-    debug.functionEnd("subtypeIndication");
-    return typeName;
-  }
 
   /*
   vhdl:
@@ -545,7 +510,14 @@ namespace generator {
       printSourceLine(parm, t->identifier);
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
-      subtypeIndication(parm, database_result, name, t->type);
+      auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
+        if (!r && !parm.isArea(parameters::Area::INTERFACE)) {
+          parm.println("template <class RANGE = " + type_name + "_range>");
+          parm.println("using " + name + " = " + type_name + "<>;");
+        } 
+        return type_name;
+      };
+      Subtype(parm, database_result, name, t->type, func);
       a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
     }
   }

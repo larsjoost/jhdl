@@ -83,7 +83,7 @@ class sc_signal : public sc_signal_base {
   bool event = false;
   
   explicit sc_signal<T>() {
-      signals.push_back(this);
+    signals.push_back(this);
   }
 
   void latchValue() {
