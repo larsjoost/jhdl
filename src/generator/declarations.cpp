@@ -284,7 +284,6 @@ namespace generator {
   std::string SystemC::FunctionAttribute(parameters& parm,
                                          std::string &name,
                                          ast::ObjectType type,
-                                         std::string& interface,
                                          ast::ObjectArguments& arguments,
                                          ast::Text* text) {
     debug.functionStart("FunctionAttribute, name = " + name + ", arguments = " + arguments.toString());
@@ -338,17 +337,13 @@ namespace generator {
       }
       printSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
-      std::string interface = "(" + getInterface(parm, f->interface) + ")";
       a_database.addFunction(type, name, arguments, parm.returnType, f);
       if (f->body) {
-        std::string foreignFunctionName = FunctionAttribute(parm, name, type,
-                                                            interface, arguments, &text);
+        std::string foreignFunctionName = FunctionAttribute(parm, name, type, arguments, &text);
         std::string parentName = a_database.getParentName();
         //        descendHierarchy(parm, name);
         bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
-        if (implementation) {
-          interface = "(" + getInterface(parm, f->interface, false) + ")";
-        }
+        std::string interface = "(" + getInterface(parm, f->interface, !implementation) + ")";
         std::string s = (implementation && !operatorName) ? parentName + "::" : "";
         parm.println(returnTypeName + " " + s + translatedName + interface + "{");
         parm.incIndent();
@@ -361,6 +356,7 @@ namespace generator {
         parm.println("}");
         // ascendHierarchy(parm);
       } else {
+        std::string interface = "(" + getInterface(parm, f->interface) + ")";
         parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       debug.functionEnd("function_declarations");

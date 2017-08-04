@@ -153,8 +153,7 @@ namespace generator {
     void generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
     void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
     std::string FunctionAttribute(parameters& parm, std::string& name, ast::ObjectType type,
-                                  std::string& interface, ast::ObjectArguments& arguments,
-                                  ast::Text* text);
+                                  ast::ObjectArguments& arguments, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
