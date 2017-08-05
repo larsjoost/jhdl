@@ -1,3 +1,4 @@
+#include <algorithm>
 
 #include "name_converter.hpp"
 
@@ -11,6 +12,14 @@ namespace generator {
       name = object.object->library + first_separator + object.object->sectionName + last_separator;
     }
     return name;
+  }
+
+  std::string NameConverter::GetPostfix(DatabaseResult& object) {
+    std::string result;
+    if (object.object->id == ast::ObjectType::TYPE) {
+      result = "<>";
+    } 
+    return result;
   }
   
   std::string NameConverter::getName(DatabaseResult& object, bool fullName) {
@@ -29,12 +38,9 @@ namespace generator {
           for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
             name = "p->" + name;
           }
-          if (object.object->id == ast::ObjectType::TYPE) {
-            name += "<>";
-          }
         } else {
           if (object.object->id == ast::ObjectType::TYPE) {
-            name = getPrefix(object, "::", "::") + name + "<>";
+            name = getPrefix(object, "::", "::") + name;
           } else {
             name = getPrefix(object, "_", ".") + name;
           }
@@ -42,7 +48,28 @@ namespace generator {
       }
     }
     a_debug.functionEnd("getName");
-    return name;
+    return name + GetPostfix(object);
   }
 
+  std::string NameConverter::ToLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+  }
+
+  std::string NameConverter::ToUpper(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+    return s;
+  }
+  
+  std::string NameConverter::getName(std::string& name, ast::ObjectArguments& arguments,
+                                     ast::ObjectValueContainer& return_type) {
+    std::string s = name;
+    for (ast::ObjectArgument& o : arguments.list) {
+      s += "_" + ToLower(o.type_name);
+    }
+    s += "__" + ast::toString(return_type.value);
+    return s;
+  }
+
+  
 }

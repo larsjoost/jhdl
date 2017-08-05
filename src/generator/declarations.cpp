@@ -3,6 +3,7 @@
 #include "systemc.hpp"
 #include "declarations.hpp"
 #include "database/database.hpp"
+#include "definition.hpp"
 
 namespace generator {
 
@@ -266,15 +267,29 @@ namespace generator {
     return result;
   }
 
-  std::string SystemC::getInterface(parameters& parm, ast::InterfaceList* interface, bool initialization) {
+  std::string SystemC::GetInterface(parameters& parm, ast::InterfaceList* interface, bool initialization,
+                                    std::string local_prefix) {
+    debug.functionStart("GetInterface");
+    std::string result;
+    if (interface) {
+      bool quiet = parm.setQuiet(true);
+      result = interfaceListToString(parm, interface, ", ", initialization, local_prefix);
+      parm.setQuiet(quiet);
+    }
+    debug.functionEnd("GetInterface");
+    return result;
+  }
+
+  void SystemC::PrintInterface(parameters& parm, ast::InterfaceList* interface) {
+    debug.functionStart("PrintInterface");
     std::string result;
     if (interface) {
       parameters::Area area = parm.area;
       parm.setArea(parameters::Area::INTERFACE);
-      result = interfaceListToString(parm, interface, ", ", initialization);
+      result = interfaceListToString(parm, interface, ", ", true);
       parm.setArea(area);
     }
-    return result;
+    debug.functionEnd("PrintInterface");
   }
 
   std::string SystemC::AttributeName(ast::Attribute* a) {
@@ -313,17 +328,15 @@ namespace generator {
       debug.functionStart("function_declarations");
       bool operatorName = (f->name == NULL);
       ast::Text& text = operatorName ? f->string->text : f->name->text;
-      std::string name;
+      std::string origin_name = operatorName ? f->string->toString(true) : f->name->toString(true);
       ast::ObjectType type = f->type;
-      std::string translatedName;
+      std::string translatedName = origin_name;
+      std::string class_name = origin_name;
       if (operatorName) {
-        name = f->string->toString(true);
-        a_expression.translateOperator(name, translatedName);
+        a_expression.translateOperator(origin_name, translatedName);
         translatedName = "operator " + translatedName;
-      } else {
-        name = f->name->toString(true);
-        translatedName = name;
-      }
+        class_name = "line" + std::to_string(text.getLine());
+      } 
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       std::string returnTypeName = "void";
@@ -337,27 +350,63 @@ namespace generator {
       }
       printSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
-      a_database.addFunction(type, name, arguments, parm.returnType, f);
-      if (f->body) {
-        std::string foreignFunctionName = FunctionAttribute(parm, name, type, arguments, &text);
-        std::string parentName = a_database.getParentName();
-        //        descendHierarchy(parm, name);
-        bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
-        std::string interface = "(" + getInterface(parm, f->interface, !implementation) + ")";
-        std::string s = (implementation && !operatorName) ? parentName + "::" : "";
-        parm.println(returnTypeName + " " + s + translatedName + interface + "{");
-        parm.incIndent();
-        if (!foreignFunctionName.empty()) {
-          parm.println("// Foreign function call");
-          parm.println("return " + foreignFunctionName + "(" + argumentNames + ");");
+      a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
+      class_name = "function_" + a_name_converter.getName(origin_name, arguments, parm.returnType);
+      std::string parentName = a_database.getParentName();
+      std::string function_prefix = "function_";
+      std::string prefix = parentName + "::" + class_name + "::";
+      std::string run_prefix;
+      std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
+      std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
+      bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
+      auto createDefinition = [&](parameters& parm) {
+        PrintInterface(parm, f->interface);
+      };
+      auto createBody = [&](parameters& parm) {
+        if (f->body) {
+          std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
+          std::string interface = implementation ? interface_without_initialization : interface_with_initialization;
+          parm.println(returnTypeName + " " + run_prefix + "run" + interface + "{");
+          parm.incIndent();
+          if (!foreignFunctionName.empty()) {
+            parm.println("// Foreign function call");
+            parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+          } 
+          FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
+          parm.decIndent();
+          parm.println("}");
+        } else {
+          parm.println(returnTypeName + " run" + interface_with_initialization + ";");
         }
-        FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
+      };
+      if (implementation) {
+        if (f->body) {
+          run_prefix = prefix;
+          descendHierarchy(parm, parentName);
+          createBody(parm);
+          ascendHierarchy(parm);
+        }
+      } else {
+        defineObject(parm, false, class_name, "SC_FUNCTION", NULL,
+                     NULL, NULL, createBody, createDefinition, false);
+      }
+      std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";
+      bool define_function = implementation || f->body;
+      parm.println((operatorName ? "friend " : "") + returnTypeName + " " +
+                   (implementation ? parentName + "::" : "") + translatedName + interface +
+                   (define_function ? "{" : ";"));
+      if (define_function) {
+        parm.incIndent();
+        parm.println("auto inst = " + class_name + "(this);");
+        std::string s,d;
+        for (auto& i : arguments.list) {
+          s += d + i.name;
+          d = ", ";
+        }
+        std::string r = returnTypeName == "void" ? "" : "return ";
+        parm.println(r + "inst.run(" + s + ");");
         parm.decIndent();
         parm.println("}");
-        // ascendHierarchy(parm);
-      } else {
-        std::string interface = "(" + getInterface(parm, f->interface) + ")";
-        parm.println((operatorName ? "friend " : "") + returnTypeName + " " + translatedName + interface + ";");
       }
       debug.functionEnd("function_declarations");
     }
@@ -395,7 +444,8 @@ namespace generator {
       DatabaseElement* e = object.object;
       assert(e->function);
       ast::InterfaceList* i = e->function->interface;
-      std::string interface = "(" + getInterface(parm, i) + ")";
+      std::string interface = "(" + GetInterface(parm, i) + ")";
+      PrintInterface(parm, i);
       std::string returnName = "void";
       if (id == ast::ObjectType::FUNCTION) {
         DatabaseResult result;

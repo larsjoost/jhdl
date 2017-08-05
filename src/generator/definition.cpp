@@ -16,8 +16,8 @@ namespace generator {
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
-		   [&](parameters& parm){}
-		   );
+		   [&](parameters& parm){},
+		   false);
     }
   }
 
@@ -33,14 +33,10 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
       };
-      defineObject(parm, false, name,
-                   "SC_FOR_GENERATE",
-		   &identifier,
+      defineObject(parm, false, name, "SC_FOR_GENERATE", &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
-		   createBody,
-		   createDeclaration
-                   );
+		   createBody, createDeclaration, false);
     }
   }
 
@@ -92,7 +88,7 @@ namespace generator {
                       });
       };
       defineObject(parm, false, methodName, "SC_THREAD", NULL,
-                   &method->declarations, NULL, createBody, createDefinition);
+                   &method->declarations, NULL, createBody, createDefinition, true);
     }
     debug.functionEnd("methodDefinition");
   }
@@ -132,7 +128,7 @@ namespace generator {
                         });
         };
         defineObject(parm, false, name, "SC_THREAD", NULL, NULL, NULL, createBody,
-		     [&](parameters& parm) {});
+		     [&](parameters& parm) {}, true);
       }
       debug.functionEnd("concurrentSignalAssignment");
     }

@@ -20,10 +20,16 @@ namespace generator {
       a_database = &database;
     };
 
+    std::string ToLower(std::string s);
+    std::string ToUpper(std::string s);
+    
+    std::string GetPostfix(DatabaseResult& object);
     std::string getPrefix(DatabaseResult& object, std::string first_separator, std::string last_separator);
 
     std::string getName(DatabaseResult& object, bool fullName);
-    
+    std::string getName(std::string& name, ast::ObjectArguments& arguments,
+                        ast::ObjectValueContainer& return_type);
+
     
   };
 

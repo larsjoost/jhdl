@@ -13,30 +13,32 @@ namespace generator {
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              BodyFunc bodyCallback,
 			     DeclFunc declarationCallback,
-                             std::string* constructor) {
+                             bool wait_statements) {
     debug.functionStart("defineObject");
     if (!topHierarchy) {descendHierarchy(parm, name);}
     parm.println(type + "(" + name + ") {");
     parm.incIndent();
-    parm.println("// Wait is support class of wait statements"); 
-    parm.println("Wait w;");
+    if (wait_statements) {
+      parm.println("// Wait is support class of wait statements"); 
+      parm.println("Wait w;");
+    }
     std::string parentName = a_database.getParentName();
     if (!topHierarchy) {
       parm.println("// p is used to access parent class");
       parm.println(parentName + "* p = NULL;");
     }
+    parm.decIndent();
+    parm.println("public:");
+    parm.incIndent();
     if (declarationList) {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
-    parm.decIndent();
-    parm.println("public:");
-    parm.incIndent();
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    createConstructor(parm, topHierarchy, name, argument, concurrentStatements, constructor);
+    createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     parm.decIndent();
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}

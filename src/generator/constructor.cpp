@@ -122,7 +122,7 @@ namespace generator {
     }
   }
 
-  std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument) {
+  std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument) {
     std::string parentName = a_database.getParentName();
     if (parentName.size() > 0) {
       std::string p1 = parentName +"* parent";
@@ -131,37 +131,37 @@ namespace generator {
         p1 += ", auto " + *argument;
         p2 += ", " + *argument + "(" + *argument + ")";
       }
-      return name + "(" + p1 + ") " + p2;
+      return type + "_CTOR(" + name + ")" + "(" + p1 + ") " + p2;
     }
     return "SC_CTOR(" + name + ")";
   }
 
-  void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& name,
-                                  std::string* argument,
-                                  ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                                  std::string* constructor) {
+  void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& type,
+                                  std::string& name, std::string* argument,
+                                  ast::List<ast::ConcurrentStatement>* concurrentStatements) {
     parameters::Area area = parm.area;
     parm.area = parameters::Area::DECLARATION;
     if (concurrentStatements) {
       concurrentStatementsInstantiation(parm, *concurrentStatements);
     }
     parm.area = parameters::Area::IMPLEMENTATION;
-    parm.println("void init() {");
     if (concurrentStatements) {
-      parm.incIndent();
-      concurrentStatementsInstantiation(parm, *concurrentStatements);
-      parm.decIndent();
+      parm.println("void init() {");
+      if (concurrentStatements) {
+        parm.incIndent();
+        concurrentStatementsInstantiation(parm, *concurrentStatements);
+        parm.decIndent();
+      }
+      parm.println("}");
     }
-    parm.println("}");
     parm.area = area;
-    if (constructor) {
-      parm.println(*constructor);
-    }
     if (!topHierarchy) {
-      parm.println(getConstructorDeclaration(parm, name, argument) + " {");
-      parm.incIndent();
-      parm.println("init();");
-      parm.decIndent();
+      parm.println(getConstructorDeclaration(parm, type, name, argument) + " {");
+      if (concurrentStatements) {
+        parm.incIndent();
+        parm.println("init();");
+        parm.decIndent();
+      }
       parm.println("}");
     }
   }

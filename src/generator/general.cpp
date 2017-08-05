@@ -64,12 +64,12 @@ namespace generator {
   }
 
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                             bool initialization) {
+                                             bool initialization, std::string local_prefix) {
     auto func = [](std::string& type, ast::ObjectType id,
                    ast::ObjectDeclaration::Direction direction) {
       return type;
     };
-    return interfaceListToString(parm, l, delimiter, initialization, func);
+    return interfaceListToString(parm, l, delimiter, initialization, func, local_prefix);
   }
 
 

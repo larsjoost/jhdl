@@ -288,18 +288,26 @@ int run(int argc, char* argv[]);
 
 #define SC_INTERFACE(x) struct interface_##x
 #define SC_MODULE(x) struct x : public sc_module, interface_##x
+#define SC_MODULE_CTOR(x) x
 
 #define SC_FOR_GENERATE(x) struct x  : public sc_module
+#define SC_FOR_GENERATOR_CTOR(x) x
 #define SC_NEW_FOR_GENERATE(x) x
 
-#define SC_PACKAGE(x) struct x 
+#define SC_PACKAGE(x) struct x
+#define SC_PACKAGE_CTOR(x) x
 #define SC_PACKAGE_BODY(x) struct body_##x : public x 
 
 #define SC_BLOCK(x) struct x : public sc_module
+#define SC_BLOCK_CTOR(x) x
 
 #define SC_NEW_BLOCK(x) x
 
 #define SC_THREAD(x) struct x : public sc_thread
+#define SC_THREAD_CTOR(x) x
 #define SC_NEW_THREAD(x) addMethod(x)
+
+#define SC_FUNCTION(x) struct x
+#define SC_FUNCTION_CTOR(x) x
 
 #endif

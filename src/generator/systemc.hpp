@@ -131,22 +131,24 @@ namespace generator {
 
     // declarations.hpp
     template<typename Func>
-    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback);
+    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "");
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
                                           bool initialization);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
-    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback);
+    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback, std::string local_prefix = "");
     template<typename Func>
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                      bool initialization, Func typeConverter);
+                                      bool initialization, Func typeConverter, std::string local_prefix = "");
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                      bool initialization);
+                                      bool initialization, std::string local_prefix = "");
     
     // declarations.cpp
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
-    std::string getInterface(parameters& parm, ast::InterfaceList* interface, bool initialization = true);
+    void PrintInterface(parameters& parm, ast::InterfaceList* interface);
+    std::string GetInterface(parameters& parm, ast::InterfaceList* interface,
+                             bool initialization = true, std::string local_prefix = "");
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
@@ -156,8 +158,7 @@ namespace generator {
                                   ast::ObjectArguments& arguments, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
-    void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
-                      ast::List<ast::SequentialStatement>& s);
+    void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d, ast::List<ast::SequentialStatement>& s);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f);
     std::string AttributeName(ast::Attribute* a);
     void ForeignAttribute(parameters& parm, ast::Attribute* a);
@@ -173,7 +174,7 @@ namespace generator {
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    std::string getConstructorDeclaration(parameters& parm, std::string& name, std::string* argument);
+    std::string getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument);
     bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
@@ -186,7 +187,7 @@ namespace generator {
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
                       BodyFunc bodyCallback,
 		      DeclFunc declarationCallback,
-                      std::string* constructor = NULL);
+                      bool wait_statements);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
@@ -214,10 +215,9 @@ namespace generator {
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                               std::string& entityName, std::string& library);
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
-    void createConstructor(parameters& parm, bool toopHierarchy, std::string& name,
-                           std::string* argument,
-                           ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                           std::string* constructor);
+    void createConstructor(parameters& parm, bool toopHierarchy, std::string& type,
+                           std::string& name, std::string* argument,
+                           ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     // systemc.cpp
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
@@ -294,35 +294,35 @@ namespace generator {
 
   template <typename Func>
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                             bool initialization, Func typeConverter) {
+                                             bool initialization, Func typeConverter, std::string local_prefix) {
+    debug.functionStart("interfaceListToString");
     std::string s;
     if (l) {
       std::string x = "";
       std::string d = "";
-      traverseInterfaceList(parm, l, true,
-                            [&](std::string& name,
-                                std::string& type, std::string& init,
-                                ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
-                              std::string x = (initialization && !init.empty()) ? " = " + init : "";
-                              s += d + typeConverter(type, id, direction) + " " + name + x;
-          d = delimiter;
-        }
-        );
+      auto func = [&](std::string& name,
+                      std::string& type, std::string& init,
+                      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+        std::string x = (initialization && !init.empty()) ? " = " + init : "";
+        s += d + typeConverter(type, id, direction) + " " + name + x;
+        d = delimiter;
+      };
+      traverseInterfaceList(parm, l, func, local_prefix);
     }
+    debug.functionEnd("interfaceListToString");
     return s;
   }
 
   template<typename Func>
-  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, bool printEnable, Func callback) {
+  void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback,
+                                      std::string local_prefix) {
     debug.functionStart("traverseInterfaceList");
     if (l) {
-      bool q = parm.setQuiet(!printEnable);
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.object) {
-          objectDeclaration(parm, i.object, callback);
+          objectDeclaration(parm, i.object, callback, local_prefix);
         }
       }
-      parm.setQuiet(q);
     }
     debug.functionEnd("traverseInterfaceList");
   }
