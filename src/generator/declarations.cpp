@@ -195,6 +195,23 @@ namespace generator {
       debug.functionEnd("type_declarations");
     }
   }
+
+  void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
+    if (file) {
+      debug.functionStart("FileDeclaration");
+      printSourceLine(parm, file->handle);
+      std::string name = file->handle->toString(true);
+      std::string type = file->type->toString(true);
+      DatabaseResult result;
+      if (a_database.findOne(result, type, ast::ObjectType::TYPE)) {
+        type = a_name_converter.getName(result, true);
+        a_database.add(ast::ObjectType::FILE, name, result.object->type);
+      }
+      parm.println(type + " " + name + " = " + type + "(" +
+                   file->direction->toString(true) + ", " + file->filename->toString() + ");"); 
+      debug.functionEnd("FileDeclaration");
+    }
+  }
   
   void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
     if (interface) {
@@ -205,7 +222,7 @@ namespace generator {
         a.type_name = i.object->type->name->toString(true);
         a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
         a.type = result.object->type;
-        a.defaultValue = (i.object->initialization) ? a_expression.toString(i.object->initialization->value, a.type) : "";
+        a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
         arguments.push_back(a);
       }
     }
@@ -220,7 +237,7 @@ namespace generator {
         a.type_name = i.toString(true);
         a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
         a.type = result.object->type;
-        a.defaultValue = "";
+        a.default_value = NULL;
         arguments.push_back(a);
       }
     }
@@ -267,17 +284,39 @@ namespace generator {
     return result;
   }
 
+  std::string SystemC::InterfaceTypeConverter(std::string& type, ast::ObjectType id,
+                                              ast::ObjectDeclaration::Direction direction) {
+    std::string r = (direction == ast::ObjectDeclaration::Direction::OUT ||
+                     direction == ast::ObjectDeclaration::Direction::INOUT ||
+                     id == ast::ObjectType::FILE) ? "&" : ""; 
+    return type + r;
+  }
+  
   std::string SystemC::GetInterface(parameters& parm, ast::InterfaceList* interface, bool initialization,
                                     std::string local_prefix) {
     debug.functionStart("GetInterface");
     std::string result;
     if (interface) {
       bool quiet = parm.setQuiet(true);
-      result = interfaceListToString(parm, interface, ", ", initialization, local_prefix);
+      auto type_converter = [&](std::string& type, ast::ObjectType id,
+                                ast::ObjectDeclaration::Direction direction) {
+        return InterfaceTypeConverter(type, id, direction);
+      };
+      result = interfaceListToString(parm, interface, ", ", initialization, type_converter, local_prefix, false);
       parm.setQuiet(quiet);
     }
     debug.functionEnd("GetInterface");
     return result;
+  }
+
+  void SystemC::StoreInterfaceInDatabase(parameters& parm, ast::InterfaceList* interface) {
+    debug.functionStart("StoreInterfaceInDatabase");
+    if (interface) {
+      bool quiet = parm.setQuiet(true);
+      interfaceListToString(parm, interface, ", ", false, "", true);
+      parm.setQuiet(quiet);
+    }
+    debug.functionEnd("StoreInterfaceInDatabase");
   }
 
   void SystemC::PrintInterface(parameters& parm, ast::InterfaceList* interface) {
@@ -286,7 +325,11 @@ namespace generator {
     if (interface) {
       parameters::Area area = parm.area;
       parm.setArea(parameters::Area::INTERFACE);
-      result = interfaceListToString(parm, interface, ", ", true);
+      auto type_converter = [&](std::string& type, ast::ObjectType id,
+                                ast::ObjectDeclaration::Direction direction) {
+        return InterfaceTypeConverter(type, id, direction);
+      };
+      result = interfaceListToString(parm, interface, ", ", true, type_converter, "", true);
       parm.setArea(area);
     }
     debug.functionEnd("PrintInterface");
@@ -323,6 +366,21 @@ namespace generator {
     return foreignName;
   };
 
+  std::string SystemC::FunctionReturn(parameters& parm, ast::FunctionDeclaration* f) {
+    debug.functionStart("FunctionReturn");
+    std::string returnTypeName = "void";
+    parm.returnType = ast::ObjectValueContainer(ast::ObjectValue::NONE);
+    if (f->returnType) {
+      DatabaseResult returnType;
+      if (a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
+        returnTypeName = a_name_converter.getName(returnType, true);
+        parm.returnType = returnType.object->type;
+      }
+    }
+    debug.functionEnd("FunctionReturn");
+    return returnTypeName;
+  }
+  
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
       debug.functionStart("function_declarations");
@@ -339,15 +397,7 @@ namespace generator {
       } 
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
-      std::string returnTypeName = "void";
-      parm.returnType = ast::ObjectValueContainer(ast::ObjectValue::NONE);
-      if (f->returnType) {
-        DatabaseResult returnType;
-        if (a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
-          returnTypeName = a_name_converter.getName(returnType, true);
-          parm.returnType = returnType.object->type;
-        }
-      }
+      std::string returnTypeName = FunctionReturn(parm, f);
       printSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
@@ -371,11 +421,12 @@ namespace generator {
           if (!foreignFunctionName.empty()) {
             parm.println("// Foreign function call");
             parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
-          } 
+          }
           FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
           parm.decIndent();
           parm.println("}");
         } else {
+          std::string r;
           parm.println(returnTypeName + " run" + interface_with_initialization + ";");
         }
       };
@@ -383,6 +434,7 @@ namespace generator {
         if (f->body) {
           run_prefix = prefix;
           descendHierarchy(parm, parentName);
+          StoreInterfaceInDatabase(parm, f->interface);
           createBody(parm);
           ascendHierarchy(parm);
         }
@@ -580,6 +632,7 @@ namespace generator {
       object_declarations(parm, i.constant);
       function_declarations(parm, i.function);
       attribute_declarations(parm, i.attribute);
+      FileDeclaration(parm, i.file);
     }
     debug.functionEnd("declarations");
   }

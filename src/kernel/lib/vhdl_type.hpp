@@ -312,12 +312,13 @@ namespace vhdl {
       return value != (T)0;
     }
 
-    std::string toString() {
+    std::string toString(bool with_quotes = true) {
       const static E valueArray;
       if (valueArray.array[value].c == 0) {
         return valueArray.array[value].s;
       }
-      return "'" + std::string(1, valueArray.array[value].c) + "'";
+      std::string s = with_quotes ? "'" : "";
+      return s + std::string(1, valueArray.array[value].c) + s;
     }
 
     int POS() {
@@ -354,73 +355,79 @@ namespace vhdl {
   class Array {
   public:
     RANGE range;
-    TYPE* value;
-
-    class iterator {
-      friend class Array;
-      Array<TYPE, RANGE>* parent;
-      int index;
-    public:
-      Array<TYPE, RANGE> operator *() const { parent->value = index; return *parent; }
-      const iterator &operator ++() { ++index; return *this; }
-      Array<TYPE, RANGE> operator ++(int) { iterator copy(*this); ++index; return copy; }
-      
-      bool operator ==(const iterator &other) const { return index == other.index; }
-      bool operator !=(const iterator &other) const { return index != other.index; }
-
-    protected:
-      iterator(Array<TYPE, RANGE>* parent, int start) : parent(parent), index(start) { }
-    };
+    TYPE* value = NULL;
 
     void init() {
+      assert(value == NULL);
       value = new TYPE[LENGTH()];
     }
     
-  public:
-
-    explicit Array<TYPE, RANGE>() : begin_(this, range.left), end_(this, range.right + 1) {
-      init();
-    }
-    Array<TYPE, RANGE>(TYPE v) :
-    value(v), begin_(this, range.left), end_(this, range.right + 1) {
-      init();
-    }
-    
-    void operator=(const TYPE other) { value = other; }
-    template <class T>
-    void operator=(const Array<TYPE, T>& other) { value = other.value; }
-    void operator=(const char* other) {
-      std::string s(other);
+    void set(const std::string& s) {
       assert(s.size() == LENGTH());
+      if (value == NULL) { init(); }
       int i = 0;
       for (auto c : s) {
         value[i++] = c;
       }
     }
 
-    template <class T>
-    bool operator ==(const Array<TYPE, T> &other) { return value == other.value; }
-    template <class T>
-    bool operator !=(const Array<TYPE, T> &other) { return value != other.value; }
-    bool operator ==(TYPE other) { return value == other; }
-    bool operator !=(TYPE other) { return value != other; }
-    TYPE operator +(TYPE other) { return value + other; }
-    TYPE operator -(TYPE other) { return value - other; }
-    template <class T>
-    TYPE operator +(const Array<TYPE, T>& other) { return value + other.value; }
-    template <class T>
-    TYPE operator -(const Array<TYPE, T>& other) { return value - other.value; }
-    TYPE& operator [](int index) {
+    int ConvertIndex(int index) {
       int x = ASCENDING() ? 1 : -1;
-      int i = x * index - range.left;
-      assert(i >= 0 && i < LENGTH());
+      return x * index - range.left;
+    }
+
+    bool IndexCheck(int i) {
+      return i >= 0 && i < LENGTH();
+    }
+    
+    bool WithinRange(int index) {
+      int i = ConvertIndex(index);
+      return IndexCheck(i);
+    }
+    
+    TYPE& get(int index) {
+      int i = ConvertIndex(index);
+      assert(IndexCheck(i));
       return value[i];
     }
     
-    std::string toString() {
-      return std::to_string(value);
+  public:
+
+    Array<TYPE, RANGE>(Array<TYPE, RANGE>& other) {
+      set(other);
+    }
+    
+    Array<TYPE, RANGE>() {
     }
 
+    void resize(int size) {
+      assert(size > 0);
+      range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
+    }
+    
+    explicit Array<TYPE, RANGE>(int size) {
+      resize(size);
+      init();
+    }
+    
+    void set(Array<TYPE, RANGE>& other) {
+      if (value != NULL) {delete value; value = NULL; }
+      range = other.range;
+      init();
+      for (int i = range.left; WithinRange(i); ASCENDING() ? i++ : i--) {
+        get(i) = other[i];
+      }
+    }
+
+    void operator=(const TYPE other) { value = other; }
+    template <class T>
+    void operator=(const char* other) {std::string s(other); set(s);}
+    void operator=(const std::string other) {set(other);}
+
+    TYPE& operator [](int index) {
+      return get(index);
+    }
+    
     bool ASCENDING() {
       return (range.right > range.left ? true : false);
     }
@@ -430,6 +437,14 @@ namespace vhdl {
     TYPE& LOW() { return (range.left < range.right ? LEFT() : RIGHT()); }
     TYPE& LEFT() { return value[0]; }
     TYPE& RIGHT() { return value[LENGTH() - 1]; }
+
+    std::string toString() {
+      std::string s;
+      for (int i = range.left; WithinRange(i); ASCENDING() ? i++ : i--) {
+        s += this->get(i).toString(false);
+      }
+      return s;
+    }
     
     std::string STATUS() {
       return toString();
@@ -444,14 +459,9 @@ namespace vhdl {
       return std::to_string(r);
     }
 
-    iterator begin() const { return begin_; }
-    iterator end() const { return end_; }
-
-  private:
-    iterator begin_;
-    iterator end_;
-
   };
+
+  
   
   /*
    * vhdl_array_type examples:

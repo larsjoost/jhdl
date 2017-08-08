@@ -5,6 +5,8 @@
 
 namespace vhdl {
   
+  STD::STANDARD STD_STANDARD;
+
   void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity) {
     std::ostream* o = &std::cout;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::ERROR ||

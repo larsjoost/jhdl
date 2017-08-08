@@ -35,5 +35,8 @@ void Exceptions::printError(std::string message, ast::Text* text) {
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
   numberOfWarnings++;
-  print("Warning", Output::Color::YELLOW, message, text);
+  if (a_display_warnings) {
+    print("Warning", Output::Color::YELLOW, message, text);
+  }
 }
+  

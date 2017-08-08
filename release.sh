@@ -3,6 +3,8 @@
 
 make clean
 
+git clean -xf
+
 set -e
 
 make

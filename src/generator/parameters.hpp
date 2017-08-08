@@ -12,6 +12,8 @@ namespace generator {
 
   class parameters {
 
+    Debug<true> debug;
+    
     struct FileInfo {
       std::string fileName;
       std::ofstream outputFile;
@@ -22,8 +24,6 @@ namespace generator {
     FileInfo sourceFileInfo;
     FileInfo headerFileInfo;
 
-    Debug<false> debug = Debug<false>("parameters");
-    
     bool quiet = false;
     
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);
@@ -37,6 +37,7 @@ namespace generator {
     FileSelect a_file_select;
     std::string AreaToString(Area a);
   public:
+    parameters() : debug("parameters") {};
     int index;
     Area area;
     bool isArea(Area a);

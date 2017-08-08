@@ -51,6 +51,7 @@ namespace generator {
 
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
+      debug.functionStart("reportStatement");
       if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
 	static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
 	std::string severity = p->severity->toString(true);
@@ -64,6 +65,7 @@ namespace generator {
 	  a_database.printAllObjects(severity);
 	}
       }
+      debug.functionEnd("reportStatement");
     }
   }
 

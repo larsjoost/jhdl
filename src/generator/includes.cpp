@@ -35,9 +35,6 @@ namespace generator {
         std::string library = useClause.library->toString(true);
 	std::string package = useClause.package->toString(true);
 	if (!load) {
-	  if ("WORK" != library) {
-	    parm.println(library + "::" + package + " " + library + "_" + package + ";");
-	  }
 	  std::string identifier = useClause.identifier->toString(true);
 	  loadPackage(package, library, identifier, &useClause.package->text);
 	} else {

@@ -14,12 +14,27 @@ architecture rtl of test is
     return a - b + 1;
   end function func;
 
+  function func (
+    a : boolean;
+    b : boolean)
+    return integer is
+  begin
+    return 123;
+  end function func;
+
 begin
 
   process is
     variable a : integer;
     variable b : integer;
   begin
+    a := func(true, true);
+    if (a /= 123) then
+      report "a = " & integer'image(a) & ", but expected 123"
+        severity failure;
+    else
+      report "a = " & integer'image(a) severity note;
+    end if;
     a := func;
     if (a /= 2) then
       report "a = " & integer'image(a) & ", but expected 2"

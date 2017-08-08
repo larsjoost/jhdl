@@ -70,6 +70,13 @@ namespace generator {
     s += "__" + ast::toString(return_type.value);
     return s;
   }
-
-  
+ 
+  std::string NameConverter::GetName(ast::SimpleIdentifier* i, ast::ObjectType o) {
+    DatabaseResult result;
+    if (!a_database->findOne(result, i, o)) {
+      assert(false);
+    }
+    return getName(result, true);
+  }
+ 
 }

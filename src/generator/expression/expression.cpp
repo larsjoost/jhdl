@@ -75,8 +75,11 @@ namespace generator {
     std::string name = p->name->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(p->arguments);
     auto valid = [&](DatabaseElement* e) {
-      return ((e->id == ast::ObjectType::PROCEDURE) &&
-              e->arguments.equals(arguments));
+      bool result = ((e->id == ast::ObjectType::PROCEDURE) &&
+                     e->arguments.equals(arguments));
+      debug.debug(e->toString() + (result ? " == " : " != ") + name + "(" + arguments.toString() + ")",
+                  true, (result ? Output::Color::GREEN : Output::Color::RED));
+      return result;
     };
     DatabaseResult object;
     if (a_database->findOne(object, name, valid)) {
@@ -121,8 +124,8 @@ namespace generator {
         result = true;
       }
     }
-    debug.debug("e = " + e->toString() + ", result = " + (result ? "true" : "false"));
-    debug.functionEnd("objectWithArguments");
+    debug.debug("e = " + e->toString());
+    debug.functionEnd("objectWithArguments = " + std::string(result ? "true" : "false"));
     return result;
   }
   
@@ -250,9 +253,11 @@ namespace generator {
   }
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
-    std::string enumName = physical->unit->toString(true);
-    a_database->globalName(enumName, ast::ObjectType::ENUM);
-    return "{" + physical->number->toString() + ", " + enumName + "}";
+    debug.functionStart("physicalToString");
+    std::string enumName = a_name_converter->GetName(physical->unit, ast::ObjectType::ENUM);
+    std::string result = "{" + physical->number->toString() + ", " + enumName + "}";
+    debug.functionEnd("physicalToString");
+    return result;
   }
   
   ExpressionParser::ReturnTypes ExpressionParser::expressionTermReturnTypes(ast::ExpressionTerm* e) {

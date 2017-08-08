@@ -44,9 +44,7 @@ protected:
 
 public:
   
-  Debug(std::string name) {
-    a_name = name;
-  }
+  Debug(std::string name) : a_name(name) {}
 
   void functionStart(std::string name, bool highlight = false) {
     print(name, "FUNCTION START", highlight, true);

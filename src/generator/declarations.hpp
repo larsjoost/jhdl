@@ -39,7 +39,8 @@ namespace generator {
   }
 
   template<typename Func>
-  void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix) {
+  void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix,
+                                  bool database_enable) {
     if (v) {
       debug.functionStart("objectDeclaration");
       assert(v->identifier);
@@ -51,7 +52,7 @@ namespace generator {
         return (r ? local_prefix + name : type_name);
       };
       type = Subtype(parm, database_result, type, v->type, func);
-      if (!parm.isQuiet()) {a_database.add(v->objectType, name, database_result.object->type);}
+      if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
       std::string init = "";
       if (v->initialization) {
         init = a_expression.toString(v->initialization->value, database_result.object->type);

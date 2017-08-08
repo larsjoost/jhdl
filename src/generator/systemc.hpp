@@ -52,10 +52,10 @@ namespace generator {
   
   class SystemC { 
 
+    Debug<true> debug;
+
     Exceptions exceptions;
     
-    Debug<false> debug = Debug<false>("SystemC");
-
     const std::string libraryInfoFilename = ".jhdl.ini";
     
     bool verbose = false;
@@ -131,21 +131,29 @@ namespace generator {
 
     // declarations.hpp
     template<typename Func>
-    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "");
+    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "",
+                           bool database_enable = true);
     std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
                                           bool initialization);
     void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
-    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback, std::string local_prefix = "");
+    void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback, std::string local_prefix = "",
+                               bool database_enable = true);
     template<typename Func>
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                      bool initialization, Func typeConverter, std::string local_prefix = "");
+                                      bool initialization, Func typeConverter, std::string local_prefix = "",
+                                      bool database_enable = true);
     std::string interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                      bool initialization, std::string local_prefix = "");
+                                      bool initialization, std::string local_prefix = "",
+                                      bool database_enable = true);
     
     // declarations.cpp
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
+    void FileDeclaration(parameters& parm, ast::FileDeclaration* file);
+    std::string InterfaceTypeConverter(std::string& type, ast::ObjectType id,
+                                       ast::ObjectDeclaration::Direction direction);
+    void StoreInterfaceInDatabase(parameters& parm, ast::InterfaceList* interface);
     void PrintInterface(parameters& parm, ast::InterfaceList* interface);
     std::string GetInterface(parameters& parm, ast::InterfaceList* interface,
                              bool initialization = true, std::string local_prefix = "");
@@ -157,6 +165,7 @@ namespace generator {
     std::string FunctionAttribute(parameters& parm, std::string& name, ast::ObjectType type,
                                   ast::ObjectArguments& arguments, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
+    std::string FunctionReturn(parameters& parm, ast::FunctionDeclaration* f);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
     void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d, ast::List<ast::SequentialStatement>& s);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f);
@@ -294,7 +303,8 @@ namespace generator {
 
   template <typename Func>
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
-                                             bool initialization, Func typeConverter, std::string local_prefix) {
+                                             bool initialization, Func typeConverter, std::string local_prefix,
+                                             bool database_enable) {
     debug.functionStart("interfaceListToString");
     std::string s;
     if (l) {
@@ -307,7 +317,7 @@ namespace generator {
         s += d + typeConverter(type, id, direction) + " " + name + x;
         d = delimiter;
       };
-      traverseInterfaceList(parm, l, func, local_prefix);
+      traverseInterfaceList(parm, l, func, local_prefix, database_enable);
     }
     debug.functionEnd("interfaceListToString");
     return s;
@@ -315,12 +325,13 @@ namespace generator {
 
   template<typename Func>
   void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback,
-                                      std::string local_prefix) {
+                                      std::string local_prefix,
+                                      bool database_enable) {
     debug.functionStart("traverseInterfaceList");
     if (l) {
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.object) {
-          objectDeclaration(parm, i.object, callback, local_prefix);
+          objectDeclaration(parm, i.object, callback, local_prefix, database_enable);
         }
       }
     }

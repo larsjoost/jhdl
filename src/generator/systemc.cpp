@@ -14,7 +14,7 @@
 
 namespace generator {
 
-  SystemC::SystemC(bool verbose) {
+  SystemC::SystemC(bool verbose) : debug("SystemC") {
     this->verbose |= verbose; 
   }
 
@@ -79,9 +79,6 @@ namespace generator {
       includes(parm, it.module.contextClause, true);
     }
     namespaceStart(parm, library);
-    if (library != "STD") {
-      parm.println("STD::STANDARD STD_STANDARD;");
-    }
     for (ast::DesignUnit& it : designFile.designUnits.list) {
       includes(parm, it.module.contextClause, false);
       packageDeclaration(parm, it.module.package, library);
@@ -230,11 +227,21 @@ namespace generator {
         parm.setArea(area);
         parm.decIndent();
         parm.println("};");
+        parm.decIndent();
+        parm.println("}");
+        parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
+        parm.println("namespace " + library + " {");
+        parm.incIndent();
       } else {
         parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
 	parameters::Area area = parm.area;
         parm.setArea(parameters::Area::IMPLEMENTATION);
 	declarations(parm, package->declarations);
+        parm.decIndent();
+        parm.println("}");
+        parm.println(library + "::" + name + " " + library + "_" + name + ";");
+        parm.println("namespace " + library + " {");
+        parm.incIndent();
 	parm.setArea(area);
         parm.selectFile(file_select);
       }
@@ -261,10 +268,10 @@ namespace generator {
 	auto func = [&](std::string& type, ast::ObjectType id,
 			ast::ObjectDeclaration::Direction direction) {
           switch (direction) {
-	  case ast::ObjectDeclaration::IN: return "sc_in<" + type + ">";
-	  case ast::ObjectDeclaration::OUT: 
-	  case ast::ObjectDeclaration::INOUT: 
-	  case ast::ObjectDeclaration::BUFFER: return "sc_out<" + type + ">";
+	  case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
+	  case ast::ObjectDeclaration::Direction::OUT: 
+	  case ast::ObjectDeclaration::Direction::INOUT: 
+	  case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
 	  }
 	  return type;
 	};

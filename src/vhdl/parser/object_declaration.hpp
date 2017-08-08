@@ -44,10 +44,10 @@ namespace vhdl {
            scanner::Scanner::VHDL_BUFFER};
         static const ast::ObjectDeclaration::Direction TRANSLATE[NUMBER_OF_DIRECTIONS] =
           {
-            ast::ObjectDeclaration::IN,
-            ast::ObjectDeclaration::OUT,
-            ast::ObjectDeclaration::INOUT,
-            ast::ObjectDeclaration::BUFFER
+            ast::ObjectDeclaration::Direction::IN,
+            ast::ObjectDeclaration::Direction::OUT,
+            ast::ObjectDeclaration::Direction::INOUT,
+            ast::ObjectDeclaration::Direction::BUFFER
           };
         for (int i=0; i<NUMBER_OF_DIRECTIONS; i++) {
           if (scanner->optional(DIRECTIONS[i])) {

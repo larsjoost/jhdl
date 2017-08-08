@@ -57,6 +57,7 @@ namespace ast {
       return typeName + "(User type)";
     }
     if (value == ObjectValue::ARRAY) {
+      assert(subtype != NULL);
       return "array of " + subtype->toString();
     }
     if (value == ObjectValue::ENUMERATION) {
@@ -115,11 +116,7 @@ namespace ast {
   void ObjectArguments::setDefaultValues(bool m[], ObjectArguments& interface) {
     int index = 0;
     for (auto& i : interface.list) {
-      if (i.defaultValue.empty()) {
-        m[index] = false;
-      } else {
-        m[index] = true;
-      }
+      m[index] = i.default_value ? true : false;
       index++;
     }
   }
@@ -193,7 +190,7 @@ namespace ast {
   }
 
   std::string ObjectArgument::toString() {
-    return name + " : " + type_name + "(" + type.toString() + ") := " + defaultValue;
+    return name + " : " + type_name + "(" + type.toString() + ") := " + (default_value ? "[DEFAULT]" : "");
   }
   
   std::string ObjectArguments::toString() {

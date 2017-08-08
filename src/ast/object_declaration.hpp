@@ -13,11 +13,11 @@ namespace ast {
     
   public:
 
-    enum Direction {IN, OUT, INOUT, BUFFER, NONE};
+    enum class Direction {IN, OUT, INOUT, BUFFER, NONE};
     
     ObjectType objectType;
     SimpleIdentifier* identifier;
-    Direction direction = NONE;
+    Direction direction = Direction::NONE;
     SubtypeIndication* type;
     DeclarationInitialization* initialization;
     

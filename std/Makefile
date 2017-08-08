@@ -22,7 +22,7 @@ textio.hpp: textio.vhd ../src/hdlc
 
 clean:
 	find . -name "*.o" -type f -delete
-	rm standard.hpp env.hpp textio.hpp
+	rm standard.hpp standard.cpp env.hpp env.cpp textio.hpp textio.cpp
 
 print-%:
 	@echo '$*=$($*)'

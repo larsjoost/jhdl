@@ -14,12 +14,13 @@ namespace generator {
 
   class ExpressionParser {
 
+    Debug<false> debug;
+    
     bool verbose = false;
     Database* a_database;
     NameConverter* a_name_converter;
     Exceptions exceptions;
-    Debug<false> debug = Debug<false>("ExpressionParser");
-    
+
     struct ReturnTypePair {
       ast::ObjectValueContainer left;
       ast::ObjectValueContainer right;
@@ -27,6 +28,27 @@ namespace generator {
     
     using ReturnTypes = std::list<ast::ObjectValueContainer>;
 
+    // Exception classes
+
+    class ObjectNotFound {
+      ExpressionParser* a_parent;
+      std::string a_name;
+      std::string a_message;
+      ast::Text* a_text;
+    public:
+      ObjectNotFound(ExpressionParser* parent, std::string name,
+                     std::string message, ast::Text* text) {
+        a_parent = parent;
+        a_name = name;
+        a_message = message;
+        a_text = text;
+      }
+      void print() {
+        a_parent->exceptions.printError(a_message, a_text);
+	a_parent->a_database->printAllObjects(a_name);
+      }
+    };
+    
     template<typename Func>
     ReturnTypes getReturnTypes(std::string& name, Func valid); 
     ReturnTypes getStandardOperatorReturnTypes(std::string& name,
@@ -107,7 +129,7 @@ namespace generator {
     
   public:
 
-    ExpressionParser(Database& database, NameConverter& name_converter, bool verbose = false) {
+    ExpressionParser(Database& database, NameConverter& name_converter, bool verbose = false) : debug("ExpressionParser") {
       a_database = &database;
       a_name_converter = &name_converter;
       this->verbose |= verbose;
@@ -139,7 +161,8 @@ namespace generator {
     debug.functionStart("toString");
     // First-pass: Collect the possible return types
     ast::ObjectValueContainer actualType;
-    getType(e, expectedType, actualType);
+    getType(e, expectedType, actualType); 
+    // debug.debug("Expected type = " + expectedType.toString() + ", actual type = " + actualType.toString());
     // Second-pass: Resolve the return type and convert to string
     std::string s = expressionToString(e, actualType, sensitivityListCallback);
     debug.functionEnd("toString");
@@ -176,30 +199,32 @@ namespace generator {
                                                   int argumentNumber,
                                                   ast::AssociationList* l,
                                                   Func sensitivityListCallback) { 
-    debug.functionStart("associateArgument");
-    std::string argument = interfaceElement.defaultValue;
+    debug.functionStart("associateArgument, interfaceElement = " + interfaceElement.toString(), true);
+    std::string argument = interfaceElement.default_value ? toString(interfaceElement.default_value, interfaceElement.type) : "";
     if (l) {
       int associationElementNumber = 0;
       for (auto& e : l->associationElements.list) {
-        std::string actualPart = expressionToString(e.actualPart, interfaceElement.type, sensitivityListCallback);
-        debug.debug("Actual part = " + actualPart);
-        if (e.formalPart) {
-          std::string formalPart = e.formalPart->toString(true);
-          debug.debug("Formal part = " + formalPart + ", interface element = " + interfaceElement.name);
-          if (formalPart == interfaceElement.name) {
+        try {
+          std::string actualPart = expressionToString(e.actualPart, interfaceElement.type, sensitivityListCallback);
+          debug.debug("Actual part = " + actualPart);
+          if (e.formalPart) {
+            std::string formalPart = e.formalPart->toString(true);
+            debug.debug("Formal part = " + formalPart + ", interface element = " + interfaceElement.name);
+            if (formalPart == interfaceElement.name) {
+              argument = actualPart;
+              break;
+            }
+          } else if (associationElementNumber == argumentNumber) {
+            debug.debug("Association number " + std::to_string(associationElementNumber) + " match");
             argument = actualPart;
             break;
           }
-        } else if (associationElementNumber == argumentNumber) {
-          debug.debug("Association number " + std::to_string(associationElementNumber) + " match");
-          argument = actualPart;
-          break;
+        } catch (ObjectNotFound e) {
         }
         associationElementNumber++;
       }
     }
-    debug.debug("Result = " + argument);
-    debug.functionEnd("associateArgument");
+    debug.functionEnd("associateArgument = " + argument);
     return argument;
   }
 
@@ -259,7 +284,7 @@ namespace generator {
                object.object->id == ast::ObjectType::PROCEDURE) {
       name += "()";
     }
-    debug.functionEnd("objectToString");
+    debug.functionEnd("objectToString = " + name);
     return name;
   }
 
@@ -327,8 +352,7 @@ namespace generator {
     } else {
       result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
     }
-    debug.debug("Result = " + result);
-    debug.functionEnd("expressionToString");
+    debug.functionEnd("expressionToString = " + result);
     return result;
   }
 
@@ -373,7 +397,8 @@ namespace generator {
                                identifier->arguments, sensitivityListCallback);
     } else {
       auto valid = [&](DatabaseElement* e) {
-        return objectWithArguments(e, arguments, &expectedType);
+        bool result = objectWithArguments(e, arguments, &expectedType);
+        return result;
       };
       DatabaseResult object;
       if (a_database->findOne(object, name, valid)) {
@@ -384,12 +409,11 @@ namespace generator {
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
-        exceptions.printError("Could not find definition of " + name + args +
-			      " with type " + expectedType.toString(), &identifier->text);
-	a_database->printAllObjects(name);
+        throw ObjectNotFound(this, name, "Could not find definition of " + name + args +
+                             " with type " + expectedType.toString(), &identifier->text);
       }
     } 
-    debug.functionEnd("basicIdentifierToString");
+    debug.functionEnd("basicIdentifierToString = " + name);
     return name;
   }
 

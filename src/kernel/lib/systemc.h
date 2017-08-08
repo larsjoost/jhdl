@@ -54,7 +54,8 @@ void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId);
 class sc_thread {
 
  public:
-
+  virtual ~sc_thread() {};
+  
   virtual void process() = 0;
   
 };
@@ -258,11 +259,78 @@ public:
 template<class T>
 class sc_access {
 
+  T a_value;
+
+  bool a_null = true;
+  
+public:
+
+  T& ALL() {
+    assert(!a_null);
+    return a_value;
+  }
+
+  void set(T& s) {
+    a_null = false;
+    a_value.set(s);
+  }
+
+  bool isNull() {
+    return a_null;
+  };
+
+  void DEALLOCATE() {
+    a_null = true;
+  }
+  
 };
+
+enum SC_FILE_DIRECTION {READ_MODE, WRITE_MODE, UNKNOWN};
 
 template<class T>
 class sc_file {
+  SC_FILE_DIRECTION a_direction;
+  std::string a_filename;
+  std::ofstream* fout = NULL;
+  bool file = false;
+public:
+  
+  sc_file(SC_FILE_DIRECTION direction, std::string filename) {
+    a_direction = direction;
+    a_filename = filename;
+    fout = NULL;
+    if (direction == WRITE_MODE) {
+      if (filename != "STD_OUTPUT") {
+        file = true;
+      }
+    }
+  }
 
+  ~sc_file() {
+    if (file) {
+      if (fout) {
+        std::cout << "Dealloc" << std::endl;
+        fout->close();
+        delete fout;
+        fout = NULL;
+      }
+    }
+  }
+  
+  void write(std::string& s) {
+    // std::cout << "Write = " + s << std::endl;
+    if (file) {
+      if (fout == NULL) {
+        // std::cout << "Alloc" << std::endl;
+        fout = new std::ofstream(a_filename);
+      }
+      // std::cout << "Output" << std::endl;
+      *fout << s;
+    } else {
+      std::cout << s;
+    }
+  }
+  
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name);
@@ -291,7 +359,7 @@ int run(int argc, char* argv[]);
 #define SC_MODULE_CTOR(x) x
 
 #define SC_FOR_GENERATE(x) struct x  : public sc_module
-#define SC_FOR_GENERATOR_CTOR(x) x
+#define SC_FOR_GENERATE_CTOR(x) x
 #define SC_NEW_FOR_GENERATE(x) x
 
 #define SC_PACKAGE(x) struct x

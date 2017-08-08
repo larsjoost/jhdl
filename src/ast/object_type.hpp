@@ -47,12 +47,14 @@ namespace ast {
     }
     std::string toString();
   };
+
+  class Expression;
   
   struct ObjectArgument {
     std::string name;
     std::string type_name;
     ObjectValueContainer type;
-    std::string defaultValue;
+    Expression* default_value = NULL;
     ObjectArgument(ObjectValueContainer& type) : type(type) {}
     ObjectArgument(std::string name) : name(name) { type = ObjectValue::USER_TYPE; }
     ObjectArgument() { type = ObjectValue::UNKNOWN; }
