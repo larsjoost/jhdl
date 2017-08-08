@@ -6,20 +6,25 @@
 #include <vector>
 #include <typeinfo>
 
+#include "../../debug/debug.hpp"
 #include "../../ast/token_scanner.hpp"
 
 namespace vhdl {
   namespace scanner {
     
     class Scanner {
-  
+
+      Debug<false> debug;
+      
     public:
 
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 16;
+      Scanner() : debug("vhdl::Scanner") {}
+      
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 17;
 
       static char* getSpecialCharacters() {
         static char a[NUMBER_OF_SPECIAL_CHARACTERS] =
-          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-', '[', ']'};
+          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-', '[', ']', '|'};
         return a;
       }
         

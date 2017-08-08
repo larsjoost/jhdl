@@ -12,6 +12,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
+    SimpleIdentifier* resolution_function = NULL;
     SubtypeIndication* type;
     
   };

@@ -7,9 +7,10 @@ namespace vhdl {
   namespace scanner {
     
     int Scanner::skipWhiteSpaceAndComments(::ast::TokenScanner<Scanner>* scanner) {
+      debug.functionStart("skipWhiteSpaceAndComments");
       int size = 0;
-      int len;
-      while (len = scanner->skipWhiteSpace()) {
+      int len  = scanner->skipWhiteSpace();
+      do {
         size += len;
         try {
           scanner->accept("--");
@@ -17,7 +18,8 @@ namespace vhdl {
           size += scanner->skipUntilEndOfLine();
         } catch (ast::TokenNotAccepted e) {
         }
-      }
+      } while (len = scanner->skipWhiteSpace());
+      debug.functionEnd("skipWhiteSpaceAndComments = " + std::to_string(size));
       return size;
     }
     

@@ -80,17 +80,18 @@ namespace generator {
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
-  void SystemC::printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype) {
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype) {
     debug.functionStart("printArrayType");
-    assert(r);
-    if (r->range) {
-      std::string left, right;
-      ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
-      rangeToString(r->range, left, right, type);
-      parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
-    } else if (r->subtype) {
-      std::string id = r->subtype->identifier->toString(true);
-      parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
+    for (auto& r : definition.list) { 
+      if (r.range) {
+        std::string left, right;
+        ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
+        rangeToString(r.range, left, right, type);
+        parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
+      } else if (r.subtype) {
+        std::string id = r.subtype->identifier->toString(true);
+        parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
+      }
     }
     debug.functionEnd("printArrayType");
   }
@@ -217,13 +218,15 @@ namespace generator {
     if (interface) {
       for (ast::InterfaceElement& i : interface->interfaceElements.list) {
         ast::ObjectArgument a;
-        a.name = i.object->identifier->toString(true);
         DatabaseResult result;
         a.type_name = i.object->type->name->toString(true);
         a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
         a.type = result.object->type;
         a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
-        arguments.push_back(a);
+        for (ast::SimpleIdentifier& id : i.object->identifiers.list) { 
+          a.name = id.toString(true);
+          arguments.push_back(a);
+        }
       }
     }
   }
@@ -255,10 +258,13 @@ namespace generator {
 
   std::string SystemC::getArgumentNames(parameters& parm, ast::InterfaceList* interface) {
    if (interface) {
-      return listToString(parm, &interface->interfaceElements, ", ",
-                          [](ast::InterfaceElement& e) {
-                            return e.object->identifier->toString(true);
-                          });
+     auto v = [&](ast::InterfaceElement& e) {
+       auto f = [&](ast::SimpleIdentifier& i) {
+         return i.toString(true);
+       };
+       return listToString(parm, e.object->identifiers.list, ", ", f);
+     };
+     return listToString(parm, &interface->interfaceElements, ", ", v);
     }
     return "";
   };
@@ -615,7 +621,7 @@ namespace generator {
   void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       debug.functionStart("object_declarations");
-      printSourceLine(parm, v->identifier->text);
+      // printSourceLine(parm, v->identifier->text);
       std::string s = objectDeclarationToString(parm, v, true);
       parm.println(s + ";");
       debug.functionEnd("object_declarations");

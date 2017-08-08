@@ -17,6 +17,8 @@
 #include "list.hpp"
 #include "identifier.hpp"
 #include "token_scanner.hpp"
+
+#include "../debug/debug.hpp"
 #include "../exceptions/exceptions.hpp"
 
 namespace ast {
@@ -39,6 +41,7 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   class Scanner : public TokenScanner<ApplicationSpecificScanner>{
 
+    Debug<false> debug;
     Exceptions exceptions;
     
     template <typename Func>
@@ -53,8 +56,6 @@ namespace ast {
 
     void printCurrentLine();
     
-    void debug(const std::string &message);
-
     int number_of_errors = 0;
     
     using Keyword = typename ApplicationSpecificScanner::Keyword;
@@ -63,6 +64,8 @@ namespace ast {
     
   public:
 
+    Scanner() : debug("ast::Scanner") {}
+    
     int accept(const char *text);
     int optional(const char* text);
     bool optional(const char text);
@@ -72,6 +75,7 @@ namespace ast {
     bool match(const char text, int lookAhead = 0);
     int match(const char* text, int lookAhead = 0);
 
+    Text* LookAhead(int number, TokenType keyword);
     Text* optional(Keyword keyword);
     Text* optional(TokenType type);
     Text* accept(Keyword keyword);
@@ -191,10 +195,10 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   bool Scanner<ApplicationSpecificScanner>::match(const char a, int lookAhead) {
-    DEBUG("match '" + std::to_string(a) + "'");
+    debug.debug("match '" + std::to_string(a) + "'");
     try {
       Token* t = tokenLookAhead(lookAhead);
-      DEBUG("Token = " + toString(t));
+      debug.debug("Token = " + toString(t));
       if ((t->type != TOKEN_SPECIAL_CHARACTER) ||
           (t->text.lookAhead(0) != a)) {
         return false;
@@ -205,7 +209,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::match(const char* a, int lookAhead) {
-    DEBUG("match '" + std::string(a) + "'");
+    debug.debug("match '" + std::string(a) + "'");
     int len = strlen(a);
     for (int i=0; i<len; i++) {
       if (!match(a[i], i + lookAhead)) {
@@ -235,7 +239,7 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::optional(const char* t) {
     int len = match(t);
-    DEBUG("optional '" + std::string(t) + "'. len = " + std::to_string(len));
+    debug.debug("optional '" + std::string(t) + "'. len = " + std::to_string(len));
     if (verbose) {
       printCurrentLine();
     }
@@ -248,7 +252,7 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   bool Scanner<ApplicationSpecificScanner>::optional(const char t) {
     bool m = match(t);
-    DEBUG("optional '" + std::to_string(t) + "'");
+    debug.debug("optional '" + std::to_string(t) + "'");
     if (verbose) {
       printCurrentLine();
     }
@@ -260,7 +264,7 @@ namespace ast {
   
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::accept(const char* t) {
-    DEBUG("accept '" + std::string(t) + "'");
+    debug.debug("accept '" + std::string(t) + "'");
     int len = optional(t);
     if (len == 0) {
       throw TokenNotAccepted();
@@ -271,7 +275,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::optional(Keyword keyword) {
-    DEBUG("Optional keyword = " + toString(keyword));
+    debug.debug("Optional keyword = " + toString(keyword));
     Token* t = tokenLookAhead(0);
     if (t->type == TOKEN_KEYWORD && t->keyword == keyword) {
       nextToken();
@@ -281,8 +285,18 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
+  Text* Scanner<ApplicationSpecificScanner>::LookAhead(int number, TokenType type) {
+    debug.debug("LookAhead type = " + toString(type));
+    Token* t = tokenLookAhead(number);
+    if (t->type == type) {
+      return &t->text;
+    }
+    return NULL;
+  }
+
+  template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::accept(Keyword keyword) {
-    DEBUG("Accept keyword = " + toString(keyword));
+    debug.debug("Accept keyword = " + toString(keyword));
     Text* t;
     if (!(t = optional(keyword))) {
       throw TokenNotAccepted();
@@ -292,7 +306,7 @@ namespace ast {
   
   template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::expect(Keyword keyword) {
-    DEBUG("Expect keyword = " + toString(keyword));
+    debug.debug("Expect keyword = " + toString(keyword));
     Text* t;
     if (!(t = optional(keyword))) {
       error("Expected " + toString(keyword));
@@ -302,7 +316,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int Scanner<ApplicationSpecificScanner>::expect(const char* t) {
-    DEBUG("expect '" + std::string(t) + "'");
+    debug.debug("expect '" + std::string(t) + "'");
     int len = optional(t);
     if (len == 0) {
       error("Expected '" + std::string(t) + "'");
@@ -312,7 +326,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::optional(TokenType type) {
-    DEBUG("Optional token = " + toString(type));
+    debug.debug("Optional token = " + toString(type));
     Token* t = tokenLookAhead(0);
     if (t->type == type) {
       nextToken();
@@ -323,7 +337,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::accept(TokenType type) {
-    DEBUG("Accept token = " + toString(type));
+    debug.debug("Accept token = " + toString(type));
     Text* t;
     if (!(t = optional(type))) {
       throw TokenNotAccepted();
@@ -333,7 +347,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   Text* Scanner<ApplicationSpecificScanner>::expect(TokenType type) {
-    DEBUG("Expect token = " + toString(type));
+    debug.debug("Expect token = " + toString(type));
     Text* t;
     if (!(t = optional(type))) {
       error("Expected " + toString(type));

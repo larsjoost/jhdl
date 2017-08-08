@@ -4,6 +4,7 @@
 
 #include "range_type.hpp"
 #include "array_subtype_definition.hpp"
+#include "simple_identifier.hpp"
 
 namespace ast {
     
@@ -11,8 +12,9 @@ namespace ast {
     
   public:
 
-    RangeType* range;
-    ArraySubtypeDefinition* subtype;
+    SimpleIdentifier* identifier = NULL;
+    RangeType* range = NULL;
+    ArraySubtypeDefinition* subtype = NULL;
     
   };
 

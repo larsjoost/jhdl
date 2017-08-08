@@ -117,7 +117,7 @@ namespace generator {
     std::string ArraySubtype(parameters& parm, DatabaseResult& database_result, std::string& name,
                              ast::SubtypeIndication* t);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
-    void printArrayType(parameters& parm, std::string& name, ast::ArrayDefinition* r, std::string& subtype);
+    void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype);
     void rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);

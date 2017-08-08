@@ -4,6 +4,7 @@
 
 #include "array_definition.hpp"
 #include "subtype_indication.hpp"
+#include "list.hpp"
 
 namespace ast {
     
@@ -11,7 +12,7 @@ namespace ast {
     
   public:
 
-    ArrayDefinition* definition;
+    List<ArrayDefinition> definition;
     SubtypeIndication* type;
     
   };

@@ -20,8 +20,7 @@
 #include "identifier.hpp"
 
 #include "../exceptions/exceptions.hpp"
-
-#define DEBUG_ENABLE
+#include "../debug/debug.hpp"
 
 namespace ast {
 
@@ -44,11 +43,14 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   class TokenScanner {
 
+    Debug<false> debug;
     Exceptions exceptions;
     
     bool skippedWhiteSpace = false;
   public:
 
+    TokenScanner() : debug("ast::TokenScanner") {}
+    
     using Keyword = typename ApplicationSpecificScanner::Keyword;
     
     struct Token {
@@ -81,16 +83,6 @@ namespace ast {
 
   private:
     
-#ifdef DEBUG_ENABLE
-#define DEBUG(x) do {						   \
-      if (verbose) {						   \
-	std::cerr << "ast::Tokenscanner.cpp: " << x << std::endl;	   \
-      }} while(false)
-#else
-#define DEBUG(x) 
-#endif
-    void debug(const std::string &message);
-
     bool isKeyword(Text& t, Keyword& k);
     Token* acceptString();
     Token* acceptCharacter();
@@ -163,7 +155,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::match(Text& t, const char* a) {
-    DEBUG("match " + std::string(a));
+    debug.debug("match " + std::string(a));
     int len = strlen(a);
     for (int i=0; i<len; i++) {
       char c = text.lookAhead(i);
@@ -177,7 +169,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::optional(Text& t, const char* c) {
-    DEBUG("optional " + std::string(c));
+    debug.debug("optional " + std::string(c));
     bool result; 
     if (result = match(t, c)) {
       incrementPosition(t.remainingSize());
@@ -187,7 +179,7 @@ namespace ast {
    
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::accept(const char* c) {
-     DEBUG("accept" + std::string(c));
+     debug.debug("accept" + std::string(c));
      Text t;
      if (!optional(t, c)) {
        throw TokenNotAccepted();
@@ -198,7 +190,7 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::add(Token* token) {
     if (token) {
-      DEBUG("Added token " + token->text.toString());
+      debug.debug("Added token " + token->text.toString());
       token->skippedWhiteSpace = skippedWhiteSpace;
       skippedWhiteSpace = false;
       tokenInfo.tokens[tokenInfo.size] = token;
@@ -212,15 +204,17 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   typename TokenScanner<ApplicationSpecificScanner>::Token*
   TokenScanner<ApplicationSpecificScanner>::acceptString() {
+    debug.functionStart("acceptString");
+    Token* t = NULL;
     if (text.lookAhead(0) == '\"') {
       int i=1;
       while (text.lookAhead(i++) != '\"') {};
-      Token* t = new Token();
+      t = new Token();
       t->type = TOKEN_STRING;
       text.subString(t->text, i);
-      return t;
     }
-    return NULL;
+    debug.functionEnd("acceptString");
+    return t;
   }
 
   template <class ApplicationSpecificScanner>
@@ -383,9 +377,11 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   bool TokenScanner<ApplicationSpecificScanner>::tokenize() {
+    debug.functionStart("tokenize");
     tokenInfo.tokens = new Token *[text.getSize()];
     tokenInfo.position = 0;
     tokenInfo.size = 0;
+    bool result = false;
     try {
       bool match;
       do {
@@ -399,9 +395,10 @@ namespace ast {
       } while (match);
       error("Unknown token");
     } catch (TextEof e) {
-      return true;
+      result = true;
     }
-    return false;
+    debug.functionEnd("tokenize");
+    return result;
   }
   
   template <class ApplicationSpecificScanner>
@@ -478,7 +475,7 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   int TokenScanner<ApplicationSpecificScanner>::skipWhiteSpace() {
-    DEBUG("skipWhiteSpace");
+    debug.debug("skipWhiteSpace");
     int i = 0;
     while (isWhiteSpace()) {
       text.incrementPosition();

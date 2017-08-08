@@ -11,6 +11,10 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_SUBTYPE);
       identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IS);
+      if (scanner->LookAhead(0, ::ast::TOKEN_IDENTIFIER) &&
+          scanner->LookAhead(1, ::ast::TOKEN_IDENTIFIER)) {
+        resolution_function = scanner->expect<SimpleIdentifier>();
+      }
       type = scanner->expect<SubtypeIndication>();
       return this;
     }

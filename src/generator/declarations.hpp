@@ -43,22 +43,23 @@ namespace generator {
                                   bool database_enable) {
     if (v) {
       debug.functionStart("objectDeclaration");
-      assert(v->identifier);
-      std::string name = v->identifier->toString(true);
-      std::string type = name + "_type";
-      debug.debug("Name = " + name + ", type = " + type);
-      DatabaseResult database_result;
-      auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
-        return (r ? local_prefix + name : type_name);
-      };
-      type = Subtype(parm, database_result, type, v->type, func);
-      if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
-      std::string init = "";
-      if (v->initialization) {
-        init = a_expression.toString(v->initialization->value, database_result.object->type);
-        debug.debug("Init = " + init, true);
+      for (ast::SimpleIdentifier& id : v->identifiers.list) {
+        std::string name = id.toString(true);
+        std::string type = name + "_type";
+        debug.debug("Name = " + name + ", type = " + type);
+        DatabaseResult database_result;
+        auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
+          return (r ? local_prefix + name : type_name);
+        };
+        type = Subtype(parm, database_result, type, v->type, func);
+        if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
+        std::string init = "";
+        if (v->initialization) {
+          init = a_expression.toString(v->initialization->value, database_result.object->type);
+          debug.debug("Init = " + init, true);
+        }
+        callback(name, type, init, v->objectType, v->direction);
       }
-      callback(name, type, init, v->objectType, v->direction);
       debug.functionEnd("objectDeclaration");
     }
   }

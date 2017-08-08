@@ -6,6 +6,7 @@
 #include "declaration_initialization.hpp"
 #include "subtype_indication.hpp"
 #include "object_type.hpp"
+#include "list.hpp"
 
 namespace ast {
     
@@ -16,7 +17,7 @@ namespace ast {
     enum class Direction {IN, OUT, INOUT, BUFFER, NONE};
     
     ObjectType objectType;
-    SimpleIdentifier* identifier;
+    List<SimpleIdentifier> identifiers;
     Direction direction = Direction::NONE;
     SubtypeIndication* type;
     DeclarationInitialization* initialization;

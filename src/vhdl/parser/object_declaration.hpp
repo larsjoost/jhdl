@@ -34,7 +34,10 @@ namespace vhdl {
         case scanner::Scanner::VHDL_FILE: objectType = ast::ObjectType::FILE; break;
         default: assert(false);
         }
-        identifier = scanner->accept<SimpleIdentifier>();
+        identifiers.add(scanner->accept<SimpleIdentifier>());
+        while (scanner->optional(",")) {
+          identifiers.add(scanner->expect<SimpleIdentifier>());
+        }
         scanner->accept(":");
         static const int NUMBER_OF_DIRECTIONS = 4;
         static const scanner::Scanner::Keyword DIRECTIONS[NUMBER_OF_DIRECTIONS] =
