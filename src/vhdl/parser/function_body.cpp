@@ -7,6 +7,7 @@
 #include "declaration.hpp"
 #include "sequential_statement.hpp"
 #include "interface_list.hpp"
+#include "string.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -18,7 +19,7 @@ namespace vhdl {
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_FUNCTION);
-      name = scanner->optional<SimpleIdentifier>();
+      (scanner->optional<String>() || scanner->optional<SimpleIdentifier>());
       return this;
     }
     

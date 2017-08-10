@@ -10,6 +10,7 @@
 #include "function_declaration.hpp"
 #include "file_declaration.hpp"
 #include "attribute.hpp"
+#include "alias_declaration.hpp"
 
 namespace ast {
     
@@ -28,6 +29,7 @@ namespace ast {
     FunctionDeclaration* function;
     FileDeclaration* file;
     Attribute* attribute;
+    AliasDeclaration* alias;
     
   };
 

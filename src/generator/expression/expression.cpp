@@ -224,8 +224,19 @@ namespace generator {
   ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {
     debug.functionStart("expressionReturnTypes");
     assert(e);
-    if (e->parenthis) {
-      e->returnTypes = expressionReturnTypes(e->parenthis);
+    if (!e->parenthis.list.empty()) {
+      if (e->parenthis.list.size() > 1) {
+        ast::Expression& x = e->parenthis.list.back();
+        ReturnTypes return_types = expressionReturnTypes(&x);
+        for (auto& i : return_types) {
+          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY);
+          a.setSubtype(i);
+          e->returnTypes.push_back(a);
+        }
+      } else {
+        ast::Expression& x = e->parenthis.list.back();
+        e->returnTypes = expressionReturnTypes(&x);
+      }
     } else if (e->unaryOperator) {
       e->returnTypes = expressionReturnTypes(e->expression);
     } else if (e->op) {

@@ -95,7 +95,7 @@ namespace generator {
       auto callback = [&](parameters& parm) {
 	sequentialStatements(parm, f->sequentialStatements);
       };
-      forLoop(parm, name, f->range, callback);
+      forLoop(parm, name, f->iteration, callback);
     }
   }
   

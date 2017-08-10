@@ -22,6 +22,7 @@ namespace ast {
     std::list<ObjectValueContainer> returnTypes;
     
     Text text;
+    bool range_attribute = false;
     Text* attribute = NULL; 
     AssociationList* arguments;
     

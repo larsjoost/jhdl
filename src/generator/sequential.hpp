@@ -4,7 +4,9 @@
 namespace generator {
 
   template<typename Func>
-  void SystemC::forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback) {
+  void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
+    ast::RangeType* r = iteration->range;
+    assert(r);
     std::string typeName = name + "_type";
     if (parm.isArea(parameters::Area::DECLARATION)) {
       a_database.add(ast::ObjectType::VARIABLE, name, ast::ObjectValue::INTEGER);

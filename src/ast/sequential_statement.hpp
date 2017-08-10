@@ -10,11 +10,13 @@
 #include "forloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
+#include "case_statement.hpp"
 
 namespace ast {
 
   class IfStatement;
   class ForLoopStatement;
+  class CaseStatement;
   
   class SequentialStatement {
     
@@ -28,7 +30,8 @@ namespace ast {
     ForLoopStatement* forLoopStatement;
     WaitStatement* waitStatement;
     ReturnStatement* returnStatement;
-
+    CaseStatement* caseStatement;
+    
   };
 
 }

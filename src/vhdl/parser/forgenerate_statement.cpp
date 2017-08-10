@@ -4,7 +4,7 @@
 #include "forgenerate_statement.hpp"
 #include "simple_identifier.hpp"
 #include "concurrent_statement.hpp"
-#include "range_type.hpp"
+#include "iteration_scheme.hpp"
 #include "declaration.hpp"
 
 namespace vhdl {
@@ -16,7 +16,7 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_FOR);
       identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IN);
-      range = scanner->expect<RangeType>();
+      iteration = scanner->expect<IterationScheme>();
       scanner->expect(scanner::Scanner::VHDL_GENERATE); 
       if (declarations.add(scanner->optional<Declaration>())) {
         while (declarations.add(scanner->optional<Declaration>())) {};

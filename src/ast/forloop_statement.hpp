@@ -5,7 +5,7 @@
 #include "simple_identifier.hpp"
 #include "list.hpp"
 #include "sequential_statement.hpp"
-#include "range_type.hpp"
+#include "iteration_scheme.hpp"
 
 namespace ast {
 
@@ -16,7 +16,7 @@ namespace ast {
   public:
     
     SimpleIdentifier* identifier;
-    RangeType* range;
+    IterationScheme* iteration;
     List<SequentialStatement> sequentialStatements;
     
   };

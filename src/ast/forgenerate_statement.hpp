@@ -5,7 +5,7 @@
 #include "simple_identifier.hpp"
 #include "list.hpp"
 #include "concurrent_statement.hpp"
-#include "range_type.hpp"
+#include "iteration_scheme.hpp"
 #include "declaration.hpp"
 
 namespace ast {
@@ -18,7 +18,7 @@ namespace ast {
 
     SimpleIdentifier* name;
     SimpleIdentifier* identifier;
-    RangeType* range;
+    IterationScheme* iteration;
     List<Declaration> declarations;
     List<ConcurrentStatement> concurrentStatements;
     

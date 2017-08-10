@@ -28,7 +28,7 @@ namespace ast {
     ExpressionOperator* op;
     UnaryOperator* unaryOperator;
     Expression* expression;
-    Expression* parenthis;
+    List<Expression> parenthis;
     
   };
 

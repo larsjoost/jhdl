@@ -3,6 +3,7 @@
 #define AST_ARRAY_SUBTYPE_DEFINITION_H_
 
 #include "simple_identifier.hpp"
+#include "range_type.hpp"
 
 namespace ast {
     
@@ -11,6 +12,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
+    RangeType* range = NULL;
     
   };
 

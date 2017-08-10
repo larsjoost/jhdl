@@ -47,7 +47,7 @@ namespace ast {
     template <typename Func>
     void print(Func print) {
       Token* t = tokenLookAhead(0);
-      std::string message = "Found " + toString(t);
+      std::string message = "Found " + toString(t) + ". ";
       if (verbose) {
         message += "[" + std::to_string(getTokenPosition()) + "]";
       }
@@ -104,9 +104,7 @@ namespace ast {
     T* optional() {
       T* p = new T();
       int position = getTokenPosition();
-      if (verbose) {
-        std::cout << "[START]Optional[" << position << "]: " << typeid(p).name() << std::endl;
-      }
+      debug.functionStart("Optional[" + std::to_string(position) + "]: " + typeid(p).name());
       try {
         p->parse(this);
       } catch (TokenNotAccepted e) {
@@ -116,11 +114,8 @@ namespace ast {
       if (getTokenPosition() == position) {
         p = NULL;
       }
-      if (verbose) {
-        std::cout << "[END]Optional[" << getTokenPosition() << "]: " << typeid(p).name() << " : ";
-        std::cout << (p ? "[FOUND]" : "[MISSED]");
-        std::cout << " Token = " + currentTokenToString() << std::endl;
-      }
+      debug.functionEnd("Optional[" + std::to_string(getTokenPosition()) + "]: " + typeid(p).name() + " : " +
+                        (p ? "[FOUND]" : "[MISSED]") + " Token = " + currentTokenToString());
       return p; 
     }
 
@@ -131,7 +126,7 @@ namespace ast {
         std::cout << "Expect: " << typeid(p).name() << std::endl;
       }
       if (!p) {
-        error("Expected something else");
+        error("Expected something else.");
       }
       return p; 
     }

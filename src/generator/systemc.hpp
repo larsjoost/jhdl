@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<true> debug;
+    Debug<false> debug;
 
     Exceptions exceptions;
     
@@ -94,7 +94,7 @@ namespace generator {
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
     template<typename Func>
-    void forLoop(parameters& parm, std::string& name, ast::RangeType* r, Func callback);
+    void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);

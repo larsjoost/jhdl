@@ -336,8 +336,13 @@ namespace generator {
     debug.functionStart("expressionToString");
     assert(e);
     std::string result;
-    if (e->parenthis) {
-      result = "(" + expressionToString(e->parenthis, expectedType, sensitivityListCallback) + ")";
+    if (!e->parenthis.list.empty()) {
+      result = "(";
+      std::string d;
+      for (ast::Expression& i : e->parenthis.list) {
+        result += d + expressionToString(&i, expectedType, sensitivityListCallback);
+      }
+      result += ")";
     } else if (e->unaryOperator) {
       std::string op;
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);

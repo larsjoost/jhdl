@@ -10,7 +10,10 @@ namespace vhdl {
     SubtypeIndication* SubtypeIndication::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       name = scanner->accept<SimpleIdentifier>();
       if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {
-        range = scanner->accept<RangeType>();
+        range = scanner->expect<RangeType>();
+      } else if (scanner->optional("(")) {
+        range = scanner->expect<RangeType>();
+        scanner->expect(")");
       }
       return this;
     }

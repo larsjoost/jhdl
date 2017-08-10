@@ -58,6 +58,7 @@ namespace vhdl {
 	VHDL_THEN,
 	VHDL_ELSIF,
 	VHDL_ELSE,
+        VHDL_CASE,
         VHDL_WHEN,
 	VHDL_FOR,
 	VHDL_IN,
@@ -98,6 +99,7 @@ namespace vhdl {
         VHDL_SRA,
         VHDL_ROL,
         VHDL_ROR,
+        VHDL_ALIAS,
         NUMBER_OF_KEYWORDS
       };
       
@@ -136,6 +138,7 @@ namespace vhdl {
           {VHDL_THEN, (char *)"then", 1987},
           {VHDL_ELSIF, (char *)"elsif", 1987},
           {VHDL_ELSE, (char *)"else", 1987},
+          {VHDL_CASE, (char *)"case", 1987},
           {VHDL_WHEN, (char *)"when", 1987},
           {VHDL_FOR, (char *)"for", 1987},
           {VHDL_IN, (char *)"in", 1987},
@@ -175,7 +178,8 @@ namespace vhdl {
           {VHDL_SLA, (char *)"sla", 1993},
           {VHDL_SRA, (char *)"sra", 1993},
           {VHDL_ROL, (char *)"rol", 1993},
-          {VHDL_ROR, (char *)"ror", 1993}};
+          {VHDL_ROR, (char *)"ror", 1993},
+          {VHDL_ALIAS, (char *)"alias", 1993}};
         return a;
       }
 

@@ -59,7 +59,7 @@ namespace generator {
       if (parm.area == parameters::Area::DECLARATION) {
         a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       }
-      forLoop(parm, identifier, forGenerateStatement->range, [&](parameters& parm) {
+      forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
           if (parm.area == parameters::Area::IMPLEMENTATION) {
             instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
           }

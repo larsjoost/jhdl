@@ -8,6 +8,7 @@
 #include "file_declaration.hpp"
 #include "declaration.hpp"
 #include "attribute.hpp"
+#include "alias_declaration.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -21,7 +22,8 @@ namespace vhdl {
           (function = scanner->optional<FunctionDeclaration>()) ||
           (function = scanner->optional<ProcedureDeclaration>()) ||
           (file = scanner->optional<FileDeclaration>()) ||
-          (attribute = scanner->optional<Attribute>())) {
+          (attribute = scanner->optional<Attribute>()) ||
+          (alias = scanner->optional<AliasDeclaration>())) {
         scanner->expect(";");
       }
       return this;

@@ -12,7 +12,11 @@ namespace vhdl {
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = *(scanner->accept(::ast::TOKEN_IDENTIFIER));
       if (scanner->optional("'")) {
-        attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
+        if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {
+          range_attribute = true;
+        } else {
+          attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
+        }
       } 
       if (scanner->optional("(")) {
         arguments = scanner->optional<AssociationList>();

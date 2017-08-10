@@ -13,6 +13,7 @@
 #include "forloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
+#include "case_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -25,7 +26,8 @@ namespace vhdl {
           (ifStatement = scanner->optional<IfStatement>()) ||
           (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
           (waitStatement = scanner->optional<WaitStatement>()) ||
-          (returnStatement = scanner->optional<ReturnStatement>())) {
+          (returnStatement = scanner->optional<ReturnStatement>()) ||
+          (caseStatement = scanner->optional<CaseStatement>())) {
         scanner->expect(";");
       }
       return this;
