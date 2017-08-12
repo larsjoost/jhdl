@@ -16,6 +16,8 @@ namespace ast {
 
     enum class Direction {IN, OUT, INOUT, BUFFER, NONE};
     
+    Text* text;
+
     ObjectType objectType;
     List<SimpleIdentifier> identifiers;
     Direction direction = Direction::NONE;

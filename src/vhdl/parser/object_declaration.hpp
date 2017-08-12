@@ -22,6 +22,7 @@ namespace vhdl {
     public:
 
       ObjectDeclaration<keyword, defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
+        text = scanner->getCurrentTextPosition();
         if (defaultType) {
           scanner->optional(keyword);
         } else {

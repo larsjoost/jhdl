@@ -43,6 +43,7 @@ namespace generator {
                                   bool database_enable) {
     if (v) {
       debug.functionStart("objectDeclaration");
+      printSourceLine(parm, v->text);
       for (ast::SimpleIdentifier& id : v->identifiers.list) {
         std::string name = id.toString(true);
         std::string type = name + "_type";
