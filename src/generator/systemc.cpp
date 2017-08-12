@@ -29,7 +29,9 @@ namespace generator {
       if (!config.load(configurationFilename)) {
         exceptions.printError("Could not open configuration file " + configurationFilename);
       } else {
-	loadPackage("STANDARD", "STD", "ALL");
+        if (designFile.IsLanguage(ast::DesignFile::LanguageType::VHDL)) {
+          loadPackage("STANDARD", "STD", "ALL");
+        }
       }
     }
     transform(library.begin(), library.end(), library.begin(), toupper);
@@ -74,18 +76,27 @@ namespace generator {
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
-    debug.functionStart("parse(library = " + library + ")");
-    for (ast::DesignUnit& it : designFile.designUnits.list) {
-      includes(parm, it.module.contextClause, true);
+    debug.functionStart("parse(designFile = " + designFile.filename + ", library = " + library + ")");
+    if (!designFile.designUnits.list.empty()) {
+      for (ast::DesignUnit& it : designFile.designUnits.list) {
+        includes(parm, it.module.contextClause, true);
+      }
+      namespaceStart(parm, library);
+      bool unit_found = false;
+      for (ast::DesignUnit& it : designFile.designUnits.list) {
+        debug.debug("Parsing design unit");
+        includes(parm, it.module.contextClause, false);
+        if (it.module.package) {packageDeclaration(parm, it.module.package, library); unit_found = true;}
+        if (it.module.interface) {interfaceDeclaration(parm, it.module.interface, library); unit_found = true;}
+        if (it.module.implementation) {implementationDeclaration(parm, it.module.implementation, library); unit_found = true;}
+      }
+      if (!unit_found) {
+        exceptions.printWarning("Did not find any design units in file " + designFile.filename);
+      }
+      namespaceEnd(parm);
+    } else {
+      exceptions.printWarning("Did not find anything in file " + designFile.filename); 
     }
-    namespaceStart(parm, library);
-    for (ast::DesignUnit& it : designFile.designUnits.list) {
-      includes(parm, it.module.contextClause, false);
-      packageDeclaration(parm, it.module.package, library);
-      interfaceDeclaration(parm, it.module.interface, library);
-      implementationDeclaration(parm, it.module.implementation, library);
-    }
-    namespaceEnd(parm);
     debug.functionEnd("parse");
   }
 
@@ -211,80 +222,76 @@ namespace generator {
   }
 
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
-    if (package) {
-      std::string name = package->name->toString(true);
-      ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
-      debug.functionStart("packageDeclaration(library = " + library +
-		    ", packet = " + name + ", type = " + toString(type) + ")");
-      topHierarchyStart(parm, library, name, type, filename);
-      if (type == ast::ObjectType::PACKAGE) {
-        parm.println("");
-        parm.println("SC_PACKAGE(" + name + ") {");
-        parm.incIndent();
-        parameters::Area area = parm.area;
-        parm.setArea(parameters::Area::DECLARATION);
-	declarations(parm, package->declarations);
-        parm.setArea(area);
-        parm.decIndent();
-        parm.println("};");
-        parm.decIndent();
-        parm.println("}");
-        parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
-        parm.println("namespace " + library + " {");
-        parm.incIndent();
-      } else {
-        parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
-	parameters::Area area = parm.area;
-        parm.setArea(parameters::Area::IMPLEMENTATION);
-	declarations(parm, package->declarations);
-        parm.decIndent();
-        parm.println("}");
-        parm.println(library + "::" + name + " " + library + "_" + name + ";");
-        parm.println("namespace " + library + " {");
-        parm.incIndent();
-	parm.setArea(area);
-        parm.selectFile(file_select);
-      }
-      topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
-      debug.functionEnd("packageDeclaration");
+    std::string name = package->name->toString(true);
+    ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
+    debug.functionStart("packageDeclaration(library = " + library +
+                        ", packet = " + name + ", type = " + toString(type) + ")");
+    topHierarchyStart(parm, library, name, type, filename);
+    if (type == ast::ObjectType::PACKAGE) {
+      parm.println("");
+      parm.println("SC_PACKAGE(" + name + ") {");
+      parm.incIndent();
+      parameters::Area area = parm.area;
+      parm.setArea(parameters::Area::DECLARATION);
+      declarations(parm, package->declarations);
+      parm.setArea(area);
+      parm.decIndent();
+      parm.println("};");
+      parm.decIndent();
+      parm.println("}");
+      parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
+      parm.println("namespace " + library + " {");
+      parm.incIndent();
+    } else {
+      parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
+      parameters::Area area = parm.area;
+      parm.setArea(parameters::Area::IMPLEMENTATION);
+      declarations(parm, package->declarations);
+      parm.decIndent();
+      parm.println("}");
+      parm.println(library + "::" + name + " " + library + "_" + name + ";");
+      parm.println("namespace " + library + " {");
+      parm.incIndent();
+      parm.setArea(area);
+      parm.selectFile(file_select);
     }
+    topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
+    debug.functionEnd("packageDeclaration");
   }
 
   void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {
-    if (interface) {
-      debug.functionStart("interfaceDeclaration");
-      std::string name = interface->name->toString(true);
-      const ast::ObjectType type = ast::ObjectType::ENTITY;
-      topHierarchyStart(parm, library, name, type, filename);
-      parm.println("");
-      parm.println("SC_INTERFACE(" + name + ") {");
-      parm.println("public:");
-      parm.incIndent();
-      if (interface->generics) {
-        parm.println("// Generics");
-        parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
-      }
-      if (interface->ports) {
-	auto func = [&](std::string& type, ast::ObjectType id,
-			ast::ObjectDeclaration::Direction direction) {
-          switch (direction) {
-	  case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
-	  case ast::ObjectDeclaration::Direction::OUT: 
-	  case ast::ObjectDeclaration::Direction::INOUT: 
-	  case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
-	  }
-	  return type;
-	};
-        parm.println("// Ports");
-        parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
-      }
-      parm.decIndent();
-      parm.println("};");
-      topHierarchyEnd(parm, true);
-      debug.functionEnd("interfaceDeclaration");
+    debug.functionStart("interfaceDeclaration");
+    std::string name = interface->name->toString(true);
+    const ast::ObjectType type = ast::ObjectType::ENTITY;
+    topHierarchyStart(parm, library, name, type, filename);
+    parm.println("");
+    parm.println("SC_INTERFACE(" + name + ") {");
+    parm.println("public:");
+    parm.incIndent();
+    if (interface->generics) {
+      parm.println("// Generics");
+      parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
     }
+    if (interface->ports) {
+      auto func = [&](std::string& type, ast::ObjectType id,
+                      ast::ObjectDeclaration::Direction direction) {
+        switch (direction) {
+        case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
+        case ast::ObjectDeclaration::Direction::OUT: 
+        case ast::ObjectDeclaration::Direction::INOUT: 
+        case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
+        }
+        return type;
+      };
+      parm.println("// Ports");
+      parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
+    }
+    parm.decIndent();
+    parm.println("};");
+    topHierarchyEnd(parm, true);
+    debug.functionEnd("interfaceDeclaration");
   }
-
+  
   void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
       debug.functionStart("implementationDeclaration");

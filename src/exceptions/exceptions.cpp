@@ -1,7 +1,7 @@
 #include "exceptions.hpp"
 
-int Exceptions::numberOfErrors = 0;
-int Exceptions::numberOfWarnings = 0;
+int Exceptions::a_number_of_errors = 0;
+int Exceptions::a_number_of_warnings = 0;
 
 void Exceptions::print(std::string severity, Output::Color color, std::string& message, ast::Text* text) {
   auto func = [&](std::ostream* out) {
@@ -29,12 +29,12 @@ void Exceptions::printNote(std::string message, ast::Text* text) {
 }
 
 void Exceptions::printError(std::string message, ast::Text* text) {
-  numberOfErrors++;
+  a_number_of_errors++;
   print("Error", Output::Color::RED, message, text);
 }
 
 void Exceptions::printWarning(std::string message, ast::Text* text) {
-  numberOfWarnings++;
+  a_number_of_warnings++;
   if (a_display_warnings) {
     print("Warning", Output::Color::YELLOW, message, text);
   }

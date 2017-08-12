@@ -132,6 +132,7 @@ namespace ast {
     std::string toString(Token* t);
     std::string toString(Keyword k);
     std::string toString(TokenType k);
+    std::string toString(Text* t);
 
     std::string currentTokenToString();
     
@@ -397,7 +398,7 @@ namespace ast {
     } catch (TextEof e) {
       result = true;
     }
-    debug.functionEnd("tokenize");
+    debug.functionEnd("tokenize = " + std::string(result ? "true" : "false"));
     return result;
   }
   
@@ -532,10 +533,13 @@ namespace ast {
   template <class ApplicationSpecificScanner>
   typename TokenScanner<ApplicationSpecificScanner>::Token*
   TokenScanner<ApplicationSpecificScanner>::tokenLookAhead(int number) {
+    debug.functionStart("tokenLookAhead, number = " + std::to_string(number));
     int i = tokenInfo.position + number;
     if (i >= tokenInfo.size) {
+      debug.debug("Throwing TokenEof");
       throw TokenEof();
     }
+    debug.functionEnd("tokenLookAhead = " + toString(tokenInfo.tokens[i]));
     return tokenInfo.tokens[i];
   }
   
@@ -585,10 +589,13 @@ namespace ast {
 
   template <class ApplicationSpecificScanner>
   std::string TokenScanner<ApplicationSpecificScanner>::currentTokenToString() {
-    return toString(tokenLookAhead(0));
+    debug.functionStart("currentTokenToString");
+    std::string s = toString(tokenLookAhead(0)); 
+    debug.functionEnd("currentTokenToString = " + s);
+    return s;
   }
 
-    template <class ApplicationSpecificScanner>
+  template <class ApplicationSpecificScanner>
   std::string TokenScanner<ApplicationSpecificScanner>::toString(Token* t) {
     std::string s = toString(t->type);
     switch (t->type) {
@@ -605,6 +612,12 @@ namespace ast {
       s += ": " + t->text.toString();
       break;
     };
+    return s;
+  }
+
+  template <class ApplicationSpecificScanner>
+  std::string TokenScanner<ApplicationSpecificScanner>::toString(Text* t) {
+    std::string s = (t ? t->toString() : "NULL");
     return s;
   }
 

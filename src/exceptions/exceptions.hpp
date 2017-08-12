@@ -15,10 +15,10 @@ class Exceptions {
 
   Output a_output = Output(std::cerr);
   
-  static int numberOfErrors;
-  static int numberOfWarnings;
+  static int a_number_of_errors;
+  static int a_number_of_warnings;
 
-  const static bool a_display_warnings = false;
+  const static bool a_display_warnings = true;
   
   void print(std::string severity, Output::Color color, std::string& message, ast::Text* text);
 

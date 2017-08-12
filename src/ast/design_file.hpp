@@ -9,7 +9,19 @@
 namespace ast {
   
   class DesignFile {
+
   public:
+
+    enum class LanguageType {VHDL, VERILOG};
+
+  protected:
+    
+    LanguageType a_language_type;
+
+  public:
+
+    bool IsLanguage(LanguageType language_type) {return language_type == a_language_type;}
+    
     std::string filename;
     List<DesignUnit> designUnits;
     

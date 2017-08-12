@@ -31,7 +31,7 @@ namespace generator {
       typeName = func(t->range, name, typeName);
       typeName += "<>";
     } else {
-      exceptions.printError("Could not find type \"" + typeName + "\"", &t->name->text);
+      throw Database::ObjectNotFoundException("Could not find type \"" + typeName + "\"", &t->name->text);
     }
     debug.debug("typeName = " + typeName);
     debug.functionEnd("Subtype");
@@ -51,14 +51,18 @@ namespace generator {
         auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
           return (r ? local_prefix + name : type_name);
         };
-        type = Subtype(parm, database_result, type, v->type, func);
-        if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
-        std::string init = "";
-        if (v->initialization) {
-          init = a_expression.toString(v->initialization->value, database_result.object->type);
-          debug.debug("Init = " + init, true);
+        try {
+          type = Subtype(parm, database_result, type, v->type, func);
+          if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
+          std::string init = "";
+          if (v->initialization) {
+            init = a_expression.toString(v->initialization->value, database_result.object->type);
+            debug.debug("Init = " + init, true);
+          }
+          callback(name, type, init, v->objectType, v->direction);
+        } catch (Database::ObjectNotFoundException o) {
+          o.print();
         }
-        callback(name, type, init, v->objectType, v->direction);
       }
       debug.functionEnd("objectDeclaration");
     }

@@ -71,9 +71,9 @@ main (int argc, char **argv)
   }
   
   try {
-    auto parserDesignFile = parser::DesignFile();
+    parser::DesignFile parserDesignFile;
     parserDesignFile.parse(filename);
-    auto systemC = generator::SystemC(verbose);
+    generator::SystemC systemC(verbose);
     systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
     if (saveLibraryInfo) {
       systemC.saveLibraryInfo();

@@ -5,15 +5,19 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../../ast/design_unit.hpp"
+#include "../../debug/debug.hpp"
 
 namespace vhdl {
   namespace parser {
     
-    class DesignUnit :
-      public ::ast::DesignUnit {
-    
+    class DesignUnit : public ::ast::DesignUnit {
+
+      Debug<false> debug;
+      
     public:
 
+      DesignUnit() : debug("vhdl::parser::DesignUnit") {};
+      
       void parse(::ast::Scanner<scanner::Scanner>* scanner);
 
     };

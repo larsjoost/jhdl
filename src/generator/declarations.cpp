@@ -527,10 +527,14 @@ namespace generator {
     if (a) {
       debug.functionStart("attribute_declarations");
       if (a->item || a->string) {
+        static std::unordered_map<std::string, bool> ignored_attributes =
+          {{"SYNTHESIS_RETURN", false}};
         assert(a->identifier);
         std::string identifier = a->identifier->toString(true);
         if (identifier == "FOREIGN") {
           ForeignAttribute(parm, a);
+        } else if (ignored_attributes.find(identifier) != ignored_attributes.end()) {
+          debug.debug("Ignoring " + identifier + " attribute");
         } else {
           exceptions.printWarning("Unknown attribute " + identifier, &a->identifier->text);
         }

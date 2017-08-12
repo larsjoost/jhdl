@@ -9,6 +9,7 @@ namespace vhdl {
   namespace parser {
   
     Package* Package::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      debug.functionStart("parse");
       scanner->accept(scanner::Scanner::VHDL_PACKAGE);
       body = scanner->optional(scanner::Scanner::VHDL_BODY);
       name = scanner->expect<SimpleIdentifier>();
@@ -27,6 +28,7 @@ namespace vhdl {
                        name->toString() + "'");
       }
       scanner->expect(";");
+      debug.functionEnd("parse");
       return this;
     }
     

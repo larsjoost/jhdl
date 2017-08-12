@@ -28,7 +28,12 @@ namespace generator {
     class ObjectNotFoundException {
     public:
       std::string msg;
-      ObjectNotFoundException(std::string msg) : msg(msg) {};
+      ast::Text* text;
+      ObjectNotFoundException(std::string msg, ast::Text* text = NULL) : msg(msg), text(text) {};
+      void print() {
+        Exceptions exceptions;
+        exceptions.printError(msg, text);
+      }
     };
     
     void addAttribute(std::string& name, ast::ObjectArguments& arguments,
