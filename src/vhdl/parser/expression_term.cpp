@@ -2,6 +2,7 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "expression_term.hpp"
+#include "expression.hpp"
 #include "basic_identifier.hpp"
 #include "number.hpp"
 #include "character.hpp"
@@ -13,11 +14,18 @@ namespace vhdl {
   
     ExpressionTerm* ExpressionTerm::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = scanner->getCurrentTextPosition();
-      (physical = scanner->optional<Physical>()) ||
-        (number = scanner->optional<Number>()) ||
-        (character = scanner->optional<Character>()) ||
-        (string = scanner->optional<String>()) || 
-        (identifier = scanner->optional<BasicIdentifier>());
+      if (scanner->optional("(")) {
+        do {
+          parenthis.add(scanner->expect<Expression>());
+        } while (scanner->optional(","));
+        scanner->expect(")");
+      } else {
+        ((physical = scanner->optional<Physical>()) ||
+         (number = scanner->optional<Number>()) ||
+         (character = scanner->optional<Character>()) ||
+         (string = scanner->optional<String>()) || 
+         (identifier = scanner->optional<BasicIdentifier>()));
+      }
       return this;
     }
 

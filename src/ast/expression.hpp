@@ -24,12 +24,11 @@ namespace ast {
     
     Text* text;
 
-    ExpressionTerm* term;
-    ExpressionOperator* op;
-    UnaryOperator* unaryOperator;
-    Expression* expression;
-    List<Expression> parenthis;
-    
+    UnaryOperator* unaryOperator = NULL;
+    ExpressionTerm* term = NULL;
+    ExpressionOperator* op = NULL; 
+    Expression* expression = NULL;
+   
   };
 
 }

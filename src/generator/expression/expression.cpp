@@ -224,34 +224,21 @@ namespace generator {
   ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {
     debug.functionStart("expressionReturnTypes");
     assert(e);
-    if (!e->parenthis.list.empty()) {
-      if (e->parenthis.list.size() > 1) {
-        ast::Expression& x = e->parenthis.list.back();
-        ReturnTypes return_types = expressionReturnTypes(&x);
-        for (auto& i : return_types) {
-          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY);
-          a.setSubtype(i);
-          e->returnTypes.push_back(a);
-        }
-      } else {
-        ast::Expression& x = e->parenthis.list.back();
-        e->returnTypes = expressionReturnTypes(&x);
-      }
-    } else if (e->unaryOperator) {
+    if (e->unaryOperator) {
       e->returnTypes = expressionReturnTypes(e->expression);
     } else if (e->op) {
-      ReturnTypes expr = expressionReturnTypes(e->expression);
       ReturnTypes term = expressionTermReturnTypes(e->term);
+      ReturnTypes expression = expressionReturnTypes(e->expression);
       for (auto& i : term) {
-        for (auto& j : expr) {
+        for (auto& j : expression) {
           ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
           e->returnTypes.insert(e->returnTypes.end(), t.begin(), t.end());
         }
       }
       if (e->returnTypes.empty()) {
         exceptions.printError("Could not resolve type of expression \"" +
-                              returnTypesToString(expr) + "\" " + e->op->op + " \"" +
-                              returnTypesToString(term) + "\"", e->text);
+                              returnTypesToString(term) + "\" " + e->op->op + " \"" +
+                              returnTypesToString(expression) + "\"", e->text);
       }
     } else {
       e->returnTypes = expressionTermReturnTypes(e->term);
@@ -274,7 +261,20 @@ namespace generator {
   ExpressionParser::ReturnTypes ExpressionParser::expressionTermReturnTypes(ast::ExpressionTerm* e) {
     debug.functionStart("expressionTermReturnTypes");
     assert(e);
-    if (e->physical) {
+    if (!e->parenthis.list.empty()) {
+      if (e->parenthis.list.size() > 1) {
+        ast::Expression& x = e->parenthis.list.back();
+        ReturnTypes return_types = expressionReturnTypes(&x);
+        for (auto& i : return_types) {
+          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY);
+          a.setSubtype(i);
+          e->returnTypes.push_back(a);
+        }
+      } else {
+        ast::Expression& x = e->parenthis.list.back();
+        e->returnTypes = expressionReturnTypes(&x);
+      }
+    } else if (e->physical) {
       e->returnTypes = {ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true))};
     } else if (e->number) {
       e->returnTypes = {ast::ObjectValueContainer(e->number->type)};

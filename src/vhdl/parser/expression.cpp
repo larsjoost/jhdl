@@ -8,15 +8,14 @@
 
 namespace vhdl {
   namespace parser {
-  
+
+    // expr = term <OP> term | unary | term
+    // unary = <OP> term
+    // term = expr | 'value' | ( expr )
+    
     Expression* Expression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = scanner->getCurrentTextPosition();
-      if (scanner->optional("(")) {
-        do {
-          parenthis.add(scanner->expect<Expression>());
-        } while (scanner->optional(","));
-        scanner->expect(")");
-      } else if (unaryOperator = scanner->optional<UnaryOperator>()) {
+      if (unaryOperator = scanner->optional<UnaryOperator>()) {
         expression = scanner->expect<Expression>();
       } else if (term = scanner->optional<ExpressionTerm>()) {
         if (op = scanner->optional<ExpressionOperator>()) {

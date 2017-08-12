@@ -336,14 +336,7 @@ namespace generator {
     debug.functionStart("expressionToString");
     assert(e);
     std::string result;
-    if (!e->parenthis.list.empty()) {
-      result = "(";
-      std::string d;
-      for (ast::Expression& i : e->parenthis.list) {
-        result += d + expressionToString(&i, expectedType, sensitivityListCallback);
-      }
-      result += ")";
-    } else if (e->unaryOperator) {
+    if (e->unaryOperator) {
       std::string op;
       std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
       switch (e->unaryOperator->op) {
@@ -368,7 +361,14 @@ namespace generator {
     std::string result = "";
     if (e) {
       debug.functionStart("expressionTermToString");
-      if (e->physical) {
+      if (!e->parenthis.list.empty()) {
+        result = "(";
+        std::string d;
+        for (ast::Expression& i : e->parenthis.list) {
+          result += d + expressionToString(&i, expectedType, sensitivityListCallback);
+        }
+        result += ")";
+      } else if (e->physical) {
         debug.debug("Physical");
         result = physicalToString(e->physical);
       } else if (e->number) {

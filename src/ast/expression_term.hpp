@@ -25,13 +25,15 @@ namespace ast {
     std::list<ObjectValueContainer> returnTypes;
 
     Text* text;
-    
-    Physical* physical;
-    Number* number;
-    String* string;
-    BasicIdentifier* identifier;
-    Character* character;
-    
+
+    List<Expression> parenthis;
+
+    Physical* physical = NULL;
+    Number* number = NULL;
+    String* string = NULL;
+    BasicIdentifier* identifier = NULL;
+    Character* character = NULL;
+
   };
 
 }
