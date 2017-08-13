@@ -151,6 +151,7 @@ namespace generator {
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void FileDeclaration(parameters& parm, ast::FileDeclaration* file);
+    void AliasDeclaration(parameters& parm, ast::AliasDeclaration* file);
     std::string InterfaceTypeConverter(std::string& type, ast::ObjectType id,
                                        ast::ObjectDeclaration::Direction direction);
     void StoreInterfaceInDatabase(parameters& parm, ast::InterfaceList* interface);

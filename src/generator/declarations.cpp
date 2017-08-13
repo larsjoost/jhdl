@@ -214,6 +214,23 @@ namespace generator {
     }
   }
   
+  void SystemC::AliasDeclaration(parameters& parm, ast::AliasDeclaration* alias) {
+    if (alias) {
+      debug.functionStart("AliasDeclaration");
+      printSourceLine(parm, alias->designator);
+      std::string designator = alias->designator->toString(true);
+      std::string name = alias->name->toString(true);
+      std::string type;
+      DatabaseResult result;
+      if (a_database.findOne(result, alias->name)) {
+        type = a_name_converter.getName(result, true);
+        a_database.add(result.object->id, name, result.object->type);
+      }
+      parm.println("using " + designator + " = " + type + ";"); 
+      debug.functionEnd("AliasDeclaration");
+    }
+  }
+  
   void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
     if (interface) {
       for (ast::InterfaceElement& i : interface->interfaceElements.list) {
@@ -645,6 +662,7 @@ namespace generator {
       function_declarations(parm, i.function);
       attribute_declarations(parm, i.attribute);
       FileDeclaration(parm, i.file);
+      AliasDeclaration(parm, i.alias);
     }
     debug.functionEnd("declarations");
   }

@@ -12,8 +12,8 @@ namespace ast {
   public:
 
     SimpleIdentifier* designator;
-    SimpleIdentifier* name;
     SubtypeIndication* type = NULL;
+    SimpleIdentifier* name;
     
   };
 
