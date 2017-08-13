@@ -385,8 +385,10 @@ namespace generator {
     if (!getStaticAttributeType(attributeName, result)) {
       if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
         switch(type.value) {
-        case ast::ObjectValue::INTEGER: result = ast::ObjectValueContainer(ast::ObjectValue::INTEGER); break;
-        case ast::ObjectValue::PHYSICAL: result = ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL); break;
+        case ast::ObjectValue::INTEGER: 
+        case ast::ObjectValue::PHYSICAL: 
+        case ast::ObjectValue::ENUMERATION: result = type; break;
+        case ast::ObjectValue::ARRAY: result = *(type.subtype); break;
         default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {

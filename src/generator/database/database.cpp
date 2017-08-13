@@ -143,6 +143,19 @@ namespace generator {
     return true;
   }
     
+  bool Database::findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier) {
+    assert(identifier);
+    std::string name = identifier->toString(true);
+    auto valid = [&](DatabaseElement* e) {
+      return true;
+    };
+    if (!findOne(result, name, valid)) {
+      exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
+      return false;
+    }
+    return true;
+  }
+
   bool Database::findOne(DatabaseResult& object, std::string& name, 
                          std::string package, std::string library) {
     auto valid = [&](DatabaseElement* e) {

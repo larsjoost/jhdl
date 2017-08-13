@@ -474,6 +474,8 @@ namespace generator {
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("function_body");
     parameters::Area area = parm.area;
+    parm.area = parameters::Area::DECLARATION;
+    sequentialStatements(parm, s);
     parm.area = parameters::Area::IMPLEMENTATION;
     declarations(parm, d);
     sequentialStatements(parm, s);

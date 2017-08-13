@@ -5,19 +5,40 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
-    ast::RangeType* r = iteration->range;
-    assert(r);
-    std::string typeName = name + "_type";
+    debug.functionStart("forLoop");
+    std::string typeName;
+    ast::ObjectValueContainer type;
+    if (iteration->range) {
+      ast::RangeType* r = iteration->range;
+      typeName = name + "_type";
+      if (parm.isArea(parameters::Area::DECLARATION)) {
+        type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
+        printRangeType(parm, typeName, r);
+        parm.println(typeName + "<> " + name + ";");
+      }
+    } else if (iteration->identifier) {
+      DatabaseResult object;
+      if (a_database.findOne(object, iteration->identifier)) {  
+        typeName = a_name_converter.getName(object, true);
+        if (iteration->range_attribute) {
+          if (object.object->type.value == ast::ObjectValue::ARRAY) { 
+            type = *object.object->type.subtype; 
+          } else {
+            exceptions.printError(name + " must be array type to use range attribute", &iteration->identifier->text);
+          }
+        } else {
+          type = object.object->type;
+        }
+      } 
+    }
     if (parm.isArea(parameters::Area::DECLARATION)) {
-      a_database.add(ast::ObjectType::VARIABLE, name, ast::ObjectValue::INTEGER);
-      printRangeType(parm, typeName, r);
-      parm.println(typeName + "<> " + name + ";");
+      a_database.add(ast::ObjectType::VARIABLE, name, type);
     }
     if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
       parm.println("for (" +
-		   name + " = " + name + ".LEFT(); " +
-		   name + " <= " + name + ".RIGHT(); " +
-		   name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
+                   name + " = " + name + ".LEFT(); " +
+                   name + " <= " + name + ".RIGHT(); " +
+                   name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
       parm.incIndent();
     }
     callback(parm);
@@ -25,8 +46,8 @@ namespace generator {
       parm.decIndent();
       parm.println("}");
     }
-  }
-  
+    debug.functionEnd("forLoop");
+  }  
 
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {

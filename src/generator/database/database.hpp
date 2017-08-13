@@ -53,6 +53,7 @@ namespace generator {
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
+    bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
     template<typename Func>
     void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
     void findAll(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
