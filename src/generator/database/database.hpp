@@ -5,6 +5,7 @@
 #include <list>
 
 #include "../../exceptions/exceptions.hpp"
+#include "../../debug/debug.hpp"
 #include "general.hpp"
 #include "local_database.hpp"
 #include "global_database.hpp"
@@ -12,6 +13,9 @@
 namespace generator {
 
   class Database {
+
+    Debug<false> debug;
+
     LocalDatabase localDatabase;
     GlobalDatabase globalDatabase;
     Exceptions exceptions;
@@ -25,6 +29,8 @@ namespace generator {
 
   public:
 
+    Database() : debug("Database") {};
+    
     class ObjectNotFoundException {
     public:
       std::string msg;

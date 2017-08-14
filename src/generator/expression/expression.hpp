@@ -29,7 +29,8 @@ namespace generator {
     using ReturnTypes = std::list<ast::ObjectValueContainer>;
 
     // Exception classes
-
+  public:
+    
     class ObjectNotFound {
       ExpressionParser* a_parent;
       std::string a_name;
@@ -48,7 +49,8 @@ namespace generator {
 	a_parent->a_database->printAllObjects(a_name);
       }
     };
-    
+
+  private:
     template<typename Func>
     ReturnTypes getReturnTypes(std::string& name, Func valid); 
     ReturnTypes getStandardOperatorReturnTypes(std::string& name,

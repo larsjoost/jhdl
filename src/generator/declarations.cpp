@@ -224,7 +224,7 @@ namespace generator {
       DatabaseResult result;
       if (a_database.findOne(result, alias->name)) {
         type = a_name_converter.getName(result, true);
-        a_database.add(result.object->id, name, result.object->type);
+        a_database.add(result.object->id, designator, result.object->type);
       }
       parm.println("using " + designator + " = " + type + ";"); 
       debug.functionEnd("AliasDeclaration");
@@ -489,15 +489,16 @@ namespace generator {
 
   void SystemC::FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
                              ast::List<ast::SequentialStatement>& s) {
-    debug.functionStart("function_body");
+    debug.functionStart("FunctionBody");
     parameters::Area area = parm.area;
     parm.area = parameters::Area::DECLARATION;
+    declarations(parm, d);
     sequentialStatements(parm, s);
     parm.area = parameters::Area::IMPLEMENTATION;
     declarations(parm, d);
     sequentialStatements(parm, s);
     parm.area = area;
-    debug.functionEnd("function_body");
+    debug.functionEnd("FunctionBody");
   }
   
   void SystemC::ForeignAttribute(parameters& parm, ast::Attribute* a) {
@@ -644,7 +645,7 @@ namespace generator {
   void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       debug.functionStart("object_declarations");
-      // printSourceLine(parm, v->identifier->text);
+      printSourceLine(parm, v->text);
       std::string s = objectDeclarationToString(parm, v, true);
       parm.println(s + ";");
       debug.functionEnd("object_declarations");

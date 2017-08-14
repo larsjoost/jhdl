@@ -37,7 +37,11 @@ namespace generator {
 	std::string name = p->identifier->toString(true);
         ast::ObjectValueContainer type;
         if (getObjectName(name, type, ast::ObjectType::VARIABLE, &p->identifier->text)) {
-          parm.println(name + " = " + a_expression.toString(p->expression, type) + ";");
+          try {
+            parm.println(name + " = " + a_expression.toString(p->expression, type) + ";");
+          } catch (ExpressionParser::ObjectNotFound e) {
+            e.print();
+          }
         }
       }
     }
@@ -121,8 +125,12 @@ namespace generator {
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
     if (r) {
        debug.functionStart("returnStatement");
-       if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-         parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
+       try {
+         if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
+           parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
+         }
+       } catch (ExpressionParser::ObjectNotFound e) {
+         e.print();
        }
        debug.functionEnd("returnStatement");
     }
