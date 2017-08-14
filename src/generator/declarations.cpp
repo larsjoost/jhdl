@@ -131,8 +131,7 @@ namespace generator {
     DatabaseResult database_result;
     std::string subtypeName = ArraySubtype(parm, database_result, name, t->type);
     printArrayType(parm, name, t->definition, subtypeName);
-    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY);
-    value.setSubtype(database_result.object->type);
+    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY, database_result.object->type);
     debug.functionEnd("arrayType");
     return value;
   }
@@ -143,9 +142,9 @@ namespace generator {
     std::string name = identifier->toString(true);
     std::string type_name = type->toString(true);
     DatabaseResult database_result;
-    ast::ObjectValueContainer value(object_value);
+    ast::ObjectValueContainer value;
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
-      value.setSubtype(database_result.object->type);
+      value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = a_name_converter.getName(database_result, true);
       parm.println("template<class T = " + n + ">");
       parm.println("using " + name + " = " + definition + "<T>;"); 

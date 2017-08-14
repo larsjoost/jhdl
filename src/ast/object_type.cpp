@@ -53,17 +53,17 @@ namespace ast {
   }
 
   std::string ObjectValueContainer::toString() {
-    if (value == ObjectValue::USER_TYPE) {
-      return typeName + "(User type)";
+    if (a_value == ObjectValue::USER_TYPE) {
+      return a_type_name + "(User type)";
     }
-    if (value == ObjectValue::ARRAY) {
-      assert(subtype != NULL);
-      return "array of " + subtype->toString();
+    if (a_value == ObjectValue::ARRAY) {
+      assert(a_subtype != NULL);
+      return "array of " + a_subtype->toString();
     }
-    if (value == ObjectValue::ENUMERATION) {
-      return "enumeration " + typeName;
+    if (a_value == ObjectValue::ENUMERATION) {
+      return "enumeration " + a_type_name;
     }
-    return ast::toString(value);
+    return ast::toString(a_value);
   }
 
   bool ObjectValueContainer::numberEquals(ObjectValue l, ObjectValue r) {
@@ -75,13 +75,17 @@ namespace ast {
   bool ObjectValueContainer::equals(ObjectValueContainer& other) {
     bool verbose = false;
     bool result;
-    if (numberEquals(value, other.value) || numberEquals(other.value, value)) {
+    if (numberEquals(a_value, other.a_value) || numberEquals(other.a_value, a_value)) {
       result = true;
-    } else if (value != other.value) {
+    } else if (a_value != other.a_value) {
       result = false;
-    } else if (value == ObjectValue::USER_TYPE ||
-               value == ObjectValue::ENUMERATION) {
-      result = (typeName == other.typeName);
+    } else if (a_value == ObjectValue::USER_TYPE ||
+               a_value == ObjectValue::ENUMERATION) {
+      result = (a_type_name == other.a_type_name);
+    } else if (HasSubtype(a_value)) {
+      assert(a_subtype);
+      assert(other.a_subtype);
+      result = a_subtype->equals(*other.a_subtype);
     } else {
       result = true;
     }

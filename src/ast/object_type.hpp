@@ -22,29 +22,54 @@ namespace ast {
 
   std::string toString(ObjectValue o);
 
-  struct ObjectValueContainer {
-    ObjectValue value;
-    std::string typeName;
-    ObjectValueContainer* subtype = NULL;
+  class ObjectValueContainer {
+    ObjectValue a_value = ObjectValue::UNKNOWN;
+    std::string a_type_name;
+    ObjectValueContainer* a_subtype = NULL;
+  public:
     bool numberEquals(ObjectValue l, ObjectValue r);
     bool equals(ObjectValueContainer& other);
-    ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN,
-                         std::string typeName = "") {
+    bool IsValue(ObjectValue other) {return a_value == other; }
+    ObjectValueContainer* GetSubtype() { return a_subtype; }
+    ObjectValue GetValue() { return a_value; }
+    std::string GetTypeName() { return a_type_name; }
+    ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
+      assert(!HasSubtype(value));
       if (value == ObjectValue::BOOLEAN) {
-        this->value = ObjectValue::ENUMERATION;
-        this->typeName = "BOOLEAN";
+        a_value = ObjectValue::ENUMERATION;
+        a_type_name = "BOOLEAN";
       } else {
-        this->value = value;
-        this->typeName = typeName;
+        a_value = value;
+        a_type_name = type_name;
       }
     }
-    void setSubtype(ObjectValueContainer& subtype) {
-      this->subtype = new ObjectValueContainer();
-      *this->subtype = subtype;
-    };
-    ObjectValueContainer(std::string typeName) : typeName(typeName) {
-      value = ObjectValue::USER_TYPE;
+    bool HasSubtype(ObjectValue value) {
+      return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
     }
+    void set(ObjectValue value, ObjectValueContainer* subtype) {
+      assert(HasSubtype(value));
+      a_value = value;
+      a_subtype = new ObjectValueContainer();
+      *a_subtype = *subtype;
+    }
+    ObjectValueContainer(ObjectValue value, ObjectValueContainer& subtype) {
+      set(value, &subtype);
+    }
+    ObjectValueContainer(ObjectValue value, ObjectValueContainer* subtype) {
+      set(value, subtype);
+    }
+    ObjectValueContainer(std::string type_name) {
+      a_value = ObjectValue::USER_TYPE;
+      a_type_name = type_name;
+    }
+    /*
+    ~ObjectValueContainer() {
+      if (a_subtype) {
+        delete a_subtype;
+        a_subtype = NULL;
+      }
+    }
+    */
     std::string toString();
   };
 

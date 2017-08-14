@@ -267,11 +267,11 @@ namespace generator {
     assert(object.object);
     std::string name = a_name_converter->getName(object, true);
     debug.debug("name = " + name + ": " + object.toString());
-    if (object.object->type.value == ast::ObjectValue::ARRAY) {
+    if (object.object->type.IsValue(ast::ObjectValue::ARRAY)) {
       std::string parameters;
       if (arguments) {
         std::string delimiter = "";
-        ast::ObjectValueContainer* subtype = object.object->type.subtype;
+        ast::ObjectValueContainer* subtype = object.object->type.GetSubtype();
         assert(subtype);
         for (auto& i : arguments->associationElements.list) {
           parameters = delimiter + expressionToString(i.actualPart, *subtype, sensitivityListCallback);

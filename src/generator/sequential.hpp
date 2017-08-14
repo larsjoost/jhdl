@@ -21,8 +21,8 @@ namespace generator {
       if (a_database.findOne(object, iteration->identifier)) {  
         typeName = a_name_converter.getName(object, true);
         if (iteration->range_attribute) {
-          if (object.object->type.value == ast::ObjectValue::ARRAY) { 
-            type = *object.object->type.subtype; 
+          if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
+            type = *object.object->type.GetSubtype(); 
           } else {
             exceptions.printError(name + " must be array type to use range attribute", &iteration->identifier->text);
           }

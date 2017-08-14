@@ -32,7 +32,7 @@ namespace generator {
       if (object.object->id == ast::ObjectType::ENUM
           // && object.object->type.value == ast::ObjectValue::ENUMERATION
           ) {
-        name = getPrefix(object, "::", "::") + object.object->type.typeName + "_enum::" + name;
+        name = getPrefix(object, "::", "::") + object.object->type.GetTypeName() + "_enum::" + name;
       } else {
         if (object.local) {
           for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
@@ -67,7 +67,7 @@ namespace generator {
     for (ast::ObjectArgument& o : arguments.list) {
       s += "_" + ToLower(o.type_name);
     }
-    s += "__" + ast::toString(return_type.value);
+    s += "__" + ast::toString(return_type.GetValue());
     return s;
   }
  

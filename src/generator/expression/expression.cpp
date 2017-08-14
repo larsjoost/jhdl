@@ -8,6 +8,7 @@ namespace generator {
     debug.functionStart("returnTypesToString", true);
     std::string found = "";
     std::string delimiter;
+    removeDuplicates(returnTypes);
     for (auto& i : returnTypes) {
       found += delimiter + i.toString();
       delimiter = ", ";
@@ -103,7 +104,6 @@ namespace generator {
   bool ExpressionParser::objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
-    static ast::ObjectValueContainer arrayType(ast::ObjectValue::ARRAY);
     bool result;
     if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments)) {
       result = false;
@@ -111,8 +111,8 @@ namespace generator {
       // TODO: Check Array arguments
       if (expectedReturnType) {
         ast::ObjectValueContainer* type;
-        if (e->type.equals(arrayType)) {
-          type = e->type.subtype;
+        if (e->type.GetValue() == ast::ObjectValue::ARRAY) {
+          type = e->type.GetSubtype();
         } else {
           type = &e->type;
         }
@@ -141,7 +141,7 @@ namespace generator {
     DatabaseResults objects;
     a_database->findAll(objects, name, valid);
     for (auto& i : objects) {
-      ast::ObjectValueContainer* subtype = i.object->type.subtype;
+      ast::ObjectValueContainer* subtype = i.object->type.GetSubtype();
       if (subtype) {
         result.push_back(*subtype);
       } else {
@@ -184,20 +184,19 @@ namespace generator {
 	{">=", {DONT_CARE, DONT_CARE, BOOLEAN}}
       };
     ReturnTypes result;
-    if (l.value == r.value) {
+    if (l.GetValue() == r.GetValue()) {
       auto i = translate.find(name);
       if (i != translate.end()) {
 	Map& m = i->second;
-	if ((m.l == DONT_CARE || m.l == l.value) &&
-	    (m.r == DONT_CARE || m.r == r.value) &&
+	if ((m.l == DONT_CARE || m.l == l.GetValue()) &&
+	    (m.r == DONT_CARE || m.r == r.GetValue()) &&
             l.equals(r)) {
-	  ast::ObjectValue v;
-	  if (m.result == DONT_CARE) {
-	    v = l.value;
+	  ast::ObjectValueContainer v;
+	  if (m.result == DONT_CARE || m.result == m.l) {
+	    v = l;
 	  } else {
-	    v = m.result;
+	    v = ast::ObjectValueContainer(m.result);
 	  }
-	  ast::ObjectValueContainer x(v);
 	  result.push_back(v);
 	}
       }
@@ -266,8 +265,7 @@ namespace generator {
         ast::Expression& x = e->parenthis.list.back();
         ReturnTypes return_types = expressionReturnTypes(&x);
         for (auto& i : return_types) {
-          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY);
-          a.setSubtype(i);
+          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
           e->returnTypes.push_back(a);
         }
       } else {
@@ -384,11 +382,11 @@ namespace generator {
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(attributeName, result)) {
       if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
-        switch(type.value) {
+        switch(type.GetValue()) {
         case ast::ObjectValue::INTEGER: 
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
-        case ast::ObjectValue::ARRAY: result = *(type.subtype); break;
+        case ast::ObjectValue::ARRAY: result = *(type.GetSubtype()); break;
         default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {
