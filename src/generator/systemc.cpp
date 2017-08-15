@@ -131,10 +131,9 @@ namespace generator {
 
   void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
     assert(r);
-    ast::ObjectValueContainer actualType;
-    a_expression.getType(r->left, expectedType, actualType);
-    left = a_expression.toString(r->left, actualType);
-    right = a_expression.toString(r->right, actualType);
+    a_expression.CollectAllReturnTypes(r->left, expectedType);
+    left = a_expression.toString(r->left, expectedType);
+    right = a_expression.toString(r->right, expectedType);
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {

@@ -29,7 +29,7 @@ namespace generator {
     a_map.front().add(name, e);
   }
   
-  void LocalDatabase::find(DatabaseResults& results, std::string& name, bool local) {
+  void LocalDatabase::find(DatabaseResults& results, const std::string& name, bool local) {
     for (auto i = a_map.begin(); i != a_map.end(); i++) {
       std::list<DatabaseElement>* e = i->find(name);
       if (e) {

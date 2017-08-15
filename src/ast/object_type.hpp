@@ -2,10 +2,11 @@
 #ifndef AST_OBJECT_TYPE_H_
 #define AST_OBJECT_TYPE_H_
 
+#include "../debug/debug.hpp"
+
 #include <list>
 #include <string>
-
-#include "../debug/debug.hpp"
+#include <unordered_set>
 
 namespace ast {
 
@@ -27,12 +28,15 @@ namespace ast {
     std::string a_type_name;
     ObjectValueContainer* a_subtype = NULL;
   public:
-    bool numberEquals(ObjectValue l, ObjectValue r);
-    bool equals(ObjectValueContainer& other);
+    bool numberEquals(ObjectValue l, ObjectValue r) const;
+    bool equals(const ObjectValueContainer& other) const;
+    bool operator==(const ObjectValueContainer& other) const {
+      return equals(other);
+    }
     bool IsValue(ObjectValue other) {return a_value == other; }
     ObjectValueContainer* GetSubtype() { return a_subtype; }
-    ObjectValue GetValue() { return a_value; }
-    std::string GetTypeName() { return a_type_name; }
+    ObjectValue GetValue() const { return a_value; }
+    std::string GetTypeName() const { return a_type_name; }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
       assert(!HasSubtype(value));
       if (value == ObjectValue::BOOLEAN) {
@@ -43,19 +47,19 @@ namespace ast {
         a_type_name = type_name;
       }
     }
-    bool HasSubtype(ObjectValue value) {
+    bool HasSubtype(ObjectValue value) const {
       return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
     }
-    void set(ObjectValue value, ObjectValueContainer* subtype) {
+    void set(ObjectValue value, const ObjectValueContainer* subtype) {
       assert(HasSubtype(value));
       a_value = value;
       a_subtype = new ObjectValueContainer();
       *a_subtype = *subtype;
     }
-    ObjectValueContainer(ObjectValue value, ObjectValueContainer& subtype) {
+    ObjectValueContainer(ObjectValue value, const ObjectValueContainer& subtype) {
       set(value, &subtype);
     }
-    ObjectValueContainer(ObjectValue value, ObjectValueContainer* subtype) {
+    ObjectValueContainer(ObjectValue value, const ObjectValueContainer* subtype) {
       set(value, subtype);
     }
     ObjectValueContainer(std::string type_name) {
@@ -70,7 +74,7 @@ namespace ast {
       }
     }
     */
-    std::string toString();
+    std::string toString(bool verbose = false) const;
   };
 
   class Expression;
@@ -80,7 +84,7 @@ namespace ast {
     std::string type_name;
     ObjectValueContainer type;
     Expression* default_value = NULL;
-    ObjectArgument(ObjectValueContainer& type) : type(type) {}
+    ObjectArgument(const ObjectValueContainer& type) : type(type) {}
     ObjectArgument(std::string name) : name(name) { type = ObjectValue::USER_TYPE; }
     ObjectArgument() { type = ObjectValue::UNKNOWN; }
     std::string toString();
@@ -102,6 +106,28 @@ namespace ast {
     std::string toString();
   };  
 
+  struct ReturnTypesHash {
+    std::size_t operator() (const ast::ObjectValueContainer& o) const {
+      ObjectValue v = o.GetValue();
+      if (v == ObjectValue::NUMBER || v == ObjectValue::INTEGER || v == ObjectValue::REAL) {
+        v = ObjectValue::NUMBER;
+      }
+      size_t result = static_cast<std::underlying_type_t<ast::ObjectValue>>(v);
+      // result += std::hash<std::string>{}(o.GetTypeName());
+      return result;
+    }
+  };
+
+  struct ReturnTypesKeysEqual {
+    bool operator() (const ast::ObjectValueContainer lhs,
+                     const ast::ObjectValueContainer rhs) const {
+      return lhs.equals(rhs);
+    }
+  };
+  
+  //  typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash, ReturnTypesKeysEqual> ReturnTypes;
+  typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash> ReturnTypes;
+  
 }
 
 #endif

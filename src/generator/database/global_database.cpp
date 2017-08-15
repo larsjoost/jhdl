@@ -20,7 +20,7 @@ namespace generator {
     }
   }
 
-  LocalDatabase* GlobalDatabase::find(std::string& library, std::string& name) {
+  LocalDatabase* GlobalDatabase::find(std::string& library, const std::string& name) {
     auto l = a_map.find(library);
     if (l != a_map.end()) {
       auto x = l->second.find(name);
@@ -31,7 +31,7 @@ namespace generator {
     return NULL;
   }
 
-  bool GlobalDatabase::find(DatabaseResults& results, std::string& name, std::string package, std::string library) {
+  bool GlobalDatabase::find(DatabaseResults& results, const std::string& name, std::string package, std::string library) {
     auto func = [&](LocalDatabase& l) {
       l.find(results, name, false);
     };

@@ -18,7 +18,7 @@ namespace generator {
     bool setVisible(std::string name = "");
     void add(std::string& name, DatabaseElement& e);
     void add(NameMap& other);
-    std::list<DatabaseElement>* find(std::string& name);
+    std::list<DatabaseElement>* find(const std::string& name);
     void print();
     static void print(DatabaseElement* e);
     std::string getSection();

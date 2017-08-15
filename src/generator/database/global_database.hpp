@@ -26,8 +26,8 @@ namespace generator {
     
   public:
     void append(LocalDatabase& d);
-    bool find(DatabaseResults& results, std::string& name, std::string package = "", std::string library = "");
-    LocalDatabase* find(std::string& name, std::string& library);
+    bool find(DatabaseResults& results, const std::string& name, std::string package = "", std::string library = "");
+    LocalDatabase* find(std::string& library, const std::string& name);
     bool setVisible(std::string name = "", std::string package = "", std::string library = "");
     bool exists(std::string& library, std::string& package);
     void print(std::string name = "");

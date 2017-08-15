@@ -61,8 +61,8 @@ namespace generator {
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
     template<typename Func>
-    void findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package = "", std::string library = "");
-    void findAll(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
+    void findAll(DatabaseResults& objects, const std::string& name, Func valid, std::string package = "", std::string library = "");
+    void findAll(DatabaseResults& objects, const std::string& name, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
 
     bool localize(std::string& library, std::string& name, ast::ObjectType type);
@@ -126,7 +126,7 @@ namespace generator {
   }
   
   template<typename Func>
-  void Database::findAll(DatabaseResults& objects, std::string& name, Func valid, std::string package, std::string library) {
+  void Database::findAll(DatabaseResults& objects, const std::string& name, Func valid, std::string package, std::string library) {
     if ((package.empty() || package == localDatabase.getName()) &&
         (library.empty() || library == localDatabase.getLibrary())) {
       localDatabase.find(objects, name);

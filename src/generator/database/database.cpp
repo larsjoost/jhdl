@@ -168,7 +168,7 @@ namespace generator {
     return findOne(object, name, valid, package, library);
   }
 
-  void Database::findAll(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
+  void Database::findAll(DatabaseResults& objects, const std::string& name, std::string package, std::string library) {
     auto valid = [&](DatabaseElement* e) {
       return true;
     };

@@ -4,17 +4,16 @@
 
 namespace generator {
 
-  std::string ExpressionParser::returnTypesToString(ReturnTypes& returnTypes) {
-    debug.functionStart("returnTypesToString", true);
+  std::string ExpressionParser::ReturnTypesToString(const ast::ReturnTypes& return_types) {
+    debug.functionStart("ReturnTypesToString", true);
     std::string found = "";
     std::string delimiter;
-    removeDuplicates(returnTypes);
-    for (auto& i : returnTypes) {
+    for (auto& i : return_types) {
       found += delimiter + i.toString();
       delimiter = ", ";
     }
     debug.debug("Result = " + found, true);
-    debug.functionEnd("returnTypesToString");
+    debug.functionEnd("ReturnTypesToString");
     return found;
   }
 
@@ -28,29 +27,20 @@ namespace generator {
     return false;
   }
   
-  bool ExpressionParser::getType(ast::Expression* e,
-                                 ast::ObjectValueContainer& expectedType,
-                                 ast::ObjectValueContainer& actualType) {
-    debug.functionStart("getType");
+  bool ExpressionParser::CollectAllReturnTypes(ast::Expression* e,
+                                               ast::ObjectValueContainer& expectedType) {
+    debug.functionStart("CollectAllReturnTypes");
     bool ok = false;
-    ReturnTypes o = expressionReturnTypes(e);
-    for (auto i : o) {
-      if (i.equals(expectedType)) {
-        ok = true;
-        actualType = i;
-        break;
-      }
+    ast::ReturnTypes o;
+    ExpressionReturnTypes(e, o);
+    if (o.find(expectedType) != o.end()) {
+      ok = true;
+    } else {
+      std::string found = ReturnTypesToString(o);
+      exceptions.printError("Could not resolve expected type " + expectedType.toString() +
+                            ". Found the following types: " + found, e->text);
     }
-    if (!ok) {
-      std::string found = returnTypesToString(o);
-      if (o.size() > 1) {
-        exceptions.printError("Could not resolve expected type " + expectedType.toString() +
-                              ". Found the following types: " + found, e->text);
-      } else {
-        actualType = o.back();
-      }
-    }
-    debug.functionEnd("getType");
+    debug.functionEnd("CollectAllReturnTypes");
     return ok;
   }
   
@@ -93,14 +83,6 @@ namespace generator {
     return name;
   }
 
-  void ExpressionParser::removeDuplicates(ReturnTypes& r) {
-    auto equal = [](ast::ObjectValueContainer& l, ast::ObjectValueContainer& r) {
-      return l.equals(r);
-    };
-    auto it = std::unique(r.begin(), r.end(), equal);
-    r.erase(it, r.end());
-  }
-  
   bool ExpressionParser::objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
@@ -129,11 +111,11 @@ namespace generator {
     return result;
   }
   
-  ExpressionParser::ReturnTypes ExpressionParser::functionReturnTypes(std::string& name,
-                                                                      ast::AssociationList* associationList) {
+  void ExpressionParser::FunctionReturnTypes(std::string& name,
+                                             ast::AssociationList* associationList,
+                                             ast::ReturnTypes& return_types) {
     debug.functionStart("functionReturnTypes");
     assert(associationList);
-    ReturnTypes result;
     ast::ObjectArguments arguments = toObjectArguments(associationList);
     auto valid = [&](DatabaseElement* e) {
       return objectWithArguments(e, arguments);
@@ -143,13 +125,12 @@ namespace generator {
     for (auto& i : objects) {
       ast::ObjectValueContainer* subtype = i.object->type.GetSubtype();
       if (subtype) {
-        result.push_back(*subtype);
+        return_types.insert(*subtype);
       } else {
-        result.push_back(i.object->type);
+        return_types.insert(i.object->type);
       }
     }
-    debug.functionEnd("functionReturnTypes");
-    return result;
+    debug.functionEnd("FunctionReturnTypes");
   }
 
   bool ExpressionParser::translateOperator(std::string& op, std::string& translatedOp) {
@@ -164,9 +145,10 @@ namespace generator {
     return result;
   }
   
-  ExpressionParser::ReturnTypes ExpressionParser::getStandardOperatorReturnTypes(std::string& name,
-										 ast::ObjectValueContainer& l,
-										 ast::ObjectValueContainer& r) {
+  void ExpressionParser::GetStandardOperatorReturnTypes(const std::string& name,
+                                                        const ast::ObjectValueContainer& l,
+                                                        const ast::ObjectValueContainer& r,
+                                                        ast::ReturnTypes& return_types) {
     struct Map {
       ast::ObjectValue l;
       ast::ObjectValue r;
@@ -183,7 +165,6 @@ namespace generator {
 	{"<=", {DONT_CARE, DONT_CARE, BOOLEAN}},
 	{">=", {DONT_CARE, DONT_CARE, BOOLEAN}}
       };
-    ReturnTypes result;
     if (l.GetValue() == r.GetValue()) {
       auto i = translate.find(name);
       if (i != translate.end()) {
@@ -197,56 +178,55 @@ namespace generator {
 	  } else {
 	    v = ast::ObjectValueContainer(m.result);
 	  }
-	  result.push_back(v);
+	  return_types.insert(v);
 	}
       }
     }
-    return result;
   }
   
-  ExpressionParser::ReturnTypes ExpressionParser::operatorReturnTypes(std::string& name,
-                                                                      ast::ObjectValueContainer& l,
-                                                                      ast::ObjectValueContainer& r) {
-    debug.functionStart("operatorReturnTypes");
+  void ExpressionParser::OperatorReturnTypes(const std::string& name,
+                                             const ast::ObjectValueContainer& l,
+                                             const ast::ObjectValueContainer& r,
+                                             ast::ReturnTypes& return_types) {
+    debug.functionStart("OperatorReturnTypes");
     std::list<ast::ObjectArgument> a = {ast::ObjectArgument(l), ast::ObjectArgument(r)};
     auto x = ast::ObjectArguments(false, a);
     auto valid = [&](DatabaseElement* e) {
       return x.equals(e->arguments);
     };
-    ReturnTypes t = getReturnTypes(name, valid);
-    ReturnTypes s = getStandardOperatorReturnTypes(name, l, r);
-    t.insert(t.end(), s.begin(), s.end());
-    debug.functionEnd("operatorReturnTypes");
-    return t;
+    GetReturnTypes(name, valid, return_types);
+    GetStandardOperatorReturnTypes(name, l, r, return_types);
+    debug.functionEnd("OperatorReturnTypes");
   }
 
-  ExpressionParser::ReturnTypes ExpressionParser::expressionReturnTypes(ast::Expression* e) {
-    debug.functionStart("expressionReturnTypes");
+  void ExpressionParser::ExpressionReturnTypes(ast::Expression* e, ast::ReturnTypes& return_types) {
+    debug.functionStart("ExpressionReturnTypes");
     assert(e);
     if (e->unaryOperator) {
-      e->returnTypes = expressionReturnTypes(e->expression);
+      ExpressionReturnTypes(e->expression, e->returnTypes);
     } else if (e->op) {
-      ReturnTypes term = expressionTermReturnTypes(e->term);
-      ReturnTypes expression = expressionReturnTypes(e->expression);
+      ast::ReturnTypes term; 
+      ast::ReturnTypes expression; 
+      ExpressionTermReturnTypes(e->term, term);
+      ExpressionReturnTypes(e->expression, expression);
       for (auto& i : term) {
         for (auto& j : expression) {
-          ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
-          e->returnTypes.insert(e->returnTypes.end(), t.begin(), t.end());
+          OperatorReturnTypes(e->op->op, i, j, e->returnTypes);
         }
       }
       if (e->returnTypes.empty()) {
         exceptions.printError("Could not resolve type of expression \"" +
-                              returnTypesToString(term) + "\" " + e->op->op + " \"" +
-                              returnTypesToString(expression) + "\"", e->text);
+                              ReturnTypesToString(term) + "\" " + e->op->op + " \"" +
+                              ReturnTypesToString(expression) + "\"", e->text);
       }
     } else {
-      e->returnTypes = expressionTermReturnTypes(e->term);
+      ExpressionTermReturnTypes(e->term, e->returnTypes);
     }
     if (e->returnTypes.empty()) {
       exceptions.printError("Could not resolve type of expression", e->text);
     }
+    return_types.insert(e->returnTypes.begin(), e->returnTypes.end());
     debug.functionEnd("expressionReturnTypes");
-    return e->returnTypes;
   }
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
@@ -257,44 +237,45 @@ namespace generator {
     return result;
   }
   
-  ExpressionParser::ReturnTypes ExpressionParser::expressionTermReturnTypes(ast::ExpressionTerm* e) {
-    debug.functionStart("expressionTermReturnTypes");
+  void ExpressionParser::ExpressionTermReturnTypes(ast::ExpressionTerm* e, ast::ReturnTypes& return_types) {
+    debug.functionStart("ExpressionTermReturnTypes");
     assert(e);
     if (!e->parenthis.list.empty()) {
       if (e->parenthis.list.size() > 1) {
         ast::Expression& x = e->parenthis.list.back();
-        ReturnTypes return_types = expressionReturnTypes(&x);
+        ast::ReturnTypes return_types;
+        ExpressionReturnTypes(&x, return_types);
         for (auto& i : return_types) {
           ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
-          e->returnTypes.push_back(a);
+          e->returnTypes.insert(a);
         }
       } else {
         ast::Expression& x = e->parenthis.list.back();
-        e->returnTypes = expressionReturnTypes(&x);
+        ExpressionReturnTypes(&x, e->returnTypes);
       }
     } else if (e->physical) {
-      e->returnTypes = {ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true))};
+      e->returnTypes.insert(ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true)));
     } else if (e->number) {
-      e->returnTypes = {ast::ObjectValueContainer(e->number->type)};
+      e->returnTypes.insert(ast::ObjectValueContainer(e->number->type));
     } else if (e->string) {
       static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
-      e->returnTypes = {stringType};
+      e->returnTypes.insert(stringType);
     } else if (e->identifier) {
-      e->returnTypes = basicIdentifierReturnTypes(e->identifier);
+      BasicIdentifierReturnTypes(e->identifier, e->returnTypes);
     } else if (e->character) {
       std::string n = e->character->toString();
       auto valid = [&](DatabaseElement* e) {
         return true;
       };
-      e->returnTypes = getReturnTypes(n, valid);
+      GetReturnTypes(n, valid, e->returnTypes);
     } else {
       exceptions.printInternal("Unknown expression term", e->text);
     }
     if (e->returnTypes.empty()) {
       exceptions.printError("Could not resolve type of expression term", e->text);
     }
-    debug.functionEnd("expressionTermReturnTypes");
-    return e->returnTypes;
+    return_types.insert(e->returnTypes.begin(), e->returnTypes.end());
+    debug.functionEnd("ExpressionTermReturnTypes");
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(ast::AssociationList* associationList) {
@@ -304,8 +285,8 @@ namespace generator {
       for (auto& i : associationList->associationElements.list) {
         ast::ObjectArgument x;
         x.name = (i.formalPart && i.formalPart->name) ? i.formalPart->name->toString(true) : "";
-        ReturnTypes r = expressionReturnTypes(i.actualPart);
-        removeDuplicates(r);
+        ast::ReturnTypes r;
+        ExpressionReturnTypes(i.actualPart, r);
         if (r.size() == 1) {
           x.type = *(r.begin());
           result.push_back(x);
@@ -314,7 +295,7 @@ namespace generator {
           if (r.empty()) {
             exceptions.printError("Could not resolve argument type", text);
           } else {
-            std::string found = returnTypesToString(r);
+            std::string found = ReturnTypesToString(r);
             exceptions.printError("More than one type for argument. Found the following types " + found, text);
           }
         }
@@ -325,42 +306,42 @@ namespace generator {
   }
  
   
-  ExpressionParser::ReturnTypes ExpressionParser::attributeReturnTypes(std::string& name, std::string& attribute,
-                                                                       ast::AssociationList* associationList) {
-    debug.functionStart("attributeReturnTypes");
-    ReturnTypes result;
+  void ExpressionParser::AttributeReturnTypes(std::string& name, std::string& attribute,
+                                              ast::AssociationList* associationList,
+                                              ast::ReturnTypes& return_types) {
+    debug.functionStart("AttributeReturnTypes");
     // ast::ObjectArguments arguments = toObjectArguments(associationList);
     DatabaseResult object;
     if (a_database->findOne(object, name)) {
       ast::ObjectValueContainer type = getAttributeType(object.object->type, attribute);
-      result.push_back(type);
+      return_types.insert(type);
     } else {
       exceptions.printError("Could not resolve type of attribute \"" + attribute + "\" of \"" + name + "\"");
     }
-    debug.functionEnd("attributeReturnTypes");
-    return result;
+    debug.functionEnd("AttributeReturnTypes");
   }
 
-  ExpressionParser::ReturnTypes ExpressionParser::basicIdentifierReturnTypes(ast::BasicIdentifier* b) {
-    debug.functionStart("basicIdentifierReturnTypes");
+  void ExpressionParser::BasicIdentifierReturnTypes(ast::BasicIdentifier* b,
+                                                    ast::ReturnTypes& return_types) {
+    debug.functionStart("BasicIdentifierReturnTypes");
     std::string name = b->text.toString(true);
     if (b->attribute) {
       std::string attribute = b->attribute->toString(true);
-      b->returnTypes = attributeReturnTypes(name, attribute, b->arguments);
+      AttributeReturnTypes(name, attribute, b->arguments, b->returnTypes);
     } else if (b->arguments) {
-      b->returnTypes = functionReturnTypes(name, b->arguments); 
+      FunctionReturnTypes(name, b->arguments, b->returnTypes); 
     } else {
       auto valid = [&](DatabaseElement* e) {
         return e->arguments.empty();
       };
-      b->returnTypes = getReturnTypes(name, valid);
+      GetReturnTypes(name, valid, b->returnTypes);
     }
     if (b->returnTypes.empty()) {
       exceptions.printError("Could not resolve type of " + name, &b->text);
       a_database->printAllObjects(name);
     }
-    debug.functionEnd("basicIdentifierReturnTypes");
-    return b->returnTypes;
+    return_types.insert(b->returnTypes.begin(), b->returnTypes.end());
+    debug.functionEnd("BasicIdentifierReturnTypes");
   }
 
   bool ExpressionParser::getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result) {

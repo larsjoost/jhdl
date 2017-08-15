@@ -25,8 +25,6 @@ namespace generator {
       ast::ObjectValueContainer left;
       ast::ObjectValueContainer right;
     };
-    
-    using ReturnTypes = std::list<ast::ObjectValueContainer>;
 
     // Exception classes
   public:
@@ -52,20 +50,24 @@ namespace generator {
 
   private:
     template<typename Func>
-    ReturnTypes getReturnTypes(std::string& name, Func valid); 
-    ReturnTypes getStandardOperatorReturnTypes(std::string& name,
-					       ast::ObjectValueContainer& l,
-					       ast::ObjectValueContainer& r);
+    void GetReturnTypes(const std::string& name, Func valid, ast::ReturnTypes& return_types); 
+    void GetStandardOperatorReturnTypes(const std::string& name,
+                                        const ast::ObjectValueContainer& l,
+                                        const ast::ObjectValueContainer& r,
+                                        ast::ReturnTypes& return_types);
    
     // First-pass functions
-    ReturnTypes expressionReturnTypes(ast::Expression* e);   
-    ReturnTypes expressionTermReturnTypes(ast::ExpressionTerm* e);  
-    ReturnTypes basicIdentifierReturnTypes(ast::BasicIdentifier* b);
-    ReturnTypes operatorReturnTypes(std::string& name,
-                                    ast::ObjectValueContainer& l,
-                                    ast::ObjectValueContainer& r);
-    ReturnTypes functionReturnTypes(std::string& name, ast::AssociationList* associationList);
-    ReturnTypes attributeReturnTypes(std::string& name, std::string& attribute, ast::AssociationList* associationList);
+    void ExpressionReturnTypes(ast::Expression* e, ast::ReturnTypes& return_types);   
+    void ExpressionTermReturnTypes(ast::ExpressionTerm* e, ast::ReturnTypes& return_types);  
+    void BasicIdentifierReturnTypes(ast::BasicIdentifier* b, ast::ReturnTypes& return_types);
+    void OperatorReturnTypes(const std::string& name,
+                             const ast::ObjectValueContainer& l,
+                             const ast::ObjectValueContainer& r,
+                             ast::ReturnTypes& return_types);
+    void FunctionReturnTypes(std::string& name, ast::AssociationList* associationList,
+                             ast::ReturnTypes& return_types);
+    void AttributeReturnTypes(std::string& name, std::string& attribute,
+                              ast::AssociationList* associationList, ast::ReturnTypes& return_types);
     
     // Second-pass functions 
     template <typename Func>
@@ -118,7 +120,7 @@ namespace generator {
     ast::ObjectArguments toObjectArguments(ast::AssociationList* associationList);
 
 
-    std::string returnTypesToString(ReturnTypes& returnTypes);
+    std::string ReturnTypesToString(const ast::ReturnTypes& return_types);
     
     bool getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result);
 
@@ -127,8 +129,6 @@ namespace generator {
     bool objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                              ast::ObjectValueContainer* expectedReturnType = NULL);
 
-    void removeDuplicates(ReturnTypes& r);
-    
   public:
 
     ExpressionParser(Database& database, NameConverter& name_converter, bool verbose = false) : debug("ExpressionParser") {
@@ -148,9 +148,8 @@ namespace generator {
 
     std::string procedureCallStatementToString(ast::ProcedureCallStatement* p);
 
-    bool getType(ast::Expression* e,
-                 ast::ObjectValueContainer& expectedType,
-                 ast::ObjectValueContainer& actualType);
+    bool CollectAllReturnTypes(ast::Expression* e,
+                               ast::ObjectValueContainer& expectedType);
     
     bool translateOperator(std::string& op, std::string& translatedOp);
 
@@ -161,12 +160,8 @@ namespace generator {
                                          ast::ObjectValueContainer& expectedType,
                                          Func sensitivityListCallback) {
     debug.functionStart("toString");
-    // First-pass: Collect the possible return types
-    ast::ObjectValueContainer actualType;
-    getType(e, expectedType, actualType); 
-    // debug.debug("Expected type = " + expectedType.toString() + ", actual type = " + actualType.toString());
-    // Second-pass: Resolve the return type and convert to string
-    std::string s = expressionToString(e, actualType, sensitivityListCallback);
+    CollectAllReturnTypes(e, expectedType); 
+    std::string s = expressionToString(e, expectedType, sensitivityListCallback);
     debug.functionEnd("toString");
     return s;
   }
@@ -183,16 +178,14 @@ namespace generator {
   }
     
   template<typename Func>
-  ExpressionParser::ReturnTypes ExpressionParser::getReturnTypes(std::string& name, Func valid) {
-    debug.functionStart("getReturnTypes");
+  void ExpressionParser::GetReturnTypes(const std::string& name, Func valid, ast::ReturnTypes& return_types) {
+    debug.functionStart("GetReturnTypes");
     DatabaseResults objects;
     a_database->findAll(objects, name, valid);
-    ReturnTypes result;
     for (auto& i : objects) {
-      result.push_back(i.object->type);
+      return_types.insert(i.object->type);
     }
-    debug.functionEnd("getReturnTypes");
-    return result;
+    debug.functionEnd("GetReturnTypes");
   }
   
   
@@ -297,9 +290,11 @@ namespace generator {
     debug.functionStart("operationToString");
     std::string result;
     std::list<ReturnTypePair> typePairs;
+    ast::ReturnTypes t;
     for (auto& i : e->term->returnTypes) {
       for (auto& j : e->expression->returnTypes) {
-        ReturnTypes t = operatorReturnTypes(e->op->op, i, j);
+        t.clear();
+        OperatorReturnTypes(e->op->op, i, j, t);
         for (auto& x : t) {
           if (x.equals(expectedType)) {
             ReturnTypePair pair = {i, j};

@@ -19,7 +19,7 @@ namespace ast {
   class BasicIdentifier {
   public:
 
-    std::list<ObjectValueContainer> returnTypes;
+    ReturnTypes returnTypes;
     
     Text text;
     bool range_attribute = false;

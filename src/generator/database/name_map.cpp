@@ -21,7 +21,7 @@ namespace generator {
     a_map.insert(other.a_map.begin(), other.a_map.end());
   }
 
-  std::list<DatabaseElement>* NameMap::find(std::string& name) {
+  std::list<DatabaseElement>* NameMap::find(const std::string& name) {
     auto m = a_map.find(name);
     if (m != a_map.end()) {
       return &m->second;
