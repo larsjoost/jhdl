@@ -12,7 +12,9 @@ architecture rtl of test is
 
 --  constant c : bit_vector(0 to 3) := "1010";
 
-  type a_t is array (0 to 4) of bit;
+  constant SIZE : integer := 5;
+  
+  type a_t is array (0 to SIZE - 1) of bit;
 
 begin
 
