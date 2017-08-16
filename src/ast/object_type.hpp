@@ -118,14 +118,6 @@ namespace ast {
     }
   };
 
-  struct ReturnTypesKeysEqual {
-    bool operator() (const ast::ObjectValueContainer lhs,
-                     const ast::ObjectValueContainer rhs) const {
-      return lhs.equals(rhs);
-    }
-  };
-  
-  //  typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash, ReturnTypesKeysEqual> ReturnTypes;
   typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash> ReturnTypes;
   
 }
