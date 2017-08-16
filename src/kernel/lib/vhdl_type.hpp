@@ -56,6 +56,10 @@ namespace vhdl {
       return value != TYPE(0);
     }
     
+    operator int() const {
+      return value;
+    }
+
     std::string toString() {
       return std::to_string(value);
     }

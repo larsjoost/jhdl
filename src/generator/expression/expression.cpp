@@ -258,8 +258,9 @@ namespace generator {
     } else if (e->number) {
       e->returnTypes.insert(ast::ObjectValueContainer(e->number->type));
     } else if (e->string) {
-      static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
-      e->returnTypes.insert(stringType);
+      static ast::ObjectValueContainer enum_type(ast::ObjectValue::ENUMERATION);
+      static ast::ObjectValueContainer string_type(ast::ObjectValue::ARRAY, enum_type);
+      e->returnTypes.insert(string_type);
     } else if (e->identifier) {
       BasicIdentifierReturnTypes(e->identifier, e->returnTypes);
     } else if (e->character) {

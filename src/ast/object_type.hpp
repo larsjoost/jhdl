@@ -18,7 +18,7 @@ namespace ast {
   std::string toString(ObjectType o);
 
   enum class ObjectValue {
-    INTEGER, REAL, NUMBER, CHARACTER, TEXT,  PHYSICAL, ARRAY, ENUMERATION,
+    INTEGER, REAL, NUMBER, CHARACTER, PHYSICAL, ARRAY, ENUMERATION,
     ACCESS, FILE, BOOLEAN, USER_TYPE, UNKNOWN, NONE, DONT_CARE};
 
   std::string toString(ObjectValue o);
@@ -34,7 +34,7 @@ namespace ast {
       return equals(other);
     }
     bool IsValue(ObjectValue other) {return a_value == other; }
-    ObjectValueContainer* GetSubtype() { return a_subtype; }
+    ObjectValueContainer* GetSubtype() const { assert(a_subtype); return a_subtype; }
     ObjectValue GetValue() const { return a_value; }
     std::string GetTypeName() const { return a_type_name; }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {

@@ -37,7 +37,6 @@ namespace ast {
     case ObjectValue::REAL: return "real";
     case ObjectValue::NUMBER: return "number";
     case ObjectValue::CHARACTER: return "character";
-    case ObjectValue::TEXT: return "text";
     case ObjectValue::PHYSICAL: return "physical";
     case ObjectValue::ARRAY: return "array";
     case ObjectValue::ENUMERATION: return "enumeration";
@@ -75,7 +74,7 @@ namespace ast {
       (l == ObjectValue::NUMBER) &&
       (r == ObjectValue::INTEGER || r == ObjectValue::REAL || r == ObjectValue::NUMBER);
   }
-  
+
   bool ObjectValueContainer::equals(const ObjectValueContainer& other) const {
     bool verbose = false;
     bool result;
@@ -85,7 +84,7 @@ namespace ast {
       result = false;
     } else if (a_value == ObjectValue::USER_TYPE ||
                a_value == ObjectValue::ENUMERATION) {
-      result = (a_type_name == other.a_type_name);
+      result = (a_type_name.empty() || other.a_type_name.empty() || a_type_name == other.a_type_name);
     } else if (HasSubtype(a_value)) {
       assert(a_subtype);
       assert(other.a_subtype);
