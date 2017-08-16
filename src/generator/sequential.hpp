@@ -11,11 +11,9 @@ namespace generator {
     if (iteration->range) {
       ast::RangeType* r = iteration->range;
       typeName = name + "_type";
-      if (parm.isArea(parameters::Area::DECLARATION)) {
-        type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
-        printRangeType(parm, typeName, r);
-        parm.println(typeName + "<> " + name + ";");
-      }
+      type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
+      printRangeType(parm, typeName, r);
+      parm.println(parameters::Area::DECLARATION, typeName + "<> " + name + ";");
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (a_database.findOne(object, iteration->identifier)) {  
@@ -31,21 +29,15 @@ namespace generator {
         }
       } 
     }
-    if (parm.isArea(parameters::Area::DECLARATION)) {
-      a_database.add(ast::ObjectType::VARIABLE, name, type);
-    }
-    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-      parm.println("for (" +
-                   name + " = " + name + ".LEFT(); " +
-                   name + " <= " + name + ".RIGHT(); " +
-                   name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
-      parm.incIndent();
-    }
+    a_database.add(ast::ObjectType::VARIABLE, name, type);
+    parm.println(parameters::Area::IMPLEMENTATION, "for (" +
+                 name + " = " + name + ".LEFT(); " +
+                 name + " <= " + name + ".RIGHT(); " +
+                 name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
+    parm.incIndent();
     callback(parm);
-    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-      parm.decIndent();
-      parm.println("}");
-    }
+    parm.decIndent();
+    parm.println(parameters::Area::IMPLEMENTATION, "}");
     debug.functionEnd("forLoop");
   }  
 

@@ -345,14 +345,11 @@ namespace generator {
     debug.functionStart("PrintInterface");
     std::string result;
     if (interface) {
-      parameters::Area area = parm.area;
-      parm.setArea(parameters::Area::INTERFACE);
       auto type_converter = [&](std::string& type, ast::ObjectType id,
                                 ast::ObjectDeclaration::Direction direction) {
         return InterfaceTypeConverter(type, id, direction);
       };
       result = interfaceListToString(parm, interface, ", ", true, type_converter, "", true);
-      parm.setArea(area);
     }
     debug.functionEnd("PrintInterface");
   }
@@ -430,7 +427,7 @@ namespace generator {
       std::string run_prefix;
       std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
       std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
-      bool implementation = parm.isArea(parameters::Area::IMPLEMENTATION);
+      bool implementation = parm.isFile(parameters::FileSelect::SOURCE_FILE);
       auto createDefinition = [&](parameters& parm) {
         PrintInterface(parm, f->interface);
       };
@@ -448,7 +445,6 @@ namespace generator {
           parm.decIndent();
           parm.println("}");
         } else {
-          std::string r;
           parm.println(returnTypeName + " run" + interface_with_initialization + ";");
         }
       };
@@ -489,14 +485,8 @@ namespace generator {
   void SystemC::FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("FunctionBody");
-    parameters::Area area = parm.area;
-    parm.area = parameters::Area::DECLARATION;
     declarations(parm, d);
     sequentialStatements(parm, s);
-    parm.area = parameters::Area::IMPLEMENTATION;
-    declarations(parm, d);
-    sequentialStatements(parm, s);
-    parm.area = area;
     debug.functionEnd("FunctionBody");
   }
   
@@ -608,9 +598,9 @@ namespace generator {
       std::string name = t->identifier->toString(true);
       DatabaseResult database_result;
       auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
-        if (!r && !parm.isArea(parameters::Area::INTERFACE)) {
-          parm.println("template <class RANGE = " + type_name + "_range>");
-          parm.println("using " + name + " = " + type_name + "<>;");
+        if (!r) {
+          parm.println(parameters::Area::INTERFACE, "template <class RANGE = " + type_name + "_range>");
+          parm.println(parameters::Area::INTERFACE, "using " + name + " = " + type_name + "<>;");
         } 
         return type_name;
       };
@@ -619,35 +609,24 @@ namespace generator {
     }
   }
 
-  std::string SystemC::objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                                 bool initialization) {
-    std::string s = "";
+  void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
-      debug.functionStart("objectDeclarationToString");
+      debug.functionStart("ObjectDeclarations");
+      printSourceLine(parm, v->text);
       auto func = [&](std::string& name,
 		      std::string& type, std::string& init,
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
         if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
         } 
-        s = type + " " + name;
-        if (initialization && init.size() > 0) {
-          s += " = " + init;
+        std::string s = type + " " + name;
+        parm.println(s + ";");
+        if (init.size() > 0) {
+          parm.println(parameters::Area::CONSTRUCTOR, name + "(" + init + ");");
         }
       };
       objectDeclaration(parm, v, func);
-      debug.functionEnd("objectDeclarationToString");
-    }
-    return s;
-  }
-
-  void SystemC::object_declarations(parameters& parm, ast::ObjectDeclaration* v) {
-    if (v) {
-      debug.functionStart("object_declarations");
-      printSourceLine(parm, v->text);
-      std::string s = objectDeclarationToString(parm, v, true);
-      parm.println(s + ";");
-      debug.functionEnd("object_declarations");
+      debug.functionEnd("ObjectDeclarations");
     }
   }
 
@@ -656,9 +635,9 @@ namespace generator {
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
       subtype_declarations(parm, i.subtype);
-      object_declarations(parm, i.variable);
-      object_declarations(parm, i.signal);
-      object_declarations(parm, i.constant);
+      ObjectDeclarations(parm, i.variable);
+      ObjectDeclarations(parm, i.signal);
+      ObjectDeclarations(parm, i.constant);
       function_declarations(parm, i.function);
       attribute_declarations(parm, i.attribute);
       FileDeclaration(parm, i.file);

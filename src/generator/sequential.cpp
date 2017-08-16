@@ -6,9 +6,7 @@ namespace generator {
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
-      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-	parm.println(a_expression.procedureCallStatementToString(p) + ";");
-      }
+      parm.println(parameters::Area::IMPLEMENTATION, a_expression.procedureCallStatementToString(p) + ";");
     }
   }
 
@@ -32,42 +30,37 @@ namespace generator {
   }
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
-      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-	printSourceLine(parm, p->identifier);
-	std::string name = p->identifier->toString(true);
-        ast::ObjectValueContainer type;
-        if (getObjectName(name, type, ast::ObjectType::VARIABLE, &p->identifier->text)) {
-          try {
-            parm.println(name + " = " + a_expression.toString(p->expression, type) + ";");
-          } catch (ExpressionParser::ObjectNotFound e) {
-            e.print();
-          }
+      printSourceLine(parm, p->identifier);
+      std::string name = p->identifier->toString(true);
+      ast::ObjectValueContainer type;
+      if (getObjectName(name, type, ast::ObjectType::VARIABLE, &p->identifier->text)) {
+        try {
+          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(p->expression, type) + ";");
+        } catch (ExpressionParser::ObjectNotFound e) {
+          e.print();
         }
       }
     }
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
-    if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-      signalAssignment(parm, p,  [](DatabaseResult& object) {});
-    }
+    signalAssignment(parm, p,  [](DatabaseResult& object) {});
   }
 
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
       debug.functionStart("reportStatement");
-      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-	static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
-	std::string severity = p->severity->toString(true);
-        DatabaseResult object;
-        if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {
-          std::string name = a_name_converter.getName(object, true);
-	  parm.println("report(" + a_expression.toString(p->message, expectedType) + ", " +
-		       name + ");");
-	} else {
-	  exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
-	  a_database.printAllObjects(severity);
-	}
+      static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
+      std::string severity = p->severity->toString(true);
+      DatabaseResult object;
+      if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {
+        std::string name = a_name_converter.getName(object, true);
+        parm.println(parameters::Area::IMPLEMENTATION,
+                     "report(" + a_expression.toString(p->message, expectedType) + ", " +
+                     name + ");");
+      } else {
+        exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
+        a_database.printAllObjects(severity);
       }
       debug.functionEnd("reportStatement");
     }
@@ -108,16 +101,12 @@ namespace generator {
       assert(p->waitText);
       std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
-      if (parm.isArea(parameters::Area::INITIALIZATION)) {
-	parm.println("case " + index + ": goto " + label + ";");
-      }
-      if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-	std::string now = a_database.globalName("NOW") + "()";
-	parm.println("w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
-	parm.println(0, label + ":");
-	printSourceLine(parm, p->waitText);
-	parm.println("if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
-      }
+      parm.println("case " + index + ": goto " + label + ";");
+      std::string now = a_database.globalName("NOW") + "()";
+      parm.println(parameters::Area::IMPLEMENTATION, "w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
+      parm.println(parameters::Area::IMPLEMENTATION, label + ":", 0);
+      printSourceLine(parm, p->waitText);
+      parm.println(parameters::Area::IMPLEMENTATION, "if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
       parm.index++;
     }
   }
@@ -126,9 +115,7 @@ namespace generator {
     if (r) {
        debug.functionStart("returnStatement");
        try {
-         if (parm.isArea(parameters::Area::IMPLEMENTATION)) {
-           parm.println("return " + a_expression.toString(r->value, parm.returnType) + ";");
-         }
+         parm.println(parameters::Area::IMPLEMENTATION, "return " + a_expression.toString(r->value, parm.returnType) + ";");
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }

@@ -133,9 +133,7 @@ namespace generator {
     template<typename Func>
     void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "",
                            bool database_enable = true);
-    std::string objectDeclarationToString(parameters& parm, ast::ObjectDeclaration* v,
-                                          bool initialization);
-    void object_declarations(parameters& parm, ast::ObjectDeclaration* v);
+    void ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
     void traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback, std::string local_prefix = "",
                                bool database_enable = true);

@@ -1,12 +1,13 @@
 #ifndef GENERATOR_PARAMETERS_HPP_
 #define GENERATOR_PARAMETERS_HPP_
 
-#include <string>
-#include <fstream>
+#include "../debug/debug.hpp"
 
 #include "../ast/object_type.hpp"
 
-#include "../debug/debug.hpp"
+#include <string>
+#include <fstream>
+#include <unordered_map>
 
 namespace generator {
 
@@ -29,20 +30,29 @@ namespace generator {
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);
 
     FileInfo& getFileInfo();
+
+    struct LineInfo {
+      int indent;
+      std::string text;
+    };
+    
+    struct AreaInfo {
+      int indent = 0;
+      std::list<LineInfo> lines;
+    };
+    
+    std::unordered_map<int, AreaInfo> printlines;
     
   public:
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
-    enum class Area {DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
+    enum class Area {CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
   private:
+    int ConvertInteger(Area a);
     FileSelect a_file_select;
     std::string AreaToString(Area a);
   public:
     parameters() : debug("parameters") {};
     int index;
-    Area area;
-    bool isArea(Area a);
-    void setArea(Area a);
-    void printArea(std::string name);
     ast::ObjectValueContainer returnType;
     void incIndent();
     void decIndent();
@@ -50,8 +60,11 @@ namespace generator {
     void close();
     void println(int position, std::string message);
     void println(std::string message);
-    void println(Area a, std::string message);
+    void println(Area a, std::string message, int position = -1);
+    void Flush(Area a);
+    bool PrintlnBuffersEmpty();
     FileSelect selectFile(FileSelect s);
+    bool isFile(FileSelect s) {return s == a_file_select; };
     bool isQuiet();
     bool setQuiet(bool quiet);
     std::string getFileName(FileSelect s); 

@@ -60,21 +60,16 @@ namespace generator {
         method->noname = methodName;
       }
       auto createDefinition = [&](parameters& parm) {
-	parm.area = parameters::Area::DECLARATION;
-	sequentialStatements(parm, method->sequentialStatements);
       };
       auto createBody = [&](parameters& parm) {
         createProcess(parm,
                       [&](parameters& parm) {
                         parm.println("// Wait statements goto tree");
-			parm.setArea(parameters::Area::INITIALIZATION);
-			parm.printArea("Process");
 			parm.println("switch (w.index) {");
 			parm.incIndent();
                         sequentialStatements(parm, method->sequentialStatements);
 			parm.decIndent();
 			parm.println("}");
-			parm.setArea(parameters::Area::IMPLEMENTATION);
 			if (method->sensitivity) {
                           auto s = [&](ast::SimpleIdentifier& name) {
                             std::string x = name.toString(true);
@@ -83,7 +78,6 @@ namespace generator {
                           };
                           printSensitivityListWait(parm, method->sensitivity, s);
                         }
-                        parm.printArea("Process");
 			sequentialStatements(parm, method->sequentialStatements);
                       });
       };
@@ -122,8 +116,6 @@ namespace generator {
           createProcess(parm,
                         [&](parameters& parm) {
                           printSensitivityListWait(parm, sensitivity, func);
-                          parm.setArea(parameters::Area::IMPLEMENTATION);
-                          parm.printArea("Concurrent signal assignment");
                           signalAssignment(parm, s);
                         });
         };

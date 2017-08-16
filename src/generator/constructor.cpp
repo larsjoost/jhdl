@@ -8,44 +8,38 @@ namespace generator {
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
                                 std::string arguments) {
     debug.functionStart("instantiateType");
-    parm.println(type + "(new " + name + "(this" + arguments + "));");
+    parm.println(parameters::Area::CONSTRUCTOR, type + "(new " + name + "(this" + arguments + "));");
     debug.functionEnd("instantiateType");
   }
 
   void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
     if (method) {
-      if (parm.area == parameters::Area::IMPLEMENTATION) {
-        debug.functionStart("methodInstantiation");
-        std::string methodName;
-        if (method->label) {
-          methodName = method->label->toString(true);
-        } else {
-          methodName = method->noname;
-        }
-        instantiateType(parm, "SC_NEW_THREAD", methodName);
-        debug.functionEnd("methodInstantiation");
+      debug.functionStart("methodInstantiation");
+      std::string methodName;
+      if (method->label) {
+        methodName = method->label->toString(true);
+      } else {
+        methodName = method->noname;
       }
+      instantiateType(parm, "SC_NEW_THREAD", methodName);
+      debug.functionEnd("methodInstantiation");
     }
   }
 
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
-      if (parm.area == parameters::Area::IMPLEMENTATION) {
-        debug.functionStart("signalInstantiation");
-        instantiateType(parm, "SC_NEW_THREAD", s->name);
-        debug.functionEnd("signalInstantiation");
-      }
+      debug.functionStart("signalInstantiation");
+      instantiateType(parm, "SC_NEW_THREAD", s->name);
+      debug.functionEnd("signalInstantiation");
     }
   }
 
   void SystemC::blockStatementInstantiation(parameters& parm,
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
-      if (parm.area == parameters::Area::IMPLEMENTATION) {
-        debug.functionStart("blockStatementInstantiation");
-        instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
-        debug.functionEnd("blockStatementInstantiation");
-      }
+      debug.functionStart("blockStatementInstantiation");
+      instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
+      debug.functionEnd("blockStatementInstantiation");
     }
   }
 
@@ -56,13 +50,9 @@ namespace generator {
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
-      if (parm.area == parameters::Area::DECLARATION) {
-        a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
-      }
+      a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          if (parm.area == parameters::Area::IMPLEMENTATION) {
-            instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
-          }
+          instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
         });
     }
   }
@@ -90,23 +80,21 @@ namespace generator {
   
   void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
     if (c) {
-      if (parm.area == parameters::Area::IMPLEMENTATION) {
-        assert(c->instanceName);
-        printSourceLine(parm, c->instanceName->text);
-        std::string instanceName = c->instanceName->toString(true);
-        std::string componentName = c->componentName->toString(true);
-        std::string s = componentName;
-        std::string libraryName;
-        if (c->libraryName) {
-          libraryName = c->libraryName->toString(true);
-          if (libraryName != "WORK") {
-            s = libraryName + "::" + s;
-          }
+      assert(c->instanceName);
+      printSourceLine(parm, c->instanceName->text);
+      std::string instanceName = c->instanceName->toString(true);
+      std::string componentName = c->componentName->toString(true);
+      std::string s = componentName;
+      std::string libraryName;
+      if (c->libraryName) {
+        libraryName = c->libraryName->toString(true);
+        if (libraryName != "WORK") {
+          s = libraryName + "::" + s;
         }
-        parm.println("auto " + instanceName + " = new " + s + "(\"" + instanceName + "\");");
-        componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
-        componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
       }
+      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new " + s + "(\"" + instanceName + "\");");
+      componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
+      componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
   }
   
@@ -139,29 +127,19 @@ namespace generator {
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& type,
                                   std::string& name, std::string* argument,
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements) {
-    parameters::Area area = parm.area;
-    parm.area = parameters::Area::DECLARATION;
+    parm.println("void init() {");
     if (concurrentStatements) {
+      parm.incIndent();
       concurrentStatementsInstantiation(parm, *concurrentStatements);
+      parm.decIndent();
     }
-    parm.area = parameters::Area::IMPLEMENTATION;
-    if (concurrentStatements) {
-      parm.println("void init() {");
-      if (concurrentStatements) {
-        parm.incIndent();
-        concurrentStatementsInstantiation(parm, *concurrentStatements);
-        parm.decIndent();
-      }
-      parm.println("}");
-    }
-    parm.area = area;
+    parm.Flush(parameters::Area::CONSTRUCTOR);
+    parm.println("}");
     if (!topHierarchy) {
       parm.println(getConstructorDeclaration(parm, type, name, argument) + " {");
-      if (concurrentStatements) {
-        parm.incIndent();
-        parm.println("init();");
-        parm.decIndent();
-      }
+      parm.incIndent();
+      parm.println("init();");
+      parm.decIndent();
       parm.println("}");
     }
   }

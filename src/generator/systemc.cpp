@@ -140,8 +140,8 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
-    parm.println("using " + name + "_type = decltype(" + left + ");"); 
-    parm.println("vhdl_range_type(" + name + ", " + left + ", " + right + ");");
+    parm.println(parameters::Area::DECLARATION, "using " + name + "_type = decltype(" + left + ");"); 
+    parm.println(parameters::Area::DECLARATION, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
@@ -230,10 +230,7 @@ namespace generator {
       parm.println("");
       parm.println("SC_PACKAGE(" + name + ") {");
       parm.incIndent();
-      parameters::Area area = parm.area;
-      parm.setArea(parameters::Area::DECLARATION);
       declarations(parm, package->declarations);
-      parm.setArea(area);
       parm.decIndent();
       parm.println("};");
       parm.decIndent();
@@ -243,15 +240,11 @@ namespace generator {
       parm.incIndent();
     } else {
       parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
-      parameters::Area area = parm.area;
-      parm.setArea(parameters::Area::IMPLEMENTATION);
       declarations(parm, package->declarations);
-      parm.decIndent();
       parm.println("}");
       parm.println(library + "::" + name + " " + library + "_" + name + ";");
       parm.println("namespace " + library + " {");
       parm.incIndent();
-      parm.setArea(area);
       parm.selectFile(file_select);
     }
     topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));

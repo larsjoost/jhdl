@@ -34,14 +34,18 @@ namespace generator {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
+    parm.Flush(parameters::Area::DECLARATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
+    parm.Flush(parameters::Area::INITIALIZATION);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     parm.decIndent();
+    parm.Flush(parameters::Area::IMPLEMENTATION);
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
+    assert(parm.PrintlnBuffersEmpty());
     debug.functionEnd("defineObject");
   }
 

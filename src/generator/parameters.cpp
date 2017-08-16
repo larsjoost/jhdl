@@ -69,17 +69,9 @@ namespace generator {
     println(getFileInfo().indent, text);
   }
 
-  bool parameters::isArea(Area a) {
-    return a == area;
-  }
-  
-  void parameters::setArea(Area a) {
-    index = 1;
-    area = a;
-  }
-
   std::string parameters::AreaToString(Area a) {
-    switch (area) {
+    switch (a) {
+    case Area::CONSTRUCTOR: return "constructor";
     case Area::DECLARATION: return "declaration";
     case Area::INITIALIZATION: return "initialization";
     case Area::IMPLEMENTATION: return "implementation";
@@ -89,16 +81,48 @@ namespace generator {
     assert(false);
   }
   
-  void parameters::printArea(std::string name) {
-    println("// " + name + " area: " + AreaToString(area));
+  int parameters::ConvertInteger(Area a) {
+    return static_cast<std::underlying_type_t<Area>>(a);
   }
   
-  void parameters::println(Area a, std::string text) {
-    if (isArea(a)) {
-      println(text);
+  void parameters::println(Area a, std::string text, int position) {
+    int index = ConvertInteger(a);
+    auto lines = printlines.find(index);
+    if (lines != printlines.end()) {
+      int indent = position < 0 ? lines->second.indent : position;
+      lines->second.lines.push_back({indent, text});
+    } else {
+      AreaInfo l;
+      int indent = position < 0 ? 0 : position;
+      l.lines.push_back({indent, text});
+      printlines[index] = l;
     }
   }
 
+  void parameters::Flush(Area a) {
+    int index = ConvertInteger(a);
+    auto lines = printlines.find(index);
+    if (lines != printlines.end()) {
+      while (!lines->second.lines.empty()) {
+        auto& lineInfo = lines->second.lines.back();
+        println(lineInfo.text);
+        lines->second.lines.pop_back();
+      }
+    }
+  }
+  
+  bool parameters::PrintlnBuffersEmpty() {
+    bool result = true;
+    for (auto& i : printlines) {
+      if (!i.second.lines.empty()) {
+        result = false;
+        std::cerr << "Buffer " << i.first << " is not empty" << std::endl;
+        break;
+      }
+    }
+    return result;
+  }
+  
   bool parameters::isQuiet() {
     return quiet;
   }
