@@ -30,16 +30,17 @@ namespace generator {
     parm.decIndent();
     parm.println("public:");
     parm.incIndent();
+    parm.SetArea(parameters::Area::DECLARATION, true);
     if (declarationList) {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
-    parm.Flush(parameters::Area::DECLARATION);
+    parm.SetArea(parameters::Area::IMPLEMENTATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    parm.Flush(parameters::Area::INITIALIZATION);
+    parm.SetArea(parameters::Area::CONSTRUCTOR);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     parm.decIndent();
     parm.Flush(parameters::Area::IMPLEMENTATION);

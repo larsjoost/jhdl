@@ -51,8 +51,9 @@ namespace generator {
     return a;
   }
 
-  void parameters::println(int position, std::string text) {
+  void parameters::println(std::string text, int position) {
     if (!isQuiet()) {
+      if (position < 0) { position = getFileInfo().indent; }
       std::string indent = std::string(position, ' ');
       getFileInfo().outputFile << indent << text << std::endl;
       std::string line = std::to_string(getFileInfo().line_number);
@@ -63,10 +64,6 @@ namespace generator {
       debug.debug("line " + line + ": " + indent + text, true, Output::Color::BLUE);
       getFileInfo().line_number++;
     }
-  }
-
-  void parameters::println(std::string text) {
-    println(getFileInfo().indent, text);
   }
 
   std::string parameters::AreaToString(Area a) {
@@ -86,16 +83,20 @@ namespace generator {
   }
   
   void parameters::println(Area a, std::string text, int position) {
-    int index = ConvertInteger(a);
-    auto lines = printlines.find(index);
-    if (lines != printlines.end()) {
-      int indent = position < 0 ? lines->second.indent : position;
-      lines->second.lines.push_back({indent, text});
+    if (a == a_area) {
+      println(text, position);
     } else {
-      AreaInfo l;
-      int indent = position < 0 ? 0 : position;
-      l.lines.push_back({indent, text});
-      printlines[index] = l;
+      int index = ConvertInteger(a);
+      auto lines = printlines.find(index);
+      if (lines != printlines.end()) {
+        int indent = position < 0 ? lines->second.indent : position;
+        lines->second.lines.push_front({indent, text});
+      } else {
+        AreaInfo l;
+        int indent = position < 0 ? 0 : position;
+        l.lines.push_front({indent, text});
+        printlines[index] = l;
+      }
     }
   }
 

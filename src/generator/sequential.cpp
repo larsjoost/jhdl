@@ -6,7 +6,9 @@ namespace generator {
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
+      debug.functionStart("procedureCallStatement");
       parm.println(parameters::Area::IMPLEMENTATION, a_expression.procedureCallStatementToString(p) + ";");
+      debug.functionEnd("procedureCallStatement");
     }
   }
 
@@ -28,6 +30,7 @@ namespace generator {
     ast::ObjectValueContainer o;
     return getObjectName(name, o, id, text);
   }
+  
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       printSourceLine(parm, p->identifier);
@@ -101,7 +104,7 @@ namespace generator {
       assert(p->waitText);
       std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
-      parm.println("case " + index + ": goto " + label + ";");
+      parm.println(parameters::Area::INITIALIZATION, "case " + index + ": goto " + label + ";");
       std::string now = a_database.globalName("NOW") + "()";
       parm.println(parameters::Area::IMPLEMENTATION, "w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
       parm.println(parameters::Area::IMPLEMENTATION, label + ":", 0);
