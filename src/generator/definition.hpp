@@ -35,15 +35,23 @@ namespace generator {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
+    parm.SetArea(parameters::Area::CONSTRUCTOR);
+    createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     parm.SetArea(parameters::Area::IMPLEMENTATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
     parm.SetArea(parameters::Area::CONSTRUCTOR);
-    createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
+    parm.println("void init() {");
+    if (concurrentStatements) {
+      parm.incIndent();
+      concurrentStatementsInstantiation(parm, *concurrentStatements);
+      parm.decIndent();
+    }
+    parm.Flush(parameters::Area::CONSTRUCTOR);
+    parm.println("}");
     parm.decIndent();
-    parm.Flush(parameters::Area::IMPLEMENTATION);
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
     assert(parm.PrintlnBuffersEmpty());

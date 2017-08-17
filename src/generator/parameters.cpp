@@ -68,6 +68,7 @@ namespace generator {
 
   std::string parameters::AreaToString(Area a) {
     switch (a) {
+    case Area::INITIALIZER_LIST: return "initializer list";
     case Area::CONSTRUCTOR: return "constructor";
     case Area::DECLARATION: return "declaration";
     case Area::INITIALIZATION: return "initialization";
@@ -112,6 +113,22 @@ namespace generator {
     }
   }
   
+  std::string parameters::ToList(Area a) {
+    std::string result;
+    std::string delimiter;
+    int index = ConvertInteger(a);
+    auto lines = printlines.find(index);
+    if (lines != printlines.end()) {
+      while (!lines->second.lines.empty()) {
+        auto& lineInfo = lines->second.lines.back();
+        result += delimiter + lineInfo.text;
+        delimiter = ", ";
+        lines->second.lines.pop_back();
+      }
+    }
+    return result;
+  }
+
   bool parameters::PrintlnBuffersEmpty() {
     bool result = true;
     for (auto& i : printlines) {

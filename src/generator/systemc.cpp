@@ -297,14 +297,15 @@ namespace generator {
           a_database.print(library);
         }
       }
-      auto bodyCallback = [&](parameters& parm) {
-        parm.println("SC_CTOR(" + name + ") {init();}");
+      auto declaration_callback = [&](parameters& parm) {
+        std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
+        parm.println("SC_CTOR(" + name + ") " + (initializer_list.empty() ? "" : ", " + initializer_list) + " {init();}");
       };
       defineObject(parm, true, name, "SC_MODULE", NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
-                   bodyCallback,
-		   [&](parameters& parm){},
+                   [&](parameters& parm){},
+                   declaration_callback,
                    false);
       topHierarchyEnd(parm, false);
       debug.functionEnd("implementationDeclaration");

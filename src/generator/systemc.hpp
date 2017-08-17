@@ -182,7 +182,8 @@ namespace generator {
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    std::string getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument);
+    std::string getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument,
+                                          const std::string& initializer_list);
     bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>

@@ -45,7 +45,7 @@ namespace generator {
     
   public:
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
-    enum class Area {CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
+    enum class Area {INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
   private:
     Area a_area;
     int ConvertInteger(Area a);
@@ -62,6 +62,7 @@ namespace generator {
     void println(std::string message, int position = -1);
     void println(Area a, std::string message, int position = -1);
     void SetArea(Area a, bool flush = false) { a_area = a; if (flush) {Flush(a);};};
+    std::string ToList(Area a);
     void Flush(Area a);
     bool PrintlnBuffersEmpty();
     FileSelect selectFile(FileSelect s);

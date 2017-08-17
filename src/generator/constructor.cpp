@@ -110,7 +110,8 @@ namespace generator {
     }
   }
 
-  std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument) {
+  std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& type, std::string& name,
+                                                 std::string* argument, const std::string& initializer_list) {
     std::string parentName = a_database.getParentName();
     if (parentName.size() > 0) {
       std::string p1 = parentName +"* parent";
@@ -119,24 +120,17 @@ namespace generator {
         p1 += ", auto " + *argument;
         p2 += ", " + *argument + "(" + *argument + ")";
       }
-      return type + "_CTOR(" + name + ")" + "(" + p1 + ") " + p2;
+      return type + "_CTOR(" + name + ")" + "(" + p1 + ") " + p2 + (initializer_list.empty() ? "" : ", " + initializer_list);
     }
-    return "SC_CTOR(" + name + ")";
+    return "SC_CTOR(" + name + ")" + (initializer_list.empty() ? "" : " : " + initializer_list);
   }
 
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& type,
                                   std::string& name, std::string* argument,
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements) {
-    parm.println("void init() {");
-    if (concurrentStatements) {
-      parm.incIndent();
-      concurrentStatementsInstantiation(parm, *concurrentStatements);
-      parm.decIndent();
-    }
-    parm.Flush(parameters::Area::CONSTRUCTOR);
-    parm.println("}");
     if (!topHierarchy) {
-      parm.println(getConstructorDeclaration(parm, type, name, argument) + " {");
+      std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
+      parm.println(getConstructorDeclaration(parm, type, name, argument, initializer_list) + " {");
       parm.incIndent();
       parm.println("init();");
       parm.decIndent();

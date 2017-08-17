@@ -83,15 +83,17 @@ namespace generator {
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype) {
     debug.functionStart("printArrayType");
     for (auto& r : definition.list) { 
+      std::string left, right;
       if (r.range) {
-        std::string left, right;
         ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
         rangeToString(r.range, left, right, type);
-        parm.println("vhdl_array_type(" + name + ", " + left + ", " + right + ", " + subtype + ");");
       } else if (r.subtype) {
         std::string id = r.subtype->identifier->toString(true);
-        parm.println("vhdl_array_type(" + name + ", " + id + "<>::LEFT(), " + id + "<>::RIGHT(), " + subtype + ");");
+        left = id + "<>::LEFT()";
+        right = id + "<>::RIGHT()";
       }
+      parm.println("using " + name + " = Array<" + subtype + ">;");
+      parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + left + ", " + right + ")");
     }
     debug.functionEnd("printArrayType");
   }
@@ -618,11 +620,13 @@ namespace generator {
 		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
         if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
-        } 
+        } else if (id == ast::ObjectType::CONSTANT) {
+          type = "const " + type;
+        }
         std::string s = type + " " + name;
         parm.println(s + ";");
         if (init.size() > 0) {
-          parm.println(parameters::Area::CONSTRUCTOR, name + "(" + init + ");");
+          parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + init + ")");
         }
       };
       objectDeclaration(parm, v, func);
