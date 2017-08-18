@@ -23,7 +23,6 @@ namespace generator {
     std::string ToLower(std::string s);
     std::string ToUpper(std::string s);
     
-    std::string GetPostfix(DatabaseResult& object);
     std::string getPrefix(DatabaseResult& object, std::string first_separator, std::string last_separator);
 
     std::string getName(DatabaseResult& object, bool fullName);

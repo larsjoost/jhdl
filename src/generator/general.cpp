@@ -32,8 +32,9 @@ namespace generator {
     a_database.topHierarchyEnd(globalize);
   }
 
-  void SystemC::descendHierarchy(parameters& parm, std::string parentName) {
-    a_database.descendHierarchy(parentName);
+  void SystemC::descendHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type) {
+    parm.DescendHierarchy();
+    a_database.descendHierarchy(parent_name, parent_type);
     if (verbose) {
       parm.println("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
     }
@@ -43,6 +44,7 @@ namespace generator {
     if (verbose) {
       parm.println("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
     }
+    parm.AscendHierarchy();
     a_database.ascendHierarchy();
   }
 

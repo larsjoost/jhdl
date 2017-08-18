@@ -75,42 +75,45 @@ namespace generator {
     parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
     parm.decIndent();
     parm.println("};");
-    parm.println("template<typename T=" + enumName+ ", class E=" + valueName + ">");
-    parm.println("using " + name + " = Enumeration<T, E>;");
+    parm.println("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
+
+  void SystemC::PrintFactory(parameters& parm, const std::string& name, 
+                             ast::RangeType* range, ast::ObjectValue expected_value,
+                             ast::ArraySubtypeDefinition* subtype) {
+    auto f = [&](parameters& parm) {
+      std::string left, right;
+      if (range) {
+        ast::ObjectValueContainer type(expected_value);
+        rangeToString(range, left, right, type);
+      } else if (subtype) {
+        std::string id = subtype->identifier->toString(true);
+        left = "factory_" + id + ".LEFT()";
+        right = "factory_" + id + ".RIGHT()";
+      }
+      parm.println(name + " create() {");
+      parm.incIndent();
+      parm.println("return " + name + "(" + left + ", " + right + ");");
+      parm.decIndent();
+      parm.println("}");
+    };
+    PrintTypeObject(parm, name, f);
+    parm.println("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
+
+  }
+  
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype) {
     debug.functionStart("printArrayType");
+    parm.println("");
     for (auto& r : definition.list) { 
-      std::string left, right;
-      if (r.range) {
-        ast::ObjectValueContainer type(ast::ObjectValue::INTEGER);
-        rangeToString(r.range, left, right, type);
-      } else if (r.subtype) {
-        std::string id = r.subtype->identifier->toString(true);
-        left = id + "<>::LEFT()";
-        right = id + "<>::RIGHT()";
-      }
       parm.println("using " + name + " = Array<" + subtype + ">;");
-      parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + left + ", " + right + ")");
+      PrintFactory(parm, name, r.range, ast::ObjectValue::INTEGER, r.subtype);
     }
     debug.functionEnd("printArrayType");
   }
   
-  std::string SystemC::ArraySubtype(parameters& parm, DatabaseResult& database_result,
-                                    std::string& name, ast::SubtypeIndication* t) {
-    debug.functionStart("ArraySubtype");
-    assert(t);
-    auto func = [](ast::RangeType* r, std::string& name, std::string& type_name) {
-      std::string s = type_name;
-      if (r) {s = name;}
-      return s;
-    };
-    std::string typeName =  Subtype(parm, database_result, name, t, func);
-    debug.functionEnd("ArraySubtype");
-    return typeName;
-  }
 
   /*
   vhdl:
@@ -130,10 +133,16 @@ namespace generator {
     debug.functionStart("arrayType");
     assert(t); 
     std::string name = identifier->toString(true);
+    std::string type_name = t->type->name->toString(true);
     DatabaseResult database_result;
-    std::string subtypeName = ArraySubtype(parm, database_result, name, t->type);
-    printArrayType(parm, name, t->definition, subtypeName);
-    ast::ObjectValueContainer value(ast::ObjectValue::ARRAY, database_result.object->type);
+    ast::ObjectValueContainer value;
+    if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+      value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, database_result.object->type);
+      std::string subtypeName = a_name_converter.getName(database_result, true);
+      printArrayType(parm, name, t->definition, subtypeName);
+    } else {
+      exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
+    }
     debug.functionEnd("arrayType");
     return value;
   }
@@ -423,9 +432,10 @@ namespace generator {
       std::string argumentNames = getArgumentNames(parm, f->interface);
       a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
       class_name = "function_" + a_name_converter.getName(origin_name, arguments, parm.returnType);
-      std::string parentName = a_database.getParentName();
+      ParentInfo parent_info;
+      a_database.GetParent(parent_info);
       std::string function_prefix = "function_";
-      std::string prefix = parentName + "::" + class_name + "::";
+      std::string prefix = parent_info.name + "::" + class_name + "::";
       std::string run_prefix;
       std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
       std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
@@ -453,19 +463,19 @@ namespace generator {
       if (implementation) {
         if (f->body) {
           run_prefix = prefix;
-          descendHierarchy(parm, parentName);
+          descendHierarchy(parm, parent_info.name);
           StoreInterfaceInDatabase(parm, f->interface);
           createBody(parm);
           ascendHierarchy(parm);
         }
       } else {
-        defineObject(parm, false, class_name, "SC_FUNCTION", NULL,
+        DefineObject(parm, false, class_name, "Function", "", NULL,
                      NULL, NULL, createBody, createDefinition, false);
       }
       std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";
       bool define_function = implementation || f->body;
       parm.println((operatorName ? "friend " : "") + returnTypeName + " " +
-                   (implementation ? parentName + "::" : "") + translatedName + interface +
+                   (implementation ? parent_info.name + "::" : "") + translatedName + interface +
                    (define_function ? "{" : ";"));
       if (define_function) {
         parm.incIndent();
@@ -488,6 +498,7 @@ namespace generator {
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("FunctionBody");
     declarations(parm, d);
+    parm.SetArea(parameters::Area::IMPLEMENTATION);
     sequentialStatements(parm, s);
     debug.functionEnd("FunctionBody");
   }
@@ -554,37 +565,6 @@ namespace generator {
     }
   }
 
-    /*
-   * vhdl_range_subtype examples:
-   *
-   * subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
-   * subtype DELAY is TIME range 0 fs to TIME'HIGH;
-
-   * struct TYPE_T_range { int left = 0; int right = 4; };
-   * template<class T = TYPE_T_range>
-   * using TYPE_T = Array<TYPE_T_type, T>;
-  */
-  
-  void SystemC::printSubtype(parameters& parm, std::string& name, ast::RangeType* r,
-                             std::string typeName, ast::ObjectValueContainer& type) {
-    debug.functionStart("printSubtype");
-    std::string rangeName;
-    std::string left, right;
-    rangeToString(r, left, right, type);
-    rangeName = name + "_range";
-    parm.println("struct " + rangeName + " {");
-    parm.incIndent();
-    parm.println(typeName + "_type left = " + left + ";");
-    parm.println(typeName + "_type right = " + right + ";");
-    parm.decIndent();
-    parm.println("};");
-    parm.println("template<class RANGE = " + rangeName + ">");
-    parm.println("using " + name + " = " + typeName + "<RANGE>;");
-    debug.functionEnd("printSubtype");
-  }
-  
-
-
   /*
   vhdl:
     subtype type_t is integer range 0 to 10;
@@ -598,16 +578,16 @@ namespace generator {
     if (t) {
       printSourceLine(parm, t->identifier);
       std::string name = t->identifier->toString(true);
+      std::string type_name = t->type->name->toString(true);
       DatabaseResult database_result;
-      auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
-        if (!r) {
-          parm.println(parameters::Area::INTERFACE, "template <class RANGE = " + type_name + "_range>");
-          parm.println(parameters::Area::INTERFACE, "using " + name + " = " + type_name + "<>;");
-        } 
-        return type_name;
-      };
-      Subtype(parm, database_result, name, t->type, func);
-      a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
+      if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
+        std::string type_name = a_name_converter.getName(database_result, true);
+        a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
+        parm.println("using " + name + " = " + type_name + ";");
+        PrintFactory(parm, name, t->type->range, database_result.object->type.GetValue());
+      } else {
+        exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
+      }
     }
   }
 
@@ -615,9 +595,9 @@ namespace generator {
     if (v) {
       debug.functionStart("ObjectDeclarations");
       printSourceLine(parm, v->text);
-      auto func = [&](std::string& name,
-		      std::string& type, std::string& init,
-		      ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
+      auto func = [&](std::string& name, std::string& type, std::string& init,
+		      std::string& factory_name, ast::ObjectType id,
+                      ast::ObjectDeclaration::Direction direction) {
         if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
         } else if (id == ast::ObjectType::CONSTANT) {
@@ -625,11 +605,12 @@ namespace generator {
         }
         std::string s = type + " " + name;
         parm.println(s + ";");
+        parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + factory_name + ");");
         if (init.size() > 0) {
           parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + init + ")");
         }
       };
-      objectDeclaration(parm, v, func);
+      ObjectDeclaration(parm, v, func);
       debug.functionEnd("ObjectDeclarations");
     }
   }

@@ -14,14 +14,6 @@ namespace generator {
     return name;
   }
 
-  std::string NameConverter::GetPostfix(DatabaseResult& object) {
-    std::string result;
-    if (object.object->id == ast::ObjectType::TYPE) {
-      result = "<>";
-    } 
-    return result;
-  }
-  
   std::string NameConverter::getName(DatabaseResult& object, bool fullName) {
     a_debug.functionStart("getName");
     std::string name = object.object->name;
@@ -48,7 +40,7 @@ namespace generator {
       }
     }
     a_debug.functionEnd("getName");
-    return name + GetPostfix(object);
+    return name;
   }
 
   std::string NameConverter::ToLower(std::string s) {

@@ -21,7 +21,7 @@ namespace generator {
       } else {
         methodName = method->noname;
       }
-      instantiateType(parm, "SC_NEW_THREAD", methodName);
+      instantiateType(parm, "AddMethod", methodName);
       debug.functionEnd("methodInstantiation");
     }
   }
@@ -29,7 +29,7 @@ namespace generator {
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
       debug.functionStart("signalInstantiation");
-      instantiateType(parm, "SC_NEW_THREAD", s->name);
+      instantiateType(parm, "AddMethod", s->name);
       debug.functionEnd("signalInstantiation");
     }
   }
@@ -38,7 +38,7 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
       debug.functionStart("blockStatementInstantiation");
-      instantiateType(parm, "SC_NEW_BLOCK", blockStatement->name->toString(true));
+      instantiateType(parm, "AddBlock", blockStatement->name->toString(true));
       debug.functionEnd("blockStatementInstantiation");
     }
   }
@@ -112,17 +112,18 @@ namespace generator {
 
   std::string SystemC::getConstructorDeclaration(parameters& parm, std::string& type, std::string& name,
                                                  std::string* argument, const std::string& initializer_list) {
-    std::string parentName = a_database.getParentName();
-    if (parentName.size() > 0) {
-      std::string p1 = parentName +"* parent";
+    ParentInfo parent_info;
+    a_database.GetParent(parent_info);
+    if (parent_info.name.size() > 0) {
+      std::string p1 = ast::toString(parent_info.type) + "_" + parent_info.name +"* parent";
       std::string p2 = " : p(parent)";
       if (argument) {
         p1 += ", auto " + *argument;
         p2 += ", " + *argument + "(" + *argument + ")";
       }
-      return type + "_CTOR(" + name + ")" + "(" + p1 + ") " + p2 + (initializer_list.empty() ? "" : ", " + initializer_list);
+      return type + "_" + name + "(" + p1 + ") " + p2 + (initializer_list.empty() ? "" : ", " + initializer_list);
     }
-    return "SC_CTOR(" + name + ")" + (initializer_list.empty() ? "" : " : " + initializer_list);
+    return type + "_" + name + (initializer_list.empty() ? "" : " : " + initializer_list);
   }
 
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, std::string& type,

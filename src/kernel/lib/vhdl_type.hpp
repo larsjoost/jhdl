@@ -18,29 +18,37 @@ namespace vhdl {
    * type REAL is range -1.7014111e+308 to 1.7014111e+308;
    */
   
-  template<class TYPE, class RANGE>
+  template<class TYPE>
   class Range {
   public:
-    RANGE range;
+    struct RangeInterval {
+      TYPE left;
+      TYPE right;
+    };
+    RangeInterval range;
     TYPE value;
 
   public:
 
-    explicit Range<TYPE, RANGE>() { }
+    explicit Range<TYPE>() { }
 
-    Range<TYPE, RANGE>(TYPE v) : value(v) { }
-
+    Range<TYPE>(TYPE v) : value(v) { }
+    Range<TYPE>(TYPE left, TYPE right) {
+      range.left = left;
+      range.right = right;
+    }
+    
     template<class T>
-    Range<TYPE, RANGE>(Range<TYPE, T>& other) : value(other.value) {};
+    Range<TYPE>(Range<TYPE>& other) : value(other.value) {};
     
     void operator=(const TYPE other) { value = other; }
     template <class T>
-    void operator=(const Range<TYPE, T>& other) { value = other.value; }
+    void operator=(const Range<TYPE>& other) { value = other.value; }
 
     template <class T>
-    bool operator ==(const Range<TYPE, T> &other) { return value == other.value; }
+    bool operator ==(const Range<TYPE> &other) { return value == other.value; }
     template <class T>
-    bool operator !=(const Range<TYPE, T> &other) { return value != other.value; }
+    bool operator !=(const Range<TYPE> &other) { return value != other.value; }
     bool operator ==(TYPE other) { return value == other; }
     bool operator <=(TYPE other) { return value <= other; }
     bool operator >=(TYPE other) { return value >= other; }
@@ -48,9 +56,9 @@ namespace vhdl {
     TYPE operator +(TYPE other) { return value + other; }
     TYPE operator -(TYPE other) { return value - other; }
     template <class T>
-    TYPE operator +(const Range<TYPE, T>& other) { return value + other.value; }
+    TYPE operator +(const Range<TYPE>& other) { return value + other.value; }
     template <class T>
-    TYPE operator -(const Range<TYPE, T>& other) { return value - other.value; }
+    TYPE operator -(const Range<TYPE>& other) { return value - other.value; }
     
     operator bool() const {
       return value != TYPE(0);
@@ -68,31 +76,23 @@ namespace vhdl {
       return 32;
     }
 
-    static TYPE HIGH() {
-      RANGE range;
+    TYPE HIGH() {
       return (range.left > range.right ? range.left : range.right);
     }
-    static TYPE LOW() {
-      RANGE range;
+    TYPE LOW() {
       return (range.left < range.right ? range.left : range.right);
     }
-    static TYPE LEFT() {
-      RANGE range;
+    TYPE LEFT() {
       return range.left;
     }
-    static TYPE RIGHT() {
-      RANGE range;
+    TYPE RIGHT() {
       return range.right;
     }
-    template <class R>
-    static TYPE LEFTOF(Range<TYPE, R> x) {
-      RANGE range;
-      return (range.left < range.right ? x.getValue() - 1 : x.getValue() + 1);
+    TYPE LEFTOF() {
+      return (range.left < range.right ? getValue() - 1 : getValue() + 1);
     }
-    template <class R>
-    static TYPE RIGHTOF(Range<TYPE, R> x) {
-      RANGE range;
-      return (range.left < range.right ? x.getValue() + 1 : x.getValue() - 1);
+    TYPE RIGHTOF() {
+      return (range.left < range.right ? getValue() + 1 : getValue() - 1);
     }
 		       
     int getValue() {
@@ -113,21 +113,6 @@ namespace vhdl {
     }
 
   };
-  /*
-   * vhdl_range_type examples:
-   *
-   * type INTEGER is range -2147483647 to 2147483647;
-   * type REAL is range -1.7014111e+308 to 1.7014111e+308;
-   */
-#define vhdl_range_type(name, leftValue, rightValue)              \
-  using type_##name = decltype(leftValue);                        \
-  struct range_##name {                                           \
-    type_##name left = leftValue;                                 \
-    type_##name right = rightValue;                               \
-  };                                                              \
-  template <class RANGE = range_##name>                           \
-  using name = Range<type_##name, RANGE>
-
 
   /*
    * Physical example:
@@ -355,12 +340,22 @@ namespace vhdl {
    * type BIT_VECTOR is array (NATURAL range <>) of BIT;
    */
   
-  template<class TYPE, class RANGE>
+  template<class TYPE>
   class Array {
   public:
-    RANGE range;
+    struct Range {
+      int left;
+      int right;
+    };
+    Range range;
     TYPE* value = NULL;
 
+    void init(int left, int right) {
+      range.left = left;
+      range.right = right;
+      init();
+    }
+    
     void init() {
       assert(value == NULL);
       value = new TYPE[LENGTH()];
@@ -397,11 +392,11 @@ namespace vhdl {
     
   public:
 
-    Array<TYPE, RANGE>(Array<TYPE, RANGE>& other) {
+    Array<TYPE>(Array<TYPE>& other) {
       set(other);
     }
     
-    Array<TYPE, RANGE>() {
+    Array<TYPE>() {
     }
 
     void resize(int size) {
@@ -409,12 +404,12 @@ namespace vhdl {
       range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
     }
     
-    explicit Array<TYPE, RANGE>(int size) {
+    explicit Array<TYPE>(int size) {
       resize(size);
       init();
     }
     
-    void set(Array<TYPE, RANGE>& other) {
+    void set(Array<TYPE>& other) {
       if (value != NULL) {delete value; value = NULL; }
       range = other.range;
       init();
@@ -464,22 +459,6 @@ namespace vhdl {
     }
 
   };
-
-  
-  
-  /*
-   * vhdl_array_type examples:
-   *
-   * type a_t is array (0 to 4) of bit;
-   */
-  
-#define vhdl_array_type(name, leftValue, rightValue, type)        \
-  struct range_##name {                                           \
-    int left = leftValue;                                         \
-    int right = rightValue;                                       \
-  };                                                              \
-  template <class RANGE = range_##name>                           \
-  using name = Array<type, RANGE>
 
 }
 

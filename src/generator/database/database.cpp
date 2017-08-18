@@ -99,10 +99,9 @@ namespace generator {
       }
     return false;
   }
-
   
-  std::string Database::getParentName() {
-    return localDatabase.getParentName();
+  void Database::GetParent(ParentInfo& parent_info) {
+    localDatabase.GetParent(parent_info);
   }
   
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
@@ -177,7 +176,7 @@ namespace generator {
 
   void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
     localDatabase.initialize(library, name, type);
-    descendHierarchy(name);
+    descendHierarchy(name, type);
   }
   
   void Database::topHierarchyEnd(bool globalize) {
@@ -187,8 +186,8 @@ namespace generator {
     ascendHierarchy();
   }
 
-  void Database::descendHierarchy(std::string& name) {
-    localDatabase.descendHierarchy(name);
+  void Database::descendHierarchy(const std::string& name, ast::ObjectType type) {
+    localDatabase.descendHierarchy(name, type);
   }
   void Database::ascendHierarchy() {
     localDatabase.ascendHierarchy();

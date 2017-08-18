@@ -2,10 +2,6 @@
 
 namespace generator {
 
-  std::string NameMap::getSection() {
-    return section;
-  }
-  
   void NameMap::add(std::string& name, DatabaseElement& e) {
     auto m = a_map.find(name);
     if (m != a_map.end()) {

@@ -51,10 +51,10 @@ namespace generator {
     std::string getName();
     ast::ObjectType getType();
     
-    void descendHierarchy(std::string& name);
+    void descendHierarchy(const std::string& name, ast::ObjectType type);
     void ascendHierarchy();
 
-    std::string getParentName();
+    void GetParent(ParentInfo& parent_info);
     void print();
   };
   

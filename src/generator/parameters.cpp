@@ -88,23 +88,24 @@ namespace generator {
       println(text, position);
     } else {
       int index = ConvertInteger(a);
-      auto lines = printlines.find(index);
-      if (lines != printlines.end()) {
+      auto lines = printlines.back().find(index);
+      if (lines != printlines.back().end()) {
         int indent = position < 0 ? lines->second.indent : position;
         lines->second.lines.push_front({indent, text});
       } else {
         AreaInfo l;
         int indent = position < 0 ? 0 : position;
         l.lines.push_front({indent, text});
-        printlines[index] = l;
+        AreaInfoMap& m = printlines.back();
+        m[index] = l;
       }
     }
   }
 
   void parameters::Flush(Area a) {
     int index = ConvertInteger(a);
-    auto lines = printlines.find(index);
-    if (lines != printlines.end()) {
+    auto lines = printlines.back().find(index);
+    if (lines != printlines.back().end()) {
       while (!lines->second.lines.empty()) {
         auto& lineInfo = lines->second.lines.back();
         println(lineInfo.text);
@@ -113,12 +114,29 @@ namespace generator {
     }
   }
   
+  void parameters::DescendHierarchy() {
+    printlines.push_back(AreaInfoMap());
+  }
+  void parameters::AscendHierarchy() {
+    for (auto& i : printlines.back()) {
+      if (!i.second.lines.empty()) {
+        std::cerr << "Buffer " << i.first << " is not empty" << std::endl;
+        std::cerr << "Contents of buffer " << i.first << ":" << std::endl;
+        for (auto& x : i.second.lines) {
+          std::cerr << x.text << std::endl;
+        }
+        assert(false);
+      }
+    }
+    printlines.pop_back();
+  }
+
   std::string parameters::ToList(Area a) {
     std::string result;
     std::string delimiter;
     int index = ConvertInteger(a);
-    auto lines = printlines.find(index);
-    if (lines != printlines.end()) {
+    auto lines = printlines.back().find(index);
+    if (lines != printlines.back().end()) {
       while (!lines->second.lines.empty()) {
         auto& lineInfo = lines->second.lines.back();
         result += delimiter + lineInfo.text;
@@ -129,18 +147,6 @@ namespace generator {
     return result;
   }
 
-  bool parameters::PrintlnBuffersEmpty() {
-    bool result = true;
-    for (auto& i : printlines) {
-      if (!i.second.lines.empty()) {
-        result = false;
-        std::cerr << "Buffer " << i.first << " is not empty" << std::endl;
-        break;
-      }
-    }
-    return result;
-  }
-  
   bool parameters::isQuiet() {
     return quiet;
   }

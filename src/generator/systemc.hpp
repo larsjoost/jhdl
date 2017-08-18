@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     Exceptions exceptions;
     
@@ -80,7 +80,7 @@ namespace generator {
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, bool globalize);
-    void descendHierarchy(parameters& parm, std::string parentName = "");
+    void descendHierarchy(parameters& parm, std::string parent_name = "", ast::ObjectType = ast::ObjectType::UNKNOWN);
     void ascendHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
@@ -114,24 +114,23 @@ namespace generator {
     ast::ObjectValueContainer AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
     ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
-    std::string ArraySubtype(parameters& parm, DatabaseResult& database_result, std::string& name,
-                             ast::SubtypeIndication* t);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
+    template<typename Func>
+    void PrintTypeObject(parameters& parm, const std::string& name, Func func);
+    void PrintFactory(parameters& parm, const std::string& name, 
+                      ast::RangeType* range, ast::ObjectValue expected_value,
+                      ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype);
     void rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
-    void printSubtype(parameters& parm, std::string& name, ast::RangeType* r, std::string typeName, ast::ObjectValueContainer& type);
-    template<typename Func>
-    std::string Subtype(parameters& parm, DatabaseResult& database_result, std::string& name,
-                        ast::SubtypeIndication* t, Func func);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
                                    std::string& preDefinition);
 
     // declarations.hpp
     template<typename Func>
-    void objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "",
+    void ObjectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix = "",
                            bool database_enable = true);
     void ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v);
     template<typename Func>
@@ -187,10 +186,11 @@ namespace generator {
     bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
-    void defineObject(parameters& parm,
+    void DefineObject(parameters& parm,
                       bool topHierarchy,
                       std::string name,
                       std::string type,
+                      std::string derived_classes,
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
@@ -311,7 +311,7 @@ namespace generator {
       std::string x = "";
       std::string d = "";
       auto func = [&](std::string& name,
-                      std::string& type, std::string& init,
+                      std::string& type, std::string& init, std::string& factory_name, 
                       ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
         std::string x = (initialization && !init.empty()) ? " = " + init : "";
         s += d + typeConverter(type, id, direction) + " " + name + x;
@@ -331,7 +331,7 @@ namespace generator {
     if (l) {
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.object) {
-          objectDeclaration(parm, i.object, callback, local_prefix, database_enable);
+          ObjectDeclaration(parm, i.object, callback, local_prefix, database_enable);
         }
       }
     }

@@ -5,68 +5,49 @@
 
 namespace generator {
 
-    /*
-  vhdl:
-    <name>        <range>
-    integer range 0 to 10;
-  systemc:
-    struct TYPE_T_range { int left = 0; int right = 4; };
-    template<class T = TYPE_T_range>
-    using TYPE_T = INTEGER<T>;
-  */
   template<typename Func>
-  std::string SystemC::Subtype(parameters& parm, DatabaseResult& database_result,
-                               std::string& name, ast::SubtypeIndication* t,
-                               Func func) {
-    debug.functionStart("Subtype");
-    assert(t);
-    std::string typeName = t->name->toString(true);
-    debug.debug("Search for " + typeName);
-    if (a_database.findOne(database_result, typeName, ast::ObjectType::TYPE)) { 
-      typeName = a_database.namePrefix(database_result) + typeName;
-      debug.debug("Found typeName = " + typeName);
-      if (t->range) {
-        printSubtype(parm, name, t->range, typeName, database_result.object->type);
-      }
-      typeName = func(t->range, name, typeName);
-      typeName += "<>";
-    } else {
-      throw Database::ObjectNotFoundException("Could not find type \"" + typeName + "\"", &t->name->text);
-    }
-    debug.debug("typeName = " + typeName);
-    debug.functionEnd("Subtype");
-    return typeName;
-  }
-
-  template<typename Func>
-  void SystemC::objectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix,
+  void SystemC::ObjectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix,
                                   bool database_enable) {
     if (v) {
-      debug.functionStart("objectDeclaration");
+      debug.functionStart("ObjectDeclaration");
       printSourceLine(parm, v->text);
-      for (ast::SimpleIdentifier& id : v->identifiers.list) {
-        std::string name = id.toString(true);
-        std::string type = name + "_type";
-        debug.debug("Name = " + name + ", type = " + type);
-        DatabaseResult database_result;
-        auto func = [&](ast::RangeType* r, std::string& name, std::string& type_name) {
-          return (r ? local_prefix + name : type_name);
-        };
-        try {
-          type = Subtype(parm, database_result, type, v->type, func);
+      DatabaseResult database_result;
+      std::string type_name = v->type->name->toString(true);
+      if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+        std::string global_type_name = a_name_converter.getName(database_result, true);
+        std::string factory_name = a_name_converter.getPrefix(database_result, "::", "::") + "factory_" + type_name;
+        if (v->type->range) {
+          std::string left, right;
+          rangeToString(v->type->range, left, right, database_result.object->type);
+          factory_name += ".create(" + left + ", " + right + ")";
+        } else {
+          factory_name += ".create()";
+        }
+        for (ast::SimpleIdentifier& id : v->identifiers.list) {
+          std::string name = id.toString(true);
+          debug.debug("Name = " + name + ", type = " + type_name);
           if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
           std::string init = "";
           if (v->initialization) {
             init = a_expression.toString(v->initialization->value, database_result.object->type);
             debug.debug("Init = " + init, true);
           }
-          callback(name, type, init, v->objectType, v->direction);
-        } catch (Database::ObjectNotFoundException o) {
-          o.print();
+          callback(name, type_name, init, factory_name, v->objectType, v->direction);
         }
+      } else {
+        exceptions.printError("Could not find type \"" + type_name + "\"", v->text);
       }
-      debug.functionEnd("objectDeclaration");
+      debug.functionEnd("ObjectDeclaration");
     }
+  }
+
+  template<typename Func>
+  void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
+    debug.functionStart("PrintTypeObject");
+    DefineObject(parm, false, name, "Factory", "", NULL, NULL, NULL, func,
+                 [](parameters& parm) {}, false);
+
+    debug.functionEnd("PrintTypeObject");
   }
 
 }

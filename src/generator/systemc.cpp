@@ -140,8 +140,8 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
-    parm.println(parameters::Area::DECLARATION, "using " + name + "_type = decltype(" + left + ");"); 
-    parm.println(parameters::Area::DECLARATION, "vhdl_range_type(" + name + ", " + left + ", " + right + ");");
+    parm.println("using " + name + " = Range<decltype(" + left + ")>;");
+    PrintFactory(parm, name, r, ast::ObjectValue::NUMBER);
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
@@ -211,12 +211,7 @@ namespace generator {
     parm.println("struct " + rangeName + " {" +
 		 typeName + " left = {" + left + ", " + baseUnitName + "}; " +
 		 typeName + " right = {" + right + ", " + upperUnitName + "};};");
-    parm.println("template <class RANGE = " + rangeName +
-		 ", typename N = " + declType +
-		 ", typename T = " + enumName +
-		 ", class E = " + valueName +
-		 ", class S = " + unitName + ">");
-    parm.println("using " + name + " = PhysicalType<RANGE, N, T, E, S>;");
+    parm.println("using " + name + " = PhysicalType<" + rangeName + ", " + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
 
   }
 
@@ -228,7 +223,7 @@ namespace generator {
     topHierarchyStart(parm, library, name, type, filename);
     if (type == ast::ObjectType::PACKAGE) {
       parm.println("");
-      parm.println("SC_PACKAGE(" + name + ") {");
+      parm.println("class " + ast::toString(type) + "_" + name + " {");
       parm.incIndent();
       declarations(parm, package->declarations);
       parm.decIndent();
@@ -257,7 +252,7 @@ namespace generator {
     const ast::ObjectType type = ast::ObjectType::ENTITY;
     topHierarchyStart(parm, library, name, type, filename);
     parm.println("");
-    parm.println("SC_INTERFACE(" + name + ") {");
+    parm.println("class " + ast::toString(type) + "_" + name + " {");
     parm.println("public:");
     parm.incIndent();
     if (interface->generics) {
@@ -299,9 +294,11 @@ namespace generator {
       }
       auto declaration_callback = [&](parameters& parm) {
         std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
-        parm.println("SC_CTOR(" + name + ") " + (initializer_list.empty() ? "" : ", " + initializer_list) + " {init();}");
+        parm.println("");
+        parm.println(ast::toString(type) + "_" + name + "(const char* name)" + (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
       };
-      defineObject(parm, true, name, "SC_MODULE", NULL,
+      parm.println("");
+      DefineObject(parm, true, name, ast::toString(type), "sc_module(name), " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

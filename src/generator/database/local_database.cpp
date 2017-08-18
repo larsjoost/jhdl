@@ -130,8 +130,8 @@ namespace generator {
     m.add(other->a_map.front());
   }
   
-  void LocalDatabase::descendHierarchy(std::string& name) {
-    NameMap m(name);
+  void LocalDatabase::descendHierarchy(const std::string& name, ast::ObjectType type) {
+    NameMap m(name, type);
     a_map.push_front(m);
   }
 
@@ -143,13 +143,17 @@ namespace generator {
     return a_map.size() - 1; 
   }
   
-  std::string LocalDatabase::getParentName() {
+  void LocalDatabase::GetParent(ParentInfo& parent_info) {
     std::string name = a_name;
+    ast::ObjectType type = a_type;
     if (a_map.size() > 1) {
       auto p = std::next(a_map.begin());
-      name = p->getSection();
+      name = p->GetSection();
+      type = p->GetType();
+      
     }
-    return name;
+    parent_info.name = name;
+    parent_info.type = type;
   }
   
 }

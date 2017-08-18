@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     struct FileInfo {
       std::string fileName;
@@ -40,8 +40,12 @@ namespace generator {
       int indent = 0;
       std::list<LineInfo> lines;
     };
+
+    typedef std::unordered_map<int, AreaInfo> AreaInfoMap;
+
+    typedef std::list<AreaInfoMap> AreaInfoMapHierarchy;
     
-    std::unordered_map<int, AreaInfo> printlines;
+    AreaInfoMapHierarchy printlines;
     
   public:
     enum FileSelect {HEADER_FILE, SOURCE_FILE};
@@ -52,11 +56,18 @@ namespace generator {
     FileSelect a_file_select;
     std::string AreaToString(Area a);
   public:
-    parameters() : debug("parameters") {};
+    parameters() : debug("parameters") {
+      DescendHierarchy();
+    };
+    ~parameters() {
+      AscendHierarchy();
+    }
     int index;
     ast::ObjectValueContainer returnType;
     void incIndent();
     void decIndent();
+    void DescendHierarchy();
+    void AscendHierarchy();
     void open(std::string filename);
     void close();
     void println(std::string message, int position = -1);
@@ -64,7 +75,6 @@ namespace generator {
     void SetArea(Area a, bool flush = false) { a_area = a; if (flush) {Flush(a);};};
     std::string ToList(Area a);
     void Flush(Area a);
-    bool PrintlnBuffersEmpty();
     FileSelect selectFile(FileSelect s);
     bool isFile(FileSelect s) {return s == a_file_select; };
     bool isQuiet();

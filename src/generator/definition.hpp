@@ -4,28 +4,28 @@ namespace generator {
 
 
   template <typename BodyFunc, typename DeclFunc>
-  void SystemC::defineObject(parameters& parm,
+  void SystemC::DefineObject(parameters& parm,
                              bool topHierarchy,
                              std::string name,
                              std::string type,
+                             std::string derived_classes,
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              BodyFunc bodyCallback,
 			     DeclFunc declarationCallback,
                              bool wait_statements) {
-    debug.functionStart("defineObject");
+    debug.functionStart("DefineObject");
     if (!topHierarchy) {descendHierarchy(parm, name);}
-    parm.println(type + "(" + name + ") {");
+    parm.println("class " + type + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
     parm.incIndent();
     if (wait_statements) {
-      parm.println("// Wait is support class of wait statements"); 
-      parm.println("Wait w;");
+      parm.println("Wait w; // Support class of wait statements");
     }
-    std::string parentName = a_database.getParentName();
+    ParentInfo parent_info;
+    a_database.GetParent(parent_info);
     if (!topHierarchy) {
-      parm.println("// p is used to access parent class");
-      parm.println(parentName + "* p = NULL;");
+      parm.println(ast::toString(parent_info.type) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
     }
     parm.decIndent();
     parm.println("public:");
@@ -54,8 +54,7 @@ namespace generator {
     parm.decIndent();
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
-    assert(parm.PrintlnBuffersEmpty());
-    debug.functionEnd("defineObject");
+    debug.functionEnd("DefineObject");
   }
 
   template<typename Func>

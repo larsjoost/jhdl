@@ -37,6 +37,11 @@ namespace generator {
   };
 
   using DatabaseResults = std::list<DatabaseResult>;
+
+  struct ParentInfo {
+    ast::ObjectType type;
+    std::string name;
+  };
   
 }
 

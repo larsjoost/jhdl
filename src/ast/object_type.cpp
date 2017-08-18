@@ -27,6 +27,7 @@ namespace ast {
     case ObjectType::PACKAGE: return "package";
     case ObjectType::PACKAGE_BODY: return "package_body";
     case ObjectType::COMPONENT: return "component";
+    case ObjectType::UNKNOWN: return "unknown";
     default: assert(false);
     }
   }
