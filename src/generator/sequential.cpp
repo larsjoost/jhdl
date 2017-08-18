@@ -16,7 +16,7 @@ namespace generator {
     bool result = false;
     DatabaseResult object;
     if (a_database.findOne(object, name, id)) {
-      name = a_name_converter.getName(object, true);
+      name = a_name_converter.GetName(object);
       type = object.object->type;
       result = true;
     } else {
@@ -53,13 +53,14 @@ namespace generator {
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
     if (p) {
       debug.functionStart("reportStatement");
-      static ast::ObjectValueContainer expectedType = a_database.getType("STRING", "STANDARD", "STD");
+      static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
+      static ast::ObjectValueContainer expected_type = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, enum_type); 
       std::string severity = p->severity->toString(true);
       DatabaseResult object;
       if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {
-        std::string name = a_name_converter.getName(object, true);
+        std::string name = a_name_converter.GetName(object);
         parm.println(parameters::Area::IMPLEMENTATION,
-                     "report(" + a_expression.toString(p->message, expectedType) + ", " +
+                     "report(" + a_expression.toString(p->message, expected_type) + ", " +
                      name + ");");
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);

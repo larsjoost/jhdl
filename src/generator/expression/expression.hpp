@@ -258,7 +258,7 @@ namespace generator {
                                                Func sensitivityListCallback) {
     debug.functionStart("objectToString");
     assert(object.object);
-    std::string name = a_name_converter->getName(object, true);
+    std::string name = a_name_converter->GetName(object);
     debug.debug("name = " + name + ": " + object.toString());
     if (object.object->type.IsValue(ast::ObjectValue::ARRAY)) {
       std::string parameters;
@@ -438,8 +438,7 @@ namespace generator {
       assert(match.object);
       bool objectMatch = (match.object->id == ast::ObjectType::VARIABLE) ||
         (match.object->id == ast::ObjectType::SIGNAL);
-      std::string seperator = objectMatch ? "." : "::";
-      name = a_database->globalName(name) + seperator + attributeName;
+      name = a_name_converter->GetName(match, true) + "." + attributeName;
       std::string a = "";
       if (associationList) {
         std::string delimiter = "";

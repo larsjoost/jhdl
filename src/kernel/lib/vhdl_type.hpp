@@ -135,7 +135,7 @@ namespace vhdl {
       value(value), unit(unit) { }
   };
 
-  template<class RANGE, typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
+  template<typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
   class PhysicalType {
     VALUE scale(VALUE v, UNIT u, UNIT l) {
       ELEMENTS e;
@@ -148,31 +148,40 @@ namespace vhdl {
   public:
     VALUE value;
     UNIT unit;
+    struct Range {
+      Physical<VALUE, UNIT> left;
+      Physical<VALUE, UNIT> right;
+    };
+    Range a_range;
+    
     PhysicalType() {
-      RANGE range;
-      value = range.left.value;
-      unit = PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
+      value = 0;
+      unit = PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
     PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
     PhysicalType(UNIT u) {unit = u;}
+    PhysicalType(Physical<VALUE, UNIT> left, Physical<VALUE, UNIT> right) {
+      a_range.left = left;
+      a_range.right = right;
+    }
     
     template<class R>
-    PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
-    operator +(PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
-      PhysicalType<RANGE, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
+    PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
+    operator +(PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
+      PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
       UNIT lowestUnit = unit < other.unit ? unit : other.unit;
       p.value = scale(value, unit, lowestUnit) + scale(other.value, other.unit, lowestUnit);
       p.unit = lowestUnit;
       return p;
     }
     template<class R>
-    void operator=(const PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
+    void operator=(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       value = other.value;
       unit = other.unit;
     }
 
     template<class R>
-    bool operator==(const PhysicalType<R, VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
+    bool operator==(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       return (value == other.value && unit == other.unit);
     }
 
@@ -186,12 +195,11 @@ namespace vhdl {
       return e.array[e.size - 1].base;
     }
     
-    static Physical<VALUE, UNIT> HIGH() {
-      RANGE range;
-      VALUE max = (range.left.value > range.right.value) ? range.left.value : range.right.value;
+    Physical<VALUE, UNIT> HIGH() {
+      VALUE max = (a_range.left.value > a_range.right.value) ? a_range.left.value : a_range.right.value;
       return {max, getHighUnit()};
     }
-    static Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
+    Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
 
     template <class X>
     static ::std::string IMAGE(X r) {
@@ -350,10 +358,14 @@ namespace vhdl {
     Range range;
     TYPE* value = NULL;
 
+    Array<TYPE>(int left, int right) {
+      range.left = left;
+      range.right = right;
+    }
+    
     void init(int left, int right) {
       range.left = left;
       range.right = right;
-      init();
     }
     
     void init() {

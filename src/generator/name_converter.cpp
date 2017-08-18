@@ -14,31 +14,43 @@ namespace generator {
     return name;
   }
 
-  std::string NameConverter::getName(DatabaseResult& object, bool fullName) {
+  std::string NameConverter::GlobalPrefix(DatabaseResult& object, bool factory_extension) {
+    a_debug.functionStart("GlobalPrefix");
+    std::string prefix;
+    int hierarchyLevel = a_database->getHierarchyLevel();
+    a_debug.debug("Object = " + object.toString());
+    if (object.object->id == ast::ObjectType::ENUM) {
+      prefix = getPrefix(object, "::", "::") + object.object->type.GetTypeName() + "_enum::";
+    } else {
+      if (object.local) {
+        for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
+          prefix = "p->" + prefix;
+        }
+      } else {
+        if (object.object->id == ast::ObjectType::TYPE) {
+          prefix = getPrefix(object, "::", "::");
+        } else {
+          prefix = getPrefix(object, "_", ".");
+        }
+      }
+    }
+    if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
+      prefix += "factory_";
+    } 
+    a_debug.functionEnd("GlobalPrefix");
+    return prefix;
+  }
+
+  std::string NameConverter::GetName(DatabaseResult& object, bool factory_extension) {
     a_debug.functionStart("getName");
     std::string name = object.object->name;
     a_debug.debug("name = " + name);
     int hierarchyLevel = a_database->getHierarchyLevel();
     a_debug.debug("Object = " + object.toString());
-    if (fullName) {
-      if (object.object->id == ast::ObjectType::ENUM
-          // && object.object->type.value == ast::ObjectValue::ENUMERATION
-          ) {
-        name = getPrefix(object, "::", "::") + object.object->type.GetTypeName() + "_enum::" + name;
-      } else {
-        if (object.local) {
-          for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
-            name = "p->" + name;
-          }
-        } else {
-          if (object.object->id == ast::ObjectType::TYPE) {
-            name = getPrefix(object, "::", "::") + name;
-          } else {
-            name = getPrefix(object, "_", ".") + name;
-          }
-        }
-      }
-    }
+    name = GlobalPrefix(object, factory_extension) + name;
+    if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
+      name += ".create()";
+    } 
     a_debug.functionEnd("getName");
     return name;
   }
@@ -68,7 +80,7 @@ namespace generator {
     if (!a_database->findOne(result, i, o)) {
       assert(false);
     }
-    return getName(result, true);
+    return GetName(result);
   }
  
 }

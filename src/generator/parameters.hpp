@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<true> debug;
+    Debug<false> debug;
     
     struct FileInfo {
       std::string fileName;

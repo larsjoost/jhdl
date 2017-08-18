@@ -17,7 +17,7 @@ namespace generator {
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (a_database.findOne(object, iteration->identifier)) {  
-        typeName = a_name_converter.getName(object, true);
+        typeName = a_name_converter.GetName(object);
         if (iteration->range_attribute) {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
             type = *object.object->type.GetSubtype(); 
@@ -52,7 +52,7 @@ namespace generator {
         std::string command = "if";
         std::string noConditionCommand = "";
         std::string noConditionDelimiter = "";
-        name = a_name_converter.getName(object, true);
+        name = a_name_converter.GetName(object);
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
             static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);

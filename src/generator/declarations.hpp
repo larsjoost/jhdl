@@ -14,8 +14,7 @@ namespace generator {
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-        std::string global_type_name = a_name_converter.getName(database_result, true);
-        std::string factory_name = a_name_converter.getPrefix(database_result, "::", "::") + "factory_" + type_name;
+        std::string factory_name = a_name_converter.GetName(database_result);
         if (v->type->range) {
           std::string left, right;
           rangeToString(v->type->range, left, right, database_result.object->type);
@@ -49,5 +48,22 @@ namespace generator {
 
     debug.functionEnd("PrintTypeObject");
   }
+
+  template<typename Func>
+  void SystemC::PrintFactory(parameters& parm, const std::string& name, Func func) {
+    std::string left;
+    std::string right;
+    auto f = [&](parameters& parm) {
+      func(parm, left, right);
+      parm.println(name + " create() {");
+      parm.incIndent();
+      parm.println("return " + name + "(" + left + ", " + right + ");");
+      parm.decIndent();
+      parm.println("}");
+    };
+    PrintTypeObject(parm, name, f);
+    parm.println("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
+  }
+
 
 }

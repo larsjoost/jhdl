@@ -205,14 +205,14 @@ namespace generator {
     parm.decIndent();
     parm.println("};");
     std::string typeName = name + "_type";
-    std::string rangeName = "range_" + name;
     std::string declType = "decltype(" + left + ")";
     parm.println("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
-    parm.println("struct " + rangeName + " {" +
-		 typeName + " left = {" + left + ", " + baseUnitName + "}; " +
-		 typeName + " right = {" + right + ", " + upperUnitName + "};};");
-    parm.println("using " + name + " = PhysicalType<" + rangeName + ", " + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
-
+    parm.println("using " + name + " = PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
+    auto f = [&](parameters& parm, std::string& l, std::string& r) {
+      l = "{" + left + ", " + baseUnitName + "}";
+      r = "{" + right + ", " + upperUnitName + "}";
+    };
+    PrintFactory(parm, name, f);
   }
 
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {

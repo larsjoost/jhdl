@@ -79,29 +79,26 @@ namespace generator {
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
-
   void SystemC::PrintFactory(parameters& parm, const std::string& name, 
                              ast::RangeType* range, ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
-    auto f = [&](parameters& parm) {
-      std::string left, right;
+    auto f = [&](parameters& parm, std::string& left, std::string& right) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
         rangeToString(range, left, right, type);
       } else if (subtype) {
-        std::string id = subtype->identifier->toString(true);
-        left = "factory_" + id + ".LEFT()";
-        right = "factory_" + id + ".RIGHT()";
+        std::string type_name = subtype->identifier->toString(true);
+        DatabaseResult database_result;
+        if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+          std::string id = a_name_converter.GetName(database_result, true);
+          left = id + ".LEFT()";
+          right = id + ".RIGHT()";
+        } else {
+          exceptions.printError("Could not find type " + type_name, &subtype->identifier->text);
+        }
       }
-      parm.println(name + " create() {");
-      parm.incIndent();
-      parm.println("return " + name + "(" + left + ", " + right + ");");
-      parm.decIndent();
-      parm.println("}");
     };
-    PrintTypeObject(parm, name, f);
-    parm.println("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
-
+    PrintFactory(parm, name, f);
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype) {
@@ -138,7 +135,7 @@ namespace generator {
     ast::ObjectValueContainer value;
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, database_result.object->type);
-      std::string subtypeName = a_name_converter.getName(database_result, true);
+      std::string subtypeName = a_name_converter.GetName(database_result);
       printArrayType(parm, name, t->definition, subtypeName);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
@@ -156,7 +153,7 @@ namespace generator {
     ast::ObjectValueContainer value;
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
-      std::string n = a_name_converter.getName(database_result, true);
+      std::string n = a_name_converter.GetName(database_result);
       parm.println("template<class T = " + n + ">");
       parm.println("using " + name + " = " + definition + "<T>;"); 
     } else {
@@ -215,7 +212,7 @@ namespace generator {
       std::string type = file->type->toString(true);
       DatabaseResult result;
       if (a_database.findOne(result, type, ast::ObjectType::TYPE)) {
-        type = a_name_converter.getName(result, true);
+        type = a_name_converter.GetName(result);
         a_database.add(ast::ObjectType::FILE, name, result.object->type);
       }
       parm.println(type + " " + name + " = " + type + "(" +
@@ -233,7 +230,7 @@ namespace generator {
       std::string type;
       DatabaseResult result;
       if (a_database.findOne(result, alias->name)) {
-        type = a_name_converter.getName(result, true);
+        type = a_name_converter.GetName(result);
         a_database.add(result.object->id, designator, result.object->type);
       }
       parm.println("using " + designator + " = " + type + ";"); 
@@ -403,7 +400,7 @@ namespace generator {
     if (f->returnType) {
       DatabaseResult returnType;
       if (a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
-        returnTypeName = a_name_converter.getName(returnType, true);
+        returnTypeName = a_name_converter.GetName(returnType, false);
         parm.returnType = returnType.object->type;
       }
     }
@@ -530,7 +527,7 @@ namespace generator {
       if (id == ast::ObjectType::FUNCTION) {
         DatabaseResult result;
         a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE);
-        returnName = a_name_converter.getName(result, true);
+        returnName = a_name_converter.GetName(result);
       }
       parm.println("/*");
       parm.println(" * This is the definition of the foreign function set as an attribute.");
@@ -581,7 +578,7 @@ namespace generator {
       std::string type_name = t->type->name->toString(true);
       DatabaseResult database_result;
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
-        std::string type_name = a_name_converter.getName(database_result, true);
+        std::string type_name = a_name_converter.GetName(database_result, false);
         a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
         parm.println("using " + name + " = " + type_name + ";");
         PrintFactory(parm, name, t->type->range, database_result.object->type.GetValue());

@@ -346,9 +346,10 @@ namespace generator {
   }
 
   bool ExpressionParser::getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result) {
-    static ast::ObjectValueContainer stringType = a_database->getType("STRING", "STANDARD", "STD");
+    static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
+    static ast::ObjectValueContainer string_type = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, enum_type); 
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
-      {{"IMAGE", stringType},
+      {{"IMAGE", string_type},
        {"LENGTH", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)}};
     bool found = false;
     auto i = fixedAttributeTypes.find(attributeName);

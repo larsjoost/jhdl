@@ -73,8 +73,6 @@ package STANDARD is
     end units;
   
   -- predefined array types:
-  
-  type STRING is array (POSITIVE range <>) of CHARACTER;
 
   subtype DELAY_LENGTH is TIME range 0 fs to TIME'HIGH;
   
@@ -88,6 +86,8 @@ package STANDARD is
   
   subtype POSITIVE is INTEGER range 1 to INTEGER'HIGH;
   
+  type STRING is array (POSITIVE range <>) of CHARACTER;
+
   type BIT_VECTOR is array (NATURAL range <>) of BIT;
   
 end STANDARD;

@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<true> debug;
+    Debug<false> debug;
 
     Exceptions exceptions;
     
@@ -117,6 +117,8 @@ namespace generator {
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     template<typename Func>
     void PrintTypeObject(parameters& parm, const std::string& name, Func func);
+    template<typename Func>
+    void PrintFactory(parameters& parm, const std::string& name, Func func);
     void PrintFactory(parameters& parm, const std::string& name, 
                       ast::RangeType* range, ast::ObjectValue expected_value,
                       ast::ArraySubtypeDefinition* subtype = NULL);
