@@ -14,7 +14,8 @@ namespace generator {
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-        std::string factory_name = a_name_converter.GetName(database_result);
+        std::string factory_name = a_name_converter.GetName(database_result, true);
+        type_name = a_name_converter.GetName(database_result, false);
         if (v->type->range) {
           std::string left, right;
           rangeToString(v->type->range, left, right, database_result.object->type);
@@ -57,7 +58,9 @@ namespace generator {
       func(parm, left, right);
       parm.println(name + " create() {");
       parm.incIndent();
-      parm.println("return " + name + "(" + left + ", " + right + ");");
+      std::string arguments = (left.empty() ? "" : "(" + left + ", " + right + ")");
+      parm.println(name + " x" + arguments + ";");
+      parm.println("return x;");
       parm.decIndent();
       parm.println("}");
     };

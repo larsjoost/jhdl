@@ -9,18 +9,17 @@ namespace vhdl {
 
   STD::STANDARD::TIME_enum convert(SC_UNITS u);
   
-  template<class RANGE>
-  bool wait(STD::STANDARD::TIME<RANGE> t) {
+  bool wait(const STD::STANDARD::TIME& t) {
     STD::STANDARD s;
     return (s.NOW() == t);
   };
 
   class Wait {
     STD::STANDARD s;
-    STD::STANDARD::TIME<> timeout;
+    STD::STANDARD::TIME timeout;
   public:
     int index = 0;
-    void waitFor(STD::STANDARD::TIME<> t) {
+    void waitFor(const STD::STANDARD::TIME& t) {
       timeout = s.NOW() + t;
     }
     bool done() {

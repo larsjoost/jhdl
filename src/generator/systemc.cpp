@@ -223,11 +223,12 @@ namespace generator {
     topHierarchyStart(parm, library, name, type, filename);
     if (type == ast::ObjectType::PACKAGE) {
       parm.println("");
-      parm.println("class " + ast::toString(type) + "_" + name + " {");
+      parm.println("struct " + ast::toString(type) + "_" + name + " {");
       parm.incIndent();
       declarations(parm, package->declarations);
       parm.decIndent();
       parm.println("};");
+      parm.println("using " + name + " = " + ast::toString(type) + "_" + name + ";");
       parm.decIndent();
       parm.println("}");
       parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");

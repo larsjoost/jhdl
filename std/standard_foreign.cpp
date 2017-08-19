@@ -13,8 +13,8 @@ namespace vhdl {
         severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
       o = &std::cerr;
     } 
-    STD::STANDARD::SEVERITY_LEVEL<> s = severity;
-    *o << STD::STANDARD::SEVERITY_LEVEL<>::IMAGE(s) << ": " << message << ::std::endl;
+    STD::STANDARD::SEVERITY_LEVEL s = severity;
+    *o << STD::STANDARD::SEVERITY_LEVEL::IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
       STD::ENV e;
       e.FINISH(1);
@@ -37,8 +37,8 @@ namespace vhdl {
  
   namespace STD {
 
-    STANDARD::DELAY_LENGTH<> STANDARD::NOW() {
-      STANDARD::DELAY_LENGTH<> t = {sc_now.value, convert(sc_now.unit)};
+    STANDARD::DELAY_LENGTH STANDARD::NOW() {
+      STANDARD::DELAY_LENGTH t = {sc_now.value, convert(sc_now.unit)};
       return t;
     }
 

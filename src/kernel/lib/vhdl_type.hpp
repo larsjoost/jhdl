@@ -131,8 +131,6 @@ namespace vhdl {
   struct Physical {
     VALUE value;
     UNIT unit;
-    Physical(VALUE value, UNIT unit) :
-      value(value), unit(unit) { }
   };
 
   template<typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
@@ -146,43 +144,38 @@ namespace vhdl {
       return scale(v * e.array[u].number, e.array[u+1].base, l);
     }
   public:
-    VALUE value;
-    UNIT unit;
-    struct Range {
-      Physical<VALUE, UNIT> left;
-      Physical<VALUE, UNIT> right;
-    };
-    Range a_range;
+    VALUE a_value;
+    UNIT a_unit;
+    Physical<VALUE, UNIT> a_left;
+    Physical<VALUE, UNIT> a_right;
     
     PhysicalType() {
-      value = 0;
-      unit = PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
+      a_value = 0;
+      a_unit = PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
-    PhysicalType(VALUE v, UNIT u) {value = v; unit = u;};
-    PhysicalType(UNIT u) {unit = u;}
-    PhysicalType(Physical<VALUE, UNIT> left, Physical<VALUE, UNIT> right) {
-      a_range.left = left;
-      a_range.right = right;
+    PhysicalType(VALUE value, UNIT unit) {a_value = value; a_unit = unit;};
+    PhysicalType(UNIT unit) {a_unit = unit;}
+    PhysicalType(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
+      a_left = left;
+      a_right = right;
     }
     
-    template<class R>
     PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
     operator +(PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
       PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
-      UNIT lowestUnit = unit < other.unit ? unit : other.unit;
-      p.value = scale(value, unit, lowestUnit) + scale(other.value, other.unit, lowestUnit);
-      p.unit = lowestUnit;
+      UNIT lowest_unit = a_unit < other.a_unit ? a_unit : other.a_unit;
+      p.a_value = scale(a_value, a_unit, lowest_unit) + scale(other.a_value, other.a_unit, lowest_unit);
+      p.a_unit = lowest_unit;
       return p;
     }
-    template<class R>
+
     void operator=(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
-      value = other.value;
-      unit = other.unit;
+      a_value = other.a_value;
+      a_unit = other.a_unit;
     }
 
-    template<class R>
     bool operator==(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
-      return (value == other.value && unit == other.unit);
+      return (a_value == other.a_value && a_unit == other.a_unit);
     }
 
     static UNIT getBaseUnit() {
@@ -196,7 +189,7 @@ namespace vhdl {
     }
     
     Physical<VALUE, UNIT> HIGH() {
-      VALUE max = (a_range.left.value > a_range.right.value) ? a_range.left.value : a_range.right.value;
+      VALUE max = (a_left.value > a_right.value) ? a_left.value : a_right.value;
       return {max, getHighUnit()};
     }
     Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
@@ -204,7 +197,7 @@ namespace vhdl {
     template <class X>
     static ::std::string IMAGE(X r) {
       UNIT_STRING_CONVERTER u;
-      return ::std::to_string(r.value) + " " + u.toString(r.unit);
+      return ::std::to_string(r.a_value) + " " + u.toString(r.a_unit);
     }
 
   };
@@ -358,11 +351,6 @@ namespace vhdl {
     Range range;
     TYPE* value = NULL;
 
-    Array<TYPE>(int left, int right) {
-      range.left = left;
-      range.right = right;
-    }
-    
     void init(int left, int right) {
       range.left = left;
       range.right = right;
@@ -411,14 +399,19 @@ namespace vhdl {
     Array<TYPE>() {
     }
 
-    void resize(int size) {
-      assert(size > 0);
-      range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
+    Array<TYPE>(int left, int right) {
+      range.left = left;
+      range.right = right;
     }
     
     explicit Array<TYPE>(int size) {
       resize(size);
       init();
+    }
+    
+    void resize(int size) {
+      assert(size > 0);
+      range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
     }
     
     void set(Array<TYPE>& other) {

@@ -154,8 +154,7 @@ namespace generator {
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = a_name_converter.GetName(database_result);
-      parm.println("template<class T = " + n + ">");
-      parm.println("using " + name + " = " + definition + "<T>;"); 
+      parm.println("using " + name + " = " + definition + "<" + n + ">;"); 
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
     }
@@ -428,11 +427,11 @@ namespace generator {
       printSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
-      class_name = "function_" + a_name_converter.getName(origin_name, arguments, parm.returnType);
+      class_name = a_name_converter.getName(origin_name, arguments, parm.returnType);
       ParentInfo parent_info;
       a_database.GetParent(parent_info);
       std::string function_prefix = "function_";
-      std::string prefix = parent_info.name + "::" + class_name + "::";
+      std::string prefix = parent_info.name + "::" + function_prefix + class_name + "::";
       std::string run_prefix;
       std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
       std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
@@ -466,7 +465,7 @@ namespace generator {
           ascendHierarchy(parm);
         }
       } else {
-        DefineObject(parm, false, class_name, "Function", "", NULL,
+        DefineObject(parm, false, class_name, "function", "", NULL,
                      NULL, NULL, createBody, createDefinition, false);
       }
       std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";
@@ -476,7 +475,7 @@ namespace generator {
                    (define_function ? "{" : ";"));
       if (define_function) {
         parm.incIndent();
-        parm.println("auto inst = " + class_name + "(this);");
+        parm.println("auto inst = " + function_prefix + class_name + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {
           s += d + i.name;
