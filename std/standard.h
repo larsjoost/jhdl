@@ -9,10 +9,7 @@ namespace vhdl {
 
   STD::STANDARD::TIME_enum convert(SC_UNITS u);
   
-  bool wait(const STD::STANDARD::TIME& t) {
-    STD::STANDARD s;
-    return (s.NOW() == t);
-  };
+  bool wait(const STD::STANDARD::TIME& t);
 
   class Wait {
     STD::STANDARD s;

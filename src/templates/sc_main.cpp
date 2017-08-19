@@ -40,7 +40,7 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  auto* dut = new vhdl::WORK::TEST("DUT"); 
+  auto* dut = new vhdl::WORK::architecture_TEST("DUT"); 
 
   if (vcdFilename) {
 

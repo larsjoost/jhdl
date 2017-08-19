@@ -604,7 +604,9 @@ namespace generator {
         }
         std::string s = type + " " + name;
         parm.println(s + ";");
-        parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + factory_name + ");");
+        if (id != ast::ObjectType::CONSTANT) {
+          parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + factory_name + ");");
+        }
         if (init.size() > 0) {
           parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + init + ")");
         }

@@ -21,59 +21,48 @@ namespace vhdl {
   template<class TYPE>
   class Range {
   public:
-    struct RangeInterval {
-      TYPE left;
-      TYPE right;
-    };
-    RangeInterval range;
-    TYPE value;
-
-  public:
-
-    explicit Range<TYPE>() { }
-
-    Range<TYPE>(TYPE v) : value(v) { }
+    TYPE a_value;
+    TYPE a_left;
+    TYPE a_right;
+    
+    Range<TYPE>() {}
     Range<TYPE>(TYPE left, TYPE right) {
-      range.left = left;
-      range.right = right;
+      a_left = left;
+      a_right = right;
+    }
+    Range<TYPE>(TYPE value) {
+      a_value = value;
     }
     
-    template<class T>
-    Range<TYPE>(Range<TYPE>& other) : value(other.value) {};
-
-    void init(const Range<TYPE> other) {
-      range = other.range;
+    void init(const Range<TYPE>& other) {
+      a_left = other.a_left;
+      a_right = other.a_right;
     };
     
-    void operator=(const TYPE other) { value = other; }
-    template <class T>
-    void operator=(const Range<TYPE>& other) { value = other.value; }
+    void operator=(const TYPE other) { a_value = other; }
+    void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
 
-    template <class T>
-    bool operator ==(const Range<TYPE> &other) { return value == other.value; }
-    template <class T>
-    bool operator !=(const Range<TYPE> &other) { return value != other.value; }
-    bool operator ==(TYPE other) { return value == other; }
-    bool operator <=(TYPE other) { return value <= other; }
-    bool operator >=(TYPE other) { return value >= other; }
-    bool operator !=(TYPE other) { return value != other; }
-    TYPE operator +(TYPE other) { return value + other; }
-    TYPE operator -(TYPE other) { return value - other; }
-    template <class T>
-    TYPE operator +(const Range<TYPE>& other) { return value + other.value; }
-    template <class T>
-    TYPE operator -(const Range<TYPE>& other) { return value - other.value; }
+    bool operator ==(const Range<TYPE> &other) const { return a_value == other.a_value; }
+    bool operator !=(const Range<TYPE> &other) const { return a_value != other.a_value; }
+    bool operator ==(const TYPE other) const { return a_value == other; }
+    bool operator <=(const TYPE other) const { return a_value <= other; }
+    bool operator >=(const TYPE other) const { return a_value >= other; }
+    bool operator !=(const TYPE other) const { return a_value != other; }
+    TYPE operator +(const TYPE other) const { return a_value + other; }
+    TYPE operator -(const TYPE other) const { return a_value - other; }
+    TYPE operator +(const Range<TYPE>& other) const { return a_value + other.a_value; }
+    TYPE operator -(const Range<TYPE>& other) const { return a_value - other.a_value; }
     
     operator bool() const {
-      return value != TYPE(0);
+      return a_value != TYPE(0);
     }
     
     operator int() const {
-      return value;
+      return a_value;
     }
 
     std::string toString() {
-      return std::to_string(value);
+      return std::to_string(a_value);
     }
 
     unsigned int LENGTH() {
@@ -81,26 +70,26 @@ namespace vhdl {
     }
 
     TYPE HIGH() {
-      return (range.left > range.right ? range.left : range.right);
+      return (a_left > a_right ? a_left : a_right);
     }
     TYPE LOW() {
-      return (range.left < range.right ? range.left : range.right);
+      return (a_left < a_right ? a_left : a_right);
     }
     TYPE LEFT() {
-      return range.left;
+      return a_left;
     }
     TYPE RIGHT() {
-      return range.right;
+      return a_right;
     }
     TYPE LEFTOF() {
-      return (range.left < range.right ? getValue() - 1 : getValue() + 1);
+      return (a_left < a_right ? getValue() - 1 : getValue() + 1);
     }
     TYPE RIGHTOF() {
-      return (range.left < range.right ? getValue() + 1 : getValue() - 1);
+      return (a_left < a_right ? getValue() + 1 : getValue() - 1);
     }
 		       
     int getValue() {
-      return value;
+      return a_value;
     }
 
     std::string STATUS() {
@@ -396,12 +385,6 @@ namespace vhdl {
       int i = ConvertIndex(index);
       assert(IndexCheck(i));
       return value[i];
-    }
-    
-  public:
-
-    Array<TYPE>(Array<TYPE>& other) {
-      set(other);
     }
     
     Array<TYPE>() {
