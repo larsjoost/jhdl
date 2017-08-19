@@ -23,11 +23,13 @@ namespace generator {
       prefix = getPrefix(object, "::", "::") + object.object->type.GetTypeName() + "_enum::";
     } else {
       if (object.local) {
-        for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
-          prefix = "p->" + prefix;
+        if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
+          for (int i=object.object->hierarchyLevel; i < hierarchyLevel; i++) {
+            prefix = "p->" + prefix;
+          }
         }
       } else {
-        if (object.object->id == ast::ObjectType::TYPE) {
+        if (!factory_extension && object.object->id == ast::ObjectType::TYPE) {
           prefix = getPrefix(object, "::", "::");
         } else {
           prefix = getPrefix(object, "_", ".");
@@ -41,7 +43,7 @@ namespace generator {
     return prefix;
   }
 
-  std::string NameConverter::GetName(DatabaseResult& object, bool factory_extension) {
+  std::string NameConverter::GetName(DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
     a_debug.functionStart("getName");
     std::string name = object.object->name;
     a_debug.debug("name = " + name);
@@ -49,7 +51,7 @@ namespace generator {
     a_debug.debug("Object = " + object.toString());
     name = GlobalPrefix(object, factory_extension) + name;
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
-      name += ".create()";
+      name += ".create(" + factory_arguments + ")";
     } 
     a_debug.functionEnd("getName");
     return name;

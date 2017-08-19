@@ -26,7 +26,7 @@ namespace generator {
     std::string GlobalPrefix(DatabaseResult& object, bool factory_extension = false);
     std::string getPrefix(DatabaseResult& object, std::string first_separator, std::string last_separator);
 
-    std::string GetName(DatabaseResult& object, bool factory_extension = false);
+    std::string GetName(DatabaseResult& object, bool factory_extension = false, std::string factory_arguments = "");
     std::string getName(std::string& name, ast::ObjectArguments& arguments,
                         ast::ObjectValueContainer& return_type);
     std::string GetName(ast::SimpleIdentifier* i, ast::ObjectType);

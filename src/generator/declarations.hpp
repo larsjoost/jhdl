@@ -14,15 +14,14 @@ namespace generator {
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-        std::string factory_name = a_name_converter.GetName(database_result, true);
         type_name = a_name_converter.GetName(database_result, false);
+        std::string factory_arguments;
         if (v->type->range) {
           std::string left, right;
           rangeToString(v->type->range, left, right, database_result.object->type);
-          factory_name += ".create(" + left + ", " + right + ")";
-        } else {
-          factory_name += ".create()";
+          factory_arguments = left + ", " + right;
         }
+        std::string factory_name = a_name_converter.GetName(database_result, true, factory_arguments);
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
           std::string name = id.toString(true);
           debug.debug("Name = " + name + ", type = " + type_name);

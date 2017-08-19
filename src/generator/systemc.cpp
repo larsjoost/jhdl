@@ -299,7 +299,7 @@ namespace generator {
         parm.println(ast::toString(type) + "_" + name + "(const char* name)" + (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
       };
       parm.println("");
-      DefineObject(parm, true, name, ast::toString(type), "sc_module(name), " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
+      DefineObject(parm, true, name, ast::toString(type), "sc_module, " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

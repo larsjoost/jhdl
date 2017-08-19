@@ -68,7 +68,7 @@ class sc_module {
   sc_module(const char* name) : name(name) {};
   sc_module() {};
   
-  void addMethod(sc_thread* c);  
+  void AddMethod(sc_thread* c);  
   
 };
 

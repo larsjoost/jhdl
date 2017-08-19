@@ -84,7 +84,7 @@ namespace generator {
                       });
       };
       parm.println("");
-      DefineObject(parm, false, methodName, "Process", "sc_module", NULL,
+      DefineObject(parm, false, methodName, "Process", "sc_thread", NULL,
                    &method->declarations, NULL, createBody, createDefinition, true);
     }
     debug.functionEnd("methodDefinition");
@@ -123,7 +123,7 @@ namespace generator {
                         });
         };
         parm.println("");
-        DefineObject(parm, false, name, "Process", "sc_module", NULL, NULL, NULL, createBody,
+        DefineObject(parm, false, name, "Process", "sc_thread", NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {}, true);
       }
       debug.functionEnd("concurrentSignalAssignment");

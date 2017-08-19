@@ -40,6 +40,10 @@ namespace vhdl {
     
     template<class T>
     Range<TYPE>(Range<TYPE>& other) : value(other.value) {};
+
+    void init(const Range<TYPE> other) {
+      range = other.range;
+    };
     
     void operator=(const TYPE other) { value = other; }
     template <class T>
@@ -356,6 +360,10 @@ namespace vhdl {
       range.right = right;
     }
     
+    void init(const Array<TYPE>& other) {
+      range = other.range;
+    }
+
     void init() {
       assert(value == NULL);
       value = new TYPE[LENGTH()];

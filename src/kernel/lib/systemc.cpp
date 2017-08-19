@@ -44,7 +44,7 @@ void log(sc_trace_file* handle, int value, unsigned int dataWidth, int traceId) 
   }
 }
 
-void sc_module::addMethod(sc_thread* c) {
+void sc_module::AddMethod(sc_thread* c) {
   methods.push_back(c);
 }
 

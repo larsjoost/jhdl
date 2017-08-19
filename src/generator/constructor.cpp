@@ -21,7 +21,7 @@ namespace generator {
       } else {
         methodName = method->noname;
       }
-      instantiateType(parm, "AddMethod", methodName);
+      instantiateType(parm, "AddMethod", "Process_" + methodName);
       debug.functionEnd("methodInstantiation");
     }
   }

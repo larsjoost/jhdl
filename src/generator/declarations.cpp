@@ -76,6 +76,9 @@ namespace generator {
     parm.decIndent();
     parm.println("};");
     parm.println("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
+    auto f = [&](parameters& parm, std::string& left, std::string& right) {
+    };
+    PrintFactory(parm, name, f);
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
