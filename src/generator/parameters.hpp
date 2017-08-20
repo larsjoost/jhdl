@@ -29,14 +29,15 @@ namespace generator {
 
     bool quiet = false;
     
-    void open(FileInfo& fileInfo, std::string& filename, std::string extension);
-
-    FileInfo& getFileInfo();
-
     struct LineInfo {
       int indent;
       std::string text;
     };
+
+    void open(FileInfo& fileInfo, std::string& filename, std::string extension);
+    void write(const LineInfo& line_info);
+
+    FileInfo& getFileInfo();
     
   public:
     
@@ -54,6 +55,8 @@ namespace generator {
     struct Areas {
       Area area;
       AreaInfoMap map;
+      int indent = 0;
+      std::list<LineInfo> buffer;
     };
     
     typedef std::list<Areas> AreasHierarchy;
@@ -67,14 +70,15 @@ namespace generator {
     template <typename Func>
     void AccessAreaInfo(Area a, Func func) {
       int index = ConvertInteger(a);
-      auto lines = printlines.back().map.find(index);
-      if (lines != printlines.back().map.end()) {
-        func(lines->second);
+      Areas& areas = printlines.back();
+      auto lines = areas.map.find(index);
+      if (lines != areas.map.end()) {
+        func(areas, lines->second);
       } else {
         AreaInfo l;
         AreaInfoMap& m = printlines.back().map;
         m[index] = l;
-        func(l);
+        func(areas, l);
       }
     }
 
