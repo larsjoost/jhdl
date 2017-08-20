@@ -63,7 +63,10 @@ namespace generator {
       if (lines != printlines.back().end()) {
         func(lines->second);
       } else {
-        std::cerr << "Could not access area " << index << std::endl;
+        AreaInfo l;
+        AreaInfoMap& m = printlines.back();
+        m[index] = l;
+        func(l);
       }
     }
 

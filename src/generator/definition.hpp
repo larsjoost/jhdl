@@ -17,7 +17,7 @@ namespace generator {
                              bool wait_statements) {
     debug.functionStart("DefineObject");
     if (!topHierarchy) {descendHierarchy(parm, name);}
-    parm.println("class " + type + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
+    parm.println("struct " + type + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
     parm.incIndent();
     if (wait_statements) {
       parm.println("Wait w; // Support class of wait statements");
@@ -27,9 +27,6 @@ namespace generator {
     if (!topHierarchy) {
       parm.println(ast::toString(parent_info.type) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
     }
-    parm.decIndent();
-    parm.println("public:");
-    parm.incIndent();
     parm.SetArea(parameters::Area::DECLARATION, true);
     if (declarationList) {
       declarations(parm, *declarationList);

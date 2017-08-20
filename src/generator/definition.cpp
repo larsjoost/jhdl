@@ -91,7 +91,6 @@ namespace generator {
   }
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
-    
     if (s) {
       debug.functionStart("concurrentSignalAssignment");
       std::string name;
@@ -101,7 +100,6 @@ namespace generator {
         name = "line" + std::to_string(s->identifier->text.getLine());
       }
       s->name = name;
-      
       {
         bool q = parm.setQuiet(true);
         std::list<std::string> sensitivity;

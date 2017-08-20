@@ -98,20 +98,15 @@ namespace generator {
   }
   
   void parameters::println(Area a, std::string text, int position) {
-    if (a == a_area) {
-      println(text, position);
-    } else {
-      int index = ConvertInteger(a);
-      auto lines = printlines.back().find(index);
-      if (lines != printlines.back().end()) {
-        int indent = position < 0 ? lines->second.indent : position;
-        lines->second.lines.push_front({indent, text});
+    if (!isQuiet()) {
+      if (a == a_area) {
+        println(text, position);
       } else {
-        AreaInfo l;
-        int indent = position < 0 ? 0 : position;
-        l.lines.push_front({indent, text});
-        AreaInfoMap& m = printlines.back();
-        m[index] = l;
+        auto f = [&](AreaInfo& info) {
+          int indent = position < 0 ? 0 : position;
+          info.lines.push_front({indent, text});
+        };
+        AccessAreaInfo(a, f);
       }
     }
   }

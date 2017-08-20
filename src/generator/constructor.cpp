@@ -29,7 +29,7 @@ namespace generator {
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
       debug.functionStart("signalInstantiation");
-      instantiateType(parm, "AddMethod", s->name);
+      instantiateType(parm, "AddMethod", "Process_" + s->name);
       debug.functionEnd("signalInstantiation");
     }
   }
@@ -92,7 +92,7 @@ namespace generator {
           s = libraryName + "::" + s;
         }
       }
-      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new " + s + "(\"" + instanceName + "\");");
+      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new architecture_" + s + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
       componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }

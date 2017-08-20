@@ -153,6 +153,11 @@ namespace vhdl {
       a_right = right;
     }
     
+    void init(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
+      a_left = other.a_left;
+      a_right = other.a_right;
+    };
+
     PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
     operator +(PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
       PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
