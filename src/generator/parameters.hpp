@@ -55,6 +55,18 @@ namespace generator {
     int ConvertInteger(Area a);
     FileSelect a_file_select;
     std::string AreaToString(Area a);
+
+    template <typename Func>
+    void AccessAreaInfo(Area a, Func func) {
+      int index = ConvertInteger(a);
+      auto lines = printlines.back().find(index);
+      if (lines != printlines.back().end()) {
+        func(lines->second);
+      } else {
+        std::cerr << "Could not access area " << index << std::endl;
+      }
+    }
+
   public:
     parameters() : debug("parameters") {
       DescendHierarchy();
@@ -65,7 +77,9 @@ namespace generator {
     int index;
     ast::ObjectValueContainer returnType;
     void incIndent();
+    void incIndent(Area area);
     void decIndent();
+    void decIndent(Area area);
     void DescendHierarchy();
     void AscendHierarchy();
     void open(std::string filename);

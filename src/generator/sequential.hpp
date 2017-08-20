@@ -56,20 +56,20 @@ namespace generator {
         for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
           if (s.condition) {
             static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-            parm.println(command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
+            parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
             command = "else if";
             noConditionCommand = "else {";
             noConditionDelimiter = "}";
           } else {
-            parm.println(noConditionCommand);
+            parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
           }
-          parm.incIndent();
-          parm.println(name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
-          parm.decIndent();
+          parm.incIndent(parameters::Area::IMPLEMENTATION);
+          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
+          parm.decIndent(parameters::Area::IMPLEMENTATION);
           if (s.condition) {
-            parm.println("}");
+            parm.println(parameters::Area::IMPLEMENTATION, "}");
           } else {
-            parm.println(noConditionDelimiter);
+            parm.println(parameters::Area::IMPLEMENTATION, noConditionDelimiter);
           }
         }
       } else {

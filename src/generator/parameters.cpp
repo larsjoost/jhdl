@@ -10,11 +10,25 @@ namespace generator {
     } 
     return sourceFileInfo;    
   }
-  
+
+  void parameters::incIndent(Area a) {
+    auto f = [&](AreaInfo& info) {
+      info.indent += 2;
+    };
+    AccessAreaInfo(a, f);
+  }
+
   void parameters::incIndent() {
     getFileInfo().indent += 2;
   }
 
+  void parameters::decIndent(Area a) {
+    auto f = [&](AreaInfo& info) {
+      info.indent -= 2;
+    };
+    AccessAreaInfo(a, f);
+  }
+  
   void parameters::decIndent() {
     getFileInfo().indent -= 2;
   }

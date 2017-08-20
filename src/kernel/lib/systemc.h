@@ -101,6 +101,11 @@ class sc_signal : public sc_signal_base {
       log(fileHandle, currentValue.getValue(), currentValue.LENGTH(), traceId);
     }
   }
+
+  void init(T other) {
+    nextValue.init(other);
+    currentValue.init(other);
+  }
   
   sc_signal<T>(const sc_signal<T>& s) {
       nextValue = s.currentValue;
