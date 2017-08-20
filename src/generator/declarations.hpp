@@ -43,7 +43,7 @@ namespace generator {
   template<typename Func>
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
     debug.functionStart("PrintTypeObject");
-    DefineObject(parm, false, name, "Factory", "", NULL, NULL, NULL, func,
+    DefineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, func,
                  [](parameters& parm) {}, false);
 
     debug.functionEnd("PrintTypeObject");

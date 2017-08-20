@@ -8,29 +8,37 @@
 
 namespace ast {
 
-  std::string toString(ObjectType o) {
+  std::string toString(ObjectType o, bool first_letter_uppercase) {
+    std::string result;
     switch (o) {
-    case ObjectType::SIGNAL: return "signal";
-    case ObjectType::VARIABLE: return "variable";
-    case ObjectType::CONSTANT: return "constant";
-    case ObjectType::FUNCTION: return "function";
-    case ObjectType::PROCEDURE: return "procedure";
-    case ObjectType::PORT: return "port";
-    case ObjectType::TYPE: return "type";
-    case ObjectType::ENUM: return "enum";
-    case ObjectType::ENTITY: return "entity";
-    case ObjectType::CONFIGURATION: return "configuration";
-    case ObjectType::SUBTYPE: return "subtype";
-    case ObjectType::FILE: return "file";
-    case ObjectType::GROUP: return "group";
-    case ObjectType::ARCHITECTURE: return "architecture";
-    case ObjectType::GENERATE: return "generate";
-    case ObjectType::PACKAGE: return "package";
-    case ObjectType::PACKAGE_BODY: return "package_body";
-    case ObjectType::COMPONENT: return "component";
-    case ObjectType::UNKNOWN: return "unknown";
+    case ObjectType::SIGNAL: result = "signal"; break;
+    case ObjectType::VARIABLE: result =  "variable"; break;
+    case ObjectType::CONSTANT: result =  "constant"; break;
+    case ObjectType::FUNCTION: result =  "function"; break;
+    case ObjectType::PROCEDURE: result =  "procedure"; break;
+    case ObjectType::PORT: result =  "port"; break;
+    case ObjectType::TYPE: result =  "type"; break;
+    case ObjectType::ENUM: result =  "enum"; break;
+    case ObjectType::ENTITY: result =  "entity"; break;
+    case ObjectType::CONFIGURATION: result =  "configuration"; break;
+    case ObjectType::SUBTYPE: result =  "subtype"; break;
+    case ObjectType::FILE: result =  "file"; break;
+    case ObjectType::GROUP: result =  "group"; break;
+    case ObjectType::ARCHITECTURE: result =  "architecture"; break;
+    case ObjectType::GENERATE: result =  "generate"; break;
+    case ObjectType::PACKAGE: result =  "package"; break;
+    case ObjectType::PACKAGE_BODY: result =  "package_body"; break;
+    case ObjectType::COMPONENT: result =  "component"; break;
+    case ObjectType::BLOCK: result =  "block"; break;
+    case ObjectType::PROCESS: result =  "process"; break;
+    case ObjectType::FACTORY: result =  "factory"; break;
+    case ObjectType::UNKNOWN: result =  "unknown"; break;
     default: assert(false);
     }
+    if (first_letter_uppercase) {
+      result[0] = toupper(result[0]);
+    }
+    return result;
   }
   
   std::string toString(ObjectValue o) {

@@ -462,13 +462,13 @@ namespace generator {
       if (implementation) {
         if (f->body) {
           run_prefix = prefix;
-          descendHierarchy(parm, parent_info.name, parameters::Area::IMPLEMENTATION);
+          descendHierarchy(parm, parent_info.name, parameters::Area::IMPLEMENTATION, type);
           StoreInterfaceInDatabase(parm, f->interface);
           createBody(parm);
           ascendHierarchy(parm);
         }
       } else {
-        DefineObject(parm, false, class_name, "function", "", NULL,
+        DefineObject(parm, false, class_name, type, "", NULL,
                      NULL, NULL, createBody, createDefinition, false);
       }
       std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";

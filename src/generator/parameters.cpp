@@ -115,11 +115,12 @@ namespace generator {
   }
 
   void parameters::Flush(Area a) {
-    debug.functionStart("Flush");
+    debug.functionStart("Flush(area = " + AreaToString(a) + ")");
+    if (verbose) {println("// Flush area(" + std::to_string(printlines.size()) + ") " + AreaToString(a), getFileInfo().indent);}
     auto f = [&](AreaInfo& info) {
       while (!info.lines.empty()) {
         auto& lineInfo = info.lines.back();
-        println(lineInfo.text);
+        println(lineInfo.text, info.indent + getFileInfo().indent);
         info.lines.pop_back();
       }
     };
@@ -129,9 +130,11 @@ namespace generator {
   
   void parameters::DescendHierarchy(Area area) {
     printlines.push_back({area, AreaInfoMap()});
+    if (verbose) {println("// Descend Hierarchy (" + std::to_string(printlines.size()) + ") " + AreaToString(area), getFileInfo().indent);}
   }
 
   void parameters::AscendHierarchy() {
+    if (verbose) {println("// Ascend Hierarchy (" + std::to_string(printlines.size() + 1) + ")", getFileInfo().indent);}
     bool ok = true;
     for (auto& i : printlines.back().map) {
       if (!i.second.lines.empty()) {
@@ -148,10 +151,13 @@ namespace generator {
   }
 
   parameters::Area parameters::SetArea(Area area, bool flush) {
+    debug.functionStart("SetArea(area = " + AreaToString(area) + ")");
+    if (verbose) {println("// Set area(" + std::to_string(printlines.size()) + ") " + AreaToString(area), getFileInfo().indent);}
     Areas& areas = printlines.back();
     Area a = areas.area;
     areas.area = area;
     if (flush) {Flush(area);};
+    debug.functionEnd("SetArea = " + AreaToString(a));
     return a;
   };
 

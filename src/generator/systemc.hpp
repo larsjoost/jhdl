@@ -81,7 +81,7 @@ namespace generator {
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, bool globalize);
     void descendHierarchy(parameters& parm, std::string parent_name, parameters::Area area,
-                          ast::ObjectType = ast::ObjectType::UNKNOWN);
+                          ast::ObjectType);
     void ascendHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
@@ -184,7 +184,7 @@ namespace generator {
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    std::string getConstructorDeclaration(parameters& parm, std::string& type, std::string& name, std::string* argument,
+    std::string getConstructorDeclaration(parameters& parm, ast::ObjectType type, std::string& name, std::string* argument,
                                           const std::string& initializer_list);
     bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
@@ -192,7 +192,7 @@ namespace generator {
     void DefineObject(parameters& parm,
                       bool topHierarchy,
                       std::string name,
-                      std::string type,
+                      ast::ObjectType type,
                       std::string derived_classes,
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
@@ -227,7 +227,7 @@ namespace generator {
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                               std::string& entityName, std::string& library);
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
-    void createConstructor(parameters& parm, bool toopHierarchy, std::string& type,
+    void createConstructor(parameters& parm, bool toopHierarchy, ast::ObjectType type,
                            std::string& name, std::string* argument,
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 

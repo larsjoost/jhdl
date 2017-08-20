@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::DefineObject(parameters& parm,
                              bool topHierarchy,
                              std::string name,
-                             std::string type,
+                             ast::ObjectType type,
                              std::string derived_classes,
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
@@ -16,8 +16,8 @@ namespace generator {
 			     DeclFunc declarationCallback,
                              bool wait_statements) {
     debug.functionStart("DefineObject");
-    if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION);}
-    parm.println("struct " + type + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
+    if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION, type);}
+    parm.println("struct " + ast::toString(type, true) + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
     parm.incIndent();
     if (wait_statements) {
       parm.println("Wait w; // Support class of wait statements");
@@ -25,7 +25,7 @@ namespace generator {
     ParentInfo parent_info;
     a_database.GetParent(parent_info);
     if (!topHierarchy) {
-      parm.println(ast::toString(parent_info.type) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
+      parm.println(ast::toString(parent_info.type, true) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
     }
     parm.SetArea(parameters::Area::DECLARATION);
     debug.debug("Declaration");
@@ -35,6 +35,7 @@ namespace generator {
     declarationCallback(parm);
     parm.SetArea(parameters::Area::CONSTRUCTOR);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
+    parm.Flush(parameters::Area::DECLARATION);
     parm.SetArea(parameters::Area::IMPLEMENTATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
@@ -43,12 +44,12 @@ namespace generator {
     parm.SetArea(parameters::Area::CONSTRUCTOR);
     debug.debug("Constructor");
     parm.println("void init() {");
+    parm.Flush(parameters::Area::CONSTRUCTOR);
     if (concurrentStatements) {
       parm.incIndent();
       concurrentStatementsInstantiation(parm, *concurrentStatements);
       parm.decIndent();
     }
-    parm.Flush(parameters::Area::CONSTRUCTOR);
     parm.println("}");
     parm.decIndent();
     parm.Flush(parameters::Area::DECLARATION);

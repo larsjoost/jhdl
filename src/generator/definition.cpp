@@ -12,7 +12,7 @@ namespace generator {
     if (blockStatement) {
       printSourceLine(parm, blockStatement->name);
       std::string name = blockStatement->name->toString(true);
-      DefineObject(parm, false, name, "Block", "sc_module", NULL, 
+      DefineObject(parm, false, name, ast::ObjectType::BLOCK, "sc_module", NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
@@ -33,7 +33,7 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
       };
-      DefineObject(parm, false, name, ast::toString(ast::ObjectType::GENERATE), "sc_module", &identifier,
+      DefineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
 		   createBody, createDeclaration, false);
@@ -85,7 +85,7 @@ namespace generator {
                       });
       };
       parm.println("");
-      DefineObject(parm, false, methodName, "Process", "sc_thread", NULL,
+      DefineObject(parm, false, methodName, ast::ObjectType::PROCESS, "sc_thread", NULL,
                    &method->declarations, NULL, createBody, createDefinition, true);
     }
     debug.functionEnd("methodDefinition");
@@ -122,7 +122,7 @@ namespace generator {
                         });
         };
         parm.println("");
-        DefineObject(parm, false, name, "Process", "sc_thread", NULL, NULL, NULL, createBody,
+        DefineObject(parm, false, name, ast::ObjectType::PROCESS, "sc_thread", NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {}, true);
       }
       debug.functionEnd("concurrentSignalAssignment");

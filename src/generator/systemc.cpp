@@ -137,11 +137,13 @@ namespace generator {
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
+    debug.functionStart("printRangeType");
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
-    parm.println("using " + name + " = Range<decltype(" + left + ")>;");
+    parm.println(parameters::Area::DECLARATION, "using " + name + " = Range<decltype(" + left + ")>;");
     PrintFactory(parm, name, r, ast::ObjectValue::NUMBER);
+    debug.functionEnd("printRangeType");
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
@@ -296,10 +298,11 @@ namespace generator {
       auto declaration_callback = [&](parameters& parm) {
         std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
         parm.println("");
-        parm.println(ast::toString(type) + "_" + name + "(const char* name)" + (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
+        parm.println(ast::toString(type, true) + "_" + name + "(const char* name)" +
+                     (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
       };
       parm.println("");
-      DefineObject(parm, true, name, ast::toString(type), "sc_module, " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
+      DefineObject(parm, true, name, type, "sc_module, " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

@@ -14,6 +14,8 @@ namespace generator {
   class parameters {
 
     Debug<true> debug;
+
+    bool verbose = true;
     
     struct FileInfo {
       std::string fileName;
