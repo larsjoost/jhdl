@@ -210,7 +210,7 @@ namespace vhdl {
   };
 
   template <typename T, class E>
-  struct Enumeration {
+  class Enumeration {
     int* char_position_lookup() {
       const static E valueArray;
       const static int SIZE =  256;
@@ -274,6 +274,9 @@ namespace vhdl {
     Enumeration<T, E>(T v) {
       set(v);
     }
+
+    void init(const Enumeration<T, E>& other) {
+    };
 
     void operator=(T v) {
       set(v);

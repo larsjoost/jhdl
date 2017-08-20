@@ -55,13 +55,23 @@ namespace generator {
     std::string right;
     auto f = [&](parameters& parm) {
       func(parm, left, right);
+      bool arguments_exists = !left.empty();
+      std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
       parm.println(name + " create() {");
       parm.incIndent();
-      std::string arguments = (left.empty() ? "" : "(" + left + ", " + right + ")");
       parm.println(name + " x" + arguments + ";");
       parm.println("return x;");
       parm.decIndent();
       parm.println("}");
+      if (arguments_exists) {
+        parm.println("template <typename T>");
+        parm.println(name + " create(T left, T right) {");
+        parm.incIndent();
+        parm.println(name + " x(left, right);");
+        parm.println("return x;");
+        parm.decIndent();
+        parm.println("}");
+      }
     };
     PrintTypeObject(parm, name, f);
     parm.println("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
