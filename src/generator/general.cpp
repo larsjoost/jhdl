@@ -32,20 +32,25 @@ namespace generator {
     a_database.topHierarchyEnd(globalize);
   }
 
-  void SystemC::descendHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type) {
-    parm.DescendHierarchy();
+  void SystemC::descendHierarchy(parameters& parm, std::string parent_name, parameters::Area area,
+                                 ast::ObjectType parent_type) {
+    debug.functionStart("descendHierarchy");
+    parm.DescendHierarchy(area);
     a_database.descendHierarchy(parent_name, parent_type);
     if (verbose) {
       parm.println("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
     }
+    debug.functionEnd("descendHierarchy");
   }
 
   void SystemC::ascendHierarchy(parameters& parm) {
+    debug.functionStart("ascendHierarchy");
     if (verbose) {
       parm.println("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
     }
     parm.AscendHierarchy();
     a_database.ascendHierarchy();
+    debug.functionEnd("ascendHierarchy");
   }
 
   void SystemC::printSourceLine(parameters& parm, ast::Text* t) {

@@ -24,6 +24,7 @@ namespace ast {
     case ObjectType::FILE: return "file";
     case ObjectType::GROUP: return "group";
     case ObjectType::ARCHITECTURE: return "architecture";
+    case ObjectType::GENERATE: return "generate";
     case ObjectType::PACKAGE: return "package";
     case ObjectType::PACKAGE_BODY: return "package_body";
     case ObjectType::COMPONENT: return "component";

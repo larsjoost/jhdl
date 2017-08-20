@@ -99,9 +99,12 @@ namespace generator {
   
   void parameters::println(Area a, std::string text, int position) {
     if (!isQuiet()) {
-      if (a == a_area) {
+      Area current_area = GetArea();
+      assert(current_area != Area::NONE);
+      if (a == current_area) {
         println(text, position);
       } else {
+        debug.debug("[" + AreaToString(GetArea()) + ", " + AreaToString(a) + "]: " + text, true, Output::Color::GREEN);
         auto f = [&](AreaInfo& info) {
           int indent = position < 0 ? 0 : position;
           info.lines.push_front({indent, text});
@@ -112,47 +115,67 @@ namespace generator {
   }
 
   void parameters::Flush(Area a) {
-    int index = ConvertInteger(a);
-    auto lines = printlines.back().find(index);
-    if (lines != printlines.back().end()) {
-      while (!lines->second.lines.empty()) {
-        auto& lineInfo = lines->second.lines.back();
+    debug.functionStart("Flush");
+    auto f = [&](AreaInfo& info) {
+      while (!info.lines.empty()) {
+        auto& lineInfo = info.lines.back();
         println(lineInfo.text);
-        lines->second.lines.pop_back();
+        info.lines.pop_back();
       }
-    }
+    };
+    AccessAreaInfo(a, f);
+    debug.functionEnd("Flush");
   }
   
-  void parameters::DescendHierarchy() {
-    printlines.push_back(AreaInfoMap());
+  void parameters::DescendHierarchy(Area area) {
+    printlines.push_back({area, AreaInfoMap()});
   }
+
   void parameters::AscendHierarchy() {
-    for (auto& i : printlines.back()) {
+    bool ok = true;
+    for (auto& i : printlines.back().map) {
       if (!i.second.lines.empty()) {
         std::cerr << "Buffer " << i.first << " is not empty" << std::endl;
         std::cerr << "Contents of buffer " << i.first << ":" << std::endl;
         for (auto& x : i.second.lines) {
           std::cerr << x.text << std::endl;
         }
-        assert(false);
+        ok = false;
       }
     }
+    assert(ok);
     printlines.pop_back();
   }
 
+  parameters::Area parameters::SetArea(Area area, bool flush) {
+    Areas& areas = printlines.back();
+    Area a = areas.area;
+    areas.area = area;
+    if (flush) {Flush(area);};
+    return a;
+  };
+
+  parameters::Area parameters::GetArea() {
+    Areas& a = printlines.back();
+    return a.area;
+  };
+
+  bool parameters::IsArea(Area area) {
+    return area == GetArea();
+  }
+  
   std::string parameters::ToList(Area a) {
     std::string result;
     std::string delimiter;
-    int index = ConvertInteger(a);
-    auto lines = printlines.back().find(index);
-    if (lines != printlines.back().end()) {
-      while (!lines->second.lines.empty()) {
-        auto& lineInfo = lines->second.lines.back();
+    auto f = [&](AreaInfo& info) {
+      while (!info.lines.empty()) {
+        auto& lineInfo = info.lines.back();
         result += delimiter + lineInfo.text;
         delimiter = ", ";
-        lines->second.lines.pop_back();
+        info.lines.pop_back();
       }
-    }
+    };
+    AccessAreaInfo(a, f);
     return result;
   }
 

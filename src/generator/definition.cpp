@@ -33,7 +33,7 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
       };
-      DefineObject(parm, false, name, "Generate", "sc_module", &identifier,
+      DefineObject(parm, false, name, ast::toString(ast::ObjectType::GENERATE), "sc_module", &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
 		   createBody, createDeclaration, false);
@@ -76,10 +76,11 @@ namespace generator {
 			parm.println("switch (w.index) {");
                         parm.index = 1;
                         parm.incIndent();
-                        parm.SetArea(parameters::Area::INITIALIZATION);
+                        parameters::Area area = parm.SetArea(parameters::Area::INITIALIZATION);
                         sequentialStatements(parm, method->sequentialStatements);
+                        parm.SetArea(area);
                         parm.decIndent();
-			parm.println(parameters::Area::INITIALIZATION, "}");
+			parm.println("}");
                         parm.Flush(parameters::Area::IMPLEMENTATION);
                       });
       };

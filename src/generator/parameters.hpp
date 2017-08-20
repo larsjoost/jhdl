@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     struct FileInfo {
       std::string fileName;
@@ -36,6 +36,12 @@ namespace generator {
       std::string text;
     };
     
+  public:
+    
+    enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    enum class Area {INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
+  private:
+
     struct AreaInfo {
       int indent = 0;
       std::list<LineInfo> lines;
@@ -43,15 +49,15 @@ namespace generator {
 
     typedef std::unordered_map<int, AreaInfo> AreaInfoMap;
 
-    typedef std::list<AreaInfoMap> AreaInfoMapHierarchy;
+    struct Areas {
+      Area area;
+      AreaInfoMap map;
+    };
     
-    AreaInfoMapHierarchy printlines;
+    typedef std::list<Areas> AreasHierarchy;
     
-  public:
-    enum FileSelect {HEADER_FILE, SOURCE_FILE};
-    enum class Area {INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
-  private:
-    Area a_area;
+    AreasHierarchy printlines;
+    
     int ConvertInteger(Area a);
     FileSelect a_file_select;
     std::string AreaToString(Area a);
@@ -59,12 +65,12 @@ namespace generator {
     template <typename Func>
     void AccessAreaInfo(Area a, Func func) {
       int index = ConvertInteger(a);
-      auto lines = printlines.back().find(index);
-      if (lines != printlines.back().end()) {
+      auto lines = printlines.back().map.find(index);
+      if (lines != printlines.back().map.end()) {
         func(lines->second);
       } else {
         AreaInfo l;
-        AreaInfoMap& m = printlines.back();
+        AreaInfoMap& m = printlines.back().map;
         m[index] = l;
         func(l);
       }
@@ -83,13 +89,15 @@ namespace generator {
     void incIndent(Area area);
     void decIndent();
     void decIndent(Area area);
-    void DescendHierarchy();
+    void DescendHierarchy(Area area = Area::NONE);
     void AscendHierarchy();
     void open(std::string filename);
     void close();
     void println(std::string message, int position = -1);
     void println(Area a, std::string message, int position = -1);
-    void SetArea(Area a, bool flush = false) { a_area = a; if (flush) {Flush(a);};};
+    Area SetArea(Area area, bool flush = false);
+    Area GetArea();
+    bool IsArea(Area area);
     std::string ToList(Area a);
     void Flush(Area a);
     FileSelect selectFile(FileSelect s);

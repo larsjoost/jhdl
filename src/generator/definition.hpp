@@ -16,7 +16,7 @@ namespace generator {
 			     DeclFunc declarationCallback,
                              bool wait_statements) {
     debug.functionStart("DefineObject");
-    if (!topHierarchy) {descendHierarchy(parm, name);}
+    if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION);}
     parm.println("struct " + type + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
     parm.incIndent();
     if (wait_statements) {
@@ -27,7 +27,8 @@ namespace generator {
     if (!topHierarchy) {
       parm.println(ast::toString(parent_info.type) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
     }
-    parm.SetArea(parameters::Area::DECLARATION, true);
+    parm.SetArea(parameters::Area::DECLARATION);
+    debug.debug("Declaration");
     if (declarationList) {
       declarations(parm, *declarationList);
     }
@@ -40,6 +41,7 @@ namespace generator {
     }
     bodyCallback(parm);
     parm.SetArea(parameters::Area::CONSTRUCTOR);
+    debug.debug("Constructor");
     parm.println("void init() {");
     if (concurrentStatements) {
       parm.incIndent();
@@ -49,6 +51,7 @@ namespace generator {
     parm.Flush(parameters::Area::CONSTRUCTOR);
     parm.println("}");
     parm.decIndent();
+    parm.Flush(parameters::Area::DECLARATION);
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
     debug.functionEnd("DefineObject");

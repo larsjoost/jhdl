@@ -57,24 +57,24 @@ namespace generator {
       func(parm, left, right);
       bool arguments_exists = !left.empty();
       std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
-      parm.println(name + " create() {");
-      parm.incIndent();
-      parm.println(name + " x" + arguments + ";");
-      parm.println("return x;");
-      parm.decIndent();
-      parm.println("}");
+      parm.println(parameters::Area::DECLARATION, name + " create() {");
+      parm.incIndent(parameters::Area::DECLARATION);
+      parm.println(parameters::Area::DECLARATION, name + " x" + arguments + ";");
+      parm.println(parameters::Area::DECLARATION, "return x;");
+      parm.decIndent(parameters::Area::DECLARATION);
+      parm.println(parameters::Area::DECLARATION, "}");
       if (arguments_exists) {
-        parm.println("template <typename T>");
-        parm.println(name + " create(T left, T right) {");
-        parm.incIndent();
-        parm.println(name + " x(left, right);");
-        parm.println("return x;");
-        parm.decIndent();
-        parm.println("}");
+        parm.println(parameters::Area::DECLARATION, "template <typename T>");
+        parm.println(parameters::Area::DECLARATION, name + " create(T left, T right) {");
+        parm.incIndent(parameters::Area::DECLARATION);
+        parm.println(parameters::Area::DECLARATION, name + " x(left, right);");
+        parm.println(parameters::Area::DECLARATION, "return x;");
+        parm.decIndent(parameters::Area::DECLARATION);
+        parm.println(parameters::Area::DECLARATION, "}");
       }
     };
     PrintTypeObject(parm, name, f);
-    parm.println("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
+    parm.println(parameters::Area::DECLARATION, "Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
   }
 
 

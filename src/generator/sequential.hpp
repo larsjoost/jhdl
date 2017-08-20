@@ -30,14 +30,16 @@ namespace generator {
       } 
     }
     a_database.add(ast::ObjectType::VARIABLE, name, type);
-    parm.println(parameters::Area::IMPLEMENTATION, "for (" +
+    parameters::Area area =
+      (parm.IsArea(parameters::Area::CONSTRUCTOR) ? parameters::Area::CONSTRUCTOR : parameters::Area::IMPLEMENTATION);
+    parm.println(area, "for (" +
                  name + " = " + name + ".LEFT(); " +
                  name + " <= " + name + ".RIGHT(); " +
                  name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
     parm.incIndent();
     callback(parm);
     parm.decIndent();
-    parm.println(parameters::Area::IMPLEMENTATION, "}");
+    parm.println(area, "}");
     debug.functionEnd("forLoop");
   }  
 

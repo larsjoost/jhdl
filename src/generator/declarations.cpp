@@ -462,7 +462,7 @@ namespace generator {
       if (implementation) {
         if (f->body) {
           run_prefix = prefix;
-          descendHierarchy(parm, parent_info.name);
+          descendHierarchy(parm, parent_info.name, parameters::Area::IMPLEMENTATION);
           StoreInterfaceInDatabase(parm, f->interface);
           createBody(parm);
           ascendHierarchy(parm);
@@ -497,8 +497,9 @@ namespace generator {
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("FunctionBody");
     declarations(parm, d);
-    parm.SetArea(parameters::Area::IMPLEMENTATION);
+    parameters::Area area = parm.SetArea(parameters::Area::IMPLEMENTATION);
     sequentialStatements(parm, s);
+    parm.SetArea(area);
     debug.functionEnd("FunctionBody");
   }
   

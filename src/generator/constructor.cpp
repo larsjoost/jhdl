@@ -47,6 +47,7 @@ namespace generator {
                                                   ast::ForGenerateStatement* forGenerateStatement) {
     
     if (forGenerateStatement) {
+      debug.functionStart("forGenerateStatementInstantiation");
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
@@ -54,6 +55,7 @@ namespace generator {
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
         });
+      debug.functionEnd("forGenerateStatementInstantiation");
     }
   }
 

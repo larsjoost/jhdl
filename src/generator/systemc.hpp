@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     Exceptions exceptions;
     
@@ -80,7 +80,8 @@ namespace generator {
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, bool globalize);
-    void descendHierarchy(parameters& parm, std::string parent_name = "", ast::ObjectType = ast::ObjectType::UNKNOWN);
+    void descendHierarchy(parameters& parm, std::string parent_name, parameters::Area area,
+                          ast::ObjectType = ast::ObjectType::UNKNOWN);
     void ascendHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);

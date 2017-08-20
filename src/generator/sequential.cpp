@@ -33,6 +33,7 @@ namespace generator {
   
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
+      debug.functionStart("variableAssignment");
       printSourceLine(parm, p->identifier);
       std::string name = p->identifier->toString(true);
       ast::ObjectValueContainer type;
@@ -43,6 +44,7 @@ namespace generator {
           e.print();
         }
       }
+      debug.functionEnd("variableAssignment");
     }
   }
 
@@ -72,6 +74,7 @@ namespace generator {
 
   void SystemC::ifStatement(parameters& parm, ast::IfStatement* p) {
     if (p) {
+      debug.functionStart("ifStatement");
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
@@ -86,22 +89,26 @@ namespace generator {
         parm.decIndent();
       }
       parm.println(parameters::Area::IMPLEMENTATION, "}");
+      debug.functionEnd("ifStatement");
     }
   }
 
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f) {
     if (f) {
+      debug.functionStart("forLoopStatement");
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
       auto callback = [&](parameters& parm) {
 	sequentialStatements(parm, f->sequentialStatements);
       };
       forLoop(parm, name, f->iteration, callback);
+      debug.functionEnd("forLoopStatement");
     }
   }
   
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
     if (p) {
+      debug.functionStart("waitStatement");
       assert(p->waitText);
       std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
@@ -111,6 +118,7 @@ namespace generator {
       printSourceLine(parm, p->waitText);
       parm.println(parameters::Area::IMPLEMENTATION, label + ": if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
       parm.index++;
+      debug.functionEnd("waitStatement");
     }
   }
 
