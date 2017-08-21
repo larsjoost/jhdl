@@ -478,7 +478,7 @@ namespace generator {
                    (define_function ? "{" : ";"));
       if (define_function) {
         parm.incIndent();
-        parm.println("auto inst = " + function_prefix + class_name + "(this);");
+        parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {
           s += d + i.name;

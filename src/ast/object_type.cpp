@@ -8,7 +8,7 @@
 
 namespace ast {
 
-  std::string toString(ObjectType o, bool first_letter_uppercase) {
+  std::string toString(ObjectType o) {
     std::string result;
     switch (o) {
     case ObjectType::SIGNAL: result = "signal"; break;
@@ -34,9 +34,6 @@ namespace ast {
     case ObjectType::FACTORY: result =  "factory"; break;
     case ObjectType::UNKNOWN: result =  "unknown"; break;
     default: assert(false);
-    }
-    if (first_letter_uppercase) {
-      result[0] = toupper(result[0]);
     }
     return result;
   }

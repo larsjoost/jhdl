@@ -17,33 +17,17 @@ namespace generator {
 
     bool verbose = true;
     
-    struct FileInfo {
-      std::string fileName;
-      std::ofstream outputFile;
-      int indent = 0;
-      int line_number = 1;
-    };
+  public:
+    
+    enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    enum class Area {TOP, INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
 
-    FileInfo sourceFileInfo;
-    FileInfo headerFileInfo;
-
-    bool quiet = false;
+  private:
     
     struct LineInfo {
       int indent;
       std::string text;
     };
-
-    void open(FileInfo& fileInfo, std::string& filename, std::string extension);
-    void write(const LineInfo& line_info);
-
-    FileInfo& getFileInfo();
-    
-  public:
-    
-    enum FileSelect {HEADER_FILE, SOURCE_FILE};
-    enum class Area {INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
-  private:
 
     struct AreaInfo {
       int indent = 0;
@@ -61,51 +45,73 @@ namespace generator {
     
     typedef std::list<Areas> AreasHierarchy;
     
-    AreasHierarchy printlines;
+    struct FileInfo {
+      std::string fileName;
+      std::ofstream outputFile;
+      int indent = 0;
+      int line_number = 1;
+      AreasHierarchy printlines;
+    };
+
+    FileInfo sourceFileInfo;
+    FileInfo headerFileInfo;
+
+    bool quiet = false;
+    
+    void open(FileInfo& fileInfo, std::string& filename, std::string extension);
+    void write(const LineInfo& line_info);
+
+    FileInfo& getFileInfo();
+
+    AreasHierarchy& GetAreas();
     
     int ConvertInteger(Area a);
     FileSelect a_file_select;
     std::string AreaToString(Area a);
 
     template <typename Func>
-    void AccessAreaInfo(Area a, Func func) {
+    void AccessAreaInfo(Area a, Func func, bool second_element = false) {
       int index = ConvertInteger(a);
-      Areas& areas = printlines.back();
-      auto lines = areas.map.find(index);
-      if (lines != areas.map.end()) {
-        func(areas, lines->second);
+      auto areas = GetAreas().begin();
+      if (second_element) {
+        areas = std::next(areas);
+      }
+      auto lines = areas->map.find(index);
+      if (lines != areas->map.end()) {
+        func(*areas, lines->second);
       } else {
         AreaInfo l;
-        AreaInfoMap& m = printlines.back().map;
+        AreaInfoMap& m = GetAreas().front().map;
         m[index] = l;
-        func(areas, l);
+        func(*areas, l);
       }
     }
 
+    void Flush(Area a);
+
   public:
     parameters() : debug("parameters") {
-      DescendHierarchy();
+      selectFile(SOURCE_FILE);
+      DescendHierarchy(Area::TOP);
+      selectFile(HEADER_FILE);
+      DescendHierarchy(Area::TOP);
     };
-    ~parameters() {
-      AscendHierarchy();
-    }
     int index;
     ast::ObjectValueContainer returnType;
     void incIndent();
     void incIndent(Area area);
     void decIndent();
     void decIndent(Area area);
-    void DescendHierarchy(Area area = Area::NONE);
+    void DescendHierarchy(Area area);
     void AscendHierarchy();
     void open(std::string filename);
     void close();
     void println(std::string message, int position = -1);
     void println(Area a, std::string message, int position = -1);
-    Area SetArea(Area area, bool flush = false);
+    Area SetArea(Area area);
     Area GetArea();
     bool IsArea(Area area);
     std::string ToList(Area a);
-    void Flush(Area a);
     FileSelect selectFile(FileSelect s);
     bool isFile(FileSelect s) {return s == a_file_select; };
     bool isQuiet();

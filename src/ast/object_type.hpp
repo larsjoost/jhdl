@@ -15,7 +15,7 @@ namespace ast {
     ENUM, ENTITY, CONFIGURATION, SUBTYPE, FILE, GROUP, ARCHITECTURE,
     GENERATE, PACKAGE, PACKAGE_BODY, COMPONENT, BLOCK, PROCESS, FACTORY, UNKNOWN};
 
-  std::string toString(ObjectType o, bool first_letter_uppercase = false);
+  std::string toString(ObjectType o);
 
   enum class ObjectValue {
     INTEGER, REAL, NUMBER, CHARACTER, PHYSICAL, ARRAY, ENUMERATION,

@@ -17,7 +17,7 @@ namespace generator {
                              bool wait_statements) {
     debug.functionStart("DefineObject");
     if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION, type);}
-    parm.println("struct " + ast::toString(type, true) + "_" + name + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
+    parm.println("struct " + ObjectName(type, name) + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
     parm.incIndent();
     if (wait_statements) {
       parm.println("Wait w; // Support class of wait statements");
@@ -25,7 +25,7 @@ namespace generator {
     ParentInfo parent_info;
     a_database.GetParent(parent_info);
     if (!topHierarchy) {
-      parm.println(ast::toString(parent_info.type, true) + "_" + parent_info.name + "* p = NULL; // Used to access parent class.");
+      parm.println(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.");
     }
     parm.SetArea(parameters::Area::DECLARATION);
     debug.debug("Declaration");
@@ -33,18 +33,16 @@ namespace generator {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
-    parm.SetArea(parameters::Area::CONSTRUCTOR);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
-    parm.Flush(parameters::Area::DECLARATION);
+    parm.SetArea(parameters::Area::DECLARATION);
     parm.SetArea(parameters::Area::IMPLEMENTATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    parm.SetArea(parameters::Area::CONSTRUCTOR);
     debug.debug("Constructor");
     parm.println("void init() {");
-    parm.Flush(parameters::Area::CONSTRUCTOR);
+    parm.SetArea(parameters::Area::CONSTRUCTOR);
     if (concurrentStatements) {
       parm.incIndent();
       concurrentStatementsInstantiation(parm, *concurrentStatements);
@@ -52,7 +50,7 @@ namespace generator {
     }
     parm.println("}");
     parm.decIndent();
-    parm.Flush(parameters::Area::DECLARATION);
+    parm.SetArea(parameters::Area::DECLARATION);
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
     debug.functionEnd("DefineObject");

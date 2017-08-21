@@ -217,6 +217,12 @@ namespace generator {
     PrintFactory(parm, name, f);
   }
 
+  std::string SystemC::ObjectName(ast::ObjectType type, const std::string& name) {
+    std::string type_name = ast::toString(type);
+    type_name[0] = toupper(type_name[0]);
+    return type_name + "_" + name;
+  }
+  
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     std::string name = package->name->toString(true);
     ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
@@ -225,12 +231,14 @@ namespace generator {
     topHierarchyStart(parm, library, name, type, filename);
     if (type == ast::ObjectType::PACKAGE) {
       parm.println("");
-      parm.println("struct " + ast::toString(type) + "_" + name + " {");
+      parm.println("struct " + ObjectName(type, name) + " {");
       parm.incIndent();
+      parm.SetArea(parameters::Area::DECLARATION);
       declarations(parm, package->declarations);
+      parm.SetArea(parameters::Area::DECLARATION);
       parm.decIndent();
       parm.println("};");
-      parm.println("using " + name + " = " + ast::toString(type) + "_" + name + ";");
+      parm.println("using " + name + " = " + ObjectName(type, name) + ";");
       parm.decIndent();
       parm.println("}");
       parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
@@ -238,7 +246,9 @@ namespace generator {
       parm.incIndent();
     } else {
       parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
+      parm.SetArea(parameters::Area::DECLARATION);
       declarations(parm, package->declarations);
+      parm.SetArea(parameters::Area::DECLARATION);
       parm.println("}");
       parm.println(library + "::" + name + " " + library + "_" + name + ";");
       parm.println("namespace " + library + " {");
@@ -298,7 +308,7 @@ namespace generator {
       auto declaration_callback = [&](parameters& parm) {
         std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
         parm.println("");
-        parm.println(ast::toString(type, true) + "_" + name + "(const char* name)" +
+        parm.println(ObjectName(type, name) + "(const char* name)" +
                      (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
       };
       parm.println("");

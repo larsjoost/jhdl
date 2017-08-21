@@ -73,15 +73,14 @@ namespace generator {
                           printSensitivityListWait(parm, method->sensitivity, s);
                         }
                         parm.println("// Wait statements goto tree");
-			parm.println("switch (w.index) {");
+			parm.SetArea(parameters::Area::INITIALIZATION);
+                        parm.println("switch (w.index) {");
                         parm.index = 1;
                         parm.incIndent();
-                        parameters::Area area = parm.SetArea(parameters::Area::INITIALIZATION);
                         sequentialStatements(parm, method->sequentialStatements);
-                        parm.SetArea(area);
                         parm.decIndent();
 			parm.println("}");
-                        parm.Flush(parameters::Area::IMPLEMENTATION);
+                        parm.SetArea(parameters::Area::IMPLEMENTATION);
                       });
       };
       parm.println("");
