@@ -10,13 +10,13 @@ namespace generator {
 
   class NameConverter {
 
-    Debug<false> a_debug = Debug<false>("NameConverter");
+    Debug<false> a_debug;
 
     Database *a_database;
   
   public:
 
-    NameConverter(Database& database) {
+    NameConverter(Database& database) : a_debug("NameConverter") {
       a_database = &database;
     };
 

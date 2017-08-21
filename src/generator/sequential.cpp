@@ -13,6 +13,7 @@ namespace generator {
   }
 
   bool SystemC::getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text) {
+    debug.functionStart("getObjectName(name = " + name + ", type = " + type.toString() + ", id = " + ast::toString(id));
     bool result = false;
     DatabaseResult object;
     if (a_database.findOne(object, name, id)) {
@@ -23,6 +24,7 @@ namespace generator {
       exceptions.printError("Cound to find definition of " + ast::toString(id) + " with name " + name, text);
       a_database.printAllObjects(name);
     }
+    debug.functionEnd("getObjectName");
     return result;
   }
   

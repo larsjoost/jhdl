@@ -34,7 +34,7 @@ namespace ast {
       return equals(other);
     }
     bool IsValue(ObjectValue other) {return a_value == other; }
-    ObjectValueContainer* GetSubtype() const { assert(a_subtype); return a_subtype; }
+    ObjectValueContainer* GetSubtype() const { return a_subtype; }
     ObjectValue GetValue() const { return a_value; }
     std::string GetTypeName() const { return a_type_name; }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
