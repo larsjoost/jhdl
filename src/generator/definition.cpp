@@ -31,7 +31,7 @@ namespace generator {
         a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       };
       auto createBody = [&](parameters& parm) {
-      	parm.println("STD::STANDARD::INTEGER<> " + identifier + ";");
+      	parm.println("STD::STANDARD::INTEGER " + identifier + ";");
       };
       DefineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
                    &forGenerateStatement->declarations,

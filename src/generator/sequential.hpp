@@ -13,7 +13,7 @@ namespace generator {
       typeName = name + "_type";
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
-      parm.println(parameters::Area::DECLARATION, typeName + "<> " + name + ";");
+      parm.println(parameters::Area::DECLARATION, typeName + " " + name + ";");
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (a_database.findOne(object, iteration->identifier)) {  

@@ -13,9 +13,9 @@ namespace generator {
 
   class parameters {
 
-    Debug<true> debug;
+    Debug<false> debug;
 
-    bool verbose = true;
+    bool verbose = false;
     
   public:
     

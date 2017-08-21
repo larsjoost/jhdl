@@ -3,55 +3,6 @@
 
 namespace generator {
 
-  std::string Database::namePrefix(DatabaseResult& object) {
-    std::string prefix;
-    if (object.object->sectionName != localDatabase.getName() ||
-        object.object->sectionType != localDatabase.getType()) {
-      std::string separator1 = "::";
-      std::string separator2 = "::";
-      if (object.object->id == ast::ObjectType::FUNCTION ||
-          object.object->id == ast::ObjectType::PROCEDURE) {
-	separator1 = "_";
-	separator2 = ".";
-      }
-      prefix = object.object->library + separator1 + object.object->sectionName + separator2;
-    }
-    return prefix;
-  }
-  
-  std::string Database::globalName(DatabaseResult& object, std::string name) {
-    name = namePrefix(object) + name;
-    if (object.object->id == ast::ObjectType::TYPE) {
-      name = name + "<>";
-    }
-    return name;
-  }
-  
-  bool Database::globalName(std::string& name, ast::ObjectType id) {
-    bool found = false;
-    DatabaseResult object;
-    if (findOne(object, name, id)) {
-      found = true;
-      name = globalName(object, name);
-    } else {
-      exceptions.printError("Unable to find " + ast::toString(id) + " " + name);
-    }
-    return found;
-  }
-
-  std::string Database::globalName(std::string name) {
-    auto valid = [&](DatabaseElement* e) {
-      return true;
-    };
-    DatabaseResult object;
-    if (findOne(object, name, valid)) {
-      name = globalName(object, name);
-    } else {
-      exceptions.printError("Unable to find " + name);
-    }
-    return name;
-  }
-
   ast::ObjectValueContainer Database::getType(std::string name, std::string package, std::string library) {
     auto valid = [&] (DatabaseElement* e) { return e->id == ast::ObjectType::TYPE; };
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);

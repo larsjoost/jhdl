@@ -67,11 +67,6 @@ namespace generator {
 
     bool localize(std::string& library, std::string& name, ast::ObjectType type);
     
-    std::string namePrefix(DatabaseResult& object);
-    std::string globalName(DatabaseResult& object, std::string name);
-    std::string globalName(std::string name);
-    bool globalName(std::string& name, ast::ObjectType id);
-
     std::string getLibrary();
     std::string getName();
     ast::ObjectType getType();

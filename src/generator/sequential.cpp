@@ -111,7 +111,14 @@ namespace generator {
       std::string index = std::to_string(parm.index);
       std::string label = "line" + std::to_string(p->waitText->getLine());
       parm.println(parameters::Area::INITIALIZATION, "case " + index + ": goto " + label + ";");
-      std::string now = a_database.globalName("NOW") + "()";
+      std::string now;
+      std::string name = "NOW";
+      DatabaseResult object;
+      if (a_database.findOne(object, name)) {
+        now = a_name_converter.GetName(object) + "()";
+      } else {
+        exceptions.printError("Unable to find " + name);
+      }
       parm.println(parameters::Area::IMPLEMENTATION, "w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
       printSourceLine(parm, p->waitText);
       parm.println(parameters::Area::IMPLEMENTATION, label + ": if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");

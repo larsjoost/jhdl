@@ -6,9 +6,9 @@
 namespace generator {
 
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
-                                std::string arguments) {
+                                ast::ObjectType object_type, std::string arguments) {
     debug.functionStart("instantiateType");
-    parm.println(parameters::Area::CONSTRUCTOR, type + "(new " + name + "(this" + arguments + "));");
+    parm.println(parameters::Area::CONSTRUCTOR, type + "(new " + ObjectName(object_type, name) + "(this" + arguments + "));");
     debug.functionEnd("instantiateType");
   }
 
@@ -21,7 +21,7 @@ namespace generator {
       } else {
         methodName = method->noname;
       }
-      instantiateType(parm, "AddMethod", "Process_" + methodName);
+      instantiateType(parm, "AddMethod", methodName, ast::ObjectType::PROCESS);
       debug.functionEnd("methodInstantiation");
     }
   }
@@ -29,7 +29,7 @@ namespace generator {
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
       debug.functionStart("signalInstantiation");
-      instantiateType(parm, "AddMethod", "Process_" + s->name);
+      instantiateType(parm, "AddMethod", s->name, ast::ObjectType::PROCESS);
       debug.functionEnd("signalInstantiation");
     }
   }
@@ -38,7 +38,7 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
       debug.functionStart("blockStatementInstantiation");
-      instantiateType(parm, "AddBlock", blockStatement->name->toString(true));
+      instantiateType(parm, "AddBlock", blockStatement->name->toString(true), ast::ObjectType::BLOCK);
       debug.functionEnd("blockStatementInstantiation");
     }
   }
@@ -53,7 +53,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ", " + identifier);
+          instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ast::ObjectType::GENERATE, ", " + identifier);
         });
       debug.functionEnd("forGenerateStatementInstantiation");
     }

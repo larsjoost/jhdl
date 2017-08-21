@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<true> debug;
+    Debug<false> debug;
 
     Exceptions exceptions;
     
@@ -218,7 +218,7 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
 
     // constructor.cpp
-    void instantiateType(parameters& parm, std::string type, std::string name, std::string arguments = "");
+    void instantiateType(parameters& parm, std::string type, std::string name, ast::ObjectType object_type, std::string arguments = "");
     void signalInstantiation(parameters& parm, ast::SignalAssignment* s);
     void methodInstantiation(parameters& parm, ast::Method* method);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);

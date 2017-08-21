@@ -473,7 +473,7 @@ namespace generator {
                    (implementation ? parent_info.name + "::" : "") + translatedName + interface +
                    (define_function ? "{" : ";"));
       if (define_function) {
-        parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
+        parm.println("static auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {
           s += d + i.name;
