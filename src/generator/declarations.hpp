@@ -58,18 +58,14 @@ namespace generator {
       bool arguments_exists = !left.empty();
       std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
       parm.println(parameters::Area::DECLARATION, name + " create() {");
-      parm.incIndent(parameters::Area::DECLARATION);
       parm.println(parameters::Area::DECLARATION, name + " x" + arguments + ";");
       parm.println(parameters::Area::DECLARATION, "return x;");
-      parm.decIndent(parameters::Area::DECLARATION);
       parm.println(parameters::Area::DECLARATION, "}");
       if (arguments_exists) {
         parm.println(parameters::Area::DECLARATION, "template <typename T>");
         parm.println(parameters::Area::DECLARATION, name + " create(T left, T right) {");
-        parm.incIndent(parameters::Area::DECLARATION);
         parm.println(parameters::Area::DECLARATION, name + " x(left, right);");
         parm.println(parameters::Area::DECLARATION, "return x;");
-        parm.decIndent(parameters::Area::DECLARATION);
         parm.println(parameters::Area::DECLARATION, "}");
       }
     };

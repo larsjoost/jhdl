@@ -61,18 +61,11 @@ namespace generator {
   }
 
   void SystemC::namespaceStart(parameters& parm, std::string& library) {
-    parm.println("");
-    parm.println("namespace vhdl {");
-    parm.incIndent();
-    parm.println("namespace " + library + " {");
-    parm.incIndent();
+    parm.println("namespace vhdl { namespace " + library + " {");
   }
 
   void SystemC::namespaceEnd(parameters& parm) {
-    parm.decIndent();
-    parm.println("}");
-    parm.decIndent();
-    parm.println("}");
+    parm.println("}}");
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
@@ -185,26 +178,20 @@ namespace generator {
 					      return "\"" + e.unit->toString() + "\""; 
 					    });
     parm.println("struct " + unitName + " {");
-    parm.incIndent();
     {
       parm.println("std::string toString(" + enumName + " e) {");
-      parm.incIndent();
       parm.println("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};");
       parm.println("return translate[e];");
-      parm.decIndent();
       parm.println("}");
     }
-    parm.decIndent();
     parm.println("};");
     std::string valueName = name + "_value";
     parm.println("struct " + valueName + " {");
-    parm.incIndent();
     {
       std::string x = std::to_string(size);
       parm.println("const int size = " + x + ";");
       parm.println("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
     }
-    parm.decIndent();
     parm.println("};");
     std::string typeName = name + "_type";
     std::string declType = "decltype(" + left + ")";
@@ -230,20 +217,15 @@ namespace generator {
                         ", packet = " + name + ", type = " + toString(type) + ")");
     topHierarchyStart(parm, library, name, type, filename);
     if (type == ast::ObjectType::PACKAGE) {
-      parm.println("");
       parm.println("struct " + ObjectName(type, name) + " {");
-      parm.incIndent();
       parm.SetArea(parameters::Area::DECLARATION);
       declarations(parm, package->declarations);
       parm.SetArea(parameters::Area::DECLARATION);
-      parm.decIndent();
       parm.println("};");
       parm.println("using " + name + " = " + ObjectName(type, name) + ";");
-      parm.decIndent();
       parm.println("}");
       parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
       parm.println("namespace " + library + " {");
-      parm.incIndent();
     } else {
       parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
       parm.SetArea(parameters::Area::DECLARATION);
@@ -252,7 +234,6 @@ namespace generator {
       parm.println("}");
       parm.println(library + "::" + name + " " + library + "_" + name + ";");
       parm.println("namespace " + library + " {");
-      parm.incIndent();
       parm.selectFile(file_select);
     }
     topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
@@ -267,7 +248,6 @@ namespace generator {
     parm.println("");
     parm.println("class " + ast::toString(type) + "_" + name + " {");
     parm.println("public:");
-    parm.incIndent();
     if (interface->generics) {
       parm.println("// Generics");
       parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
@@ -286,7 +266,6 @@ namespace generator {
       parm.println("// Ports");
       parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
     }
-    parm.decIndent();
     parm.println("};");
     topHierarchyEnd(parm, true);
     debug.functionEnd("interfaceDeclaration");

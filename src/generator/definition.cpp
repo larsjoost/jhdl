@@ -43,9 +43,7 @@ namespace generator {
   template <typename Func>
   void SystemC::createProcess(parameters& parm, Func func) {
     parm.println("void process() {");
-    parm.incIndent();
     func(parm);
-    parm.decIndent();
     parm.println("}");
   }
   
@@ -76,9 +74,7 @@ namespace generator {
 			parm.SetArea(parameters::Area::INITIALIZATION);
                         parm.println("switch (w.index) {");
                         parm.index = 1;
-                        parm.incIndent();
                         sequentialStatements(parm, method->sequentialStatements);
-                        parm.decIndent();
 			parm.println("}");
                         parm.SetArea(parameters::Area::IMPLEMENTATION);
                       });

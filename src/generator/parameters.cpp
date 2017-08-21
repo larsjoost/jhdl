@@ -15,28 +15,6 @@ namespace generator {
     return getFileInfo().printlines;
   }
 
-  void parameters::incIndent(Area a) {
-    auto f = [&](Areas& areas, AreaInfo& info) {
-      info.indent += 2;
-    };
-    AccessAreaInfo(a, f);
-  }
-
-  void parameters::incIndent() {
-    getFileInfo().indent += 2;
-  }
-
-  void parameters::decIndent(Area a) {
-    auto f = [&](Areas& areas, AreaInfo& info) {
-      info.indent -= 2;
-    };
-    AccessAreaInfo(a, f);
-  }
-  
-  void parameters::decIndent() {
-    getFileInfo().indent -= 2;
-  }
-
   std::string parameters::replaceFileExtension(std::string filename, std::string extension) {
     return baseName(filename) + extension;
   }
@@ -73,43 +51,35 @@ namespace generator {
     return a;
   }
 
-  void parameters::write(const LineInfo& line_info) {
-    std::string indent = std::string(line_info.indent, ' ');
-    getFileInfo().outputFile << indent << line_info.text << std::endl;
+  void parameters::write(const std::string& text) {
+    getFileInfo().outputFile << text << std::endl;
     std::string line = std::to_string(getFileInfo().line_number);
-    int spaces = 3 - line.size();
-    if (spaces > 0) {
-      line = std::string(spaces, ' ') + line;
-    }
-    debug.debug("line " + line + ": " + indent + line_info.text, true, Output::Color::BLUE);
+    debug.debug("line " + line + ": " + text, true, Output::Color::BLUE);
     getFileInfo().line_number++;
   }
 
-  void parameters::println(std::string text, int position) {
+  void parameters::println(std::string text) {
     if (!isQuiet()) {
       Areas& a = GetAreas().front();
-      if (position < 0) { position = a.indent; }
-      a.buffer.push_back({position, text});
+      a.buffer.push_back(text);
     }
   }
 
-  void parameters::println(Area a, std::string text, int position) {
+  void parameters::println(Area a, std::string text) {
     if (!isQuiet()) {
       Area current_area = GetArea();
       assert(current_area != Area::NONE);
       if (a == current_area) {
-        println(text, position);
+        println(text);
       } else {
         debug.debug("[" + AreaToString(GetArea()) + ", " + AreaToString(a) + "]: " + text, true, Output::Color::GREEN);
-        auto f = [&](Areas& areas, AreaInfo& info) {
-          int indent = position < 0 ? 0 : position;
-          info.lines.push_back({indent, text});
+        auto f = [&](Areas& areas, std::list<std::string>& info) {
+          info.push_back(text);
         };
         AccessAreaInfo(a, f);
       }
     }
   }
-
 
   std::string parameters::AreaToString(Area a) {
     switch (a) {
@@ -131,11 +101,11 @@ namespace generator {
   
   void parameters::Flush(Area a) {
     debug.functionStart("Flush(area = " + AreaToString(a) + ")");
-    auto f = [&](Areas& areas, AreaInfo& info) {
-      while (!info.lines.empty()) {
-        LineInfo& lineInfo = info.lines.front();
-        areas.buffer.push_back(lineInfo);
-        info.lines.pop_front();
+    auto f = [&](Areas& areas, std::list<std::string>& info) {
+      while (!info.empty()) {
+        std::string& line = info.front();
+        areas.buffer.push_back(line);
+        info.pop_front();
       }
     };
     AccessAreaInfo(a, f);
@@ -144,19 +114,19 @@ namespace generator {
   
   void parameters::DescendHierarchy(Area area) {
     GetAreas().push_front({area, AreaInfoMap()});
-    if (verbose) {println("// Descend Hierarchy (" + std::to_string(GetAreas().size()) + ") " + AreaToString(area), getFileInfo().indent);}
+    if (verbose) {println("// Descend Hierarchy (" + std::to_string(GetAreas().size()) + ") " + AreaToString(area));}
   }
 
   void parameters::AscendHierarchy() {
-    if (verbose) {println("// Ascend Hierarchy (" + std::to_string(GetAreas().size() + 1) + ")", getFileInfo().indent);}
+    if (verbose) {println("// Ascend Hierarchy (" + std::to_string(GetAreas().size() + 1) + ")");}
     bool ok = true;
     Areas& current_area = GetAreas().front();
     for (auto& i : current_area.map) {
-      if (!i.second.lines.empty()) {
+      if (!i.second.empty()) {
         std::cerr << "Hierarchy " << GetAreas().size() << " Buffer " << i.first << " is not empty" << std::endl;
         std::cerr << "Contents of buffer " << i.first << ":" << std::endl;
-        for (auto& x : i.second.lines) {
-          std::cerr << x.text << std::endl;
+        for (auto& x : i.second) {
+          std::cerr << x << std::endl;
         }
         ok = false;
       }
@@ -164,9 +134,9 @@ namespace generator {
     assert(ok);
     Area area = current_area.area;
     if (GetAreas().size() > 1) {
-      auto f = [&](Areas& areas, AreaInfo& info) {
+      auto f = [&](Areas& areas, std::list<std::string>& info) {
         while (!current_area.buffer.empty()) {
-          info.lines.push_back(current_area.buffer.front());
+          info.push_back(current_area.buffer.front());
           current_area.buffer.pop_front();
         }
       };
@@ -185,7 +155,7 @@ namespace generator {
 
   parameters::Area parameters::SetArea(Area area) {
     debug.functionStart("SetArea(area = " + AreaToString(area) + ")");
-    if (verbose) {println("// Set area(" + std::to_string(GetAreas().size()) + ") " + AreaToString(area), getFileInfo().indent);}
+    if (verbose) {println("// Set area(" + std::to_string(GetAreas().size()) + ") " + AreaToString(area));}
     Areas& areas = GetAreas().front();
     Area a = areas.area;
     areas.area = area;
@@ -206,12 +176,12 @@ namespace generator {
   std::string parameters::ToList(Area a) {
     std::string result;
     std::string delimiter;
-    auto f = [&](Areas& areas, AreaInfo& info) {
-      while (!info.lines.empty()) {
-        auto& lineInfo = info.lines.front();
-        result += delimiter + lineInfo.text;
+    auto f = [&](Areas& areas, std::list<std::string>& info) {
+      while (!info.empty()) {
+        std::string& text = info.front();
+        result += delimiter + text;
         delimiter = ", ";
-        info.lines.pop_front();
+        info.pop_front();
       }
     };
     AccessAreaInfo(a, f);

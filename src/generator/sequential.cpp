@@ -84,9 +84,7 @@ namespace generator {
 	  parm.println(parameters::Area::IMPLEMENTATION, "} else {");
 	}
 	command = "} elsif";
-        parm.incIndent();
         sequentialStatements(parm, c.sequentialStatements);
-        parm.decIndent();
       }
       parm.println(parameters::Area::IMPLEMENTATION, "}");
       debug.functionEnd("ifStatement");

@@ -24,23 +24,12 @@ namespace generator {
 
   private:
     
-    struct LineInfo {
-      int indent;
-      std::string text;
-    };
-
-    struct AreaInfo {
-      int indent = 0;
-      std::list<LineInfo> lines;
-    };
-
-    typedef std::unordered_map<int, AreaInfo> AreaInfoMap;
+    typedef std::unordered_map<int, std::list<std::string>> AreaInfoMap;
 
     struct Areas {
       Area area;
       AreaInfoMap map;
-      int indent = 0;
-      std::list<LineInfo> buffer;
+      std::list<std::string> buffer;
     };
     
     typedef std::list<Areas> AreasHierarchy;
@@ -48,7 +37,6 @@ namespace generator {
     struct FileInfo {
       std::string fileName;
       std::ofstream outputFile;
-      int indent = 0;
       int line_number = 1;
       AreasHierarchy printlines;
     };
@@ -59,7 +47,7 @@ namespace generator {
     bool quiet = false;
     
     void open(FileInfo& fileInfo, std::string& filename, std::string extension);
-    void write(const LineInfo& line_info);
+    void write(const std::string& line);
 
     FileInfo& getFileInfo();
 
@@ -80,7 +68,7 @@ namespace generator {
       if (lines != areas->map.end()) {
         func(*areas, lines->second);
       } else {
-        AreaInfo l;
+        std::list<std::string> l;
         AreaInfoMap& m = GetAreas().front().map;
         m[index] = l;
         func(*areas, l);
@@ -98,16 +86,12 @@ namespace generator {
     };
     int index;
     ast::ObjectValueContainer returnType;
-    void incIndent();
-    void incIndent(Area area);
-    void decIndent();
-    void decIndent(Area area);
     void DescendHierarchy(Area area);
     void AscendHierarchy();
     void open(std::string filename);
     void close();
-    void println(std::string message, int position = -1);
-    void println(Area a, std::string message, int position = -1);
+    void println(std::string message);
+    void println(Area a, std::string message);
     Area SetArea(Area area);
     Area GetArea();
     bool IsArea(Area area);

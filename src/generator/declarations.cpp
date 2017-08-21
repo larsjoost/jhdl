@@ -69,11 +69,9 @@ namespace generator {
     std::string s = std::to_string(total_size);
     parm.println("enum class " + enumName + " {" + enumList + "};");
     parm.println("struct " + valueName + " {");
-    parm.incIndent();
     parm.println("const static int size = " + s + ";");
     parm.println("const static int enum_size = " + std::to_string(enum_size) + ";");
     parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
-    parm.decIndent();
     parm.println("};");
     parm.println("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
@@ -447,13 +445,11 @@ namespace generator {
           std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
           std::string interface = implementation ? interface_without_initialization : interface_with_initialization;
           parm.println(returnTypeName + " " + run_prefix + "run" + interface + "{");
-          parm.incIndent();
           if (!foreignFunctionName.empty()) {
             parm.println("// Foreign function call");
             parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
           }
           FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
-          parm.decIndent();
           parm.println("}");
         } else {
           parm.println(returnTypeName + " run" + interface_with_initialization + ";");
@@ -477,7 +473,6 @@ namespace generator {
                    (implementation ? parent_info.name + "::" : "") + translatedName + interface +
                    (define_function ? "{" : ";"));
       if (define_function) {
-        parm.incIndent();
         parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {
@@ -486,7 +481,6 @@ namespace generator {
         }
         std::string r = returnTypeName == "void" ? "" : "return ";
         parm.println(r + "inst.run(" + s + ");");
-        parm.decIndent();
         parm.println("}");
       }
       debug.functionEnd("function_declarations");

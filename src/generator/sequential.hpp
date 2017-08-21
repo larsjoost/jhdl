@@ -35,10 +35,8 @@ namespace generator {
     parm.println(area, "for (" +
                  name + " = " + name + ".LEFT(); " +
                  name + " <= " + name + ".RIGHT(); " +
-                 name + " = " + typeName + "<>::RIGHTOF(" + name + ")) {");
-    parm.incIndent();
+                 name + " = " + name + ".RIGHTOF()) {");
     callback(parm);
-    parm.decIndent();
     parm.println(area, "}");
     debug.functionEnd("forLoop");
   }  
@@ -65,9 +63,7 @@ namespace generator {
           } else {
             parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
           }
-          parm.incIndent(parameters::Area::IMPLEMENTATION);
           parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
-          parm.decIndent(parameters::Area::IMPLEMENTATION);
           if (s.condition) {
             parm.println(parameters::Area::IMPLEMENTATION, "}");
           } else {

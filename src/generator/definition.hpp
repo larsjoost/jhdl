@@ -18,7 +18,6 @@ namespace generator {
     debug.functionStart("DefineObject");
     if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION, type);}
     parm.println("struct " + ObjectName(type, name) + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
-    parm.incIndent();
     if (wait_statements) {
       parm.println("Wait w; // Support class of wait statements");
     }
@@ -44,12 +43,9 @@ namespace generator {
     parm.println("void init() {");
     parm.SetArea(parameters::Area::CONSTRUCTOR);
     if (concurrentStatements) {
-      parm.incIndent();
       concurrentStatementsInstantiation(parm, *concurrentStatements);
-      parm.decIndent();
     }
     parm.println("}");
-    parm.decIndent();
     parm.SetArea(parameters::Area::DECLARATION);
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}

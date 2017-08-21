@@ -138,9 +138,7 @@ namespace generator {
     if (!topHierarchy) {
       std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
       parm.println(getConstructorDeclaration(parm, type, name, argument, initializer_list) + " {");
-      parm.incIndent();
       parm.println("init();");
-      parm.decIndent();
       parm.println("}");
     }
   }
