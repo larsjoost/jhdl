@@ -17,7 +17,7 @@ namespace generator {
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
 		   [&](parameters& parm){},
-		   false);
+		   false, true);
     }
   }
 
@@ -36,7 +36,7 @@ namespace generator {
       DefineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
-		   createBody, createDeclaration, false);
+		   createBody, createDeclaration, false, true);
     }
   }
 
@@ -81,7 +81,7 @@ namespace generator {
       };
       parm.println("");
       DefineObject(parm, false, methodName, ast::ObjectType::PROCESS, "sc_thread", NULL,
-                   &method->declarations, NULL, createBody, createDefinition, true);
+                   &method->declarations, NULL, createBody, createDefinition, true, true);
     }
     debug.functionEnd("methodDefinition");
   }
@@ -118,7 +118,7 @@ namespace generator {
         };
         parm.println("");
         DefineObject(parm, false, name, ast::ObjectType::PROCESS, "sc_thread", NULL, NULL, NULL, createBody,
-		     [&](parameters& parm) {}, true);
+		     [&](parameters& parm) {}, true, true);
       }
       debug.functionEnd("concurrentSignalAssignment");
     }

@@ -5,7 +5,7 @@
 namespace generator {
 
   parameters::FileInfo& parameters::getFileInfo() {
-    if (a_file_select == HEADER_FILE) {
+    if (a_file_select == FileSelect::HEADER) {
       return headerFileInfo;
     } 
     return sourceFileInfo;    
@@ -33,21 +33,23 @@ namespace generator {
   void parameters::open(std::string filename) {
     open(headerFileInfo, filename, ".hpp");
     open(sourceFileInfo, filename, ".cpp");
-    selectFile(HEADER_FILE);
+    selectFile(FileSelect::HEADER);
   }
   
   void parameters::close() {
-    selectFile(HEADER_FILE);
+    selectFile(FileSelect::HEADER);
     AscendHierarchy();
     headerFileInfo.outputFile.close();
-    selectFile(SOURCE_FILE);
+    selectFile(FileSelect::SOURCE);
     AscendHierarchy();
     sourceFileInfo.outputFile.close();
   }
   
   parameters::FileSelect parameters::selectFile(FileSelect file_select) {
+    debug.functionStart("selectFile(file_select = " + ToString(file_select) + ")");
     FileSelect a = a_file_select;
     a_file_select = file_select;
+    debug.functionEnd("selectFile");
     return a;
   }
 
@@ -72,16 +74,24 @@ namespace generator {
       if (a == current_area) {
         println(text);
       } else {
-        debug.debug("[" + AreaToString(GetArea()) + ", " + AreaToString(a) + "]: " + text, true, Output::Color::GREEN);
-        auto f = [&](Areas& areas, std::list<std::string>& info) {
-          info.push_back(text);
+        debug.debug("[" + ToString(GetArea()) + ", " + ToString(a) + "]: " + text, true, Output::Color::GREEN);
+        auto f = [&](Areas& areas, AreaInfo& info) {
+          info.lines.push_back(text);
         };
         AccessAreaInfo(a, f);
       }
     }
   }
 
-  std::string parameters::AreaToString(Area a) {
+  std::string parameters::ToString(FileSelect f) {
+    switch (f) {
+    case FileSelect::HEADER: return "HEADER";
+    case FileSelect::SOURCE: return "SOURCE";
+    }
+    assert(false);
+  }
+  
+  std::string parameters::ToString(Area a) {
     switch (a) {
     case Area::TOP: return "top";
     case Area::INITIALIZER_LIST: return "initializer list";
@@ -100,12 +110,12 @@ namespace generator {
   }
   
   void parameters::Flush(Area a) {
-    debug.functionStart("Flush(area = " + AreaToString(a) + ")");
-    auto f = [&](Areas& areas, std::list<std::string>& info) {
-      while (!info.empty()) {
-        std::string& line = info.front();
+    debug.functionStart("Flush(area = " + ToString(a) + ")");
+    auto f = [&](Areas& areas, AreaInfo& info) {
+      while (!info.lines.empty()) {
+        std::string& line = info.lines.front();
         areas.buffer.push_back(line);
-        info.pop_front();
+        info.lines.pop_front();
       }
     };
     AccessAreaInfo(a, f);
@@ -114,29 +124,18 @@ namespace generator {
   
   void parameters::DescendHierarchy(Area area) {
     GetAreas().push_front({area, AreaInfoMap()});
-    if (verbose) {println("// Descend Hierarchy (" + std::to_string(GetAreas().size()) + ") " + AreaToString(area));}
+    if (verbose) {println("// Descend Hierarchy (" + std::to_string(GetAreas().size()) + ") " + ToString(area));}
   }
 
   void parameters::AscendHierarchy() {
     if (verbose) {println("// Ascend Hierarchy (" + std::to_string(GetAreas().size() + 1) + ")");}
     bool ok = true;
     Areas& current_area = GetAreas().front();
-    for (auto& i : current_area.map) {
-      if (!i.second.empty()) {
-        std::cerr << "Hierarchy " << GetAreas().size() << " Buffer " << i.first << " is not empty" << std::endl;
-        std::cerr << "Contents of buffer " << i.first << ":" << std::endl;
-        for (auto& x : i.second) {
-          std::cerr << x << std::endl;
-        }
-        ok = false;
-      }
-    }
-    assert(ok);
     Area area = current_area.area;
     if (GetAreas().size() > 1) {
-      auto f = [&](Areas& areas, std::list<std::string>& info) {
+      auto f = [&](Areas& areas, AreaInfo& info) {
         while (!current_area.buffer.empty()) {
-          info.push_back(current_area.buffer.front());
+          info.lines.push_back(current_area.buffer.front());
           current_area.buffer.pop_front();
         }
       };
@@ -154,13 +153,14 @@ namespace generator {
   }
 
   parameters::Area parameters::SetArea(Area area) {
-    debug.functionStart("SetArea(area = " + AreaToString(area) + ")");
-    if (verbose) {println("// Set area(" + std::to_string(GetAreas().size()) + ") " + AreaToString(area));}
+    debug.functionStart("SetArea(area = " + ToString(area) + ")");
+    debug.debug("File select = " + ToString(a_file_select));
+    if (verbose) {println("// Set area(" + std::to_string(GetAreas().size()) + ") " + ToString(area));}
     Areas& areas = GetAreas().front();
     Area a = areas.area;
     areas.area = area;
     Flush(area);
-    debug.functionEnd("SetArea = " + AreaToString(a));
+    debug.functionEnd("SetArea = " + ToString(a));
     return a;
   };
 
@@ -176,12 +176,12 @@ namespace generator {
   std::string parameters::ToList(Area a) {
     std::string result;
     std::string delimiter;
-    auto f = [&](Areas& areas, std::list<std::string>& info) {
-      while (!info.empty()) {
-        std::string& text = info.front();
+    auto f = [&](Areas& areas, AreaInfo& info) {
+      while (!info.lines.empty()) {
+        std::string& text = info.lines.front();
         result += delimiter + text;
         delimiter = ", ";
-        info.pop_front();
+        info.lines.pop_front();
       }
     };
     AccessAreaInfo(a, f);

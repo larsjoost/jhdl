@@ -44,7 +44,7 @@ namespace generator {
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
     debug.functionStart("PrintTypeObject");
     DefineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, func,
-                 [](parameters& parm) {}, false);
+                 [](parameters& parm) {}, false, false);
 
     debug.functionEnd("PrintTypeObject");
   }

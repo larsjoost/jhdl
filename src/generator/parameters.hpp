@@ -13,23 +13,42 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     bool verbose = false;
     
   public:
     
-    enum FileSelect {HEADER_FILE, SOURCE_FILE};
+    enum class FileSelect {HEADER, SOURCE};
     enum class Area {TOP, INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
 
   private:
+
+    struct AreaInfo {
+      FileSelect a_file_select;
+      Area a_area;
+      parameters* a_parm;
+      std::list<std::string> lines;
+      ~AreaInfo() {
+        if (!lines.empty()) {
+          std::cerr <<
+            "AreaInfo(" << a_parm->GetAreas().size() << ") " <<
+            a_parm->ToString(a_area) << " of file " <<
+            a_parm->ToString(a_file_select) << " not empty" << std::endl;
+          assert(false);
+        }
+      }
+    };
     
-    typedef std::unordered_map<int, std::list<std::string>> AreaInfoMap;
+    typedef std::unordered_map<int, AreaInfo> AreaInfoMap;
 
     struct Areas {
       Area area;
       AreaInfoMap map;
       std::list<std::string> buffer;
+      ~Areas() {
+        assert(buffer.empty());
+      }
     };
     
     typedef std::list<Areas> AreasHierarchy;
@@ -55,8 +74,9 @@ namespace generator {
     
     int ConvertInteger(Area a);
     FileSelect a_file_select;
-    std::string AreaToString(Area a);
-
+    std::string ToString(Area a);
+    std::string ToString(FileSelect f);
+    
     template <typename Func>
     void AccessAreaInfo(Area a, Func func, bool second_element = false) {
       int index = ConvertInteger(a);
@@ -68,7 +88,10 @@ namespace generator {
       if (lines != areas->map.end()) {
         func(*areas, lines->second);
       } else {
-        std::list<std::string> l;
+        AreaInfo l;
+        l.a_file_select = a_file_select;
+        l.a_area = a;
+        l.a_parm = this;
         AreaInfoMap& m = GetAreas().front().map;
         m[index] = l;
         func(*areas, l);
@@ -79,9 +102,9 @@ namespace generator {
 
   public:
     parameters() : debug("parameters") {
-      selectFile(SOURCE_FILE);
+      selectFile(FileSelect::SOURCE);
       DescendHierarchy(Area::TOP);
-      selectFile(HEADER_FILE);
+      selectFile(FileSelect::HEADER);
       DescendHierarchy(Area::TOP);
     };
     int index;

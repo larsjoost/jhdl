@@ -35,10 +35,10 @@ namespace generator {
       }
     }
     transform(library.begin(), library.end(), library.begin(), toupper);
-    parm.selectFile(parameters::SOURCE_FILE);
-    parm.println("#include \"" + parm.getFileName(parameters::HEADER_FILE) + "\"");
+    parm.selectFile(parameters::FileSelect::SOURCE);
+    parm.println("#include \"" + parm.getFileName(parameters::FileSelect::HEADER) + "\"");
     namespaceStart(parm, library);
-    parm.selectFile(parameters::HEADER_FILE);
+    parm.selectFile(parameters::FileSelect::HEADER);
     std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
     parm.println("#ifndef " + ifndefName);
     parm.println("#define " + ifndefName);
@@ -49,9 +49,9 @@ namespace generator {
     parm.println("#include \"standard.hpp\"");
     if (!standardPackage) {parm.println("#include \"standard.h\"");}
     parse(parm, designFile, library);
-    parm.selectFile(parameters::HEADER_FILE);
+    parm.selectFile(parameters::FileSelect::HEADER);
     parm.println("#endif");
-    parm.selectFile(parameters::SOURCE_FILE);
+    parm.selectFile(parameters::FileSelect::SOURCE);
     namespaceEnd(parm);
     parm.close();
   }
@@ -227,7 +227,7 @@ namespace generator {
       parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
       parm.println("namespace " + library + " {");
     } else {
-      parameters::FileSelect file_select = parm.selectFile(parameters::SOURCE_FILE);
+      parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
       parm.SetArea(parameters::Area::DECLARATION);
       declarations(parm, package->declarations);
       parm.SetArea(parameters::Area::DECLARATION);
@@ -296,7 +296,7 @@ namespace generator {
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},
                    declaration_callback,
-                   false);
+                   false, true);
       topHierarchyEnd(parm, false);
       debug.functionEnd("implementationDeclaration");
     }

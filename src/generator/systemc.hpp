@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     Exceptions exceptions;
     
@@ -199,7 +199,8 @@ namespace generator {
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
                       BodyFunc bodyCallback,
 		      DeclFunc declarationCallback,
-                      bool wait_statements);
+                      bool wait_statements,
+                      bool init_enable);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
@@ -229,7 +230,8 @@ namespace generator {
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
     void createConstructor(parameters& parm, bool toopHierarchy, ast::ObjectType type,
                            std::string& name, std::string* argument,
-                           ast::List<ast::ConcurrentStatement>* concurrentStatements);
+                           ast::List<ast::ConcurrentStatement>* concurrentStatements,
+                           bool init_enable);
 
     // systemc.cpp
     std::string ObjectName(ast::ObjectType type, const std::string& name);

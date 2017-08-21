@@ -113,7 +113,8 @@ namespace generator {
   }
 
   std::string SystemC::ObjectName(const ParentInfo& info) {
-    return ObjectName(info.type, info.name);
+    ast::ObjectType type = (info.type == ast::ObjectType::PACKAGE_BODY ? ast::ObjectType::PACKAGE : info.type);
+    return ObjectName(type, info.name);
   }
   
   std::string SystemC::getConstructorDeclaration(parameters& parm, ast::ObjectType type, std::string& name,
@@ -134,12 +135,11 @@ namespace generator {
 
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, ast::ObjectType type,
                                   std::string& name, std::string* argument,
-                                  ast::List<ast::ConcurrentStatement>* concurrentStatements) {
+                                  ast::List<ast::ConcurrentStatement>* concurrentStatements,
+                                  bool init_enable) {
     if (!topHierarchy) {
       std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
-      parm.println(getConstructorDeclaration(parm, type, name, argument, initializer_list) + " {");
-      parm.println("init();");
-      parm.println("}");
+      parm.println(getConstructorDeclaration(parm, type, name, argument, initializer_list) + " {" + (init_enable ? "init();" : "") + "}");
     }
   }
 

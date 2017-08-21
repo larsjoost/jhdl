@@ -14,7 +14,8 @@ namespace generator {
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
                              BodyFunc bodyCallback,
 			     DeclFunc declarationCallback,
-                             bool wait_statements) {
+                             bool wait_statements,
+                             bool init_enable) {
     debug.functionStart("DefineObject");
     if (!topHierarchy) {descendHierarchy(parm, name, parameters::Area::DECLARATION, type);}
     parm.println("struct " + ObjectName(type, name) + (derived_classes.empty() ? "" : " : public " + derived_classes) + " {");
@@ -32,21 +33,24 @@ namespace generator {
       declarations(parm, *declarationList);
     }
     declarationCallback(parm);
-    createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
+    createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements, init_enable);
     parm.SetArea(parameters::Area::DECLARATION);
     parm.SetArea(parameters::Area::IMPLEMENTATION);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     bodyCallback(parm);
-    debug.debug("Constructor");
-    parm.println("void init() {");
-    parm.SetArea(parameters::Area::CONSTRUCTOR);
-    if (concurrentStatements) {
-      concurrentStatementsInstantiation(parm, *concurrentStatements);
-    }
-    parm.println("}");
     parm.SetArea(parameters::Area::DECLARATION);
+    if (init_enable) {
+      debug.debug("Constructor");
+      parm.println("void init() {");
+      parm.SetArea(parameters::Area::CONSTRUCTOR);
+      if (concurrentStatements) {
+        concurrentStatementsInstantiation(parm, *concurrentStatements);
+      }
+      parm.println("}");
+      parm.SetArea(parameters::Area::DECLARATION);
+    }
     parm.println("};");
     if (!topHierarchy) {ascendHierarchy(parm);}
     debug.functionEnd("DefineObject");

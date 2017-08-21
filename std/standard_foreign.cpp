@@ -21,7 +21,7 @@ namespace vhdl {
     STD::STANDARD::SEVERITY_LEVEL s = severity;
     *o << STD::STANDARD::SEVERITY_LEVEL::IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
-      STD::ENV e;
+      STD::Package_ENV e;
       e.FINISH(1);
     } 
   }

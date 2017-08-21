@@ -431,12 +431,11 @@ namespace generator {
       class_name = a_name_converter.getName(origin_name, arguments, parm.returnType);
       ParentInfo parent_info;
       a_database.GetParent(parent_info);
-      std::string function_prefix = "function_";
-      std::string prefix = parent_info.name + "::" + function_prefix + class_name + "::";
+      std::string prefix = ObjectName(parent_info) + "::" + ObjectName(type, class_name) + "::";
       std::string run_prefix;
       std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
       std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
-      bool implementation = parm.isFile(parameters::FileSelect::SOURCE_FILE);
+      bool implementation = parm.isFile(parameters::FileSelect::SOURCE);
       auto createDefinition = [&](parameters& parm) {
         PrintInterface(parm, f->interface);
       };
@@ -465,15 +464,15 @@ namespace generator {
         }
       } else {
         DefineObject(parm, false, class_name, type, "", NULL,
-                     NULL, NULL, createBody, createDefinition, false);
+                     NULL, NULL, createBody, createDefinition, false, true);
       }
       std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";
       bool define_function = implementation || f->body;
       parm.println((operatorName ? "friend " : "") + returnTypeName + " " +
-                   (implementation ? parent_info.name + "::" : "") + translatedName + interface +
+                   (implementation ? ObjectName(parent_info) + "::" : "") + translatedName + interface +
                    (define_function ? "{" : ";"));
       if (define_function) {
-        parm.println("static auto inst = " + ObjectName(type, class_name) + "(this);");
+        parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {
           s += d + i.name;
@@ -490,10 +489,11 @@ namespace generator {
   void SystemC::FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
                              ast::List<ast::SequentialStatement>& s) {
     debug.functionStart("FunctionBody");
+    parm.SetArea(parameters::Area::DECLARATION);
     declarations(parm, d);
-    parameters::Area area = parm.SetArea(parameters::Area::IMPLEMENTATION);
+    parm.SetArea(parameters::Area::IMPLEMENTATION);
     sequentialStatements(parm, s);
-    parm.SetArea(area);
+    parm.SetArea(parameters::Area::DECLARATION);
     debug.functionEnd("FunctionBody");
   }
   
