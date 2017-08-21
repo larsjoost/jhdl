@@ -69,7 +69,7 @@ class sc_module {
   sc_module() {};
   
   void AddMethod(sc_thread* c);  
-  
+  void AddBlock(sc_module* c) {}
 };
 
 template<class T>
@@ -280,6 +280,9 @@ public:
     a_value.set(s);
   }
 
+  void init(const sc_access<T>& s) {
+  }
+  
   bool isNull() {
     return a_null;
   };
@@ -299,6 +302,8 @@ class sc_file {
   std::ofstream* fout = NULL;
   bool file = false;
 public:
+
+  sc_file() { }
   
   sc_file(SC_FILE_DIRECTION direction, std::string filename) {
     a_direction = direction;
@@ -335,7 +340,11 @@ public:
       std::cout << s;
     }
   }
-  
+
+  void init(const sc_file<T>& s) {
+  }
+ 
+
 };
 
 sc_trace_file* sc_create_vcd_trace_file(const char* name);

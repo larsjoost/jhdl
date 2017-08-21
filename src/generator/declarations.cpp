@@ -156,6 +156,9 @@ namespace generator {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = a_name_converter.GetName(database_result);
       parm.println("using " + name + " = " + definition + "<" + n + ">;"); 
+      auto f = [&](parameters& parm, std::string& left, std::string& right) {
+      };
+      PrintFactory(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
     }
