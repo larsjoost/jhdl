@@ -94,7 +94,8 @@ namespace generator {
           s = libraryName + "::" + s;
         }
       }
-      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new architecture_" + s + "(\"" + instanceName + "\");");
+      std::string object_name = ObjectName(ast::ObjectType::ARCHITECTURE, s);
+      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
       componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
