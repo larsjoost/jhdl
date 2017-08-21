@@ -7,15 +7,16 @@ use std.env.finish;
 
 architecture rtl of test is
 
-
---  type bit_t is array (natural range <>) of bit;
-
---  constant c : bit_vector(0 to 3) := "1010";
+  type enum_t is (FIRST, SECOND);
 
   constant SIZE : integer := 5;
   
   type a_t is array (0 to SIZE - 1) of bit;
 
+  type b_t is array (enum_t) of integer;
+
+  constant C_B : b_t := (1, 2);
+  
 begin
 
 
@@ -31,6 +32,14 @@ begin
     if (a(0) /= '0') then
       report "a failed" severity failure;
     end if;
+    if (C_B(FIRST) /= 1) then
+      report "b(" & enum_t'image(FIRST) & ") = " & integer'image(C_B(FIRST)) &
+        ", but expected 1" severity failure;
+    end if;   
+    if (C_B(SECOND) /= 2) then
+      report "b(" & enum_t'image(SECOND) & ") = " & integer'image(C_B(SECOND)) &
+        ", but expected 2" severity failure;
+    end if;   
     --for i in a'range loop
     --  report "a = " & bit'image(i) severity note;
     --end loop;  -- i
