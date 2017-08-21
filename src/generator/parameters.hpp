@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<true> debug;
+    Debug<false> debug;
 
     bool verbose = false;
     
@@ -35,6 +35,12 @@ namespace generator {
             "AreaInfo(" << a_parm->GetAreas().size() << ") " <<
             a_parm->ToString(a_area) << " of file " <<
             a_parm->ToString(a_file_select) << " not empty" << std::endl;
+          std::cerr << "<Lines>" << std::endl;
+          while(!lines.empty()) {
+            std::cerr << lines.front() << std::endl;
+            lines.pop_front();
+          }
+          std::cerr << "</Lines>" << std::endl;
           assert(false);
         }
       }
@@ -94,7 +100,7 @@ namespace generator {
         l.a_parm = this;
         AreaInfoMap& m = GetAreas().front().map;
         m[index] = l;
-        func(*areas, l);
+        func(*areas, m[index]);
       }
     }
 

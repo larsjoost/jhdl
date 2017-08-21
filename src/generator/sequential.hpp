@@ -14,6 +14,8 @@ namespace generator {
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
       parm.println(parameters::Area::DECLARATION, typeName + " " + name + ";");
+      std::string factory_name = "factory_" + typeName + ".create()";
+      parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + factory_name + ");");
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (a_database.findOne(object, iteration->identifier)) {  

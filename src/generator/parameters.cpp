@@ -31,18 +31,22 @@ namespace generator {
   };
   
   void parameters::open(std::string filename) {
+    debug.functionStart("open(filename = " + filename + ")");
     open(headerFileInfo, filename, ".hpp");
     open(sourceFileInfo, filename, ".cpp");
     selectFile(FileSelect::HEADER);
+    debug.functionEnd("open");
   }
   
   void parameters::close() {
+    debug.functionStart("close");
     selectFile(FileSelect::HEADER);
     AscendHierarchy();
     headerFileInfo.outputFile.close();
     selectFile(FileSelect::SOURCE);
     AscendHierarchy();
     sourceFileInfo.outputFile.close();
+    debug.functionEnd("close");
   }
   
   parameters::FileSelect parameters::selectFile(FileSelect file_select) {
@@ -69,6 +73,7 @@ namespace generator {
 
   void parameters::println(Area a, std::string text) {
     if (!isQuiet()) {
+      debug.functionStart("println");
       Area current_area = GetArea();
       assert(current_area != Area::NONE);
       if (a == current_area) {
@@ -80,6 +85,7 @@ namespace generator {
         };
         AccessAreaInfo(a, f);
       }
+      debug.functionEnd("println");
     }
   }
 
