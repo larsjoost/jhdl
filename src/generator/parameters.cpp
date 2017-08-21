@@ -153,7 +153,7 @@ namespace generator {
       }
     }
     GetAreas().pop_front();
-    if (area == GetArea()) {
+    if (area == GetArea() && GetAreas().size() > 0) {
       Flush(area);
     }
   }
