@@ -58,16 +58,26 @@ namespace ast {
     };
   }
 
+  std::string ObjectValueContainer::ToString(const Subtype& l, bool verbose) const {
+    std::string subtype;
+    std::string delimiter;
+    for (const ObjectValueContainer& s : l) {
+      subtype += delimiter + s.toString(verbose);
+      delimiter = ", ";
+    }
+    return subtype;
+  }
+  
   std::string ObjectValueContainer::toString(bool verbose) const {
     if (verbose) {
-      return "value = " + ast::toString(a_value) + "type name = \"" + a_type_name + "\", subtype = " + (a_subtype ? a_subtype->toString(verbose) : "NULL");
+      return "value = " + ast::toString(a_value) + "type name = \"" + a_type_name + "\", subtype = (" + ToString(a_subtype, verbose) + ")";
     } else {
       if (a_value == ObjectValue::USER_TYPE) {
         return a_type_name + "(User type)";
       }
       if (a_value == ObjectValue::ARRAY) {
-        assert(a_subtype != NULL);
-        return "array of " + a_subtype->toString();
+        assert(!a_subtype.empty());
+        return "array of " + ToString(a_subtype);
       }
       if (a_value == ObjectValue::ENUMERATION) {
         return "enumeration " + a_type_name;
@@ -82,6 +92,23 @@ namespace ast {
       (r == ObjectValue::INTEGER || r == ObjectValue::REAL || r == ObjectValue::NUMBER);
   }
 
+  bool ObjectValueContainer::equals(const Subtype& l, const Subtype& r) const {
+    bool result = true;
+    if (l.size() != r.size()) {
+      result = false;
+    } else {
+      auto il = l.begin();
+      auto ir = r.begin();
+      for ( ; il != l.end(); il++, ir++) {
+        if (!il->equals(*ir)) {
+          result = false;
+          break;
+        } 
+      }
+    }
+    return result;
+  }
+
   bool ObjectValueContainer::equals(const ObjectValueContainer& other) const {
     bool verbose = false;
     bool result;
@@ -93,9 +120,9 @@ namespace ast {
                a_value == ObjectValue::ENUMERATION) {
       result = (a_type_name.empty() || other.a_type_name.empty() || a_type_name == other.a_type_name);
     } else if (HasSubtype(a_value)) {
-      assert(a_subtype);
-      assert(other.a_subtype);
-      result = a_subtype->equals(*other.a_subtype);
+      assert(!a_subtype.empty());
+      assert(!other.a_subtype.empty());
+      result = equals(a_subtype, other.a_subtype);
     } else {
       result = true;
     }
@@ -179,6 +206,23 @@ namespace ast {
     return true;
   }
 
+  bool ObjectArguments::equals(ObjectValueContainer::Subtype& other) {
+    bool result = true;
+    if (list.size() != other.size()) {
+      result = false;
+    } else {
+      auto it = list.begin();
+      auto it_other = other.begin();
+      for ( ; it != list.end(); it++, it_other++) {
+        if (!it->type.equals(*it_other)) {
+          result = false;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+  
   bool ObjectArguments::ExactMatch(ObjectArguments& other) {
     Debug<false> debug = Debug<false>("ObjectArgument");
     debug.functionStart("ExactMatch");

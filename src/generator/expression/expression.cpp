@@ -89,18 +89,12 @@ namespace generator {
     bool result;
     if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments)) {
       result = false;
+    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetSubtype())) {
+      result = false;
     } else {
-      // TODO: Check Array arguments
       if (expectedReturnType) {
-        ast::ObjectValueContainer* type;
-        if (e->type.GetValue() == ast::ObjectValue::ARRAY) {
-          type = e->type.GetSubtype();
-        } else {
-          type = &e->type;
-        }
-        assert(type);
-        result = type->equals(*expectedReturnType); 
-        debug.debug("Return type " + type->toString() + (result ? " == " : " != ") +
+        result = e->type.equals(*expectedReturnType); 
+        debug.debug("Return type " + e->type.toString() + (result ? " == " : " != ") +
                     expectedReturnType->toString());
       } else {
         result = true;
@@ -123,9 +117,10 @@ namespace generator {
     DatabaseResults objects;
     a_database->findAll(objects, name, valid);
     for (auto& i : objects) {
-      ast::ObjectValueContainer* subtype = i.object->type.GetSubtype();
-      if (subtype) {
-        return_types.insert(*subtype);
+      ast::ObjectValueContainer::Subtype& subtype = i.object->type.GetSubtype();
+      assert(subtype.size() < 2);
+      if (!subtype.empty()) {
+        return_types.insert(subtype.front());
       } else {
         return_types.insert(i.object->type);
       }
@@ -369,7 +364,12 @@ namespace generator {
         case ast::ObjectValue::INTEGER: 
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
-        case ast::ObjectValue::ARRAY: result = *(type.GetSubtype()); break;
+        case ast::ObjectValue::ARRAY: {
+          ast::ObjectValueContainer::Subtype& subtype = type.GetSubtype();
+          assert(subtype.size() == 1);
+          result = subtype.front();
+          break;
+        }
         default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {

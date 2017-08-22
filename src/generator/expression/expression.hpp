@@ -14,7 +14,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     bool verbose = false;
     Database* a_database;
@@ -264,10 +264,10 @@ namespace generator {
       std::string parameters;
       if (arguments) {
         std::string delimiter = "";
-        ast::ObjectValueContainer* subtype = object.object->type.GetSubtype();
-        assert(subtype);
+        ast::ObjectValueContainer::Subtype& subtype = object.object->type.GetSubtype();
+        assert(subtype.size() == 1);
         for (auto& i : arguments->associationElements.list) {
-          parameters = delimiter + expressionToString(i.actualPart, *subtype, sensitivityListCallback);
+          parameters = delimiter + expressionToString(i.actualPart, subtype.front(), sensitivityListCallback);
           delimiter = ", ";
         }
       }

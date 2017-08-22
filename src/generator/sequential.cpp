@@ -81,7 +81,12 @@ namespace generator {
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
           static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
-	  parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(c.condition, expectedType) + ") {");
+          try {
+            std::string condition = a_expression.toString(c.condition, expectedType);
+            parm.println(parameters::Area::IMPLEMENTATION, command + " (" + condition + ") {");
+          } catch (ExpressionParser::ObjectNotFound e) {
+            e.print();
+          }
 	} else {
 	  parm.println(parameters::Area::IMPLEMENTATION, "} else {");
 	}

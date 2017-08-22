@@ -26,15 +26,19 @@ namespace ast {
   class ObjectValueContainer {
     ObjectValue a_value = ObjectValue::UNKNOWN;
     std::string a_type_name;
-    ObjectValueContainer* a_subtype = NULL;
+  public:
+    typedef std::list<ObjectValueContainer> Subtype;
+  private:
+    Subtype a_subtype;
   public:
     bool numberEquals(ObjectValue l, ObjectValue r) const;
+    bool equals(const Subtype& l, const Subtype& r) const;
     bool equals(const ObjectValueContainer& other) const;
     bool operator==(const ObjectValueContainer& other) const {
       return equals(other);
     }
     bool IsValue(ObjectValue other) {return a_value == other; }
-    ObjectValueContainer* GetSubtype() const { return a_subtype; }
+    Subtype& GetSubtype() { return a_subtype; }
     ObjectValue GetValue() const { return a_value; }
     std::string GetTypeName() const { return a_type_name; }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
@@ -50,16 +54,12 @@ namespace ast {
     bool HasSubtype(ObjectValue value) const {
       return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
     }
-    void set(ObjectValue value, const ObjectValueContainer* subtype) {
+    void set(ObjectValue value, const ObjectValueContainer& subtype) {
       assert(HasSubtype(value));
       a_value = value;
-      a_subtype = new ObjectValueContainer();
-      *a_subtype = *subtype;
+      a_subtype.push_back(subtype);
     }
     ObjectValueContainer(ObjectValue value, const ObjectValueContainer& subtype) {
-      set(value, &subtype);
-    }
-    ObjectValueContainer(ObjectValue value, const ObjectValueContainer* subtype) {
       set(value, subtype);
     }
     ObjectValueContainer(std::string type_name) {
@@ -75,6 +75,7 @@ namespace ast {
     }
     */
     std::string toString(bool verbose = false) const;
+    std::string ToString(const Subtype& l, bool verbose = false) const;
   };
 
   class Expression;
@@ -100,6 +101,7 @@ namespace ast {
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
     void push_back(ObjectArgument& o) {list.push_back(o);}
     bool equals(ObjectArguments& other, bool verbose = false);
+    bool equals(ObjectValueContainer::Subtype& other);
     bool ExactMatch(ObjectArguments& other);
     bool empty() { return list.empty(); }
     int size() { return list.size(); }
