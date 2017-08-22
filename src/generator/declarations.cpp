@@ -121,7 +121,6 @@ namespace generator {
       if (r.range) {
         ast::ObjectValue type = ast::ObjectValue::INTEGER;
         arguments.push_back(ast::ObjectValueContainer(type));
-        PrintFactory(parm, name, r.range, NULL, type, r.subtype);
       } else if (r.identifier) {
         DatabaseResult database_result;
         type = ast::ObjectValue::ENUMERATION;
