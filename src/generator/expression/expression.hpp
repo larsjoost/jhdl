@@ -14,7 +14,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    Debug<true> debug;
+    Debug<false> debug;
     
     bool verbose = false;
     Database* a_database;
@@ -181,7 +181,7 @@ namespace generator {
   void ExpressionParser::GetReturnTypes(const std::string& name, Func valid, ast::ReturnTypes& return_types) {
     debug.functionStart("GetReturnTypes");
     DatabaseResults objects;
-    a_database->findAll(objects, name, valid);
+    a_database->findAll(objects, name);
     for (auto& i : objects) {
       return_types.insert(i.object->type);
     }
@@ -264,10 +264,12 @@ namespace generator {
       std::string parameters;
       if (arguments) {
         std::string delimiter = "";
-        ast::ObjectValueContainer::Subtype& subtype = object.object->type.GetSubtype();
-        assert(subtype.size() == 1);
+        ast::ObjectValueContainer::Array& args = object.object->type.GetArguments();
+        assert(args.size() == arguments->associationElements.list.size());
+        auto it = args.begin();
         for (auto& i : arguments->associationElements.list) {
-          parameters = delimiter + expressionToString(i.actualPart, subtype.front(), sensitivityListCallback);
+          parameters = delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback);
+          it++;
           delimiter = ", ";
         }
       }
@@ -391,9 +393,9 @@ namespace generator {
   std::string ExpressionParser::basicIdentifierToString(ast::BasicIdentifier* identifier,
                                                         ast::ObjectValueContainer& expectedType,
                                                         Func sensitivityListCallback) {
-    debug.functionStart("basicIdentifierToString");
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
+    debug.functionStart("basicIdentifierToString(name = " + name + "(" + arguments.toString() + ")", true);
     if (identifier->attribute) {
       name = attributeToString(name, arguments, expectedType, identifier->attribute,
                                identifier->arguments, sensitivityListCallback);
@@ -431,7 +433,7 @@ namespace generator {
       return e->arguments.equals(arguments);
     };
     DatabaseResults objects;
-    a_database->findAll(objects, name, valid);
+    a_database->findAll(objects, name);
     std::string attributeName = attribute->toString(true);
     DatabaseResult match;
     if (findAttributeMatch(objects, match, expectedType, attributeName)) {

@@ -58,7 +58,7 @@ namespace ast {
     };
   }
 
-  std::string ObjectValueContainer::ToString(const Subtype& l, bool verbose) const {
+  std::string ObjectValueContainer::ToString(const Array& l, bool verbose) const {
     std::string subtype;
     std::string delimiter;
     for (const ObjectValueContainer& s : l) {
@@ -77,7 +77,7 @@ namespace ast {
       }
       if (a_value == ObjectValue::ARRAY) {
         assert(!a_subtype.empty());
-        return "array of " + ToString(a_subtype);
+        return "array(" + ToString(a_arguments) + ") of " + ToString(a_subtype);
       }
       if (a_value == ObjectValue::ENUMERATION) {
         return "enumeration " + a_type_name;
@@ -92,7 +92,7 @@ namespace ast {
       (r == ObjectValue::INTEGER || r == ObjectValue::REAL || r == ObjectValue::NUMBER);
   }
 
-  bool ObjectValueContainer::equals(const Subtype& l, const Subtype& r) const {
+  bool ObjectValueContainer::equals(const Array& l, const Array& r) const {
     bool result = true;
     if (l.size() != r.size()) {
       result = false;
@@ -119,7 +119,7 @@ namespace ast {
     } else if (a_value == ObjectValue::USER_TYPE ||
                a_value == ObjectValue::ENUMERATION) {
       result = (a_type_name.empty() || other.a_type_name.empty() || a_type_name == other.a_type_name);
-    } else if (HasSubtype(a_value)) {
+    } else if (HasArray(a_value)) {
       assert(!a_subtype.empty());
       assert(!other.a_subtype.empty());
       result = equals(a_subtype, other.a_subtype);
@@ -206,20 +206,29 @@ namespace ast {
     return true;
   }
 
-  bool ObjectArguments::equals(ObjectValueContainer::Subtype& other) {
+  bool ObjectArguments::equals(ObjectValueContainer::Array& other, bool verbose) {
     bool result = true;
     if (list.size() != other.size()) {
+      if (verbose) {
+        std::cout << "list.size() = " << list.size() << " != " << " other.size() = " << other.size() << std::endl;
+      }
       result = false;
     } else {
       auto it = list.begin();
       auto it_other = other.begin();
       for ( ; it != list.end(); it++, it_other++) {
+        if (verbose) {
+          std::cout << "left = " << it->toString() << " == right = " << it_other->toString();
+        }
         if (!it->type.equals(*it_other)) {
           result = false;
+          if (verbose) {std::cout << " false" << std::endl;}
           break;
         }
+        if (verbose) {std::cout << " true" << std::endl;}
       }
     }
+    if (verbose) {std::cout << "result = " << (result ? "true" : "false") << std::endl;}
     return result;
   }
   

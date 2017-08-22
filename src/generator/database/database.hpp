@@ -56,12 +56,12 @@ namespace generator {
 
     template<typename Func>
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
+    template<typename Func>
+    bool findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
-    template<typename Func>
-    void findAll(DatabaseResults& objects, const std::string& name, Func valid, std::string package = "", std::string library = "");
     void findAll(DatabaseResults& objects, const std::string& name, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
 
@@ -116,19 +116,23 @@ namespace generator {
   template<typename Func>
   bool Database::findOne(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
     DatabaseResults objects;
-    findAll(objects, name, valid, package, library);
+    findAll(objects, name, package, library);
     return findBestMatch(objects, object, valid);
   }
   
   template<typename Func>
-  void Database::findAll(DatabaseResults& objects, const std::string& name, Func valid, std::string package, std::string library) {
-    if ((package.empty() || package == localDatabase.getName()) &&
-        (library.empty() || library == localDatabase.getLibrary())) {
-      localDatabase.find(objects, name);
+  bool Database::findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package, std::string library) {
+    DatabaseResults objects;
+    assert(identifier);
+    std::string name = identifier->toString(true);
+    bool result = true;
+    if (!findOne(object, name, valid, package, library)) {
+      result = false;
+      exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
     }
-    globalDatabase.find(objects, name, package, library);
+    return result;
   }
-
+  
 }
 
 #endif

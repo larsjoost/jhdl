@@ -81,33 +81,64 @@ namespace generator {
   }
 
   void SystemC::PrintFactory(parameters& parm, const std::string& name, 
-                             ast::RangeType* range, ast::ObjectValue expected_value,
+                             ast::RangeType* range, ast::SimpleIdentifier* identifier,
+                             ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
         rangeToString(range, left, right, type);
-      } else if (subtype) {
-        std::string type_name = subtype->identifier->toString(true);
+      } else {
+        ast::SimpleIdentifier* id;
+        if (identifier) {
+          id = identifier;
+        } else if (subtype) {
+          id = subtype->identifier;
+        } else {
+          assert(false);
+        }
+        std::string type_name = id->toString(true);
         DatabaseResult database_result;
         if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
           std::string id = a_name_converter.GetName(database_result, true);
           left = id + ".LEFT()";
           right = id + ".RIGHT()";
         } else {
-          exceptions.printError("Could not find type " + type_name, &subtype->identifier->text);
+          exceptions.printError("Could not find type " + type_name, &id->text);
         }
       }
     };
     PrintFactory(parm, name, f);
   }
   
-  void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype) {
+  void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition,
+                               std::string& subtype, ast::ObjectValueContainer::Array& arguments) {
     debug.functionStart("printArrayType");
     parm.println("");
     for (auto& r : definition.list) { 
       parm.println("using " + name + " = Array<" + subtype + ">;");
-      PrintFactory(parm, name, r.range, ast::ObjectValue::INTEGER, r.subtype);
+      ast::ObjectValue type;
+      if (r.range) {
+        ast::ObjectValue type = ast::ObjectValue::INTEGER;
+        arguments.push_back(ast::ObjectValueContainer(type));
+        PrintFactory(parm, name, r.range, NULL, type, r.subtype);
+      } else if (r.identifier) {
+        DatabaseResult database_result;
+        type = ast::ObjectValue::ENUMERATION;
+        auto f = [&](DatabaseElement* e) {
+          return e->type.IsValue(type);
+        };
+        if (a_database.findOne(database_result, r.identifier, f)) { 
+          arguments.push_back(database_result.object->type);
+        }
+      } else if (r.subtype) {
+        DatabaseResult database_result;
+        if (a_database.findOne(database_result, r.subtype->identifier)) { 
+          arguments.push_back(database_result.object->type);
+          type = database_result.object->type.GetValue();
+        }
+      }
+      PrintFactory(parm, name, r.range, r.identifier, type, r.subtype);
     }
     debug.functionEnd("printArrayType");
   }
@@ -135,9 +166,10 @@ namespace generator {
     DatabaseResult database_result;
     ast::ObjectValueContainer value;
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-      value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, database_result.object->type);
       std::string subtypeName = a_name_converter.GetName(database_result);
-      printArrayType(parm, name, t->definition, subtypeName);
+      ast::ObjectValueContainer::Array arguments;
+      printArrayType(parm, name, t->definition, subtypeName, arguments);
+      value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
     }
@@ -581,7 +613,7 @@ namespace generator {
         std::string type_name = a_name_converter.GetName(database_result, false);
         a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
         parm.println("using " + name + " = " + type_name + ";");
-        PrintFactory(parm, name, t->type->range, database_result.object->type.GetValue());
+        PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
       } else {
         exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
       }

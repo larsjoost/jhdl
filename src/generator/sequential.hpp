@@ -22,7 +22,7 @@ namespace generator {
         typeName = a_name_converter.GetName(object);
         if (iteration->range_attribute) {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
-            ast::ObjectValueContainer::Subtype& subtype = object.object->type.GetSubtype();
+            ast::ObjectValueContainer::Array& subtype = object.object->type.GetSubtype();
             assert(subtype.size() == 1);
             type = subtype.front();
           } else {

@@ -59,6 +59,10 @@ public:
       print(name, "DEBUG", highlight, highlight_color);
     }
   }
+
+  inline bool IsVerbose() {
+    return enable;
+  }
   
 };
 

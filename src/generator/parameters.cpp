@@ -65,6 +65,7 @@ namespace generator {
   }
 
   void parameters::println(std::string text) {
+    debug.debug("[" + ToString(GetArea()) + "]: " + text, true, Output::Color::GREEN);
     if (!isQuiet()) {
       Areas& a = GetAreas().front();
       a.buffer.push_back(text);
@@ -72,21 +73,21 @@ namespace generator {
   }
 
   void parameters::println(Area a, std::string text) {
-    if (!isQuiet()) {
-      debug.functionStart("println");
-      Area current_area = GetArea();
-      assert(current_area != Area::NONE);
-      if (a == current_area) {
-        println(text);
-      } else {
-        debug.debug("[" + ToString(GetArea()) + ", " + ToString(a) + "]: " + text, true, Output::Color::GREEN);
+    debug.functionStart("println");
+    Area current_area = GetArea();
+    if (a == current_area) {
+      println(text);
+    } else {
+      debug.debug("[" + ToString(GetArea()) + ", " + ToString(a) + "]: " + text, true, Output::Color::GREEN);
+      if (!isQuiet()) {
+        assert(current_area != Area::NONE);
         auto f = [&](Areas& areas, AreaInfo& info) {
           info.lines.push_back(text);
         };
         AccessAreaInfo(a, f);
       }
-      debug.functionEnd("println");
     }
+    debug.functionEnd("println");
   }
 
   std::string parameters::ToString(FileSelect f) {

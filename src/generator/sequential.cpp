@@ -58,7 +58,8 @@ namespace generator {
     if (p) {
       debug.functionStart("reportStatement");
       static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
-      static ast::ObjectValueContainer expected_type = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, enum_type); 
+      static ast::ObjectValueContainer expected_type =
+        ast::ObjectValueContainer(ast::ObjectValue::ARRAY, ast::ObjectValueContainer(ast::ObjectValue::INTEGER), enum_type); 
       std::string severity = p->severity->toString(true);
       DatabaseResult object;
       if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {

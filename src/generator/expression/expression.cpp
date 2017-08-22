@@ -87,14 +87,22 @@ namespace generator {
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments");
     bool result;
-    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments)) {
+    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, debug.IsVerbose())) {
       result = false;
-    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetSubtype())) {
+    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), debug.IsVerbose())) {
       result = false;
     } else {
       if (expectedReturnType) {
-        result = e->type.equals(*expectedReturnType); 
-        debug.debug("Return type " + e->type.toString() + (result ? " == " : " != ") +
+        ast::ObjectValueContainer* type;
+        if (e->type.GetValue() == ast::ObjectValue::ARRAY) {
+          ast::ObjectValueContainer::Array& subtype = e->type.GetSubtype();
+          assert(subtype.size() == 1);
+          type = &subtype.front();
+        } else {
+          type = &e->type; 
+        }
+        result = type->equals(*expectedReturnType); 
+        debug.debug("Return type " + type->toString() + (result ? " == " : " != ") +
                     expectedReturnType->toString());
       } else {
         result = true;
@@ -115,9 +123,9 @@ namespace generator {
       return objectWithArguments(e, arguments);
     };
     DatabaseResults objects;
-    a_database->findAll(objects, name, valid);
+    a_database->findAll(objects, name);
     for (auto& i : objects) {
-      ast::ObjectValueContainer::Subtype& subtype = i.object->type.GetSubtype();
+      ast::ObjectValueContainer::Array& subtype = i.object->type.GetSubtype();
       assert(subtype.size() < 2);
       if (!subtype.empty()) {
         return_types.insert(subtype.front());
@@ -365,7 +373,7 @@ namespace generator {
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
         case ast::ObjectValue::ARRAY: {
-          ast::ObjectValueContainer::Subtype& subtype = type.GetSubtype();
+          ast::ObjectValueContainer::Array& subtype = type.GetSubtype();
           assert(subtype.size() == 1);
           result = subtype.front();
           break;

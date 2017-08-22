@@ -119,10 +119,11 @@ namespace generator {
   }
 
   void Database::findAll(DatabaseResults& objects, const std::string& name, std::string package, std::string library) {
-    auto valid = [&](DatabaseElement* e) {
-      return true;
-    };
-    return findAll(objects, name, valid, package, library);
+    if ((package.empty() || package == localDatabase.getName()) &&
+        (library.empty() || library == localDatabase.getLibrary())) {
+      localDatabase.find(objects, name);
+    }
+    globalDatabase.find(objects, name, package, library);
   }
 
   void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
@@ -171,7 +172,7 @@ namespace generator {
   void Database::printAllObjects(std::string name) {
     auto valid = [&](DatabaseElement* e) { return true; };
     DatabaseResults objects;
-    findAll(objects, name, valid);
+    findAll(objects, name);
     if (!objects.empty()) {
       std::cerr << "Found the following objects with name \"" + name + "\":" << std::endl;
       for (auto& i : objects) {

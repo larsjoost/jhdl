@@ -135,7 +135,7 @@ namespace generator {
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
     parm.println(parameters::Area::DECLARATION, "using " + name + " = Range<decltype(" + left + ")>;");
-    PrintFactory(parm, name, r, ast::ObjectValue::NUMBER);
+    PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }
 
