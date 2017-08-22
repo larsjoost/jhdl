@@ -84,6 +84,7 @@ namespace generator {
                              ast::RangeType* range, ast::SimpleIdentifier* identifier,
                              ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
+    debug.functionStart("PrintFactory(expected_value = " + ast::toString(expected_value) + ")");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
@@ -107,6 +108,7 @@ namespace generator {
       }
     };
     PrintFactory(parm, name, f);
+    debug.functionEnd("PrintFactory");
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition,
@@ -117,7 +119,7 @@ namespace generator {
       ast::ObjectValue type;
       std::string range;
       if (r.range) {
-        ast::ObjectValue type = ast::ObjectValue::INTEGER;
+        type = ast::ObjectValue::INTEGER;
         range = "Range<int>";
         arguments.push_back(ast::ObjectValueContainer(type));
       } else if (r.identifier) {
@@ -631,7 +633,7 @@ namespace generator {
         if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
         } else if (id == ast::ObjectType::CONSTANT) {
-          type = "const " + type;
+          // type = "const " + type;
         }
         std::string s = type + " " + name;
         parm.println(s + ";");
