@@ -116,10 +116,11 @@ namespace generator {
     debug.functionStart("printArrayType");
     parm.println("");
     for (auto& r : definition.list) { 
-      parm.println("using " + name + " = Array<" + subtype + ">;");
       ast::ObjectValue type;
+      std::string range;
       if (r.range) {
         ast::ObjectValue type = ast::ObjectValue::INTEGER;
+        range = "Range<int>";
         arguments.push_back(ast::ObjectValueContainer(type));
       } else if (r.identifier) {
         DatabaseResult database_result;
@@ -128,15 +129,18 @@ namespace generator {
           return e->type.IsValue(type);
         };
         if (a_database.findOne(database_result, r.identifier, f)) { 
+          range = a_name_converter.GetName(database_result);
           arguments.push_back(database_result.object->type);
         }
       } else if (r.subtype) {
         DatabaseResult database_result;
         if (a_database.findOne(database_result, r.subtype->identifier)) { 
+          range = a_name_converter.GetName(database_result);
           arguments.push_back(database_result.object->type);
           type = database_result.object->type.GetValue();
         }
       }
+      parm.println("using " + name + " = Array<" + range + ", " + subtype + ">;");
       PrintFactory(parm, name, r.range, r.identifier, type, r.subtype);
     }
     debug.functionEnd("printArrayType");

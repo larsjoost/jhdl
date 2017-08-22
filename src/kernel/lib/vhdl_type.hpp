@@ -338,26 +338,26 @@ namespace vhdl {
 
   /*
    * Array example:
-   *
+   *        <NAME>                <RANGE>          <TYPE>
    * type BIT_VECTOR is array (NATURAL range <>) of BIT;
    */
   
-  template<class TYPE>
+  template<class RANGE, class TYPE>
   class Array {
   public:
     struct Range {
-      int left;
-      int right;
+      RANGE left;
+      RANGE right;
     };
     Range range;
     TYPE* value = NULL;
 
-    void init(int left, int right) {
+    void init(RANGE left, RANGE right) {
       range.left = left;
       range.right = right;
     }
     
-    void init(const Array<TYPE>& other) {
+    void init(const Array<RANGE, TYPE>& other) {
       range = other.range;
     }
 
@@ -395,15 +395,15 @@ namespace vhdl {
       return value[i];
     }
     
-    Array<TYPE>() {
+    Array() {
     }
 
-    Array<TYPE>(int left, int right) {
+    Array(RANGE left, RANGE right) {
       range.left = left;
       range.right = right;
     }
     
-    explicit Array<TYPE>(int size) {
+    explicit Array(int size) {
       resize(size);
       init();
     }
@@ -413,7 +413,7 @@ namespace vhdl {
       range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
     }
     
-    void set(Array<TYPE>& other) {
+    void set(Array<RANGE, TYPE>& other) {
       if (value != NULL) {delete value; value = NULL; }
       range = other.range;
       init();
