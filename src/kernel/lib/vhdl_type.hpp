@@ -256,6 +256,26 @@ namespace vhdl {
       int index = underlying_index(e);
       return l[index];
     }
+
+    EnumerationElement<T> position(int i) {
+      const static E value_array;
+      return value_array.array[i];
+    }
+
+    int position(const EnumerationElement<T>& e) {
+      int index;
+      if (e.c == 0) {
+        index = enum_position(e.e);
+      } else {
+        index = char_position(e.c);
+      }
+      return index;
+    }
+    
+    int size() {
+      const static E value_array;
+      return value_array.size;
+    }
     
   protected:
 
@@ -263,23 +283,34 @@ namespace vhdl {
       if (char_position(c) < 0) {
         std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
       } else {
-        value = char_position(c);
+        a_value = char_position(c);
       }
     }
     void set(T e) {
-      value = enum_position(e);
+      a_value = enum_position(e);
     }
     
   public:
-    int value = 0;
-
-    Enumeration<T, E>() {
+    int a_value = 0;
+    int a_left = 0;
+    int a_right = 0;
+    
+    Enumeration() {
+      a_left = 0;
+      a_right = size() - 1;
     }
     
-    Enumeration<T, E>(T v) {
+    Enumeration(T v) {
       set(v);
+      a_left = 0;
+      a_right = size() - 1;
     }
 
+    Enumeration(EnumerationElement<T>& left, EnumerationElement<T>& right) {
+      a_left = position(left);
+      a_right = position(right);
+    }
+    
     void init(const Enumeration<T, E>& other) {
     };
 
@@ -292,32 +323,32 @@ namespace vhdl {
     }
 
     void operator=(bool v) {
-      value = v ? (T)1 : (T)0;
+      a_value = v ? (T)1 : (T)0;
     }
 
     bool operator!() {
-      return value != (T)0;
+      return a_value != (T)0;
     }
       
     operator bool() const {
-      return value != (T)0;
+      return a_value != (T)0;
     }
 
     std::string toString(bool with_quotes = true) {
       const static E valueArray;
-      if (valueArray.array[value].c == 0) {
-        return valueArray.array[value].s;
+      if (valueArray.array[a_value].c == 0) {
+        return valueArray.array[a_value].s;
       }
       std::string s = with_quotes ? "'" : "";
-      return s + std::string(1, valueArray.array[value].c) + s;
+      return s + std::string(1, valueArray.array[a_value].c) + s;
     }
 
     int POS() {
-      return value;
+      return a_value;
     }
 
     int getValue() {
-      return value;
+      return a_value;
     }
     
     template <class X>
@@ -326,13 +357,15 @@ namespace vhdl {
     }
 
     int LENGTH() { return 1; }
+    EnumerationElement<T> LEFT() { return position(a_left); }
+    EnumerationElement<T> RIGHT() { return position(a_right);}
     
-    bool operator==(T e) const {Enumeration<T, E> other; other.set(e); return value == other.value;}
-    bool operator!=(T e) const {Enumeration<T, E> other; other.set(e); return value != other.value;}
-    bool operator==(char c) const {Enumeration<T, E> other; other.set(c); return value == other.value;}
-    bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return value != other.value;}
-    bool operator ==(const Enumeration<T, E> &other) const { return value == other.value; }
-    bool operator !=(const Enumeration<T, E> &other) const { return value != other.value; }
+    bool operator==(T e) const {Enumeration<T, E> other; other.set(e); return a_value == other.a_value;}
+    bool operator!=(T e) const {Enumeration<T, E> other; other.set(e); return a_value != other.a_value;}
+    bool operator==(char c) const {Enumeration<T, E> other; other.set(c); return a_value == other.a_value;}
+    bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return a_value != other.a_value;}
+    bool operator ==(const Enumeration<T, E> &other) const { return a_value == other.a_value; }
+    bool operator !=(const Enumeration<T, E> &other) const { return a_value != other.a_value; }
   };
 
 

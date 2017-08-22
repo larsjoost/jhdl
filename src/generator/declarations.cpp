@@ -88,15 +88,13 @@ namespace generator {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
         rangeToString(range, left, right, type);
-      } else {
+      } else if (identifier || subtype) {
         ast::SimpleIdentifier* id;
         if (identifier) {
           id = identifier;
         } else if (subtype) {
           id = subtype->identifier;
-        } else {
-          assert(false);
-        }
+        } 
         std::string type_name = id->toString(true);
         DatabaseResult database_result;
         if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
