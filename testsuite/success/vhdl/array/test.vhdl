@@ -15,6 +15,10 @@ architecture rtl of test is
 
   type b_t is array (enum_t) of integer;
 
+  constant C_SIZE : positive := 7;
+  
+  type c_t is array (enum_t) of string(1 to C_SIZE);
+  
   constant C_B : b_t := (1, 2);
   
 begin
@@ -23,8 +27,10 @@ begin
   process is
 --    variable a : bit_vector(0 to 5);
     variable a : a_t;
+    variable c : c_t;
   begin  -- process
     a := "00001";
+    c(FIRST) := "Testing";
     wait for 10 ns;
     if (a(4) /= '1') then
       report "a = " & bit'image(a(4)) & ", but expected = '1'" severity failure;
