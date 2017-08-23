@@ -14,7 +14,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     bool verbose = false;
     Database* a_database;
@@ -59,7 +59,9 @@ namespace generator {
     // First-pass functions
     void ExpressionReturnTypes(ast::Expression* e, ast::ReturnTypes& return_types);   
     void ExpressionTermReturnTypes(ast::ExpressionTerm* e, ast::ReturnTypes& return_types);  
+  public:
     void BasicIdentifierReturnTypes(ast::BasicIdentifier* b, ast::ReturnTypes& return_types);
+  private:
     void OperatorReturnTypes(const std::string& name,
                              const ast::ObjectValueContainer& l,
                              const ast::ObjectValueContainer& r,
@@ -82,11 +84,14 @@ namespace generator {
     std::string expressionTermToString(ast::ExpressionTerm* e,
                                        ast::ObjectValueContainer& expectedType,
                                        Func sensitivityListCallback);
+  public:
     template <typename Func>
-    std::string basicIdentifierToString(ast::BasicIdentifier* identifier,
-                                        ast::ObjectValueContainer& expectedType,
+    std::string BasicIdentifierToString(ast::BasicIdentifier* identifier,
+                                        ast::ObjectValueContainer* expectedType,
                                         Func sensitivityListCallback);
-
+    std::string BasicIdentifierToString(ast::BasicIdentifier* identifier,
+                                        ast::ObjectValueContainer* expectedType = NULL);
+  private:
     template <typename Func>
     std::string objectToString(DatabaseResult& object,
                                ast::AssociationList* arguments,
@@ -153,6 +158,8 @@ namespace generator {
     
     bool translateOperator(std::string& op, std::string& translatedOp);
 
+    bool UniqueReturnType(ast::ReturnTypes& return_types, ast::ObjectValueContainer& type, ast::Text* text);
+  
   };
 
   template <typename Func>
@@ -272,8 +279,8 @@ namespace generator {
           it++;
           delimiter = ", ";
         }
+        name += "[" + parameters + "]";
       }
-      name += "[" + parameters + "]";
     } else if (arguments) {
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);
       name += "(" + parameters + ")";
@@ -378,7 +385,7 @@ namespace generator {
         debug.debug("String");
         result = e->string->toString();
       } else if (e->identifier) {
-        result = basicIdentifierToString(e->identifier, expectedType, sensitivityListCallback);
+        result = BasicIdentifierToString(e->identifier, &expectedType, sensitivityListCallback);
       } else if (e->character) {
         debug.debug("Character");
         result = e->character->toString();
@@ -391,18 +398,19 @@ namespace generator {
   }
 
   template <typename Func>
-  std::string ExpressionParser::basicIdentifierToString(ast::BasicIdentifier* identifier,
-                                                        ast::ObjectValueContainer& expectedType,
+  std::string ExpressionParser::BasicIdentifierToString(ast::BasicIdentifier* identifier,
+                                                        ast::ObjectValueContainer* expected_type,
                                                         Func sensitivityListCallback) {
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
-    debug.functionStart("basicIdentifierToString(name = " + name + "(" + arguments.toString() + ")", true);
+    debug.functionStart("BasicIdentifierToString(name = " + name + "(" + arguments.toString() + ")" +
+                        ", expected_type = " + (expected_type ? expected_type->toString() : "None") + ")", true);
     if (identifier->attribute) {
-      name = attributeToString(name, arguments, expectedType, identifier->attribute,
+      name = attributeToString(name, arguments, *expected_type, identifier->attribute,
                                identifier->arguments, sensitivityListCallback);
     } else {
       auto valid = [&](DatabaseElement* e) {
-        bool result = objectWithArguments(e, arguments, &expectedType);
+        bool result = objectWithArguments(e, arguments, expected_type);
         return result;
       };
       DatabaseResult object;
@@ -415,10 +423,10 @@ namespace generator {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
         throw ObjectNotFound(this, name, "Could not find definition of " + name + args +
-                             " with type " + expectedType.toString(), &identifier->text);
+                             " with type " + (expected_type ? expected_type->toString() : "None"), &identifier->text);
       }
     } 
-    debug.functionEnd("basicIdentifierToString = " + name);
+    debug.functionEnd("BasicIdentifierToString = " + name);
     return name;
   }
 

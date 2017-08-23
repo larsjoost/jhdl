@@ -37,11 +37,13 @@ namespace generator {
     if (p) {
       debug.functionStart("variableAssignment");
       printSourceLine(parm, p->identifier);
-      std::string name = p->identifier->toString(true);
-      ast::ObjectValueContainer type;
-      if (getObjectName(name, type, ast::ObjectType::VARIABLE, &p->identifier->text)) {
+      ast::ReturnTypes return_types;
+      a_expression.BasicIdentifierReturnTypes(p->identifier, return_types);
+      ast::ObjectValueContainer expectedType;
+      if (a_expression.UniqueReturnType(return_types, expectedType, &p->identifier->text)) {
+        std::string name = a_expression.BasicIdentifierToString(p->identifier);
         try {
-          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(p->expression, type) + ";");
+          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(p->expression, expectedType) + ";");
         } catch (ExpressionParser::ObjectNotFound e) {
           e.print();
         }

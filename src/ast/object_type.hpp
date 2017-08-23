@@ -112,8 +112,8 @@ namespace ast {
     std::list<ObjectArgument> list;
     ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
     void push_back(ObjectArgument& o) {list.push_back(o);}
-    bool equals(ObjectArguments& other, bool verbose = false);
-    bool equals(ObjectValueContainer::Array& other, bool verbose = false);
+    bool equals(ObjectArguments& other, bool array_type = false, bool verbose = false);
+    bool equals(ObjectValueContainer::Array& other, bool array_type = false, bool verbose = false);
     bool ExactMatch(ObjectArguments& other);
     bool empty() { return list.empty(); }
     int size() { return list.size(); }

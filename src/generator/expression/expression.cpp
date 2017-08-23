@@ -26,6 +26,18 @@ namespace generator {
     }
     return false;
   }
+
+  bool ExpressionParser::UniqueReturnType(ast::ReturnTypes& return_types, ast::ObjectValueContainer& type, ast::Text* text) {
+    bool result = true;
+    if (return_types.size() == 1) {
+      type = *return_types.begin();
+    } else {
+      result = false;
+      std::string found = ReturnTypesToString(return_types);
+      exceptions.printError("Could not resolve unique type. Found the following types: " + found, text);
+    }
+    return result;
+  }
   
   bool ExpressionParser::CollectAllReturnTypes(ast::Expression* e,
                                                ast::ObjectValueContainer& expectedType) {
@@ -85,11 +97,11 @@ namespace generator {
 
   bool ExpressionParser::objectWithArguments(DatabaseElement* e, ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
-    debug.functionStart("objectWithArguments");
+    debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")");
     bool result;
     if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, debug.IsVerbose())) {
       result = false;
-    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), debug.IsVerbose())) {
+    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, debug.IsVerbose())) {
       result = false;
     } else {
       if (expectedReturnType) {
@@ -408,6 +420,10 @@ namespace generator {
     return foundMatch;
   }
   
+  std::string ExpressionParser::BasicIdentifierToString(ast::BasicIdentifier* identifier,
+                                                        ast::ObjectValueContainer* expected_type) {
+    return BasicIdentifierToString(identifier, expected_type, [](DatabaseResult& r) {});
+  }
       
 
 }

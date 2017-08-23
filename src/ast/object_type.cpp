@@ -169,7 +169,7 @@ namespace ast {
    *    c : type3                  
    */
   
-  bool ObjectArguments::equals(ObjectArguments& other, bool verbose) {
+  bool ObjectArguments::equals(ObjectArguments& other, bool array_type, bool verbose) {
     ObjectArguments& interface = isInterface ? *this : other;
     ObjectArguments& association = isInterface ? other : *this;
     if (verbose) {
@@ -198,6 +198,7 @@ namespace ast {
       }
       m[i] = true;
     }
+    if (array_type) { return true; }
     for (int i=0; i<size; i++) {
       if (!m[i]) {
         return false;
@@ -206,30 +207,13 @@ namespace ast {
     return true;
   }
 
-  bool ObjectArguments::equals(ObjectValueContainer::Array& other, bool verbose) {
-    bool result = true;
-    if (list.size() != other.size()) {
-      if (verbose) {
-        std::cout << "list.size() = " << list.size() << " != " << " other.size() = " << other.size() << std::endl;
-      }
-      result = false;
-    } else {
-      auto it = list.begin();
-      auto it_other = other.begin();
-      for ( ; it != list.end(); it++, it_other++) {
-        if (verbose) {
-          std::cout << "left = " << it->toString() << " == right = " << it_other->toString();
-        }
-        if (!it->type.equals(*it_other)) {
-          result = false;
-          if (verbose) {std::cout << " false" << std::endl;}
-          break;
-        }
-        if (verbose) {std::cout << " true" << std::endl;}
-      }
+  bool ObjectArguments::equals(ObjectValueContainer::Array& other, bool array_type, bool verbose) {
+    ObjectArguments args(false);
+    for (ObjectValueContainer& i : other) {
+      ObjectArgument x(i);
+      args.list.push_back(x);
     }
-    if (verbose) {std::cout << "result = " << (result ? "true" : "false") << std::endl;}
-    return result;
+    return this->equals(args, array_type, verbose);
   }
   
   bool ObjectArguments::ExactMatch(ObjectArguments& other) {
