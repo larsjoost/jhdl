@@ -632,16 +632,12 @@ namespace generator {
                       ast::ObjectDeclaration::Direction direction) {
         if (id == ast::ObjectType::SIGNAL) {
           type = "sc_signal<" + type + ">";
-        } else if (id == ast::ObjectType::CONSTANT) {
-          // type = "const " + type;
         }
         std::string s = type + " " + name;
         parm.println(s + ";");
-        if (id != ast::ObjectType::CONSTANT) {
-          parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + factory_name + ");");
-        }
+        parm.println(parameters::Area::CONSTRUCTOR, name + ".construct(" + factory_name + ");");
         if (init.size() > 0) {
-          parm.println(parameters::Area::INITIALIZER_LIST, name + "(" + init + ")");
+          parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + init + ");");
         }
       };
       ObjectDeclaration(parm, v, func);

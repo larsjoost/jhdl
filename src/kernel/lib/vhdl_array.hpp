@@ -8,6 +8,9 @@
 #include <cassert>
 #include <algorithm>
 #include <type_traits>
+#include <vector>
+
+// #include "../../debug/debug.hpp"
 
 namespace vhdl {
 
@@ -19,40 +22,37 @@ namespace vhdl {
   
   template<class RANGE, class TYPE>
   class Array {
+    //    Debug<true> a_debug;
   public:
-    struct Range {
-      RANGE left;
-      RANGE right;
-    };
-    Range range;
-    TYPE* value = NULL;
+    RANGE a_left;
+    RANGE a_right;
+    std::vector<TYPE> a_value;
 
-    void init(RANGE left, RANGE right) {
-      range.left = left;
-      range.right = right;
+    void construct(RANGE left, RANGE right) {
+      a_left = left;
+      a_right = right;
     }
     
-    void init(const Array<RANGE, TYPE>& other) {
-      range = other.range;
+    void construct(const Array<RANGE, TYPE>& other) {
+      a_left = other.a_left;
+      a_right = other.a_right;
     }
 
-    void init() {
-      assert(value == NULL);
-      value = new TYPE[LENGTH()];
-    }
-    
     void set(const std::string& s) {
+      //      a_debug.functionStart("set");
       assert(s.size() == LENGTH());
-      if (value == NULL) { init(); }
-      int i = 0;
+      a_value.clear();
       for (auto c : s) {
-        value[i++] = c;
+        TYPE t;
+        t = c;
+        a_value.push_back(t);
       }
+      //      a_debug.functionEnd("set");
     }
 
     int ConvertIndex(int index) {
       int x = ASCENDING() ? 1 : -1;
-      return x * index - range.left;
+      return x * index - a_left;
     }
 
     bool IndexCheck(int i) {
@@ -67,37 +67,49 @@ namespace vhdl {
     TYPE& get(int index) {
       int i = ConvertIndex(index);
       assert(IndexCheck(i));
-      return value[i];
+      return a_value[i];
     }
     
-    Array() {
+    Array() { // : a_debug("Array") {
     }
 
-    Array(RANGE left, RANGE right) {
-      range.left = left;
-      range.right = right;
+    Array(RANGE left, RANGE right) { // : a_debug("Array") {
+      a_left = left;
+      a_right = right;
+    }
+
+    Array(std::vector<int> vec) { // : a_debug("Array") {
+      assert(LENGTH() == vec.size());
     }
     
-    explicit Array(int size) {
+    explicit Array(int size) { // : a_debug("Array") {
       resize(size);
-      init();
     }
-    
+
+    void init(std::vector<TYPE> vec) {
+      //      a_debug.functionStart("init");
+      assert(LENGTH() == vec.size());
+      if (a_value.size() != vec.size()) { a_value.resize(vec.size()); }
+      for (int i = 0; i < vec.size(); i++) {
+        a_value[i] = vec[i];
+      }
+      //      a_debug.functionEnd("init");
+    }
+
     void resize(int size) {
       assert(size > 0);
-      range.right = ASCENDING() ? range.left + size - 1 : range.left - size + 1;
+      a_right = ASCENDING() ? a_left.ToInt() + size - 1 : a_left.ToInt() - size + 1;
     }
     
     void set(Array<RANGE, TYPE>& other) {
-      if (value != NULL) {delete value; value = NULL; }
-      range = other.range;
-      init();
-      for (int i = range.left; WithinRange(i); ASCENDING() ? i++ : i--) {
-        get(i) = other[i];
-      }
+      //      a_debug.functionStart("set(other = " + other.toString() + ")");
+      a_left = other.a_left;
+      a_right = other.a_right;
+      init(other.a_value);
+      //      a_debug.functionEnd("set");
     }
 
-    void operator=(const TYPE other) { value = other; }
+    void operator=(const TYPE other) { a_value = other; }
     template <class T>
     void operator=(const char* other) {std::string s(other); set(s);}
     void operator=(const std::string other) {set(other);}
@@ -111,18 +123,18 @@ namespace vhdl {
     }
     
     bool ASCENDING() {
-      return (range.right > range.left ? true : false);
+      return (a_right > a_left ? true : false);
     }
     
-    unsigned int LENGTH() { return abs(range.left - range.right) + 1; }
-    TYPE& HIGH() { return (range.left > range.right ? LEFT() : RIGHT()); }
-    TYPE& LOW() { return (range.left < range.right ? LEFT() : RIGHT()); }
-    TYPE& LEFT() { return value[0]; }
-    TYPE& RIGHT() { return value[LENGTH() - 1]; }
+    unsigned int LENGTH() { return abs(a_left - a_right) + 1; }
+    TYPE& HIGH() { return (a_left > a_right ? LEFT() : RIGHT()); }
+    TYPE& LOW() { return (a_left < a_right ? LEFT() : RIGHT()); }
+    TYPE& LEFT() { return a_value[0]; }
+    TYPE& RIGHT() { return a_value[LENGTH() - 1]; }
 
     std::string toString() {
       std::string s;
-      for (int i = range.left; WithinRange(i); ASCENDING() ? i++ : i--) {
+      for (int i = a_left; WithinRange(i); ASCENDING() ? i++ : i--) {
         s += this->get(i).toString(false);
       }
       return s;

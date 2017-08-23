@@ -122,7 +122,7 @@ namespace vhdl {
       a_right = right.a_value;
     }
     
-    void init(const Enumeration<T, E>& other) {
+    void construct(const Enumeration<T, E>& other) {
       a_left = other.a_left;
       a_right = other.a_right;
     };
@@ -130,7 +130,11 @@ namespace vhdl {
     void operator=(T v) {
       set(v);
     }
-  
+
+    void operator=(int v) {
+      a_value = v;
+    }
+    
     void operator=(char c) {
       set(c);
     }
@@ -140,11 +144,11 @@ namespace vhdl {
     }
 
     bool operator!() {
-      return a_value != (T)0;
+      return a_value != 0;
     }
       
     operator bool() const {
-      return a_value != (T)0;
+      return a_value != 0;
     }
 
     std::string toString(bool with_quotes = true) {
@@ -174,6 +178,11 @@ namespace vhdl {
       return r.toString();
     }
 
+    template<class X>
+    ::std::string IMAGE(X& other) {
+      return other.toString();
+    }
+    
     int LENGTH() { return 1; }
     Enumeration<T, E> LEFT() { Enumeration<T, E> e; e.a_value = a_left; return e; }
     Enumeration<T, E> RIGHT() { Enumeration<T, E> e; e.a_value = a_right; return e; }
@@ -184,6 +193,11 @@ namespace vhdl {
     bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return a_value != other.a_value;}
     bool operator ==(const Enumeration<T, E> &other) const { return a_value == other.a_value; }
     bool operator !=(const Enumeration<T, E> &other) const { return a_value != other.a_value; }
+
+    int ToInt() {
+      return a_value;
+    }
+
   };
 
 }

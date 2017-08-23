@@ -124,7 +124,8 @@ namespace vhdl {
        * The implementation must be defined in a .cpp file in this directory.
       */
       void TEXTIO::std_textio_write5(LINE& L, STD::STANDARD::INTEGER VALUE, SIDE JUSTIFIED, WIDTH FIELD) {
-        std::string x = STD::STANDARD::INTEGER::IMAGE(VALUE);
+        STD::STANDARD::INTEGER i;
+        std::string x = i.IMAGE(VALUE);
         if (!L.isNull()) {
           x = STD::STANDARD::STRING::IMAGE(L.ALL()) + x;
         }

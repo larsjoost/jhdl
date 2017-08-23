@@ -361,12 +361,13 @@ namespace generator {
     if (e) {
       debug.functionStart("expressionTermToString");
       if (!e->parenthis.list.empty()) {
-        result = "(";
+        result = expectedType.IsValue(ast::ObjectValue::ARRAY) ? "{" : "(";
         std::string d;
         for (ast::Expression& i : e->parenthis.list) {
           result += d + expressionToString(&i, expectedType, sensitivityListCallback);
+          d = ", ";
         }
-        result += ")";
+        result += expectedType.IsValue(ast::ObjectValue::ARRAY) ? "}" : ")";
       } else if (e->physical) {
         debug.debug("Physical");
         result = physicalToString(e->physical);

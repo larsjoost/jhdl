@@ -1,0 +1,269 @@
+#ifndef STD_standard_HPP
+#define STD_standard_HPP
+
+#include <string.h>
+#include "systemc.h"
+#include "vhdl.h"
+#include "standard.hpp"
+namespace vhdl { namespace STD {
+    struct Package_STANDARD {
+      // line 2:   type BOOLEAN is (FALSE, TRUE);
+      enum class BOOLEAN_enum {FALSE, TRUE};
+      struct BOOLEAN_value {
+        const static int size = 2;
+        const static int enum_size = 2;
+        EnumerationElement<BOOLEAN_enum> array[size] {{BOOLEAN_enum::FALSE, 0, "FALSE"}, {BOOLEAN_enum::TRUE, 0, "TRUE"}};
+      };
+      using BOOLEAN = Enumeration<BOOLEAN_enum, BOOLEAN_value>;
+      struct Factory_BOOLEAN {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_BOOLEAN(Package_STANDARD* parent)  : p(parent) {}
+        BOOLEAN create() {
+          BOOLEAN x;
+          return x;
+        }
+      };
+      Factory_BOOLEAN factory_BOOLEAN = Factory_BOOLEAN(this);
+      // line 4:   type BIT is ('0', '1');
+      enum class BIT_enum {};
+      struct BIT_value {
+        const static int size = 2;
+        const static int enum_size = 0;
+        EnumerationElement<BIT_enum> array[size] {{(BIT_enum)0, '0', ""}, {(BIT_enum)0, '1', ""}};
+      };
+      using BIT = Enumeration<BIT_enum, BIT_value>;
+      struct Factory_BIT {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_BIT(Package_STANDARD* parent)  : p(parent) {}
+        BIT create() {
+          BIT x;
+          return x;
+        }
+      };
+      Factory_BIT factory_BIT = Factory_BIT(this);
+      // line 6:   type CHARACTER is (
+      enum class CHARACTER_enum {NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EM, SUB, ESC, FSP, GSP, RSP, USP, DEL, C128, C129, C130, C131, C132, C133, C134, C135, C136, C137, C138, C139, C140, C141, C142, C143, C144, C145, C146, C147, C148, C149, C150, C151, C152, C153, C154, C155, C156, C157, C158, C159};
+      struct CHARACTER_value {
+        const static int size = 256;
+        const static int enum_size = 65;
+        EnumerationElement<CHARACTER_enum> array[size] {{CHARACTER_enum::NUL, 0, "NUL"}, {CHARACTER_enum::SOH, 0, "SOH"}, {CHARACTER_enum::STX, 0, "STX"}, {CHARACTER_enum::ETX, 0, "ETX"}, {CHARACTER_enum::EOT, 0, "EOT"}, {CHARACTER_enum::ENQ, 0, "ENQ"}, {CHARACTER_enum::ACK, 0, "ACK"}, {CHARACTER_enum::BEL, 0, "BEL"}, {CHARACTER_enum::BS, 0, "BS"}, {CHARACTER_enum::HT, 0, "HT"}, {CHARACTER_enum::LF, 0, "LF"}, {CHARACTER_enum::VT, 0, "VT"}, {CHARACTER_enum::FF, 0, "FF"}, {CHARACTER_enum::CR, 0, "CR"}, {CHARACTER_enum::SO, 0, "SO"}, {CHARACTER_enum::SI, 0, "SI"}, {CHARACTER_enum::DLE, 0, "DLE"}, {CHARACTER_enum::DC1, 0, "DC1"}, {CHARACTER_enum::DC2, 0, "DC2"}, {CHARACTER_enum::DC3, 0, "DC3"}, {CHARACTER_enum::DC4, 0, "DC4"}, {CHARACTER_enum::NAK, 0, "NAK"}, {CHARACTER_enum::SYN, 0, "SYN"}, {CHARACTER_enum::ETB, 0, "ETB"}, {CHARACTER_enum::CAN, 0, "CAN"}, {CHARACTER_enum::EM, 0, "EM"}, {CHARACTER_enum::SUB, 0, "SUB"}, {CHARACTER_enum::ESC, 0, "ESC"}, {CHARACTER_enum::FSP, 0, "FSP"}, {CHARACTER_enum::GSP, 0, "GSP"}, {CHARACTER_enum::RSP, 0, "RSP"}, {CHARACTER_enum::USP, 0, "USP"}, {(CHARACTER_enum)0, ' ', ""}, {(CHARACTER_enum)0, '!', ""}, {(CHARACTER_enum)0, '"', ""}, {(CHARACTER_enum)0, '#', ""}, {(CHARACTER_enum)0, '$', ""}, {(CHARACTER_enum)0, '%', ""}, {(CHARACTER_enum)0, '&', ""}, {(CHARACTER_enum)0, '\'', ""}, {(CHARACTER_enum)0, '(', ""}, {(CHARACTER_enum)0, ')', ""}, {(CHARACTER_enum)0, '*', ""}, {(CHARACTER_enum)0, '+', ""}, {(CHARACTER_enum)0, ',', ""}, {(CHARACTER_enum)0, '-', ""}, {(CHARACTER_enum)0, '.', ""}, {(CHARACTER_enum)0, '/', ""}, {(CHARACTER_enum)0, '0', ""}, {(CHARACTER_enum)0, '1', ""}, {(CHARACTER_enum)0, '2', ""}, {(CHARACTER_enum)0, '3', ""}, {(CHARACTER_enum)0, '4', ""}, {(CHARACTER_enum)0, '5', ""}, {(CHARACTER_enum)0, '6', ""}, {(CHARACTER_enum)0, '7', ""}, {(CHARACTER_enum)0, '8', ""}, {(CHARACTER_enum)0, '9', ""}, {(CHARACTER_enum)0, ':', ""}, {(CHARACTER_enum)0, ';', ""}, {(CHARACTER_enum)0, '<', ""}, {(CHARACTER_enum)0, '=', ""}, {(CHARACTER_enum)0, '>', ""}, {(CHARACTER_enum)0, '?', ""}, {(CHARACTER_enum)0, '@', ""}, {(CHARACTER_enum)0, 'A', ""}, {(CHARACTER_enum)0, 'B', ""}, {(CHARACTER_enum)0, 'C', ""}, {(CHARACTER_enum)0, 'D', ""}, {(CHARACTER_enum)0, 'E', ""}, {(CHARACTER_enum)0, 'F', ""}, {(CHARACTER_enum)0, 'G', ""}, {(CHARACTER_enum)0, 'H', ""}, {(CHARACTER_enum)0, 'I', ""}, {(CHARACTER_enum)0, 'J', ""}, {(CHARACTER_enum)0, 'K', ""}, {(CHARACTER_enum)0, 'L', ""}, {(CHARACTER_enum)0, 'M', ""}, {(CHARACTER_enum)0, 'N', ""}, {(CHARACTER_enum)0, 'O', ""}, {(CHARACTER_enum)0, 'P', ""}, {(CHARACTER_enum)0, 'Q', ""}, {(CHARACTER_enum)0, 'R', ""}, {(CHARACTER_enum)0, 'S', ""}, {(CHARACTER_enum)0, 'T', ""}, {(CHARACTER_enum)0, 'U', ""}, {(CHARACTER_enum)0, 'V', ""}, {(CHARACTER_enum)0, 'W', ""}, {(CHARACTER_enum)0, 'X', ""}, {(CHARACTER_enum)0, 'Y', ""}, {(CHARACTER_enum)0, 'Z', ""}, {(CHARACTER_enum)0, '[', ""}, {(CHARACTER_enum)0, '\\', ""}, {(CHARACTER_enum)0, ']', ""}, {(CHARACTER_enum)0, '^', ""}, {(CHARACTER_enum)0, '_', ""}, {(CHARACTER_enum)0, '`', ""}, {(CHARACTER_enum)0, 'a', ""}, {(CHARACTER_enum)0, 'b', ""}, {(CHARACTER_enum)0, 'c', ""}, {(CHARACTER_enum)0, 'd', ""}, {(CHARACTER_enum)0, 'e', ""}, {(CHARACTER_enum)0, 'f', ""}, {(CHARACTER_enum)0, 'g', ""}, {(CHARACTER_enum)0, 'h', ""}, {(CHARACTER_enum)0, 'i', ""}, {(CHARACTER_enum)0, 'j', ""}, {(CHARACTER_enum)0, 'k', ""}, {(CHARACTER_enum)0, 'l', ""}, {(CHARACTER_enum)0, 'm', ""}, {(CHARACTER_enum)0, 'n', ""}, {(CHARACTER_enum)0, 'o', ""}, {(CHARACTER_enum)0, 'p', ""}, {(CHARACTER_enum)0, 'q', ""}, {(CHARACTER_enum)0, 'r', ""}, {(CHARACTER_enum)0, 's', ""}, {(CHARACTER_enum)0, 't', ""}, {(CHARACTER_enum)0, 'u', ""}, {(CHARACTER_enum)0, 'v', ""}, {(CHARACTER_enum)0, 'w', ""}, {(CHARACTER_enum)0, 'x', ""}, {(CHARACTER_enum)0, 'y', ""}, {(CHARACTER_enum)0, 'z', ""}, {(CHARACTER_enum)0, '{', ""}, {(CHARACTER_enum)0, '|', ""}, {(CHARACTER_enum)0, '}', ""}, {(CHARACTER_enum)0, '~', ""}, {CHARACTER_enum::DEL, 0, "DEL"}, {CHARACTER_enum::C128, 0, "C128"}, {CHARACTER_enum::C129, 0, "C129"}, {CHARACTER_enum::C130, 0, "C130"}, {CHARACTER_enum::C131, 0, "C131"}, {CHARACTER_enum::C132, 0, "C132"}, {CHARACTER_enum::C133, 0, "C133"}, {CHARACTER_enum::C134, 0, "C134"}, {CHARACTER_enum::C135, 0, "C135"}, {CHARACTER_enum::C136, 0, "C136"}, {CHARACTER_enum::C137, 0, "C137"}, {CHARACTER_enum::C138, 0, "C138"}, {CHARACTER_enum::C139, 0, "C139"}, {CHARACTER_enum::C140, 0, "C140"}, {CHARACTER_enum::C141, 0, "C141"}, {CHARACTER_enum::C142, 0, "C142"}, {CHARACTER_enum::C143, 0, "C143"}, {CHARACTER_enum::C144, 0, "C144"}, {CHARACTER_enum::C145, 0, "C145"}, {CHARACTER_enum::C146, 0, "C146"}, {CHARACTER_enum::C147, 0, "C147"}, {CHARACTER_enum::C148, 0, "C148"}, {CHARACTER_enum::C149, 0, "C149"}, {CHARACTER_enum::C150, 0, "C150"}, {CHARACTER_enum::C151, 0, "C151"}, {CHARACTER_enum::C152, 0, "C152"}, {CHARACTER_enum::C153, 0, "C153"}, {CHARACTER_enum::C154, 0, "C154"}, {CHARACTER_enum::C155, 0, "C155"}, {CHARACTER_enum::C156, 0, "C156"}, {CHARACTER_enum::C157, 0, "C157"}, {CHARACTER_enum::C158, 0, "C158"}, {CHARACTER_enum::C159, 0, "C159"}, {(CHARACTER_enum)0, ' ', ""}, {(CHARACTER_enum)0, '¡', ""}, {(CHARACTER_enum)0, '¢', ""}, {(CHARACTER_enum)0, '£', ""}, {(CHARACTER_enum)0, '¤', ""}, {(CHARACTER_enum)0, '¥', ""}, {(CHARACTER_enum)0, '¦', ""}, {(CHARACTER_enum)0, '§', ""}, {(CHARACTER_enum)0, '¨', ""}, {(CHARACTER_enum)0, '©', ""}, {(CHARACTER_enum)0, 'ª', ""}, {(CHARACTER_enum)0, '«', ""}, {(CHARACTER_enum)0, '¬', ""}, {(CHARACTER_enum)0, '­', ""}, {(CHARACTER_enum)0, '®', ""}, {(CHARACTER_enum)0, '¯', ""}, {(CHARACTER_enum)0, '°', ""}, {(CHARACTER_enum)0, '±', ""}, {(CHARACTER_enum)0, '²', ""}, {(CHARACTER_enum)0, '³', ""}, {(CHARACTER_enum)0, '´', ""}, {(CHARACTER_enum)0, 'µ', ""}, {(CHARACTER_enum)0, '¶', ""}, {(CHARACTER_enum)0, '·', ""}, {(CHARACTER_enum)0, '¸', ""}, {(CHARACTER_enum)0, '¹', ""}, {(CHARACTER_enum)0, 'º', ""}, {(CHARACTER_enum)0, '»', ""}, {(CHARACTER_enum)0, '¼', ""}, {(CHARACTER_enum)0, '½', ""}, {(CHARACTER_enum)0, '¾', ""}, {(CHARACTER_enum)0, '¿', ""}, {(CHARACTER_enum)0, 'À', ""}, {(CHARACTER_enum)0, 'Á', ""}, {(CHARACTER_enum)0, 'Â', ""}, {(CHARACTER_enum)0, 'Ã', ""}, {(CHARACTER_enum)0, 'Ä', ""}, {(CHARACTER_enum)0, 'Å', ""}, {(CHARACTER_enum)0, 'Æ', ""}, {(CHARACTER_enum)0, 'Ç', ""}, {(CHARACTER_enum)0, 'È', ""}, {(CHARACTER_enum)0, 'É', ""}, {(CHARACTER_enum)0, 'Ê', ""}, {(CHARACTER_enum)0, 'Ë', ""}, {(CHARACTER_enum)0, 'Ì', ""}, {(CHARACTER_enum)0, 'Í', ""}, {(CHARACTER_enum)0, 'Î', ""}, {(CHARACTER_enum)0, 'Ï', ""}, {(CHARACTER_enum)0, 'Ð', ""}, {(CHARACTER_enum)0, 'Ñ', ""}, {(CHARACTER_enum)0, 'Ò', ""}, {(CHARACTER_enum)0, 'Ó', ""}, {(CHARACTER_enum)0, 'Ô', ""}, {(CHARACTER_enum)0, 'Õ', ""}, {(CHARACTER_enum)0, 'Ö', ""}, {(CHARACTER_enum)0, '×', ""}, {(CHARACTER_enum)0, 'Ø', ""}, {(CHARACTER_enum)0, 'Ù', ""}, {(CHARACTER_enum)0, 'Ú', ""}, {(CHARACTER_enum)0, 'Û', ""}, {(CHARACTER_enum)0, 'Ü', ""}, {(CHARACTER_enum)0, 'Ý', ""}, {(CHARACTER_enum)0, 'Þ', ""}, {(CHARACTER_enum)0, 'ß', ""}, {(CHARACTER_enum)0, 'à', ""}, {(CHARACTER_enum)0, 'á', ""}, {(CHARACTER_enum)0, 'â', ""}, {(CHARACTER_enum)0, 'ã', ""}, {(CHARACTER_enum)0, 'ä', ""}, {(CHARACTER_enum)0, 'å', ""}, {(CHARACTER_enum)0, 'æ', ""}, {(CHARACTER_enum)0, 'ç', ""}, {(CHARACTER_enum)0, 'è', ""}, {(CHARACTER_enum)0, 'é', ""}, {(CHARACTER_enum)0, 'ê', ""}, {(CHARACTER_enum)0, 'ë', ""}, {(CHARACTER_enum)0, 'ì', ""}, {(CHARACTER_enum)0, 'í', ""}, {(CHARACTER_enum)0, 'î', ""}, {(CHARACTER_enum)0, 'ï', ""}, {(CHARACTER_enum)0, 'ð', ""}, {(CHARACTER_enum)0, 'ñ', ""}, {(CHARACTER_enum)0, 'ò', ""}, {(CHARACTER_enum)0, 'ó', ""}, {(CHARACTER_enum)0, 'ô', ""}, {(CHARACTER_enum)0, 'õ', ""}, {(CHARACTER_enum)0, 'ö', ""}, {(CHARACTER_enum)0, '÷', ""}, {(CHARACTER_enum)0, 'ø', ""}, {(CHARACTER_enum)0, 'ù', ""}, {(CHARACTER_enum)0, 'ú', ""}, {(CHARACTER_enum)0, 'û', ""}, {(CHARACTER_enum)0, 'ü', ""}, {(CHARACTER_enum)0, 'ý', ""}, {(CHARACTER_enum)0, 'þ', ""}, {(CHARACTER_enum)0, 'ÿ', ""}};
+      };
+      using CHARACTER = Enumeration<CHARACTER_enum, CHARACTER_value>;
+      struct Factory_CHARACTER {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_CHARACTER(Package_STANDARD* parent)  : p(parent) {}
+        CHARACTER create() {
+          CHARACTER x;
+          return x;
+        }
+      };
+      Factory_CHARACTER factory_CHARACTER = Factory_CHARACTER(this);
+      // line 45:   type SEVERITY_LEVEL is (NOTE, WARNING, ERROR, FAILURE);
+      enum class SEVERITY_LEVEL_enum {NOTE, WARNING, ERROR, FAILURE};
+      struct SEVERITY_LEVEL_value {
+        const static int size = 4;
+        const static int enum_size = 4;
+        EnumerationElement<SEVERITY_LEVEL_enum> array[size] {{SEVERITY_LEVEL_enum::NOTE, 0, "NOTE"}, {SEVERITY_LEVEL_enum::WARNING, 0, "WARNING"}, {SEVERITY_LEVEL_enum::ERROR, 0, "ERROR"}, {SEVERITY_LEVEL_enum::FAILURE, 0, "FAILURE"}};
+      };
+      using SEVERITY_LEVEL = Enumeration<SEVERITY_LEVEL_enum, SEVERITY_LEVEL_value>;
+      struct Factory_SEVERITY_LEVEL {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_SEVERITY_LEVEL(Package_STANDARD* parent)  : p(parent) {}
+        SEVERITY_LEVEL create() {
+          SEVERITY_LEVEL x;
+          return x;
+        }
+      };
+      Factory_SEVERITY_LEVEL factory_SEVERITY_LEVEL = Factory_SEVERITY_LEVEL(this);
+      // line 47:   type FILE_OPEN_KIND is (READ_MODE, WRITE_MODE, APPEND_MODE);
+      enum class FILE_OPEN_KIND_enum {READ_MODE, WRITE_MODE, APPEND_MODE};
+      struct FILE_OPEN_KIND_value {
+        const static int size = 3;
+        const static int enum_size = 3;
+        EnumerationElement<FILE_OPEN_KIND_enum> array[size] {{FILE_OPEN_KIND_enum::READ_MODE, 0, "READ_MODE"}, {FILE_OPEN_KIND_enum::WRITE_MODE, 0, "WRITE_MODE"}, {FILE_OPEN_KIND_enum::APPEND_MODE, 0, "APPEND_MODE"}};
+      };
+      using FILE_OPEN_KIND = Enumeration<FILE_OPEN_KIND_enum, FILE_OPEN_KIND_value>;
+      struct Factory_FILE_OPEN_KIND {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_FILE_OPEN_KIND(Package_STANDARD* parent)  : p(parent) {}
+        FILE_OPEN_KIND create() {
+          FILE_OPEN_KIND x;
+          return x;
+        }
+      };
+      Factory_FILE_OPEN_KIND factory_FILE_OPEN_KIND = Factory_FILE_OPEN_KIND(this);
+      // line 49:   type FILE_OPEN_STATUS is (OPEN_OK, STATUS_ERROR, NAME_ERROR, MODE_ERROR);
+      enum class FILE_OPEN_STATUS_enum {OPEN_OK, STATUS_ERROR, NAME_ERROR, MODE_ERROR};
+      struct FILE_OPEN_STATUS_value {
+        const static int size = 4;
+        const static int enum_size = 4;
+        EnumerationElement<FILE_OPEN_STATUS_enum> array[size] {{FILE_OPEN_STATUS_enum::OPEN_OK, 0, "OPEN_OK"}, {FILE_OPEN_STATUS_enum::STATUS_ERROR, 0, "STATUS_ERROR"}, {FILE_OPEN_STATUS_enum::NAME_ERROR, 0, "NAME_ERROR"}, {FILE_OPEN_STATUS_enum::MODE_ERROR, 0, "MODE_ERROR"}};
+      };
+      using FILE_OPEN_STATUS = Enumeration<FILE_OPEN_STATUS_enum, FILE_OPEN_STATUS_value>;
+      struct Factory_FILE_OPEN_STATUS {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_FILE_OPEN_STATUS(Package_STANDARD* parent)  : p(parent) {}
+        FILE_OPEN_STATUS create() {
+          FILE_OPEN_STATUS x;
+          return x;
+        }
+      };
+      Factory_FILE_OPEN_STATUS factory_FILE_OPEN_STATUS = Factory_FILE_OPEN_STATUS(this);
+      // line 53:   type INTEGER is range -2147483647 to 2147483647;
+      using INTEGER = Range<decltype(-2147483647)>;
+      struct Factory_INTEGER {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_INTEGER(Package_STANDARD* parent)  : p(parent) {}
+        INTEGER create() {
+          INTEGER x(-2147483647, 2147483647);
+          return x;
+        }
+        template <typename T>
+        INTEGER create(T left, T right) {
+          INTEGER x(left, right);
+          return x;
+        }
+      };
+      Factory_INTEGER factory_INTEGER = Factory_INTEGER(this);
+      // line 55:   type REAL is range -1.7014111e+308 to 1.7014111e+308;
+      using REAL = Range<decltype(-1.7014111e+308)>;
+      struct Factory_REAL {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_REAL(Package_STANDARD* parent)  : p(parent) {}
+        REAL create() {
+          REAL x(-1.7014111e+308, 1.7014111e+308);
+          return x;
+        }
+        template <typename T>
+        REAL create(T left, T right) {
+          REAL x(left, right);
+          return x;
+        }
+      };
+      Factory_REAL factory_REAL = Factory_REAL(this);
+      // line 59:   type TIME is range -2147483647 to 2147483647
+      enum TIME_enum {FS, PS, NS, US, MS, SEC, MIN, HR};
+      struct TIME_unit {
+        std::string toString(TIME_enum e) {
+          static std::string translate[8] = {"fs", "ps", "ns", "us", "ms", "sec", "min", "hr"};
+          return translate[e];
+        }
+      };
+      struct TIME_value {
+        const int size = 8;
+        const PhysicalElement<TIME_enum, decltype(-2147483647)> array[8] {{FS, 1, FS}, {PS, 1000, FS}, {NS, 1000, PS}, {US, 1000, NS}, {MS, 1000, US}, {SEC, 1000, MS}, {MIN, 60, SEC}, {HR, 60, MIN}};
+      };
+      using TIME_type = Physical<decltype(-2147483647), TIME_enum>;
+      using TIME = PhysicalType<decltype(-2147483647), TIME_enum, TIME_value, TIME_unit>;
+      struct Factory_TIME {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_TIME(Package_STANDARD* parent)  : p(parent) {}
+        TIME create() {
+          TIME x({-2147483647, FS}, {2147483647, HR});
+          return x;
+        }
+        template <typename T>
+        TIME create(T left, T right) {
+          TIME x(left, right);
+          return x;
+        }
+      };
+      Factory_TIME factory_TIME = Factory_TIME(this);
+      // line 76:   subtype DELAY_LENGTH is TIME range 0 fs to TIME'HIGH;
+      using DELAY_LENGTH = TIME;
+      struct Factory_DELAY_LENGTH {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_DELAY_LENGTH(Package_STANDARD* parent)  : p(parent) {}
+        DELAY_LENGTH create() {
+          DELAY_LENGTH x({0, TIME_enum::FS}, p->factory_TIME.create().HIGH());
+          return x;
+        }
+        template <typename T>
+        DELAY_LENGTH create(T left, T right) {
+          DELAY_LENGTH x(left, right);
+          return x;
+        }
+      };
+      Factory_DELAY_LENGTH factory_DELAY_LENGTH = Factory_DELAY_LENGTH(this);
+      // line 80:   function NOW return DELAY_LENGTH;
+      struct Function_NOW__physical {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Function_NOW__physical(Package_STANDARD* parent)  : p(parent) {init();}
+        DELAY_LENGTH run();
+        void init() {
+        }
+      };
+      DELAY_LENGTH NOW();
+      // line 84:   subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
+      using NATURAL = INTEGER;
+      struct Factory_NATURAL {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_NATURAL(Package_STANDARD* parent)  : p(parent) {}
+        NATURAL create() {
+          NATURAL x(0, p->factory_INTEGER.create().HIGH());
+          return x;
+        }
+        template <typename T>
+        NATURAL create(T left, T right) {
+          NATURAL x(left, right);
+          return x;
+        }
+      };
+      Factory_NATURAL factory_NATURAL = Factory_NATURAL(this);
+      // line 86:   subtype POSITIVE is INTEGER range 1 to INTEGER'HIGH;
+      using POSITIVE = INTEGER;
+      struct Factory_POSITIVE {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_POSITIVE(Package_STANDARD* parent)  : p(parent) {}
+        POSITIVE create() {
+          POSITIVE x(1, p->factory_INTEGER.create().HIGH());
+          return x;
+        }
+        template <typename T>
+        POSITIVE create(T left, T right) {
+          POSITIVE x(left, right);
+          return x;
+        }
+      };
+      Factory_POSITIVE factory_POSITIVE = Factory_POSITIVE(this);
+      // line 88:   type STRING is array (POSITIVE range <>) of CHARACTER;
+
+      using STRING = Array<POSITIVE, CHARACTER>;
+      struct Factory_STRING {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_STRING(Package_STANDARD* parent)  : p(parent) {}
+        STRING create() {
+          STRING x(p->factory_POSITIVE.create().LEFT(), p->factory_POSITIVE.create().RIGHT());
+          return x;
+        }
+        template <typename T>
+        STRING create(T left, T right) {
+          STRING x(left, right);
+          return x;
+        }
+      };
+      Factory_STRING factory_STRING = Factory_STRING(this);
+      // line 90:   type BIT_VECTOR is array (NATURAL range <>) of BIT;
+
+      using BIT_VECTOR = Array<NATURAL, BIT>;
+      struct Factory_BIT_VECTOR {
+        Package_STANDARD* p = NULL; // Used to access parent class.
+        Factory_BIT_VECTOR(Package_STANDARD* parent)  : p(parent) {}
+        BIT_VECTOR create() {
+          BIT_VECTOR x(p->factory_NATURAL.create().LEFT(), p->factory_NATURAL.create().RIGHT());
+          return x;
+        }
+        template <typename T>
+        BIT_VECTOR create(T left, T right) {
+          BIT_VECTOR x(left, right);
+          return x;
+        }
+      };
+      Factory_BIT_VECTOR factory_BIT_VECTOR = Factory_BIT_VECTOR(this);
+    };
+    using STANDARD = Package_STANDARD;
+  }
+  extern STD::STANDARD STD_STANDARD;
+  namespace STD {
+  }}
+#endif

@@ -102,9 +102,9 @@ class sc_signal : public sc_signal_base {
     }
   }
 
-  void init(T other) {
-    nextValue.init(other);
-    currentValue.init(other);
+  void construct(T other) {
+    nextValue.construct(other);
+    currentValue.construct(other);
   }
   
   sc_signal<T>(const sc_signal<T>& s) {
@@ -280,7 +280,8 @@ public:
     a_value.set(s);
   }
 
-  void init(const sc_access<T>& s) {
+  void construct(sc_access<T> s) {
+    set(s.a_value);
   }
   
   bool isNull() {

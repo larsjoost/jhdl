@@ -34,10 +34,14 @@ namespace vhdl {
       a_value = value;
     }
     
-    void init(const Range<TYPE>& other) {
+    void construct(const Range<TYPE>& other) {
       a_left = other.a_left;
       a_right = other.a_right;
     };
+
+    void init(TYPE value) {
+      a_value = value;
+    }
     
     void operator=(const TYPE other) { a_value = other; }
     void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
@@ -61,6 +65,10 @@ namespace vhdl {
       return a_value;
     }
 
+    int ToInt() {
+      return a_value;
+    }
+    
     std::string toString() {
       return std::to_string(a_value);
     }
@@ -97,11 +105,11 @@ namespace vhdl {
     }
     
     template <class T>
-    static ::std::string IMAGE(T& r) {
+    ::std::string IMAGE(T& r) {
       return r.toString();
     }
 
-    static ::std::string IMAGE(TYPE r) {
+    ::std::string IMAGE(TYPE r) {
       return std::to_string(r);
     }
 
@@ -153,7 +161,7 @@ namespace vhdl {
       a_right = right;
     }
     
-    void init(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
+    void construct(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       a_left = other.a_left;
       a_right = other.a_right;
     };
