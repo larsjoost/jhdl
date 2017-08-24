@@ -256,6 +256,7 @@ namespace generator {
     debug.functionStart("ExpressionTermReturnTypes");
     assert(e);
     if (!e->parenthis.list.empty()) {
+      debug.debug("parenthis size = " + e->parenthis.list.size());
       if (e->parenthis.list.size() > 1) {
         ast::Expression& x = e->parenthis.list.back();
         ast::ReturnTypes return_types;
@@ -263,6 +264,16 @@ namespace generator {
         for (auto& i : return_types) {
           ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
           e->returnTypes.insert(a);
+          if (i.IsValue(ast::ObjectValue::ARRAY)) {
+            ast::ObjectValueContainer::Array arguments;
+            ast::ObjectValueContainer unknown_argument;
+            arguments.push_back(unknown_argument);
+            arguments.push_back(unknown_argument);
+            ast::ObjectValueContainer subtype;
+            i.SetSubtype(subtype);
+            ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, arguments, subtype);
+            e->returnTypes.insert(a);
+          }
         }
       } else {
         ast::Expression& x = e->parenthis.list.back();

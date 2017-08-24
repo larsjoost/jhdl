@@ -38,11 +38,37 @@ namespace ast {
     bool operator==(const ObjectValueContainer& other) const {
       return equals(other);
     }
-    bool IsValue(ObjectValue other) {return a_value == other; }
+    void set(const ObjectValueContainer& other) {
+      a_value = other.a_value;
+      a_type_name = other.a_type_name;
+      a_arguments = other.a_arguments;
+      a_subtype = other.a_subtype;
+    }
+    bool IsValue(ObjectValue other) const {return a_value == other; }
     Array& GetSubtype() { return a_subtype; }
+    bool SetSubtype(ObjectValueContainer& other) const {
+      bool result = true;
+      if (a_subtype.empty()) {
+        other = ObjectValueContainer();
+        result = false;
+      } else {
+        assert(a_subtype.size() == 1);
+        other.set(a_subtype.front());
+      }
+      return result;
+    }
     Array& GetArguments() { return a_arguments; }
     ObjectValue GetValue() const { return a_value; }
     std::string GetTypeName() const { return a_type_name; }
+    bool HasArray(ObjectValue value) const {
+      return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
+    }
+    void set(ObjectValue value, const Array& arguments, const ObjectValueContainer& subtype) {
+      assert(HasArray(value));
+      a_value = value;
+      a_subtype.push_back(subtype);
+      a_arguments = arguments;
+    }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
       assert(!HasArray(value));
       if (value == ObjectValue::BOOLEAN) {
@@ -52,15 +78,6 @@ namespace ast {
         a_value = value;
         a_type_name = type_name;
       }
-    }
-    bool HasArray(ObjectValue value) const {
-      return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
-    }
-    void set(ObjectValue value, const Array& arguments, const ObjectValueContainer& subtype) {
-      assert(HasArray(value));
-      a_value = value;
-      a_subtype.push_back(subtype);
-      a_arguments = arguments;
     }
     ObjectValueContainer(ObjectValue value, const Array& arguments, const ObjectValueContainer& subtype) {
       set(value, arguments, subtype);
