@@ -129,7 +129,7 @@ namespace vhdl {
         if (!L.isNull()) {
           x = STD::STANDARD::STRING::IMAGE(L.ALL()) + x;
         }
-        STD::STANDARD::STRING s(x.size());
+        STD::STANDARD::STRING s;
         s = x;
         L.set(s);
       }

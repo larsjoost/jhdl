@@ -23,7 +23,7 @@ EOF
 
 MAX_ERRORS=5
 
-while getopts ":hd:f:o:vx" OPTION
+while getopts ":hd:f:o:vxy" OPTION
 do
     case $OPTION in
         h)
@@ -44,6 +44,9 @@ do
             ;;
         x)
             DEBUG="gdb --args"
+            ;;
+        y)
+            DEBUG="valgrind --leak-check=yes"
             ;;
         ?)
             echo "Unknown option $OPTARG"
