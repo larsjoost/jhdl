@@ -20,6 +20,13 @@ architecture rtl of test is
   type c_t is array (enum_t) of string(1 to C_SIZE);
   
   constant C_B : b_t := (1, 2);
+
+  type d_t is array(enum_t, enum_t) of integer;
+
+  constant C_D : d_t := (
+    (1, 2),
+    (3, 4)
+    );
   
 begin
 
@@ -32,6 +39,9 @@ begin
     a := "00001";
     c(FIRST) := "Testing";
     wait for 10 ns;
+    if (C_D(FIRST, SECOND) /= 2) then
+      report "C_D(FIRST, SECOND) = " & integer'image(C_D(FIRST, SECOND)) & ", but expected 2" severity failure;
+    end if;   
     if (a(4) /= '1') then
       report "a = " & bit'image(a(4)) & ", but expected = '1'" severity failure;
     end if;
