@@ -37,7 +37,7 @@ namespace vhdl {
         a_value[i] = a_subtype;
       }
     }
-    
+
     void construct(const Array<RANGE, SUBTYPE>& other) {
       construct(other.a_left, other.a_right);
     }
@@ -102,14 +102,36 @@ namespace vhdl {
     }
 
     Array(std::vector<int> vec) { // : a_debug("Array") {
-      assert(LENGTH() == vec.size());
+      if (LENGTH() != vec.size()) {
+        std::cerr << "Warning: Array of length " << LENGTH() << " assigned to integer array of length " << vec.size() << std::endl;
+        int l = 0;
+        int r = vec.size() - 1;
+        RANGE left;
+        RANGE right;
+        left = l;
+        right = r;
+        construct(left, right);
+      }
+      for (int i = 0; i < LENGTH(); i++) {
+        std::cout << "Array: vec[" << i << "] = " << vec[i] << std::endl;
+        a_value[i] = vec[i];
+      }
     }
     
     void init(std::vector<SUBTYPE> vec) {
       //      a_debug.functionStart("init");
-      assert(LENGTH() == vec.size());
-      assert(a_value.size() == vec.size());
-      for (int i = 0; i < vec.size(); i++) {
+      if (LENGTH() != vec.size()) {
+        std::cerr << "Warning: Array of length " << LENGTH() << " assigned to array of length " << vec.size() << std::endl;
+        int l = 0;
+        int r = vec.size() - 1;
+        RANGE left;
+        RANGE right;
+        left = l;
+        right = r;
+        construct(left, right);
+      }
+      for (int i = 0; i < LENGTH(); i++) {
+        std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
         a_value[i] = vec[i];
       }
       //      a_debug.functionEnd("init");

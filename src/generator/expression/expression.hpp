@@ -275,9 +275,9 @@ namespace generator {
         assert(args.size() == arguments->associationElements.list.size());
         auto it = args.begin();
         for (auto& i : arguments->associationElements.list) {
-          parameters = delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback);
+          parameters += delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback);
           it++;
-          delimiter = ", ";
+          delimiter = "][";
         }
         name += "[" + parameters + "]";
       }
@@ -368,13 +368,13 @@ namespace generator {
     if (e) {
       debug.functionStart("expressionTermToString");
       if (!e->parenthis.list.empty()) {
-        result = expectedType.IsValue(ast::ObjectValue::ARRAY) ? "{" : "(";
+        result = expectedType.IsValue(ast::ObjectValue::ARRAY) ? "{{" : "(";
         std::string d;
         for (ast::Expression& i : e->parenthis.list) {
           result += d + expressionToString(&i, expectedType, sensitivityListCallback);
           d = ", ";
         }
-        result += expectedType.IsValue(ast::ObjectValue::ARRAY) ? "}" : ")";
+        result += expectedType.IsValue(ast::ObjectValue::ARRAY) ? "}}" : ")";
       } else if (e->physical) {
         debug.debug("Physical");
         result = physicalToString(e->physical);

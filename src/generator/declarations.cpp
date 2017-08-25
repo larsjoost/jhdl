@@ -115,6 +115,8 @@ namespace generator {
                                std::string& subtype, ast::ObjectValueContainer::Array& arguments) {
     debug.functionStart("printArrayType");
     parm.println("");
+    std::string array_template_start;
+    std::string array_template_end;
     for (auto& r : definition.list) { 
       ast::ObjectValue type;
       std::string range;
@@ -140,9 +142,19 @@ namespace generator {
           type = database_result.object->type.GetValue();
         }
       }
-      parm.println("using " + name + " = Array<" + range + ", " + subtype + ">;");
-      PrintFactory(parm, name, r.range, r.identifier, type, r.subtype);
+      array_template_start = "Array<" + range + ", " + array_template_start;
+      array_template_end += ">";
     }
+    parm.println("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
+    auto f = [&](parameters& parm, std::string& left, std::string& right) {
+      for (auto& r : definition.list) { 
+        if (r.range) {
+          ast::ObjectValueContainer t(ast::ObjectValue::INTEGER);
+          rangeToString(r.range, left, right, t);
+        }
+      }
+    };
+    PrintFactory(parm, name, f);
     debug.functionEnd("printArrayType");
   }
   
