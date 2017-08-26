@@ -131,6 +131,7 @@ namespace vhdl {
         }
         STD::STANDARD::STRING s;
         s = x;
+        // std::cout << "s = " << s.IMAGE(s) << std::endl;
         L.set(s);
       }
       /*

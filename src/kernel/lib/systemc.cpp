@@ -192,13 +192,13 @@ int run(int argc, char* argv[]) {
     getline(std::cin, command);
     continueRun = parseCommand(command);
   }
-  
+
   while (!methods.empty()) {
     sc_thread* t = methods.back();
     delete t;
     methods.pop_back();
   }
-  
+
   return exitCode;
   
 }

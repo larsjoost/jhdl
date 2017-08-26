@@ -281,7 +281,7 @@ public:
   }
 
   void construct(sc_access<T> s) {
-    set(s.a_value);
+    a_value.construct(s.a_value);
   }
   
   bool isNull() {

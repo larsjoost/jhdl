@@ -66,8 +66,11 @@ namespace vhdl {
 
     void set(Array<RANGE, SUBTYPE>& other) {
       //      a_debug.functionStart("set(other = " + other.toString() + ")");
-      assert(LENGTH() == other.LENGTH());
-      for (int i = 0; i < LENGTH() - 1; i++) {
+      if (LENGTH() != other.LENGTH()) {
+        construct(1, other.LENGTH());
+      }
+      for (int i = 0; i < LENGTH(); i++) {
+        // std::cout << "set[" << i << "] = " << other.a_value[i].IMAGE(other.a_value[i]) << std::endl;
         a_value[i] = other.a_value[i];
       }
       //      a_debug.functionEnd("set");
@@ -103,7 +106,7 @@ namespace vhdl {
 
     Array(std::vector<int> vec) { // : a_debug("Array") {
       if (LENGTH() != vec.size()) {
-        std::cerr << "Warning: Array of length " << LENGTH() << " assigned to integer array of length " << vec.size() << std::endl;
+        std::cout << "Warning: Array of length " << LENGTH() << " assigned to integer array of length " << vec.size() << std::endl;
         int l = 0;
         int r = vec.size() - 1;
         RANGE left;
@@ -121,7 +124,7 @@ namespace vhdl {
     void init(std::vector<SUBTYPE> vec) {
       //      a_debug.functionStart("init");
       if (LENGTH() != vec.size()) {
-        std::cerr << "Warning: Array of length " << LENGTH() << " assigned to array of length " << vec.size() << std::endl;
+        std::cout << "Warning: Array of length " << LENGTH() << " assigned to array of length " << vec.size() << std::endl;
         int l = 0;
         int r = vec.size() - 1;
         RANGE left;
