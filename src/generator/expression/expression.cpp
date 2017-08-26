@@ -396,12 +396,7 @@ namespace generator {
         case ast::ObjectValue::INTEGER: 
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
-        case ast::ObjectValue::ARRAY: {
-          ast::ObjectValueContainer::Array& subtype = type.GetSubtype();
-          assert(subtype.size() == 1);
-          result = subtype.front();
-          break;
-        }
+        case ast::ObjectValue::ARRAY: result = type.GetArgument(); break;
         default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
         };
       } else {

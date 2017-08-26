@@ -27,6 +27,8 @@ namespace ast {
     ObjectValue a_value = ObjectValue::UNKNOWN;
     std::string a_type_name;
   public:
+    class IndexOutOfRange {
+    };
     typedef std::list<ObjectValueContainer> Array;
   private:
     Array a_arguments;
@@ -68,7 +70,19 @@ namespace ast {
       return result;
     }
     Array& GetArguments() { return a_arguments; }
+    ObjectValueContainer& GetArgument(const int index = 0) {
+      if (a_arguments.size() > index) { 
+        auto it = a_arguments.begin();
+        std::advance(it, index);
+        return *it;
+      }
+      throw IndexOutOfRange();
+    }
     ObjectValue GetValue() const { return a_value; }
+    ObjectValue GetArgumentValue(const int index = 0) {
+      ObjectValueContainer& o = GetArgument(index);
+      return o.GetValue();
+    }
     std::string GetTypeName() const { return a_type_name; }
     bool HasArray(ObjectValue value) const {
       return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
