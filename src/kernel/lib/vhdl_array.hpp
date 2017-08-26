@@ -113,7 +113,7 @@ namespace vhdl {
         construct(left, right);
       }
       for (int i = 0; i < LENGTH(); i++) {
-        std::cout << "Array: vec[" << i << "] = " << vec[i] << std::endl;
+        // std::cout << "Array: vec[" << i << "] = " << vec[i] << std::endl;
         a_value[i] = vec[i];
       }
     }
@@ -131,7 +131,7 @@ namespace vhdl {
         construct(left, right);
       }
       for (int i = 0; i < LENGTH(); i++) {
-        std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
+        // std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
         a_value[i] = vec[i];
       }
       //      a_debug.functionEnd("init");

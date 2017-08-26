@@ -86,7 +86,8 @@ namespace generator {
     };
     DatabaseResult object;
     if (a_database->findOne(object, name, valid)) {
-      name = objectToString(object, p->arguments, [&](DatabaseResult& e) {});
+      bool double_brackets = false;
+      name = objectToString(object, p->arguments, [&](DatabaseResult& e) {}, double_brackets);
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
       a_database->printAllObjects(name);

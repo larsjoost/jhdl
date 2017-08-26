@@ -79,11 +79,13 @@ namespace generator {
     template <typename Func>
     std::string expressionToString(ast::Expression* e,
                                    ast::ObjectValueContainer& expectedType,
-                                   Func sensitivityListCallback);
+                                   Func sensitivityListCallback,
+                                   const bool double_brackets);
     template <typename Func>
     std::string expressionTermToString(ast::ExpressionTerm* e,
                                        ast::ObjectValueContainer& expectedType,
-                                       Func sensitivityListCallback);
+                                       Func sensitivityListCallback,
+                                       const bool double_brackets);
   public:
     template <typename Func>
     std::string BasicIdentifierToString(ast::BasicIdentifier* identifier,
@@ -95,7 +97,8 @@ namespace generator {
     template <typename Func>
     std::string objectToString(DatabaseResult& object,
                                ast::AssociationList* arguments,
-                               Func sensitivityListCallback);
+                               Func sensitivityListCallback,
+                               const bool double_brackets);
     
     ast::ObjectValueContainer getAttributeType(ast::ObjectValueContainer& type,
                                                std::string attributeName);
@@ -167,8 +170,9 @@ namespace generator {
                                          ast::ObjectValueContainer& expectedType,
                                          Func sensitivityListCallback) {
     debug.functionStart("toString");
-    CollectAllReturnTypes(e, expectedType); 
-    std::string s = expressionToString(e, expectedType, sensitivityListCallback);
+    CollectAllReturnTypes(e, expectedType);
+    bool double_brackets = !expectedType.IsArrayWithDimension(1);
+    std::string s = expressionToString(e, expectedType, sensitivityListCallback, double_brackets);
     debug.functionEnd("toString");
     return s;
   }
@@ -207,7 +211,8 @@ namespace generator {
       int associationElementNumber = 0;
       for (auto& e : l->associationElements.list) {
         try {
-          std::string actualPart = expressionToString(e.actualPart, interfaceElement.type, sensitivityListCallback);
+          bool double_brackets = false;
+          std::string actualPart = expressionToString(e.actualPart, interfaceElement.type, sensitivityListCallback, double_brackets);
           debug.debug("Actual part = " + actualPart);
           if (e.formalPart) {
             std::string formalPart = e.formalPart->toString(true);
@@ -262,7 +267,8 @@ namespace generator {
   template <typename Func>
   std::string ExpressionParser::objectToString(DatabaseResult& object,
                                                ast::AssociationList* arguments,
-                                               Func sensitivityListCallback) {
+                                               Func sensitivityListCallback,
+                                               const bool double_brackets) {
     debug.functionStart("objectToString");
     assert(object.object);
     std::string name = a_name_converter->GetName(object);
@@ -275,7 +281,7 @@ namespace generator {
         assert(args.size() == arguments->associationElements.list.size());
         auto it = args.begin();
         for (auto& i : arguments->associationElements.list) {
-          parameters += delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback);
+          parameters += delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback, double_brackets);
           it++;
           delimiter = "][";
         }
@@ -325,8 +331,9 @@ namespace generator {
         }
       }
     } else {
-      std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback);
-      std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback);
+      bool double_brackets = false;
+      std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback, double_brackets);
+      std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback, double_brackets);
       std::string op;
       translateOperator(e->op->op, op);
       result = term + " " + op + " " + expr;
@@ -338,13 +345,14 @@ namespace generator {
   template <typename Func>
   std::string ExpressionParser::expressionToString(ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
-                                                   Func sensitivityListCallback) {
+                                                   Func sensitivityListCallback,
+                                                   const bool double_brackets) {
     debug.functionStart("expressionToString");
     assert(e);
     std::string result;
     if (e->unaryOperator) {
       std::string op;
-      std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback);
+      std::string expr = expressionToString(e->expression, expectedType, sensitivityListCallback, double_brackets);
       switch (e->unaryOperator->op) {
       case ::ast::UnaryOperator::NOT: {op = "!"; break;}
       case ::ast::UnaryOperator::MINUS: {op = "-"; break;}
@@ -354,7 +362,7 @@ namespace generator {
     } else if (e->op) {
       result = operationToString(e, expectedType, sensitivityListCallback);
     } else {
-      result = expressionTermToString(e->term, expectedType, sensitivityListCallback);
+      result = expressionTermToString(e->term, expectedType, sensitivityListCallback, double_brackets);
     }
     debug.functionEnd("expressionToString = " + result);
     return result;
@@ -363,18 +371,21 @@ namespace generator {
   template <typename Func>
   std::string ExpressionParser::expressionTermToString(ast::ExpressionTerm* e,
                                                        ast::ObjectValueContainer& expectedType,
-                                                       Func sensitivityListCallback) {
+                                                       Func sensitivityListCallback,
+                                                       const bool double_brackets) {
     std::string result = "";
     if (e) {
       debug.functionStart("expressionTermToString");
       if (!e->parenthis.list.empty()) {
-        result = expectedType.IsValue(ast::ObjectValue::ARRAY) ? "{{" : "(";
+        bool array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
         std::string d;
         for (ast::Expression& i : e->parenthis.list) {
-          result += d + expressionToString(&i, expectedType, sensitivityListCallback);
+          result += d + expressionToString(&i, expectedType, sensitivityListCallback, double_brackets);
           d = ", ";
         }
-        result += expectedType.IsValue(ast::ObjectValue::ARRAY) ? "}}" : ")";
+        std::string left = array_type ? (double_brackets ? "{{" : "{") : "(";
+        std::string right = array_type ? (double_brackets ? "}}" : "}") : ")";
+        result = left + result + right;
       } else if (e->physical) {
         debug.debug("Physical");
         result = physicalToString(e->physical);
@@ -418,7 +429,8 @@ namespace generator {
         if (object.object->id == ast::ObjectType::SIGNAL) {
           sensitivityListCallback(object);
         }
-        name = objectToString(object, identifier->arguments, sensitivityListCallback);
+        bool double_brackets = false;
+        name = objectToString(object, identifier->arguments, sensitivityListCallback, double_brackets);
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
@@ -453,8 +465,9 @@ namespace generator {
       std::string a = "";
       if (associationList) {
         std::string delimiter = "";
+        bool double_brackets = false;
         for (auto& i : associationList->associationElements.list) {
-          a = delimiter + expressionToString(i.actualPart, match.object->type, sensitivityListCallback);
+          a = delimiter + expressionToString(i.actualPart, match.object->type, sensitivityListCallback, double_brackets);
           delimiter = ", ";
         }
       }

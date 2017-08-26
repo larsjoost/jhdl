@@ -45,6 +45,16 @@ namespace ast {
       a_subtype = other.a_subtype;
     }
     bool IsValue(ObjectValue other) const {return a_value == other; }
+    bool IsArrayWithDimension(const int dim) {
+      return IsValue(ObjectValue::ARRAY) && (a_arguments.size() == 1) && !SubtypeIsValue(ObjectValue::ARRAY);
+    }
+    bool SubtypeIsValue(ObjectValue other) const {
+      ObjectValueContainer x;
+      if (a_subtype.size() == 1) {
+        return a_subtype.front().IsValue(other);
+      }
+      return false;
+    }
     Array& GetSubtype() { return a_subtype; }
     bool SetSubtype(ObjectValueContainer& other) const {
       bool result = true;
