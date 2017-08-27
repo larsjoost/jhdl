@@ -72,6 +72,33 @@ namespace generator {
     }
   }
 
+  bool parameters::IsAreaValid(Area a) {
+    debug.functionStart("IsAreaValid(a = " + ToString(a) + ")");
+    debug.debug("File select = " + ToString(a_file_select));
+    bool result = false;
+    switch (a_file_select) {
+    case FileSelect::HEADER: {
+      switch (a) {
+      case Area::DECLARATION:
+      case Area::CONSTRUCTOR:
+      case Area::IMPLEMENTATION:
+      case Area::INITIALIZER_LIST:
+      case Area::INITIALIZATION:
+      case Area::INTERFACE: result = true; break;
+      }
+      break;
+    }
+    case FileSelect::SOURCE: {
+      switch (a) {
+      case Area::IMPLEMENTATION: result = true; break;
+      }
+      break;
+    }
+    }
+    assert(result);
+    debug.functionEnd("IsAreaValid");
+  }
+  
   void parameters::println(Area a, std::string text) {
     debug.functionStart("println");
     Area current_area = GetArea();
@@ -80,11 +107,12 @@ namespace generator {
     } else {
       debug.debug("[" + ToString(GetArea()) + ", " + ToString(a) + "]: " + text, true, Output::Color::GREEN);
       if (!isQuiet()) {
-        assert(current_area != Area::NONE);
-        auto f = [&](Areas& areas, AreaInfo& info) {
-          info.lines.push_back(text);
-        };
-        AccessAreaInfo(a, f);
+        if (IsAreaValid(a)) {
+          auto f = [&](Areas& areas, AreaInfo& info) {
+            info.lines.push_back(text);
+          };
+          AccessAreaInfo(a, f);
+        }
       }
     }
     debug.functionEnd("println");

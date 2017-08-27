@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     bool verbose = false;
     
@@ -120,6 +120,7 @@ namespace generator {
     void open(std::string filename);
     void close();
     void println(std::string message);
+    bool IsAreaValid(Area a);
     void println(Area a, std::string message);
     Area SetArea(Area area);
     Area GetArea();
