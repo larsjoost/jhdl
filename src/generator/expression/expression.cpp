@@ -5,7 +5,7 @@
 namespace generator {
 
   std::string ExpressionParser::ReturnTypesToString(const ast::ReturnTypes& return_types) {
-    debug.functionStart("ReturnTypesToString", true);
+    debug.functionStart("ReturnTypesToString");
     std::string found = "";
     std::string delimiter;
     for (auto& i : return_types) {
@@ -242,7 +242,7 @@ namespace generator {
       exceptions.printError("Could not resolve type of expression", e->text);
     }
     return_types.insert(e->returnTypes.begin(), e->returnTypes.end());
-    debug.functionEnd("expressionReturnTypes");
+    debug.functionEnd("expressionReturnTypes = " + ReturnTypesToString(return_types));
   }
 
   std::string ExpressionParser::physicalToString(ast::Physical* physical) {
@@ -329,7 +329,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("toObjectArguments");
+    debug.functionEnd("toObjectArguments = " + result.toString());
     return result;
   }
  
@@ -351,8 +351,8 @@ namespace generator {
 
   void ExpressionParser::BasicIdentifierReturnTypes(ast::BasicIdentifier* b,
                                                     ast::ReturnTypes& return_types) {
-    debug.functionStart("BasicIdentifierReturnTypes");
     std::string name = b->text.toString(true);
+    debug.functionStart("BasicIdentifierReturnTypes(name = " + name + ")", true);
     if (b->attribute) {
       std::string attribute = b->attribute->toString(true);
       AttributeReturnTypes(name, attribute, b->arguments, b->returnTypes);
@@ -369,7 +369,7 @@ namespace generator {
       a_database->printAllObjects(name);
     }
     return_types.insert(b->returnTypes.begin(), b->returnTypes.end());
-    debug.functionEnd("BasicIdentifierReturnTypes");
+    debug.functionEnd("BasicIdentifierReturnTypes = " + ReturnTypesToString(return_types));
   }
 
   bool ExpressionParser::getStaticAttributeType(std::string attributeName, ast::ObjectValueContainer& result) {
@@ -389,6 +389,7 @@ namespace generator {
   
   ast::ObjectValueContainer ExpressionParser::getAttributeType(ast::ObjectValueContainer& type,
                                                                std::string attributeName) {
+    debug.functionStart("getAttributeType(attributeName = " + attributeName + ")");
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(attributeName, result)) {
       if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
@@ -403,6 +404,7 @@ namespace generator {
         exceptions.printError("Could not resolve type of attribute " + attributeName);
       }
     }
+    debug.functionEnd("getAttributeType = " + result.toString());
     return result;
   }
   

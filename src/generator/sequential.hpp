@@ -22,9 +22,7 @@ namespace generator {
         typeName = a_name_converter.GetName(object);
         if (iteration->range_attribute) {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
-            ast::ObjectValueContainer::Array& subtype = object.object->type.GetSubtype();
-            assert(subtype.size() == 1);
-            type = subtype.front();
+            type = object.object->type.GetArgument();
           } else {
             exceptions.printError(name + " must be array type to use range attribute", &iteration->identifier->text);
           }

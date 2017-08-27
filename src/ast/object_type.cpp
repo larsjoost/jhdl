@@ -241,7 +241,7 @@ namespace ast {
   }
 
   std::string ObjectArgument::toString() {
-    return name + " : " + type_name + "(" + type.toString() + ") := " + (default_value ? "[DEFAULT]" : "");
+    return name + (type_name.empty() ? " " : " : " + type_name) + "(" + type.toString() + ")" + (default_value ? " := [DEFAULT]" : "");
   }
   
   std::string ObjectArguments::toString() {

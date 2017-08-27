@@ -14,7 +14,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     bool verbose = false;
     Database* a_database;
@@ -190,13 +190,13 @@ namespace generator {
     
   template<typename Func>
   void ExpressionParser::GetReturnTypes(const std::string& name, Func valid, ast::ReturnTypes& return_types) {
-    debug.functionStart("GetReturnTypes");
+    debug.functionStart("GetReturnTypes(name = " + name + ")");
     DatabaseResults objects;
     a_database->findAll(objects, name);
     for (auto& i : objects) {
       return_types.insert(i.object->type);
     }
-    debug.functionEnd("GetReturnTypes");
+    debug.functionEnd("GetReturnTypes = " + ReturnTypesToString(return_types));
   }
   
   
@@ -414,7 +414,7 @@ namespace generator {
                                                         Func sensitivityListCallback) {
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments = toObjectArguments(identifier->arguments);
-    debug.functionStart("BasicIdentifierToString(name = " + name + "(" + arguments.toString() + ")" +
+    debug.functionStart("BasicIdentifierToString(name = " + name + (arguments.empty() ? "" : "(" + arguments.toString() + ")") +
                         ", expected_type = " + (expected_type ? expected_type->toString() : "None") + ")", true);
     if (identifier->attribute) {
       name = attributeToString(name, arguments, *expected_type, identifier->attribute,
