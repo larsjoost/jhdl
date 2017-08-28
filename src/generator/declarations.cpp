@@ -499,15 +499,16 @@ namespace generator {
               parm.println("// Foreign function call");
               parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
             }
-            FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
+            sequentialStatements(parm, f->body->sequentialStatements);
             parm.println("}");
           } else {
             parm.println(returnTypeName + " run" + interface_with_initialization + ";");
           }
         };
         DefineObject(parm, false, class_name, type, "", NULL,
-                     NULL, NULL, createBody, createDefinition, false, true);
-      }
+                     &f->body->declarations, NULL, createBody, createDefinition, false, true);
+      } 
+      parm.SetArea(parameters::Area::DECLARATION);
       std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";
       parm.println(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
                    translatedName + interface +
@@ -527,17 +528,6 @@ namespace generator {
     }
   }
 
-  void SystemC::FunctionBody(parameters& parm, ast::List<ast::Declaration>& d,
-                             ast::List<ast::SequentialStatement>& s) {
-    debug.functionStart("FunctionBody");
-    parm.SetArea(parameters::Area::DECLARATION);
-    declarations(parm, d);
-    parm.SetArea(parameters::Area::IMPLEMENTATION);
-    sequentialStatements(parm, s);
-    parm.SetArea(parameters::Area::DECLARATION);
-    debug.functionEnd("FunctionBody");
-  }
-  
   void SystemC::ForeignAttribute(parameters& parm, ast::Attribute* a) {
     debug.functionStart("ForeignAttribute");
     ast::Text* text = a->item ? &a->item->text : &a->string->text;

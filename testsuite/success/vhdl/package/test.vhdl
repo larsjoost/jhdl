@@ -16,10 +16,10 @@ package body test_pkg is
     a : integer;
     b : integer)
     return integer IS
-    variable c : integer;
+    variable dummy : integer;
   begin
-    c := a + b;
-    return c;
+    dummy := a + b;
+    return dummy;
   end function test_function;
 
 end package body test_pkg;

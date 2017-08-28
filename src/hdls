@@ -73,7 +73,8 @@ make -C $KERNEL > /dev/null
 
 filebase="${FILENAME%.*}"
 $SCRIPTPATH/hdlc.sh -f $FILENAME 
-sourcefile="$filebase.hpp"
+headerfile="$filebase.hpp"
+sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)
 templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
 targets=""
@@ -84,10 +85,10 @@ for i in $templatefiles; do
         cp $i $target
         MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
         sed -i "s/%module%/${MODULE_NAME}/g" $target
-        sed -i "s/%include%/$sourcefile/g" $target
+        sed -i "s/%include%/$headerfile/g" $target
     fi
 done
-g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase $sourcefile $targets $KERNEL/*.o $SCRIPTPATH/../std/*.o
+g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase $headerfile $sourcefile $targets $KERNEL/*.o $SCRIPTPATH/../std/*.o *.o 
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

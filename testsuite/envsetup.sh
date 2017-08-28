@@ -7,7 +7,7 @@ SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 OPTIONS=""
 
 if [ -z "$JHDL" ]; then
-    JHDL=$SCRIPTPATH/../src
+    JHDL=$SCRIPTPATH/..
 fi
 
 if [ -n "$VERBOSE" ]; then
@@ -15,9 +15,9 @@ if [ -n "$VERBOSE" ]; then
 fi
 
 function analyse {
-    $JHDL/hdlc.sh -f $1 $VERBOSE
+    $JHDL/src/hdlc.sh -f $1 $VERBOSE
 }
 
 function simulate {
-    $JHDL/hdls -f $@ $HDLS_DEBUG
+    $JHDL/src/hdls -f $@ $HDLS_DEBUG
 }

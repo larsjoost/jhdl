@@ -170,7 +170,6 @@ namespace generator {
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
     std::string FunctionReturn(parameters& parm, ast::FunctionDeclaration* f);
     void function_declarations(parameters& parm, ast::FunctionDeclaration* f);
-    void FunctionBody(parameters& parm, ast::List<ast::Declaration>& d, ast::List<ast::SequentialStatement>& s);
     void procedure_declarations(parameters& parm, ast::ProcedureDeclaration* f);
     std::string AttributeName(ast::Attribute* a);
     void ForeignAttribute(parameters& parm, ast::Attribute* a);
