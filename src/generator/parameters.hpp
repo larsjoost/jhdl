@@ -53,7 +53,13 @@ namespace generator {
       AreaInfoMap map;
       std::list<std::string> buffer;
       ~Areas() {
-        assert(buffer.empty());
+        if (!buffer.empty()) {
+          std::cerr << "Buffer is not empty. Contents:" << std::endl;
+          for (auto& i : buffer) {
+            std::cerr << i << std::endl;
+          }
+          assert(false);
+        }
       }
     };
     
@@ -104,8 +110,6 @@ namespace generator {
       }
     }
 
-    void Flush(Area a);
-
   public:
     parameters() : debug("parameters") {
       selectFile(FileSelect::SOURCE);
@@ -120,9 +124,10 @@ namespace generator {
     void open(std::string filename);
     void close();
     void println(std::string message);
-    bool IsAreaValid(Area a);
     void println(Area a, std::string message);
     Area SetArea(Area area);
+    void Flush(Area a);
+    void Flush();
     Area GetArea();
     bool IsArea(Area area);
     std::string ToList(Area a);

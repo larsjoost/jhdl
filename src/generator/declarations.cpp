@@ -485,43 +485,34 @@ namespace generator {
       std::string run_prefix;
       std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
       std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
-      bool implementation = parm.isFile(parameters::FileSelect::SOURCE);
-      auto createDefinition = [&](parameters& parm) {
-        PrintInterface(parm, f->interface);
-      };
-      auto createBody = [&](parameters& parm) {
-        if (f->body) {
-          std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
-          std::string interface = implementation ? interface_without_initialization : interface_with_initialization;
-          parm.println(returnTypeName + " " + run_prefix + "run" + interface + "{");
-          if (!foreignFunctionName.empty()) {
-            parm.println("// Foreign function call");
-            parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+      bool package_body = parent_info.type == ast::ObjectType::PACKAGE_BODY;
+      if (f->body) {
+        auto createDefinition = [&](parameters& parm) {
+          PrintInterface(parm, f->interface);
+        };
+        auto createBody = [&](parameters& parm) {
+          if (f->body) {
+            std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
+            std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
+            parm.println(returnTypeName + " " + run_prefix + "run" + interface + "{");
+            if (!foreignFunctionName.empty()) {
+              parm.println("// Foreign function call");
+              parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+            }
+            FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
+            parm.println("}");
+          } else {
+            parm.println(returnTypeName + " run" + interface_with_initialization + ";");
           }
-          FunctionBody(parm, f->body->declarations, f->body->sequentialStatements);
-          parm.println("}");
-        } else {
-          parm.println(returnTypeName + " run" + interface_with_initialization + ";");
-        }
-      };
-      if (implementation) {
-        if (f->body) {
-          run_prefix = prefix;
-          descendHierarchy(parm, parent_info.name, parameters::Area::IMPLEMENTATION, type);
-          StoreInterfaceInDatabase(parm, f->interface);
-          createBody(parm);
-          ascendHierarchy(parm);
-        }
-      } else {
+        };
         DefineObject(parm, false, class_name, type, "", NULL,
                      NULL, NULL, createBody, createDefinition, false, true);
       }
-      std::string interface = "(" + GetInterface(parm, f->interface, !implementation, class_name + "::") + ")";
-      bool define_function = implementation || f->body;
-      parm.println((operatorName ? "friend " : "") + returnTypeName + " " +
-                   (implementation ? ObjectName(parent_info) + "::" : "") + translatedName + interface +
-                   (define_function ? "{" : ";"));
-      if (define_function) {
+      std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";
+      parm.println(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
+                   translatedName + interface +
+                   (f->body ? "{" : ";"));
+      if (f->body) {
         parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;
         for (auto& i : arguments.list) {

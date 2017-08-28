@@ -65,40 +65,13 @@ namespace generator {
   }
 
   void parameters::println(std::string text) {
-    debug.debug("[" + ToString(GetArea()) + "]: " + text, true, Output::Color::GREEN);
     if (!isQuiet()) {
+      debug.debug("[" + ToString(GetArea()) + "]: " + text, true, Output::Color::GREEN);
       Areas& a = GetAreas().front();
       a.buffer.push_back(text);
     }
   }
 
-  bool parameters::IsAreaValid(Area a) {
-    debug.functionStart("IsAreaValid(a = " + ToString(a) + ")");
-    debug.debug("File select = " + ToString(a_file_select));
-    bool result = false;
-    switch (a_file_select) {
-    case FileSelect::HEADER: {
-      switch (a) {
-      case Area::DECLARATION:
-      case Area::CONSTRUCTOR:
-      case Area::IMPLEMENTATION:
-      case Area::INITIALIZER_LIST:
-      case Area::INITIALIZATION:
-      case Area::INTERFACE: result = true; break;
-      }
-      break;
-    }
-    case FileSelect::SOURCE: {
-      switch (a) {
-      case Area::IMPLEMENTATION: result = true; break;
-      }
-      break;
-    }
-    }
-    assert(result);
-    debug.functionEnd("IsAreaValid");
-  }
-  
   void parameters::println(Area a, std::string text) {
     debug.functionStart("println");
     Area current_area = GetArea();
@@ -107,12 +80,10 @@ namespace generator {
     } else {
       debug.debug("[" + ToString(GetArea()) + ", " + ToString(a) + "]: " + text, true, Output::Color::GREEN);
       if (!isQuiet()) {
-        if (IsAreaValid(a)) {
-          auto f = [&](Areas& areas, AreaInfo& info) {
-            info.lines.push_back(text);
-          };
-          AccessAreaInfo(a, f);
-        }
+        auto f = [&](Areas& areas, AreaInfo& info) {
+          info.lines.push_back(text);
+        };
+        AccessAreaInfo(a, f);
       }
     }
     debug.functionEnd("println");
@@ -162,6 +133,14 @@ namespace generator {
     if (verbose) {println("// Descend Hierarchy (" + std::to_string(GetAreas().size()) + ") " + ToString(area));}
   }
 
+  void parameters::Flush() {
+    Areas& current_area = GetAreas().front();
+    while(!current_area.buffer.empty()) {
+      write(current_area.buffer.front());
+      current_area.buffer.pop_front();
+    }
+  }
+  
   void parameters::AscendHierarchy() {
     if (verbose) {println("// Ascend Hierarchy (" + std::to_string(GetAreas().size() + 1) + ")");}
     bool ok = true;
@@ -176,10 +155,7 @@ namespace generator {
       };
       AccessAreaInfo(area, f, true);
     } else {
-      while(!current_area.buffer.empty()) {
-        write(current_area.buffer.front());
-        current_area.buffer.pop_front();
-      }
+      Flush();
     }
     GetAreas().pop_front();
     if (area == GetArea() && GetAreas().size() > 0) {

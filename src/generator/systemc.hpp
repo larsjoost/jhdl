@@ -105,7 +105,7 @@ namespace generator {
     void variableAssignment(parameters& parm, ast::VariableAssignment* p);
 
     // includes.cpp
-    void loadPackage(std::string package, std::string library,
+    void loadPackage(parameters& parm, std::string package, std::string library,
                      std::string identifier, ast::Text* text = NULL);
     void includes(parameters& parm, ast::ContextClause* contextClause, bool load);
 

@@ -5,15 +5,16 @@
 
 namespace generator {
 
-  void SystemC::loadPackage(std::string package,
+  void SystemC::loadPackage(parameters& parm, std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
     debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")");
     bool packageExists = a_database.exists(library, package);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
-      parameters parm;
+      parm.SetArea(parameters::Area::TOP);
       parsePackage(parm, package, library);
+      parm.Flush();
       packageExists = a_database.exists(library, package);
     }
     if (packageExists) {
@@ -36,12 +37,8 @@ namespace generator {
 	std::string package = useClause.package->toString(true);
 	if (!load) {
 	  std::string identifier = useClause.identifier->toString(true);
-	  loadPackage(package, library, identifier, &useClause.package->text);
-	} else {
-	  std::string p = package;
-	  transform(p.begin(), p.end(), p.begin(), tolower);
-	  parm.println("#include \"" + p + ".hpp\"");
-	}
+	  loadPackage(parm, package, library, identifier, &useClause.package->text);
+	} 
       }
       debug.functionEnd("includes");
     }    

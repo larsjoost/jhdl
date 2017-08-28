@@ -24,29 +24,31 @@ namespace generator {
     filename = designFile.filename;
     parameters parm;
     parm.open(filename); 
+    transform(library.begin(), library.end(), library.begin(), toupper);
+    parm.selectFile(parameters::FileSelect::SOURCE);
+    parm.SetArea(parameters::Area::TOP);
+    parm.println("#include \"" + parm.getFileName(parameters::FileSelect::HEADER) + "\"");
+    namespaceStart(parm, library);
+    parm.selectFile(parameters::FileSelect::HEADER);
+    parm.SetArea(parameters::Area::TOP);
+    std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
+    parm.println("#ifndef " + ifndefName);
+    parm.println("#define " + ifndefName);
+    parm.println("");
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
         exceptions.printError("Could not open configuration file " + configurationFilename);
       } else {
         if (designFile.IsLanguage(ast::DesignFile::LanguageType::VHDL)) {
-          loadPackage("STANDARD", "STD", "ALL");
+          loadPackage(parm, "STANDARD", "STD", "ALL");
         }
       }
     }
-    transform(library.begin(), library.end(), library.begin(), toupper);
-    parm.selectFile(parameters::FileSelect::SOURCE);
-    parm.println("#include \"" + parm.getFileName(parameters::FileSelect::HEADER) + "\"");
-    namespaceStart(parm, library);
-    parm.selectFile(parameters::FileSelect::HEADER);
-    std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
-    parm.println("#ifndef " + ifndefName);
-    parm.println("#define " + ifndefName);
-    parm.println("");
+    parm.SetArea(parameters::Area::TOP);
     parm.println("#include <string.h>");
     parm.println("#include \"systemc.h\"");
     parm.println("#include \"vhdl.h\"");
-    parm.println("#include \"standard.hpp\"");
     if (!standardPackage) {parm.println("#include \"standard.h\"");}
     parse(parm, designFile, library);
     parm.selectFile(parameters::FileSelect::HEADER);
@@ -70,23 +72,27 @@ namespace generator {
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     debug.functionStart("parse(designFile = " + designFile.filename + ", library = " + library + ")");
+    parm.SetArea(parameters::Area::TOP);
     if (!designFile.designUnits.list.empty()) {
       for (ast::DesignUnit& it : designFile.designUnits.list) {
         includes(parm, it.module.contextClause, true);
       }
-      namespaceStart(parm, library);
+      parm.SetArea(parameters::Area::TOP);
       bool unit_found = false;
       for (ast::DesignUnit& it : designFile.designUnits.list) {
         debug.debug("Parsing design unit");
+        parm.SetArea(parameters::Area::TOP);
         includes(parm, it.module.contextClause, false);
+        parm.SetArea(parameters::Area::TOP);
+        namespaceStart(parm, library);
         if (it.module.package) {packageDeclaration(parm, it.module.package, library); unit_found = true;}
         if (it.module.interface) {interfaceDeclaration(parm, it.module.interface, library); unit_found = true;}
         if (it.module.implementation) {implementationDeclaration(parm, it.module.implementation, library); unit_found = true;}
+        namespaceEnd(parm);
       }
       if (!unit_found) {
         exceptions.printWarning("Did not find any design units in file " + designFile.filename);
       }
-      namespaceEnd(parm);
     } else {
       exceptions.printWarning("Did not find anything in file " + designFile.filename); 
     }
@@ -102,8 +108,9 @@ namespace generator {
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
 	if (filename != this->filename) {
+	  parm.println(parameters::Area::TOP, "#include \"" + parm.replaceFileExtension(filename, ".hpp") + "\"");
 	  filename = stdPath + "/" + filename;
-	  parser::DesignFile parserDesignFile;
+          parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
 	  parameters p;
           p.setQuiet(true);
@@ -117,7 +124,7 @@ namespace generator {
     } else {
       exceptions.printError("Could not find library \"" + library + "\" is [hdl] section of config file");
     }
-    debug.functionEnd("parsePackage");
+    debug.functionEnd("parsePackage(name = " + name + ")");
   }
   
 
@@ -216,24 +223,29 @@ namespace generator {
     debug.functionStart("packageDeclaration(library = " + library +
                         ", packet = " + name + ", type = " + toString(type) + ")");
     topHierarchyStart(parm, library, name, type, filename);
+    parameters::FileSelect file_select;
+    if (type == ast::ObjectType::PACKAGE_BODY) {
+      file_select = parm.selectFile(parameters::FileSelect::SOURCE);
+    }
+    std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
+    auto createDefinition = [&](parameters& parm) {
+    };
+    auto createBody = [&](parameters& parm) {
+    };
+    bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
+    DefineObject(parm, true, name, type, derived_name, NULL,
+                 &package->declarations, NULL, createBody, createDefinition, false, true);
     if (type == ast::ObjectType::PACKAGE) {
-      parm.println("struct " + ObjectName(type, name) + " {");
-      parm.SetArea(parameters::Area::DECLARATION);
-      declarations(parm, package->declarations);
-      parm.SetArea(parameters::Area::DECLARATION);
-      parm.println("};");
       parm.println("using " + name + " = " + ObjectName(type, name) + ";");
-      parm.println("}");
+    }
+    parm.println("}");
+    if (type == ast::ObjectType::PACKAGE) {
       parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
-      parm.println("namespace " + library + " {");
     } else {
-      parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
-      parm.SetArea(parameters::Area::DECLARATION);
-      declarations(parm, package->declarations);
-      parm.SetArea(parameters::Area::DECLARATION);
-      parm.println("}");
-      parm.println(library + "::" + name + " " + library + "_" + name + ";");
-      parm.println("namespace " + library + " {");
+      parm.println(library + "::" + name + " " + library + "_" + name + " = " + library + "::" + ObjectName(type, name) + "();");
+    }
+    parm.println("namespace " + library + " {");
+    if (type == ast::ObjectType::PACKAGE_BODY) {
       parm.selectFile(file_select);
     }
     topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
