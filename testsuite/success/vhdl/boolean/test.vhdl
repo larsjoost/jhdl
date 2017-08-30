@@ -11,6 +11,7 @@ architecture rtl of test is
 begin
 
   process is
+    variable b, c : boolean;
   begin  -- process
     a <= false;
     wait for 5 ns;
@@ -23,6 +24,11 @@ begin
     report "A = " & boolean'image(a) severity note;
     if (not a) then
       report "A test failed" severity failure;
+    end if;
+    b := true;
+    c := b;
+    if (not (b and c)) then
+      report "b and c test failed" severity failure;
     end if;
     finish(0);
   end process;
