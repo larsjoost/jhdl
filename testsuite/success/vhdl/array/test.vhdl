@@ -27,6 +27,8 @@ architecture rtl of test is
     (1, 2),
     (3, 4)
     );
+
+  type e_t is array (natural range <>) of bit;
   
 begin
 
@@ -35,6 +37,7 @@ begin
 --    variable a : bit_vector(0 to 5);
     variable a : a_t;
     variable c : c_t;
+    variable e : e_t(0 to SIZE - 1);
   begin  -- process
     a := "00001";
     c(FIRST) := "Testing";
