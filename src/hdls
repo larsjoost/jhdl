@@ -67,6 +67,10 @@ if [ -z "$FILENAME" ]; then
     exit 1
 fi
 
+if [ -z "$JHDL" ]; then
+    export JHDL=$SCRIPTPATH/../
+fi
+
 KERNEL=$SCRIPTPATH/kernel/lib
 
 make -C $KERNEL > /dev/null
@@ -77,10 +81,8 @@ headerfile="$filebase.hpp"
 sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)
 templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
-targets=""
 for i in $templatefiles; do
     target=$targetdir/$(basename "$i")
-    targets="$targets $target"
     if [ ! -e $target ]; then
         cp $i $target
         MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
@@ -88,7 +90,10 @@ for i in $templatefiles; do
         sed -i "s/%include%/$headerfile/g" $target
     fi
 done
-g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase $headerfile $sourcefile $targets $KERNEL/*.o $SCRIPTPATH/../std/*.o *.o 
+make -C $targetdir
+set -x
+g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
+set +x
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

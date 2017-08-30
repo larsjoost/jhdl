@@ -80,6 +80,8 @@ package STANDARD is
   
   function NOW return DELAY_LENGTH;
   
+  attribute foreign of NOW : function is "vhdl_now";
+
   -- predefined numeric subtypes:
   
   subtype NATURAL is INTEGER range 0 to INTEGER'HIGH;
@@ -92,3 +94,12 @@ package STANDARD is
   
 end STANDARD;
 
+package body STANDARD is
+
+  function NOW
+    return delay_length is
+  begin  -- function NOW
+    
+  end function NOW;
+
+end package body STANDARD;

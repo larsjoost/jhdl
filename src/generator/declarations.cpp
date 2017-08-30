@@ -461,6 +461,7 @@ namespace generator {
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
     if (f) {
       debug.functionStart("function_declarations");
+      parm.package_contains_function = true;
       bool operatorName = (f->name == NULL);
       ast::Text& text = operatorName ? f->string->text : f->name->text;
       std::string origin_name = operatorName ? f->string->toString(true) : f->name->toString(true);
@@ -512,7 +513,7 @@ namespace generator {
       std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";
       parm.println(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
                    translatedName + interface +
-                   (f->body ? "{" : ";"));
+                   (f->body ? "{" : " = 0;"));
       if (f->body) {
         parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
         std::string s,d;

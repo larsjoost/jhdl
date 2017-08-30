@@ -28,7 +28,7 @@ namespace generator {
     parm.selectFile(parameters::FileSelect::SOURCE);
     parm.SetArea(parameters::Area::TOP);
     parm.println("#include \"" + parm.getFileName(parameters::FileSelect::HEADER) + "\"");
-    namespaceStart(parm, library);
+    parm.println("namespace vhdl {");
     parm.selectFile(parameters::FileSelect::HEADER);
     parm.SetArea(parameters::Area::TOP);
     std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
@@ -54,7 +54,7 @@ namespace generator {
     parm.selectFile(parameters::FileSelect::HEADER);
     parm.println("#endif");
     parm.selectFile(parameters::FileSelect::SOURCE);
-    namespaceEnd(parm);
+    parm.println("}");
     parm.close();
   }
 
@@ -223,31 +223,29 @@ namespace generator {
     debug.functionStart("packageDeclaration(library = " + library +
                         ", packet = " + name + ", type = " + toString(type) + ")");
     topHierarchyStart(parm, library, name, type, filename);
-    parameters::FileSelect file_select;
-    if (type == ast::ObjectType::PACKAGE_BODY) {
-      file_select = parm.selectFile(parameters::FileSelect::SOURCE);
-    }
+    parm.package_contains_function = false;
     std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
     auto createDefinition = [&](parameters& parm) {
+      parm.println(ObjectName(type, name) + "() {init();}");
     };
     auto createBody = [&](parameters& parm) {
     };
     bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
     DefineObject(parm, true, name, type, derived_name, NULL,
                  &package->declarations, NULL, createBody, createDefinition, false, true);
-    if (type == ast::ObjectType::PACKAGE) {
+    bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
+    if (declare_object) {
       parm.println("using " + name + " = " + ObjectName(type, name) + ";");
     }
     parm.println("}");
-    if (type == ast::ObjectType::PACKAGE) {
-      parm.println("extern " + library + "::" + name + " " + library + "_" + name + ";");
-    } else {
-      parm.println(library + "::" + name + " " + library + "_" + name + " = " + library + "::" + ObjectName(type, name) + "();");
-    }
-    parm.println("namespace " + library + " {");
-    if (type == ast::ObjectType::PACKAGE_BODY) {
+    if (declare_object) {
+      std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
+      parm.println("extern " + declaration);
+      parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
+      parm.println(declaration);
       parm.selectFile(file_select);
     }
+    parm.println("namespace " + library + " {");
     topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
     debug.functionEnd("packageDeclaration");
   }
@@ -298,7 +296,6 @@ namespace generator {
       }
       auto declaration_callback = [&](parameters& parm) {
         std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
-        parm.println("");
         parm.println(ObjectName(type, name) + "(const char* name)" +
                      (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
       };

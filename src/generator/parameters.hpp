@@ -118,6 +118,7 @@ namespace generator {
       DescendHierarchy(Area::TOP);
     };
     int index;
+    bool package_contains_function;
     ast::ObjectValueContainer returnType;
     void DescendHierarchy(Area area);
     void AscendHierarchy();

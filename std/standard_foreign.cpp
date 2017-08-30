@@ -5,8 +5,6 @@
 
 namespace vhdl {
   
-  STD::STANDARD STD_STANDARD;
-
   bool wait(const STD::STANDARD::TIME& t) {
     STD::STANDARD s;
     return (s.NOW() == t);
@@ -21,8 +19,7 @@ namespace vhdl {
     STD::STANDARD::SEVERITY_LEVEL s = severity;
     *o << s.IMAGE(s) << ": " << message << ::std::endl;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
-      STD::Package_ENV e;
-      e.FINISH(1);
+      STD_ENV.FINISH(1);
     } 
   }
 
@@ -42,8 +39,8 @@ namespace vhdl {
  
   namespace STD {
 
-    STANDARD::DELAY_LENGTH STANDARD::NOW() {
-      STANDARD::DELAY_LENGTH t = {sc_now.value, convert(sc_now.unit)};
+    Package_STANDARD::DELAY_LENGTH Package_STANDARD::vhdl_now() {
+      DELAY_LENGTH t = {sc_now.value, convert(sc_now.unit)};
       return t;
     }
 
