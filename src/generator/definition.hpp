@@ -29,10 +29,10 @@ namespace generator {
     }
     parm.SetArea(parameters::Area::DECLARATION);
     debug.debug("Declaration");
+    declarationCallback(parm);
     if (declarationList) {
       declarations(parm, *declarationList);
     }
-    declarationCallback(parm);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements, init_enable);
     parm.SetArea(parameters::Area::DECLARATION);
     parm.SetArea(parameters::Area::IMPLEMENTATION);
