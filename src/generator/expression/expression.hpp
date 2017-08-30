@@ -158,6 +158,9 @@ namespace generator {
 
     bool CollectAllReturnTypes(ast::Expression* e,
                                ast::ObjectValueContainer& expectedType);
+
+    bool CollectUniqueReturnType(ast::Expression* e,
+                                 ast::ObjectValueContainer& type);
     
     bool translateOperator(std::string& op, std::string& translatedOp);
 

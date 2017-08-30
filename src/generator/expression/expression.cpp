@@ -55,6 +55,13 @@ namespace generator {
     debug.functionEnd("CollectAllReturnTypes");
     return ok;
   }
+
+  bool ExpressionParser::CollectUniqueReturnType(ast::Expression* e,
+                                                 ast::ObjectValueContainer& type) {
+    ast::ReturnTypes return_types;
+    ExpressionReturnTypes(e, return_types);   
+    return UniqueReturnType(return_types, type, e->text);
+  }
   
   std::string ExpressionParser::toString(ast::Expression* e, ast::ObjectValueContainer& expectedType) {
     debug.functionStart("toString");
@@ -107,7 +114,7 @@ namespace generator {
     } else {
       if (expectedReturnType) {
         ast::ObjectValueContainer* type;
-        if (e->type.GetValue() == ast::ObjectValue::ARRAY) {
+        if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.empty()) {
           ast::ObjectValueContainer::Array& subtype = e->type.GetSubtype();
           assert(subtype.size() == 1);
           type = &subtype.front();
@@ -377,7 +384,8 @@ namespace generator {
     static ast::ObjectValueContainer string_type = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, enum_type); 
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
       {{"IMAGE", string_type},
-       {"LENGTH", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)}};
+       {"LENGTH", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)},
+       {"EVENT", ast::ObjectValueContainer(ast::ObjectValue::BOOLEAN)}};
     bool found = false;
     auto i = fixedAttributeTypes.find(attributeName);
     if (i != fixedAttributeTypes.end()) {
@@ -392,7 +400,7 @@ namespace generator {
     debug.functionStart("getAttributeType(attributeName = " + attributeName + ")");
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(attributeName, result)) {
-      if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT") {
+      if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT" || attributeName == "LAST_VALUE") {
         switch(type.GetValue()) {
         case ast::ObjectValue::INTEGER: 
         case ast::ObjectValue::PHYSICAL: 
