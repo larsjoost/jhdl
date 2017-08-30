@@ -90,10 +90,9 @@ for i in $templatefiles; do
         sed -i "s/%include%/$headerfile/g" $target
     fi
 done
+cp $SCRIPTPATH/templates/Makefile $targetdir
 make -C $targetdir
-set -x
 g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
-set +x
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME
