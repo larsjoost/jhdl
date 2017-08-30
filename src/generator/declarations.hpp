@@ -18,7 +18,11 @@ namespace generator {
         std::string factory_arguments;
         if (v->type->range) {
           std::string left, right;
-          rangeToString(v->type->range, left, right, database_result.object->type);
+          ast::ObjectValueContainer i = database_result.object->type;
+          try {
+            i = database_result.object->type.GetArgument();
+          } catch (ast::ObjectValueContainer::IndexOutOfRange e) {}
+          rangeToString(v->type->range, left, right, i);
           factory_arguments = left + ", " + right;
         }
         std::string factory_name = a_name_converter.GetName(database_result, true, factory_arguments);
@@ -61,13 +65,11 @@ namespace generator {
       parm.println(parameters::Area::DECLARATION, name + " x" + arguments + ";");
       parm.println(parameters::Area::DECLARATION, "return x;");
       parm.println(parameters::Area::DECLARATION, "}");
-      if (arguments_exists) {
-        parm.println(parameters::Area::DECLARATION, "template <typename T>");
-        parm.println(parameters::Area::DECLARATION, name + " create(T left, T right) {");
-        parm.println(parameters::Area::DECLARATION, name + " x(left, right);");
-        parm.println(parameters::Area::DECLARATION, "return x;");
-        parm.println(parameters::Area::DECLARATION, "}");
-      }
+      parm.println(parameters::Area::DECLARATION, "template <typename T>");
+      parm.println(parameters::Area::DECLARATION, name + " create(T left, T right) {");
+      parm.println(parameters::Area::DECLARATION, name + " x(left, right);");
+      parm.println(parameters::Area::DECLARATION, "return x;");
+      parm.println(parameters::Area::DECLARATION, "}");
     };
     PrintTypeObject(parm, name, f);
     parm.println(parameters::Area::DECLARATION, "Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");

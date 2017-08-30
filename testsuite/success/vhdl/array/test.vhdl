@@ -42,6 +42,9 @@ begin
     a := "00001";
     c(FIRST) := "Testing";
     wait for 10 ns;
+    if (e'length /= SIZE) then
+      report "e'length = " & integer'image(e'length) & ", but expected = " & integer'image(SIZE) severity failure;
+    end if;   
     if (C_D(FIRST, SECOND) /= 2) then
       report "C_D(FIRST, SECOND) = " & integer'image(C_D(FIRST, SECOND)) & ", but expected 2" severity failure;
     end if;   

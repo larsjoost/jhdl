@@ -13,7 +13,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     bool verbose = false;
     
