@@ -15,7 +15,7 @@ namespace ast {
     
     Text text;
 
-    List<Choises> choises;
+    Choises* choises;
     Expression* expression;
     
   };

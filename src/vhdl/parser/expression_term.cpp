@@ -8,6 +8,7 @@
 #include "character.hpp"
 #include "string.hpp"
 #include "physical.hpp"
+#include "element_association.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -16,7 +17,7 @@ namespace vhdl {
       text = scanner->getCurrentTextPosition();
       if (scanner->optional("(")) {
         do {
-          parenthis.add(scanner->expect<Expression>());
+          parenthis.add(scanner->expect<ElementAssociation>());
         } while (scanner->optional(","));
         scanner->expect(")");
       } else {
