@@ -167,44 +167,51 @@ namespace generator {
     }
     return result;
   }
-  
+
   void ExpressionParser::GetStandardOperatorReturnTypes(const std::string& name,
                                                         const ast::ObjectValueContainer& l,
                                                         const ast::ObjectValueContainer& r,
                                                         ast::ReturnTypes& return_types) {
-    struct Map {
+    debug.functionStart("GetStandardOperatorReturnTypes(name = " + name + ", l = " + l.toString() + ", r = " + r.toString() + ")");
+    struct OperatorReturnMap {
       ast::ObjectValue l;
       ast::ObjectValue r;
       ast::ObjectValue result;};
     const static ast::ObjectValue BOOLEAN = ast::ObjectValue::BOOLEAN;
     const static ast::ObjectValue ARRAY = ast::ObjectValue::ARRAY;
     const static ast::ObjectValue DONT_CARE = ast::ObjectValue::DONT_CARE;
-    static std::unordered_map<std::string, Map> translate =
-      { {"&", {ARRAY, ARRAY, ARRAY}},
+    static std::unordered_map<std::string, OperatorReturnMap> translate =
+      {
+        {"&", {ARRAY, ARRAY, ARRAY}},
 	{"+", {DONT_CARE, DONT_CARE, DONT_CARE}},
 	{"-", {DONT_CARE, DONT_CARE, DONT_CARE}},
 	{"=", {DONT_CARE, DONT_CARE, BOOLEAN}},
 	{"/=", {DONT_CARE, DONT_CARE, BOOLEAN}},
 	{"<=", {DONT_CARE, DONT_CARE, BOOLEAN}},
-	{">=", {DONT_CARE, DONT_CARE, BOOLEAN}}
+	{">=", {DONT_CARE, DONT_CARE, BOOLEAN}},
+	{"and", {BOOLEAN, BOOLEAN, BOOLEAN}},
+	{"or", {BOOLEAN, BOOLEAN, BOOLEAN}}
       };
     if (l.GetValue() == r.GetValue()) {
       auto i = translate.find(name);
       if (i != translate.end()) {
-	Map& m = i->second;
-	if ((m.l == DONT_CARE || m.l == l.GetValue()) &&
-	    (m.r == DONT_CARE || m.r == r.GetValue()) &&
+        OperatorReturnMap& map = i->second;
+        ast::ObjectValueContainer lv(map.l);
+        ast::ObjectValueContainer rv(map.r);
+        if ((map.l == DONT_CARE || lv.equals(l)) &&
+            (map.r == DONT_CARE || rv.equals(r)) &&
             l.equals(r)) {
-	  ast::ObjectValueContainer v;
-	  if (m.result == DONT_CARE || m.result == m.l) {
-	    v = l;
-	  } else {
-	    v = ast::ObjectValueContainer(m.result);
-	  }
-	  return_types.insert(v);
-	}
+          ast::ObjectValueContainer v;
+          if (map.result == DONT_CARE || map.result == map.l) {
+            v = l;
+          } else {
+            v = ast::ObjectValueContainer(map.result);
+          }
+          return_types.insert(v);
+        }
       }
     }
+    debug.functionEnd("GetStandardOperatorReturnTypes = " + ReturnTypesToString(return_types));
   }
   
   void ExpressionParser::OperatorReturnTypes(const std::string& name,

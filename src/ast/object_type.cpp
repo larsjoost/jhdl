@@ -112,7 +112,9 @@ namespace ast {
   bool ObjectValueContainer::equals(const ObjectValueContainer& other) const {
     bool verbose = false;
     bool result;
-    if (numberEquals(a_value, other.a_value) || numberEquals(other.a_value, a_value)) {
+    if (a_value == ObjectValue::UNKNOWN || other.a_value == ObjectValue::UNKNOWN) {
+      result = true;
+    } else if (numberEquals(a_value, other.a_value) || numberEquals(other.a_value, a_value)) {
       result = true;
     } else if (a_value != other.a_value) {
       result = false;

@@ -94,7 +94,9 @@ namespace ast {
       a_arguments = arguments;
     }
     ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
-      assert(!HasArray(value));
+      if (HasArray(value)) {
+        a_subtype.push_back(ObjectValueContainer(ObjectValue::UNKNOWN));
+      }
       if (value == ObjectValue::BOOLEAN) {
         a_value = ObjectValue::ENUMERATION;
         a_type_name = "BOOLEAN";
