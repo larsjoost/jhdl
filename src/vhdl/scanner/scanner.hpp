@@ -100,6 +100,7 @@ namespace vhdl {
         VHDL_ROL,
         VHDL_ROR,
         VHDL_ALIAS,
+        VHDL_OTHERS
         NUMBER_OF_KEYWORDS
       };
       
@@ -179,7 +180,9 @@ namespace vhdl {
           {VHDL_SRA, (char *)"sra", 1993},
           {VHDL_ROL, (char *)"rol", 1993},
           {VHDL_ROR, (char *)"ror", 1993},
-          {VHDL_ALIAS, (char *)"alias", 1993}};
+          {VHDL_ALIAS, (char *)"alias", 1993},
+          {VHDL_OTHERS, (char *)"others", 1993}
+        };
         return a;
       }
 
