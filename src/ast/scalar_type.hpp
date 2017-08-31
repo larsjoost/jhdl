@@ -23,6 +23,13 @@ namespace ast {
     SimpleIdentifier* identifier;
     Character* character;
     
+    std::string toString(bool setCase = false) {
+      if (string) {
+        return string->toString();
+      } else if (identifier) {
+        return identifier->toString(setCase);
+      } else { assert(false); }
+    }
   };
 
 }

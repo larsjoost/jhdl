@@ -5,6 +5,7 @@
 #include "simple_identifier.hpp"
 #include "list.hpp"
 #include "string.hpp"
+#include "scalar_type.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -41,7 +42,7 @@ namespace vhdl {
         scanner->error("Did not find attribute class");
       }
       if (scanner->optional(scanner::Scanner::VHDL_IS)) {
-        expression = scanner->expect<String>();
+        expression = scanner->expect<ScalarType>();
       }
       return this;
     }

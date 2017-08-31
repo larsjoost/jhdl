@@ -7,6 +7,7 @@
 #include "string.hpp"
 #include "object_type.hpp"
 #include "string.hpp"
+#include "scalar_type.hpp"
 
 namespace ast {
     
@@ -20,7 +21,7 @@ namespace ast {
     List<SimpleIdentifier>* arguments;
     ObjectType objectType;
     SimpleIdentifier* typeMark;
-    String* expression;
+    ScalarType* expression;
 
     std::string toString(bool setCase = false) {
       return identifier->toString(setCase);
