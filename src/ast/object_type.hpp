@@ -157,6 +157,7 @@ namespace ast {
     void push_back(ObjectArgument& o) {list.push_back(o);}
     bool equals(ObjectArguments& other, bool array_type = false, bool verbose = false);
     bool equals(ObjectValueContainer::Array& other, bool array_type = false, bool verbose = false);
+    bool equals(const ObjectValueContainer& other, bool verbose = false);
     bool ExactMatch(ObjectArguments& other);
     bool empty() { return list.empty(); }
     int size() { return list.size(); }

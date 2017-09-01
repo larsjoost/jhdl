@@ -107,8 +107,11 @@ namespace generator {
                                              ast::ObjectValueContainer* expectedReturnType) {
     debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")");
     bool result;
-    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, debug.IsVerbose())) {
+    bool cast_operation = (e->id == ast::ObjectType::TYPE);
+    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, false, debug.IsVerbose())) {
       result = false;
+    } else if (cast_operation) {
+      result = arguments.equals(e->type, debug.IsVerbose());
     } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, debug.IsVerbose())) {
       result = false;
     } else {
@@ -128,7 +131,6 @@ namespace generator {
         result = true;
       }
     }
-    debug.debug("e = " + e->toString());
     debug.functionEnd("objectWithArguments = " + std::string(result ? "true" : "false"));
     return result;
   }
@@ -136,7 +138,7 @@ namespace generator {
   void ExpressionParser::FunctionReturnTypes(std::string& name,
                                              ast::AssociationList* associationList,
                                              ast::ReturnTypes& return_types) {
-    debug.functionStart("functionReturnTypes");
+    debug.functionStart("functionReturnTypes(name = " + name + ")");
     assert(associationList);
     ast::ObjectArguments arguments = toObjectArguments(associationList);
     auto valid = [&](DatabaseElement* e) {
@@ -145,15 +147,21 @@ namespace generator {
     DatabaseResults objects;
     a_database->findAll(objects, name);
     for (auto& i : objects) {
-      ast::ObjectValueContainer::Array& subtype = i.object->type.GetSubtype();
-      assert(subtype.size() < 2);
-      if (!subtype.empty()) {
-        return_types.insert(subtype.front());
-      } else {
+      debug.debug("Found object: " + i.toString());
+      bool cast_operation = (i.object->id == ast::ObjectType::TYPE);
+      if (cast_operation) {
         return_types.insert(i.object->type);
+      } else {
+        ast::ObjectValueContainer::Array& subtype = i.object->type.GetSubtype();
+        assert(subtype.size() < 2);
+        if (!subtype.empty()) {
+          return_types.insert(subtype.front());
+        } else {
+          return_types.insert(i.object->type);
+        }
       }
     }
-    debug.functionEnd("FunctionReturnTypes");
+    debug.functionEnd("FunctionReturnTypes = " + ReturnTypesToString(return_types));
   }
 
   bool ExpressionParser::translateOperator(std::string& op, std::string& translatedOp) {
@@ -272,8 +280,8 @@ namespace generator {
     assert(e);
     if (!e->parenthis.list.empty()) {
       debug.debug("parenthis size = " + e->parenthis.list.size());
-      if (e->parenthis.list.size() > 1) {
-        ast::ElementAssociation& x = e->parenthis.list.back();
+      ast::ElementAssociation& x = e->parenthis.list.back();
+      if (e->parenthis.list.size() > 1 || x.choises) {
         ast::ReturnTypes return_types;
         ExpressionReturnTypes(x.expression, return_types);
         for (auto& i : return_types) {
@@ -291,7 +299,6 @@ namespace generator {
           }
         }
       } else {
-        ast::ElementAssociation& x = e->parenthis.list.back();
         ExpressionReturnTypes(x.expression, e->returnTypes);
       }
     } else if (e->physical) {

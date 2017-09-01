@@ -277,18 +277,25 @@ namespace generator {
     std::string name = a_name_converter->GetName(object);
     debug.debug("name = " + name + ": " + object.toString());
     if (object.object->type.IsValue(ast::ObjectValue::ARRAY)) {
-      std::string parameters;
       if (arguments) {
-        std::string delimiter = "";
-        ast::ObjectValueContainer::Array& args = object.object->type.GetArguments();
-        assert(args.size() == arguments->associationElements.list.size());
-        auto it = args.begin();
-        for (auto& i : arguments->associationElements.list) {
-          parameters += delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback, double_brackets);
-          it++;
-          delimiter = "][";
+        bool cast_operator = (object.object->id == ast::ObjectType::TYPE);
+        if (cast_operator) {
+          assert(arguments->associationElements.list.size() == 1);
+          ast::Expression* arg = arguments->associationElements.list.front().actualPart;
+          name += "(" + expressionToString(arg, object.object->type, sensitivityListCallback, double_brackets) + ")";
+        } else {
+          std::string parameters;
+          std::string delimiter = "";
+          ast::ObjectValueContainer::Array& args = object.object->type.GetArguments();
+          assert(args.size() == arguments->associationElements.list.size());
+          auto it = args.begin();
+          for (auto& i : arguments->associationElements.list) {
+            parameters += delimiter + expressionToString(i.actualPart, *it, sensitivityListCallback, double_brackets);
+            it++;
+            delimiter = "][";
+          }
+          name += "[" + parameters + "]";
         }
-        name += "[" + parameters + "]";
       }
     } else if (arguments) {
       std::string parameters = parametersToString(object.object->arguments, arguments, sensitivityListCallback);

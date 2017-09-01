@@ -172,7 +172,11 @@ namespace ast {
    */
   
   bool ObjectArguments::equals(ObjectArguments& other, bool array_type, bool verbose) {
-    ObjectArguments& interface = isInterface ? *this : other;
+    if (verbose) {
+      std::cout << "This   = " << this->toString() << std::endl;
+      std::cout << "Other  = " << other.toString() << std::endl;
+    }
+    ObjectArguments& interface   = isInterface ? *this : other;
     ObjectArguments& association = isInterface ? other : *this;
     if (verbose) {
       std::cout << "Interface = " << interface.toString() << std::endl;
@@ -215,7 +219,15 @@ namespace ast {
       ObjectArgument x(i);
       args.list.push_back(x);
     }
-    return this->equals(args, array_type, verbose);
+    return equals(args, array_type, verbose);
+  }
+
+  bool ObjectArguments::equals(const ObjectValueContainer& other, bool verbose) {
+    if (verbose) { std::cout << "equals(other = " << other.toString() << ")" << std::endl; }
+    ObjectArguments args(false);
+    ObjectArgument x(other);
+    args.list.push_back(x);
+    return equals(args, false, verbose);
   }
   
   bool ObjectArguments::ExactMatch(ObjectArguments& other) {
