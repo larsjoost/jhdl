@@ -12,13 +12,13 @@
 
 void usage() {
   version::Version v;
-  printf("hdlc -f <name> [-l <name>] [-s <name>] [-v]\n");
+  std::cout << "hdlc -f <name> [-l <name>] [-s <name>] [-v]" << std::endl;
   std::cout << "Version " << v.version << " (" << v.date << "), id " << v.id << std::endl;
-  printf("  -f <name> : File name\n");
-  printf("  -l <name> : Library name\n");
-  printf("  -c <name> : Configuration file name\n");
-  printf("  -s        : Save library info file\n"); 
-  printf("  -v : Verbose\n");
+  std::cout << "  -f <name> : File name" << std::endl;
+  std::cout << "  -l <name> : Library name (default = work)"  << std::endl;
+  std::cout << "  -c <name> : Configuration file name" << std::endl;
+  std::cout << "  -s        : Save library info file"  << std::endl;
+  std::cout << "  -v : Verbose" << std::endl;
 }
 
 int

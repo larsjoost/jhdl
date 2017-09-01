@@ -108,7 +108,8 @@ namespace generator {
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
 	if (filename != this->filename) {
-	  parm.println(parameters::Area::TOP, "#include \"" + parm.replaceFileExtension(filename, ".hpp") + "\"");
+          std::string hpp_filename = parm.replaceFileExtension(filename, ".hpp");
+	  parm.println(parameters::Area::TOP, "#include \"" + hpp_filename + "\"");
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
