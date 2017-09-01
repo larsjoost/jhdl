@@ -8,7 +8,9 @@
 #include "choises.hpp"
 
 namespace ast {
-    
+
+  class Choises;
+  
   class ElementAssociation {
     
   public:

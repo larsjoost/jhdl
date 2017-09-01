@@ -19,7 +19,7 @@ namespace ast {
     Expression* expression = NULL;
     RangeDirection* discrete_range = NULL;
     SimpleIdentifier* identifier = NULL;
-    bool Others = false;
+    bool others = false;
     
   };
 

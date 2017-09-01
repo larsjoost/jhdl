@@ -9,10 +9,10 @@ namespace vhdl {
   namespace parser {
   
     Choises* Choises::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      text = scanner->getCurrentTextPosition();
       do {
-        choises = scanner->accept<Choise>();
+        choises.add(scanner->accept<Choise>());
       } while (scanner->optional("|"));
+      scanner->accept("=>");
       return this;
     }
 

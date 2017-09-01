@@ -9,11 +9,8 @@ namespace vhdl {
   namespace parser {
   
     ElementAssociation* ElementAssociation::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      text = scanner->getCurrentTextPosition();
-      do {
-        choises = scanner->optional<Choises>();
-        expression = scanner->expect<Expression>();
-      } while (scanner->optional(","));
+      choises = scanner->optional<Choises>();
+      expression = scanner->expect<Expression>();
       return this;
     }
 

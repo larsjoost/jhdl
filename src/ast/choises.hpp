@@ -7,7 +7,9 @@
 #include "choise.hpp"
 
 namespace ast {
-    
+
+  class Choise;
+  
   class Choises {
     
   public:

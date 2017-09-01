@@ -100,7 +100,7 @@ namespace vhdl {
         VHDL_ROL,
         VHDL_ROR,
         VHDL_ALIAS,
-        VHDL_OTHERS
+        VHDL_OTHERS,
         NUMBER_OF_KEYWORDS
       };
       

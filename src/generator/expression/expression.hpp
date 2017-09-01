@@ -382,8 +382,8 @@ namespace generator {
       if (!e->parenthis.list.empty()) {
         bool array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
         std::string d;
-        for (ast::Expression& i : e->parenthis.list) {
-          result += d + expressionToString(&i, expectedType, sensitivityListCallback, double_brackets);
+        for (ast::ElementAssociation& i : e->parenthis.list) {
+          result += d + expressionToString(i.expression, expectedType, sensitivityListCallback, double_brackets);
           d = ", ";
         }
         std::string left = array_type ? (double_brackets ? "{{" : "{") : "(";

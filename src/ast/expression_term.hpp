@@ -11,13 +11,14 @@
 #include "basic_identifier.hpp"
 #include "physical.hpp"
 #include "character.hpp"
-
+#include "element_association.hpp"
 
 namespace ast {
 
   class BasicIdentifier;
   class Physical;
-
+  class ElementAssociation;
+  
   class ExpressionTerm {
     
   public:
@@ -26,7 +27,7 @@ namespace ast {
 
     Text* text;
 
-    List<Expression> parenthis;
+    List<ElementAssociation> parenthis;
 
     Physical* physical = NULL;
     Number* number = NULL;

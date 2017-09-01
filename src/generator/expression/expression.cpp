@@ -273,9 +273,9 @@ namespace generator {
     if (!e->parenthis.list.empty()) {
       debug.debug("parenthis size = " + e->parenthis.list.size());
       if (e->parenthis.list.size() > 1) {
-        ast::Expression& x = e->parenthis.list.back();
+        ast::ElementAssociation& x = e->parenthis.list.back();
         ast::ReturnTypes return_types;
-        ExpressionReturnTypes(&x, return_types);
+        ExpressionReturnTypes(x.expression, return_types);
         for (auto& i : return_types) {
           ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
           e->returnTypes.insert(a);
@@ -291,8 +291,8 @@ namespace generator {
           }
         }
       } else {
-        ast::Expression& x = e->parenthis.list.back();
-        ExpressionReturnTypes(&x, e->returnTypes);
+        ast::ElementAssociation& x = e->parenthis.list.back();
+        ExpressionReturnTypes(x.expression, e->returnTypes);
       }
     } else if (e->physical) {
       e->returnTypes.insert(ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true)));
