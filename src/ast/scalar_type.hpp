@@ -23,9 +23,9 @@ namespace ast {
     SimpleIdentifier* identifier;
     Character* character;
     
-    std::string toString(bool setCase = false) {
+    std::string toString(bool setCase = false, bool removeQuotationMarks = false) {
       if (string) {
-        return string->toString();
+        return string->toString(removeQuotationMarks);
       } else if (identifier) {
         return identifier->toString(setCase);
       } else { assert(false); }

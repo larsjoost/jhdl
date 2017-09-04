@@ -97,11 +97,12 @@ namespace vhdl {
         a_value = char_position(c);
       }
     }
+  public:
+
     void set(T e) {
       a_value = enum_position(e);
     }
     
-  public:
     int a_value = 0;
     int a_left = 0;
     int a_right = 0;
@@ -200,6 +201,13 @@ namespace vhdl {
 
   };
 
+  template <typename T, class E>
+  bool Neq(const Enumeration<T, E>& l, T r) {
+    Enumeration<T, E> o;
+    o.set(r);
+    return l != o;
+  }
+  
 }
 
 #endif

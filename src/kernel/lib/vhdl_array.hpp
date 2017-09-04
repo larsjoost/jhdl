@@ -186,6 +186,8 @@ namespace vhdl {
 
   };
 
+  std::string Concat(std::string l, std::string r);
+    
 }
 
 #endif

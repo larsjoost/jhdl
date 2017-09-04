@@ -2,6 +2,7 @@ SOURCE := $(wildcard *.cpp)
 VHDL_SOURCE := $(wildcard *.vhd)
 VHDL_HPP := $(VHDL_SOURCE:.vhd=.hpp)
 VHDL_CPP := $(VHDL_SOURCE:.vhd=.cpp)
+VHDL_INC := $(VHDL_SOURCE:.vhd=.i)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
@@ -9,11 +10,15 @@ CXXFLAGS := -std=c++14 -g -MMD -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
 
 all: $(OBJS)
 
-$(VHDL_HPP): $(VHDL_SOURCE) ../src/hdlc
+hpp: $(VHDL_HPP)
+
+%.hpp: %.vhd 
 	../src/hdlc.sh -f $< -l ieee -s 
 
-%.o: %.cpp $(VHDL_HPP) 
-	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib 
+%.o: %.cpp %.hpp 
+	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib $(VHDL_INCLUDES)
+
+-include $(VHDL_INC)
 
 -include $(DEPS)
 

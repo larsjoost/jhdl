@@ -416,7 +416,7 @@ namespace generator {
   }
 
   std::string SystemC::AttributeName(ast::Attribute* a) {
-    return a->expression->toString(true);
+    return a->expression->toString(true, true);
   }
   
   std::string SystemC::FunctionAttribute(parameters& parm,
@@ -472,8 +472,7 @@ namespace generator {
       std::string translatedName = origin_name;
       std::string class_name = origin_name;
       if (operatorName) {
-        a_expression.translateOperator(origin_name, translatedName);
-        translatedName = "operator " + translatedName;
+        translatedName = a_expression.TranslateOperator(origin_name);
         class_name = "line" + std::to_string(text.getLine());
       } 
       ast::ObjectArguments arguments(true);

@@ -162,7 +162,7 @@ namespace generator {
     bool CollectUniqueReturnType(ast::Expression* e,
                                  ast::ObjectValueContainer& type);
     
-    bool translateOperator(std::string& op, std::string& translatedOp);
+    std::string TranslateOperator(const std::string& op);
 
     bool UniqueReturnType(ast::ReturnTypes& return_types, ast::ObjectValueContainer& type, ast::Text* text);
   
@@ -344,9 +344,8 @@ namespace generator {
       bool double_brackets = false;
       std::string term = expressionTermToString(e->term, typePairs.back().left, sensitivityListCallback, double_brackets);
       std::string expr = expressionToString(e->expression, typePairs.back().right, sensitivityListCallback, double_brackets);
-      std::string op;
-      translateOperator(e->op->op, op);
-      result = term + " " + op + " " + expr;
+      std::string op = TranslateOperator(e->op->op);
+      result = op + "(" + term + ", " + expr + ")";
     }
     debug.functionEnd("operationToString");
     return result;
