@@ -60,7 +60,7 @@ namespace generator {
     
     bool verbose = false;
 
-    std::string filename;
+    std::string a_filename;
 
     parameters headerParameters;
     parameters sourceParameters;

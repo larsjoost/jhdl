@@ -5,6 +5,8 @@
 
 #include "../ast/object_type.hpp"
 
+#include "info_writer.hpp"
+
 #include <string>
 #include <fstream>
 #include <unordered_map>
@@ -16,6 +18,8 @@ namespace generator {
     Debug<false> debug;
 
     bool verbose = false;
+
+    InfoWriter a_info_writer;
     
   public:
     
@@ -139,7 +143,11 @@ namespace generator {
     std::string getFileName(FileSelect s); 
     std::string replaceFileExtension(std::string filename, std::string extension);
     std::string baseName(std::string filename);
- };
+
+    void SetPackageName(const std::string& path, const std::string& name) {
+      a_info_writer.SetPackageName(path, name);
+    }
+  };
 
 }
 

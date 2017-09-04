@@ -21,9 +21,9 @@ namespace generator {
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                          bool standardPackage) {
     debug.functionStart("SystemC");
-    filename = designFile.filename;
+    a_filename = designFile.filename;
     parameters parm;
-    parm.open(filename); 
+    parm.open(a_filename); 
     transform(library.begin(), library.end(), library.begin(), toupper);
     parm.selectFile(parameters::FileSelect::SOURCE);
     parm.SetArea(parameters::Area::TOP);
@@ -31,7 +31,7 @@ namespace generator {
     parm.println("namespace vhdl {");
     parm.selectFile(parameters::FileSelect::HEADER);
     parm.SetArea(parameters::Area::TOP);
-    std::string ifndefName = library + "_" + parm.baseName(filename) + "_HPP";
+    std::string ifndefName = library + "_" + parm.baseName(a_filename) + "_HPP";
     parm.println("#ifndef " + ifndefName);
     parm.println("#define " + ifndefName);
     parm.println("");
@@ -107,9 +107,10 @@ namespace generator {
       c.load(stdPath + "/" + libraryInfoFilename);
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
-	if (filename != this->filename) {
+	if (filename != a_filename) {
           std::string hpp_filename = parm.replaceFileExtension(filename, ".hpp");
 	  parm.println(parameters::Area::TOP, "#include \"" + hpp_filename + "\"");
+          parm.SetPackageName(stdPath, filename);
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
@@ -225,7 +226,7 @@ namespace generator {
     ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
     debug.functionStart("packageDeclaration(library = " + library +
                         ", packet = " + name + ", type = " + toString(type) + ")");
-    topHierarchyStart(parm, library, name, type, filename);
+    topHierarchyStart(parm, library, name, type, a_filename);
     parm.package_contains_function = false;
     std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
     auto createDefinition = [&](parameters& parm) {
@@ -257,7 +258,7 @@ namespace generator {
     debug.functionStart("interfaceDeclaration");
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
-    topHierarchyStart(parm, library, name, type, filename);
+    topHierarchyStart(parm, library, name, type, a_filename);
     parm.println("");
     parm.println("class " + ast::toString(type) + "_" + name + " {");
     parm.println("public:");
@@ -289,7 +290,7 @@ namespace generator {
       debug.functionStart("implementationDeclaration");
       std::string name = implementation->name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
-      topHierarchyStart(parm, library, name, type, filename);
+      topHierarchyStart(parm, library, name, type, a_filename);
       if (!a_database.localize(library, name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
                               library + "." + name, &implementation->name->text);

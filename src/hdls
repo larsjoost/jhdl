@@ -92,7 +92,12 @@ for i in $templatefiles; do
 done
 cp $SCRIPTPATH/templates/Makefile $targetdir
 make -C $targetdir
-g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/../std -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
+INCLUDE_PATHS=$(cat $targetdir/$filebase.i)
+INCLUDES=""
+for i in $INCLUDE_PATHS; do
+    INCLUDES+=" -I$i"
+done
+g++ -std=c++14 -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib $INCLUDES -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

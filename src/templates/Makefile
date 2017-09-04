@@ -9,8 +9,10 @@ all: $(OBJS)
 test.hpp: test.vhdl
 	${JHDL}/src/hdlc.sh -f test.vhdl
 
+-include test.i
+
 %.o: %.cpp test.hpp
-	g++ $(CXXFLAGS) -c $< -o $@ $(INC_DIR)
+	g++ $(CXXFLAGS) -c $< -o $@ $(INC_DIR) $(VHDL_INCLUDES)
 
 simulate: %.o
 	${JHDL}/src/hdls -f test.vhdl -d run.do 

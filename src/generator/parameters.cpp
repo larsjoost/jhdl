@@ -26,6 +26,7 @@ namespace generator {
   }
   
   void parameters::open(FileInfo& f, std::string& filename, std::string extension) {
+    a_info_writer.Open(replaceFileExtension(filename, ".i"));
     f.fileName = replaceFileExtension(filename, extension); 
     f.outputFile.open(f.fileName);
   };
@@ -46,6 +47,7 @@ namespace generator {
     selectFile(FileSelect::SOURCE);
     AscendHierarchy();
     sourceFileInfo.outputFile.close();
+    a_info_writer.Close();
     debug.functionEnd("close");
   }
   
