@@ -164,14 +164,15 @@ namespace generator {
     debug.functionEnd("FunctionReturnTypes = " + ReturnTypesToString(return_types));
   }
 
-  bool ExpressionParser::translateOperator(std::string& op, std::string& translatedOp) {
+  std::string ExpressionParser::TranslateOperator(const std::string& op) {
     static std::unordered_map<std::string, std::string> translate =
       { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"} };
     auto i = translate.find(op);
-    bool result = false;
+    std::string result = op;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    result[0] = toupper(result[0]);
     if (i != translate.end()) {
-      translatedOp = i->second;
-      result = true;
+      result  = i->second;
     }
     return result;
   }
