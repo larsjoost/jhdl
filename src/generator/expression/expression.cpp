@@ -166,7 +166,7 @@ namespace generator {
 
   std::string ExpressionParser::TranslateOperator(const std::string& op) {
     static std::unordered_map<std::string, std::string> translate =
-      { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"} };
+      { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"}, {"**", "^"} };
     auto i = translate.find(op);
     std::string result = op;
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);

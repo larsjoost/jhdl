@@ -20,11 +20,11 @@ namespace vhdl {
 
       Scanner() : debug("vhdl::Scanner") {}
       
-      static const int NUMBER_OF_SPECIAL_CHARACTERS = 17;
+      static const int NUMBER_OF_SPECIAL_CHARACTERS = 18;
 
       static char* getSpecialCharacters() {
         static char a[NUMBER_OF_SPECIAL_CHARACTERS] =
-          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-', '[', ']', '|'};
+          {'(', ')', '\'', '=', '>', '<', ';', '.', ':',',', '&', '+', '/', '-', '[', ']', '|', '*'};
         return a;
       }
         

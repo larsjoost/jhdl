@@ -7,8 +7,8 @@ namespace vhdl {
   namespace parser {
   
     ExpressionOperator* ExpressionOperator::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      static const int CHARS_SIZE = 7;
-      static const char* chars[CHARS_SIZE] = {"/=", ">=", "<=", "&", "+", "-", "="};
+      static const int CHARS_SIZE = 9;
+      static const char* chars[CHARS_SIZE] = {"/=", ">=", "<=", "**", "*", "&", "+", "-", "="};
       for (int i=0; i<CHARS_SIZE; i++) {
         if (scanner->optional(chars[i])) {
           op = std::string(chars[i]);
