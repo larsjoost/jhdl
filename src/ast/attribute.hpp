@@ -8,6 +8,7 @@
 #include "object_type.hpp"
 #include "string.hpp"
 #include "scalar_type.hpp"
+#include "return_statement.hpp"
 
 namespace ast {
     
@@ -19,6 +20,7 @@ namespace ast {
     SimpleIdentifier* item;
     String* string;
     List<SimpleIdentifier>* arguments;
+    ReturnStatement* returnStatement;
     ObjectType objectType;
     SimpleIdentifier* typeMark;
     ScalarType* expression;

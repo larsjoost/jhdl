@@ -6,6 +6,7 @@
 #include "list.hpp"
 #include "string.hpp"
 #include "scalar_type.hpp"
+#include "return_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -19,6 +20,7 @@ namespace vhdl {
         }
         if (scanner->optional("[")) {
           arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+          returnStatement = scanner->optional<ReturnStatement>();
           scanner->expect("]");
         }
       }
