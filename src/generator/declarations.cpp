@@ -121,11 +121,15 @@ namespace generator {
       ast::ObjectValue type;
       std::string range;
       if (r.range) {
-        ast::ObjectValueContainer t;
-        a_expression.CollectUniqueReturnType(r.range->left, t);
-        type = t.GetValue();
-        range = "Range<int>";
-        arguments.push_back(t);
+        if (r.range->range_direction_type) {
+          ast::ObjectValueContainer t;
+          a_expression.CollectUniqueReturnType(r.range->range_direction_type->left, t);
+          type = t.GetValue();
+          range = "Range<int>";
+          arguments.push_back(t);
+        } else {
+          assert(false);
+        }
       } else if (r.identifier) {
         DatabaseResult database_result;
         type = ast::ObjectValue::ENUMERATION;
@@ -151,9 +155,13 @@ namespace generator {
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       for (auto& r : definition.list) { 
         if (r.range) {
-          ast::ObjectValueContainer t;
-          a_expression.CollectUniqueReturnType(r.range->left, t);
-          rangeToString(r.range, left, right, t);
+          if (r.range->range_direction_type) {
+            ast::ObjectValueContainer t;
+            a_expression.CollectUniqueReturnType(r.range->range_direction_type->left, t);
+            rangeToString(r.range, left, right, t);
+          } else {
+            assert(false);
+          }
         }
       }
     };

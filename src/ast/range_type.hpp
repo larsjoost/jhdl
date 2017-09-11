@@ -3,7 +3,8 @@
 #define AST_RANGE_TYPE_H_
 
 #include "expression.hpp"
-#include "range_direction.hpp"
+#include "range_direction_type.hpp"
+#include "range_attribute_type.hpp"
 
 namespace ast {
     
@@ -11,9 +12,8 @@ namespace ast {
     
   public:
 
-    Expression* left;
-    RangeDirection* rangeDirection;
-    Expression* right;
+    RangeAttributeType* range_attribute_type = NULL;
+    RangeDirectionType* range_direction_type = NULL;
     
   };
 
