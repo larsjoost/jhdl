@@ -4,6 +4,7 @@
 #include "simple_identifier.hpp"
 #include "expression.hpp"
 #include "signal_assignment.hpp"
+#include "target.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -13,7 +14,7 @@ namespace vhdl {
         label = scanner->accept<SimpleIdentifier>();
         scanner->accept(":");
       }
-      identifier = scanner->accept<SimpleIdentifier>();
+      target = scanner->accept<Target>();
       scanner->accept("<=");
       do {
         ::ast::SignalAssignmentCondition s;

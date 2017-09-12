@@ -7,7 +7,10 @@
 #include "range_attribute_type.hpp"
 
 namespace ast {
-    
+
+  class RangeAttributeType;
+  class RangeDirectionType;
+  
   class RangeType {
     
   public:

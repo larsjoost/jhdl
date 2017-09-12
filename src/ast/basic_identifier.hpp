@@ -10,11 +10,13 @@
 #include "list.hpp"
 #include "expression.hpp"
 #include "association_list.hpp"
+#include "range_type.hpp"
 
 namespace ast {
 
   class Expression;
   class AssociationList;
+  class RangeType;
   
   class BasicIdentifier {
   public:
@@ -25,7 +27,8 @@ namespace ast {
     bool range_attribute = false;
     Text* attribute = NULL; 
     Expression* type_select = NULL;
-    AssociationList* arguments;
+    AssociationList* arguments = NULL;
+    RangeType* range = NULL;
     
     bool equals(BasicIdentifier* b) {
       if (b) {

@@ -36,12 +36,12 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       debug.functionStart("variableAssignment");
-      printSourceLine(parm, p->identifier);
-      ast::ReturnTypes return_types;
-      a_expression.BasicIdentifierReturnTypes(p->identifier, return_types);
-      ast::ObjectValueContainer expectedType;
-      if (a_expression.UniqueReturnType(return_types, expectedType, &p->identifier->text)) {
-        std::string name = a_expression.BasicIdentifierToString(p->identifier);
+      printSourceLine(parm, p->target->identifier);
+      std::string name = p->target->identifier->toString(true);
+      DatabaseResult object;
+      if (a_database.findOne(object, name, ast::ObjectType::VARIABLE)) {  
+        ast::ObjectValueContainer expectedType = object.object->type;
+        std::string name = a_name_converter.GetName(object);
         try {
           parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(p->expression, expectedType) + ";");
         } catch (ExpressionParser::ObjectNotFound e) {

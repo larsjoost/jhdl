@@ -3,7 +3,7 @@
 #define AST_SIGNAL_ASSIGNMENT_H_
 
 #include "signal_assignment_condition.hpp"
-#include "basic_identifier.hpp"
+#include "target.hpp"
 #include "simple_identifier.hpp"
 #include "expression.hpp"
 #include "list.hpp"
@@ -16,7 +16,7 @@ namespace ast {
 
     std::string name = "";
     SimpleIdentifier* label;
-    SimpleIdentifier* identifier;
+    Target* target;
     List<SignalAssignmentCondition> signalAssignmentConditions;
     
   };

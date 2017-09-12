@@ -5,6 +5,7 @@
 #include "association_list.hpp" 
 #include "list.hpp"
 #include "expression.hpp"
+#include "range_type.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -24,7 +25,9 @@ namespace vhdl {
         }
       } 
       if (expect_parenthis && scanner->optional("(")) {
-        arguments = scanner->optional<AssociationList>();
+        (
+         (range = scanner->optional<RangeType>()) ||
+         (arguments = scanner->optional<AssociationList>()));
         scanner->expect(")");
       }
     }

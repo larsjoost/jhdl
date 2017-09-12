@@ -47,8 +47,8 @@ namespace generator {
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
     if (p) {
       debug.functionStart("signalAssignment");
-      printSourceLine(parm, p->identifier);
-      std::string name = p->identifier->toString(true);
+      printSourceLine(parm, p->target->identifier);
+      std::string name = p->target->identifier->toString(true);
       DatabaseResult object;
       if (a_database.findOne(object, name, ast::ObjectType::SIGNAL)) {  
         std::string command = "if";
@@ -73,7 +73,7 @@ namespace generator {
           }
         }
       } else {
-        exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->identifier->text);
+        exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->target->identifier->text);
 	a_database.printAllObjects(name);
       }
       debug.functionEnd("signalAssignment");

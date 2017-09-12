@@ -1,6 +1,6 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "basic_identifier.hpp"
+#include "target.hpp"
 #include "expression.hpp"
 #include "variable_assignment.hpp"
 #include "association_list.hpp"
@@ -9,7 +9,7 @@ namespace vhdl {
   namespace parser {
   
     VariableAssignment* VariableAssignment::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      identifier = scanner->accept<BasicIdentifier>();
+      target = scanner->accept<Target>();
       scanner->accept(":=");
       expression = scanner->expect<Expression>();
       return this;
