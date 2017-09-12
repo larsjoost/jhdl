@@ -11,14 +11,19 @@ namespace vhdl {
   
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = *(scanner->accept(::ast::TOKEN_IDENTIFIER));
+      bool expect_parenthis = true;
       if (scanner->optional("'")) {
         if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {
           range_attribute = true;
+        } else if (scanner->optional("(")) {
+          type_select = scanner->expect<Expression>();
+          scanner->expect(")");
+          expect_parenthis = false;
         } else {
           attribute = scanner->expect(::ast::TOKEN_IDENTIFIER);
         }
       } 
-      if (scanner->optional("(")) {
+      if (expect_parenthis && scanner->optional("(")) {
         arguments = scanner->optional<AssociationList>();
         scanner->expect(")");
       }

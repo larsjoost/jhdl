@@ -24,6 +24,7 @@ namespace ast {
     Text text;
     bool range_attribute = false;
     Text* attribute = NULL; 
+    Expression* type_select = NULL;
     AssociationList* arguments;
     
     bool equals(BasicIdentifier* b) {
