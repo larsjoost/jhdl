@@ -10,7 +10,7 @@ namespace vhdl {
     ReportStatement* ReportStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       if (scanner->optional(scanner::Scanner::VHDL_ASSERT)) {
         bool parenthis = scanner->optional("(");
-        assert_condition = scanner->expect<SimpleIdentifier>();
+        assert_condition = scanner->expect<Expression>();
         if (parenthis) {scanner->expect(")");}
       }
       scanner->accept(scanner::Scanner::VHDL_REPORT);

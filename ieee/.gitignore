@@ -4,3 +4,6 @@
 /std_logic_misc.hpp
 /std_logic_misc.cpp
 /std_logic_misc.i
+/std_logic_arith.hpp
+/std_logic_arith.cpp
+/std_logic_arith.i

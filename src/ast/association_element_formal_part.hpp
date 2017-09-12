@@ -11,8 +11,9 @@ namespace ast {
   class AssociationElementFormalPart {
     
   public:
-    
-    SimpleIdentifier* name;
+
+    bool others = false;
+    SimpleIdentifier* name = NULL;
 
     std::string toString(bool setCase = false) {
       return name->toString(setCase);

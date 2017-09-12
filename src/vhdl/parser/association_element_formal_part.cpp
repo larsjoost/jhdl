@@ -7,7 +7,11 @@ namespace vhdl {
   namespace parser {
   
     AssociationElementFormalPart* AssociationElementFormalPart::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      name = scanner->accept<SimpleIdentifier>();
+      if (scanner->optional(scanner::Scanner::VHDL_OTHERS)) {
+        others = true;
+      } else {
+        name = scanner->accept<SimpleIdentifier>();
+      }
       scanner->accept("=>");
       return this;
     }

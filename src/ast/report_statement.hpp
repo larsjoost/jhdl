@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    SimpleIdentifier* assert_condition;
+    Expression* assert_condition;
     Expression* message;
     SimpleIdentifier* severity;
     
