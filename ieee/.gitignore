@@ -7,3 +7,12 @@
 /std_logic_arith.hpp
 /std_logic_arith.cpp
 /std_logic_arith.i
+/fixed_float_types_c.hpp
+/fixed_float_types_c.cpp
+/fixed_float_types_c.i
+/math_complex.hpp
+/math_complex.cpp
+/math_complex.i
+/math_real.hpp
+/math_real.cpp
+/math_real.i

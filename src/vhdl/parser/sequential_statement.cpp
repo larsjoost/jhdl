@@ -11,6 +11,7 @@
 #include "declaration.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
+#include "whileloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
 #include "case_statement.hpp"
@@ -25,6 +26,7 @@ namespace vhdl {
           (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
           (ifStatement = scanner->optional<IfStatement>()) ||
           (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
+          (whileLoopStatement = scanner->optional<WhileLoopStatement>()) ||
           (waitStatement = scanner->optional<WaitStatement>()) ||
           (returnStatement = scanner->optional<ReturnStatement>()) ||
           (caseStatement = scanner->optional<CaseStatement>())) {
