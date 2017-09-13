@@ -2,9 +2,9 @@
 #ifndef AST_TARGET_HPP_
 #define AST_TARGET_HPP_
 
-#include "expression.hpp"
-#include "range_type.hpp"
+#include "target_argument.hpp"
 #include "simple_identifier.hpp"
+#include "list.hpp"
 
 namespace ast {
     
@@ -13,8 +13,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
-    RangeType* range = NULL;
-    Expression* index = NULL;
+    List<TargetArgument> arguments;
     
   };
 
