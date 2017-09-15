@@ -15,6 +15,7 @@ namespace ast {
     
   public:
     
+    SimpleIdentifier* label;
     SimpleIdentifier* identifier;
     IterationScheme* iteration;
     List<SequentialStatement> sequentialStatements;

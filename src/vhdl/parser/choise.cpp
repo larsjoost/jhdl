@@ -2,8 +2,8 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "choise.hpp"
-#include "range_direction.hpp"
-#include "simple_identifier.hpp"
+#include "range_direction_type.hpp"
+#include "expression.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -11,8 +11,8 @@ namespace vhdl {
     Choise* Choise::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       (
        (others = scanner->optional(scanner::Scanner::VHDL_OTHERS)) ||
-       (discrete_range = scanner->optional<RangeDirection>()) ||
-       (identifier = scanner->optional<SimpleIdentifier>()));
+       (discrete_range = scanner->optional<RangeDirectionType>()) ||
+       (expression = scanner->optional<Expression>()));
       return this;
     }
 

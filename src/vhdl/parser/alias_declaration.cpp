@@ -3,6 +3,8 @@
 #include "alias_declaration.hpp"
 #include "simple_identifier.hpp"
 #include "subtype_indication.hpp"
+#include "list.hpp"
+#include "return_statement.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -15,6 +17,11 @@ namespace vhdl {
       }
       scanner->expect(scanner::Scanner::VHDL_IS);
       name = scanner->expect<SimpleIdentifier>();
+      if (scanner->optional("[")) {
+        arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+        returnStatement = scanner->optional<ReturnStatement>();
+        scanner->expect("]");
+      }
       return this;
     }
 

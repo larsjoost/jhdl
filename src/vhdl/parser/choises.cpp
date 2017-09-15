@@ -12,7 +12,6 @@ namespace vhdl {
       do {
         choises.add(scanner->accept<Choise>());
       } while (scanner->optional("|"));
-      scanner->accept("=>");
       return this;
     }
 

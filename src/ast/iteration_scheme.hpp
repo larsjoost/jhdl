@@ -13,6 +13,7 @@ namespace ast {
     RangeType* range = NULL;
     SimpleIdentifier* identifier = NULL;
     bool range_attribute;
+    bool reverse_range_attribute;
     
   };
 

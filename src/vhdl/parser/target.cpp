@@ -15,7 +15,7 @@ namespace vhdl {
         do {
           arguments.add(scanner->accept<TargetArgument>());
         } while (scanner->optional(","));
-        scanner->expect(")");
+        scanner->accept(")");
       }
       return this;
     }

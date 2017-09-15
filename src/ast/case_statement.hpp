@@ -15,6 +15,7 @@ namespace ast {
     
   public:
     
+    SimpleIdentifier* label;
     SimpleIdentifier* identifier;
     AssociationList* arguments = NULL; 
     List<CaseStatementAlternative> alternatives;

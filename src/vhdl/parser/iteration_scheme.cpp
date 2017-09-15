@@ -11,7 +11,10 @@ namespace vhdl {
       range = scanner->optional<RangeType>(); 
       if (identifier = scanner->optional<SimpleIdentifier>()) {
         if (scanner->optional("'")) {
-          range_attribute = scanner->expect(scanner::Scanner::VHDL_RANGE) ? true : false;
+          reverse_range_attribute = scanner->optional(scanner::Scanner::VHDL_REVERSE_RANGE) ? true : false;
+          if (!reverse_range_attribute) {
+            range_attribute = scanner->expect(scanner::Scanner::VHDL_RANGE) ? true : false;
+          }
         }
       }
       return this;

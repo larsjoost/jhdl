@@ -209,7 +209,16 @@ namespace ast {
     Token* t = NULL;
     if (text.lookAhead(0) == '\"') {
       int i=1;
-      while (text.lookAhead(i++) != '\"') {};
+      bool string_end_found = false;
+      do {
+        if (text.lookAhead(i++) == '\"') {
+          if (text.lookAhead(i) == '\"') {
+            i++;
+          } else {
+            string_end_found = true;
+          }
+        }
+      } while (!string_end_found);
       t = new Token();
       t->type = TOKEN_STRING;
       text.subString(t->text, i);
@@ -295,14 +304,27 @@ namespace ast {
         assignRange(VALID_CHAR, '_', '_', true);
       }
     } BASIC_IDENTIFIER;
-    char a = text.lookAhead(0);
-    if (!BASIC_IDENTIFIER.VALID_FIRST_CHAR[a]) {
+    int i = 0;
+    char a = text.lookAhead(i);
+    if (BASIC_IDENTIFIER.VALID_FIRST_CHAR[a]) {
+      do {
+        a = text.lookAhead(++i);
+      } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
+    } else if (a == '\\') {
+      bool extended_identifier_end_found = false;
+      i++;
+      do {
+        if (text.lookAhead(i++) == '\\') {
+          if (text.lookAhead(i) == '\\') {
+            i++;
+          } else {
+            extended_identifier_end_found = true;
+          }
+        }
+      } while (!extended_identifier_end_found);
+    } else {
       return NULL;
     }
-    int i = 0;
-    do {
-      a = text.lookAhead(++i);
-    } while (BASIC_IDENTIFIER.VALID_CHAR[a]);
     Token* t = new Token();
     text.subString(t->text, i);
     Keyword k;

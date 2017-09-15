@@ -24,6 +24,7 @@ namespace ast {
     ReturnTypes returnTypes;
     
     Text text;
+    List<SimpleIdentifier> elements;
     bool range_attribute = false;
     Text* attribute = NULL; 
     Expression* type_select = NULL;

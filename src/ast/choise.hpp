@@ -6,7 +6,7 @@
 #include "list.hpp"
 #include "expression.hpp"
 #include "simple_identifier.hpp"
-#include "range_direction.hpp"
+#include "range_direction_type.hpp"
 
 namespace ast {
     
@@ -17,8 +17,7 @@ namespace ast {
     Text text;
 
     Expression* expression = NULL;
-    RangeDirection* discrete_range = NULL;
-    SimpleIdentifier* identifier = NULL;
+    RangeDirectionType* discrete_range = NULL;
     bool others = false;
     
   };

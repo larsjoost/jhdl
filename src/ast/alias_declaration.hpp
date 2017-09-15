@@ -4,6 +4,8 @@
 
 #include "simple_identifier.hpp"
 #include "subtype_indication.hpp"
+#include "list.hpp"
+#include "return_statement.hpp"
 
 namespace ast {
     
@@ -14,6 +16,8 @@ namespace ast {
     SimpleIdentifier* designator;
     SubtypeIndication* type = NULL;
     SimpleIdentifier* name;
+    List<SimpleIdentifier>* arguments;
+    ReturnStatement* returnStatement;
     
   };
 

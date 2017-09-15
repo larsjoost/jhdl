@@ -10,6 +10,10 @@ namespace vhdl {
   namespace parser {
   
     ForLoopStatement* ForLoopStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      if (scanner->lookAhead(":", 1)) {
+        label = scanner->accept<SimpleIdentifier>();
+        scanner->accept(":");
+      }
       scanner->accept(scanner::Scanner::VHDL_FOR);
       identifier = scanner->expect<SimpleIdentifier>();
       scanner->expect(scanner::Scanner::VHDL_IN);
@@ -18,6 +22,14 @@ namespace vhdl {
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->expect(scanner::Scanner::VHDL_LOOP);
+      SimpleIdentifier* i;
+      if (i = scanner->optional<SimpleIdentifier>()) {
+        if (!label->equals(i)) {
+          scanner->error("Identifier '" + i->toString() +
+                         "' does not match for loop name '" +
+                         label->toString() + "'");
+        }
+      }
       return this;
     }
 

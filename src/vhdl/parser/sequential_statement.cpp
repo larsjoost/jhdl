@@ -23,13 +23,13 @@ namespace vhdl {
       if ((variableAssignment = scanner->optional<VariableAssignment>()) ||
           (signalAssignment = scanner->optional<SignalAssignment>()) ||
           (reportStatement = scanner->optional<ReportStatement>()) ||
+          (caseStatement = scanner->optional<CaseStatement>()) ||
+          (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
           (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
           (ifStatement = scanner->optional<IfStatement>()) ||
-          (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
           (whileLoopStatement = scanner->optional<WhileLoopStatement>()) ||
           (waitStatement = scanner->optional<WaitStatement>()) ||
-          (returnStatement = scanner->optional<ReturnStatement>()) ||
-          (caseStatement = scanner->optional<CaseStatement>())) {
+          (returnStatement = scanner->optional<ReturnStatement>())) {
         scanner->expect(";");
       }
       return this;

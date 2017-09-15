@@ -16,3 +16,6 @@
 /math_real.hpp
 /math_real.cpp
 /math_real.i
+/numeric_bit.hpp
+/numeric_bit.cpp
+/numeric_bit.i
