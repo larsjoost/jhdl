@@ -13,7 +13,7 @@ namespace ast {
 
     Expression* assert_condition;
     Expression* message;
-    SimpleIdentifier* severity;
+    SimpleIdentifier* severity = NULL;
     
   };
 

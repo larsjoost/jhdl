@@ -21,10 +21,10 @@ namespace vhdl {
         }
       }
       {
-        static const int SIZE = 1;
+        static const int SIZE = 2;
         static const ::ast::UnaryOperator::operators o[SIZE] = {
           ::ast::UnaryOperator::MINUS};
-        static const char* c[SIZE] = {"-"};
+        static const char* c[SIZE] = {"-", "+"};
         for (int i=0; i<SIZE; i++) {
           if (scanner->optional(c[i])) {
             op = o[i];

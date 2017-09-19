@@ -11,6 +11,7 @@ namespace vhdl {
     VariableAssignment* VariableAssignment::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       target = scanner->accept<Target>();
       scanner->accept(":=");
+      new_operation = scanner->optional(scanner::Scanner::VHDL_NEW) ? true : false;
       expression = scanner->expect<Expression>();
       return this;
     }

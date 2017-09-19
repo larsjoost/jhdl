@@ -13,6 +13,7 @@ namespace ast {
   public:
 
     Target* target;
+    bool new_operation;
     Expression* expression;
     
   };

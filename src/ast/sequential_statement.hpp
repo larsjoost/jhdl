@@ -9,6 +9,8 @@
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
 #include "loop_statement.hpp"
+#include "exit_statement.hpp"
+#include "next_statement.hpp"
 #include "whileloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
@@ -19,6 +21,8 @@ namespace ast {
   class IfStatement;
   class ForLoopStatement;
   class LoopStatement;
+  class ExitStatement;
+  class NextStatement;
   class CaseStatement;
   
   class SequentialStatement {
@@ -32,6 +36,8 @@ namespace ast {
     IfStatement* ifStatement;
     ForLoopStatement* forLoopStatement;
     LoopStatement* loopStatement;
+    ExitStatement* exitStatement;
+    NextStatement* nextStatement;
     WhileLoopStatement* whileLoopStatement;
     WaitStatement* waitStatement;
     ReturnStatement* returnStatement;
