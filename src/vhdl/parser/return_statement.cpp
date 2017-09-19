@@ -8,7 +8,7 @@ namespace vhdl {
   
     ReturnStatement* ReturnStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_RETURN);
-      value = scanner->expect<Expression>();
+      value = scanner->optional<Expression>();
       return this;
     }
 

@@ -11,6 +11,7 @@
 #include "declaration.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
+#include "loop_statement.hpp"
 #include "whileloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
@@ -24,6 +25,7 @@ namespace vhdl {
           (signalAssignment = scanner->optional<SignalAssignment>()) ||
           (reportStatement = scanner->optional<ReportStatement>()) ||
           (caseStatement = scanner->optional<CaseStatement>()) ||
+          (loopStatement = scanner->optional<LoopStatement>()) ||
           (forLoopStatement = scanner->optional<ForLoopStatement>()) ||
           (procedureCallStatement = scanner->optional<ProcedureCallStatement>()) ||
           (ifStatement = scanner->optional<IfStatement>()) ||

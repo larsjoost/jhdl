@@ -207,8 +207,16 @@ namespace ast {
   TokenScanner<ApplicationSpecificScanner>::acceptString() {
     debug.functionStart("acceptString");
     Token* t = NULL;
+    int i=0;
     if (text.lookAhead(0) == '\"') {
-      int i=1;
+      i=1;
+    } else if (text.lookAhead(1) == '\"' &&
+               (text.lookAhead(0) == 'x' || text.lookAhead(0) == 'X' ||
+                text.lookAhead(0) == 'b' || text.lookAhead(0) == 'B' ||
+                text.lookAhead(0) == 'o' || text.lookAhead(0) == 'O')) {
+      i=2;
+    }
+    if (i > 0) {
       bool string_end_found = false;
       do {
         if (text.lookAhead(i++) == '\"') {

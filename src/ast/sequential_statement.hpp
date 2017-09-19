@@ -8,6 +8,7 @@
 #include "report_statement.hpp"
 #include "if_statement.hpp"
 #include "forloop_statement.hpp"
+#include "loop_statement.hpp"
 #include "whileloop_statement.hpp"
 #include "wait_statement.hpp"
 #include "return_statement.hpp"
@@ -17,6 +18,7 @@ namespace ast {
 
   class IfStatement;
   class ForLoopStatement;
+  class LoopStatement;
   class CaseStatement;
   
   class SequentialStatement {
@@ -29,6 +31,7 @@ namespace ast {
     ReportStatement* reportStatement;
     IfStatement* ifStatement;
     ForLoopStatement* forLoopStatement;
+    LoopStatement* loopStatement;
     WhileLoopStatement* whileLoopStatement;
     WaitStatement* waitStatement;
     ReturnStatement* returnStatement;
