@@ -58,6 +58,7 @@ namespace generator {
    
     // First-pass functions
     void ExpressionReturnTypes(ast::Expression* e, ast::ReturnTypes& return_types);   
+    void ParenthesisReturnTypes(ast::ExpressionTerm* e);  
     void ExpressionTermReturnTypes(ast::ExpressionTerm* e, ast::ReturnTypes& return_types);  
   public:
     void BasicIdentifierReturnTypes(ast::BasicIdentifier* b, ast::ReturnTypes& return_types);
@@ -390,7 +391,16 @@ namespace generator {
         bool array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
         std::string d;
         for (ast::ElementAssociation& i : e->parenthis.list) {
-          result += d + expressionToString(i.expression, expectedType, sensitivityListCallback, double_brackets);
+          ast::Expression* expression = i.expression;
+          if (expression == NULL) {
+            assert(i.choises);
+            if (i.choises->choises.list.size() == 1) {
+              expression = i.choises->choises.list.back().expression;
+            } else {
+              exceptions.printInternal("Could not resolve type of more than one choise", e->text);
+            }
+          }
+          result += d + expressionToString(expression, expectedType, sensitivityListCallback, double_brackets);
           d = ", ";
         }
         std::string left = array_type ? (double_brackets ? "{{" : "{") : "(";

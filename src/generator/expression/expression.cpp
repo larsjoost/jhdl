@@ -275,33 +275,48 @@ namespace generator {
     debug.functionEnd("physicalToString");
     return result;
   }
+
+  void ExpressionParser::ParenthesisReturnTypes(ast::ExpressionTerm* e) {
+    debug.functionStart("ParenthesisReturnTypes");
+    debug.debug("parenthis size = " + std::to_string(e->parenthis.list.size()));
+    ast::ElementAssociation& x = e->parenthis.list.back();
+    ast::Expression* expression = x.expression;
+    if (expression == NULL) {
+      assert(x.choises);
+      if (x.choises->choises.list.size() == 1) {
+        expression = x.choises->choises.list.back().expression;
+      } else {
+        exceptions.printInternal("Could not resolve type of more than one choise", e->text);
+      }
+    }
+    if (e->parenthis.list.size() > 1) {
+      ast::ReturnTypes return_types;
+      ExpressionReturnTypes(expression, return_types);
+      for (auto& i : return_types) {
+        ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
+        e->returnTypes.insert(a);
+        if (i.IsValue(ast::ObjectValue::ARRAY)) {
+          ast::ObjectValueContainer::Array arguments;
+          ast::ObjectValueContainer unknown_argument;
+          arguments.push_back(unknown_argument);
+          arguments.push_back(unknown_argument);
+          ast::ObjectValueContainer subtype;
+          i.SetSubtype(subtype);
+          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, arguments, subtype);
+          e->returnTypes.insert(a);
+        }
+      }
+    } else {
+      ExpressionReturnTypes(expression, e->returnTypes);
+    }
+    debug.functionEnd("ParenthesisReturnTypes");
+  }
   
   void ExpressionParser::ExpressionTermReturnTypes(ast::ExpressionTerm* e, ast::ReturnTypes& return_types) {
     debug.functionStart("ExpressionTermReturnTypes");
     assert(e);
     if (!e->parenthis.list.empty()) {
-      debug.debug("parenthis size = " + e->parenthis.list.size());
-      ast::ElementAssociation& x = e->parenthis.list.back();
-      if (e->parenthis.list.size() > 1 || x.choises) {
-        ast::ReturnTypes return_types;
-        ExpressionReturnTypes(x.expression, return_types);
-        for (auto& i : return_types) {
-          ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, i);
-          e->returnTypes.insert(a);
-          if (i.IsValue(ast::ObjectValue::ARRAY)) {
-            ast::ObjectValueContainer::Array arguments;
-            ast::ObjectValueContainer unknown_argument;
-            arguments.push_back(unknown_argument);
-            arguments.push_back(unknown_argument);
-            ast::ObjectValueContainer subtype;
-            i.SetSubtype(subtype);
-            ast::ObjectValueContainer a(ast::ObjectValue::ARRAY, arguments, subtype);
-            e->returnTypes.insert(a);
-          }
-        }
-      } else {
-        ExpressionReturnTypes(x.expression, e->returnTypes);
-      }
+      ParenthesisReturnTypes(e);
     } else if (e->physical) {
       e->returnTypes.insert(ast::ObjectValueContainer(ast::ObjectValue::PHYSICAL, e->physical->unit->toString(true)));
     } else if (e->number) {
