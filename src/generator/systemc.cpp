@@ -116,6 +116,7 @@ namespace generator {
 	  parserDesignFile.parse(filename);
 	  parameters p;
           p.setQuiet(true);
+          p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);
 	} else {
 	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename);
@@ -226,36 +227,38 @@ namespace generator {
   }
   
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
-    std::string name = package->name->toString(true);
     ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
-    debug.functionStart("packageDeclaration(library = " + library +
-                        ", packet = " + name + ", type = " + toString(type) + ")");
-    topHierarchyStart(parm, library, name, type, a_filename);
-    parm.package_contains_function = false;
-    std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
-    auto createDefinition = [&](parameters& parm) {
-      parm.println(ObjectName(type, name) + "() {init();}");
-    };
-    auto createBody = [&](parameters& parm) {
-    };
-    bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
-    DefineObject(parm, true, name, type, derived_name, NULL,
-                 &package->declarations, NULL, createBody, createDefinition, false, true);
-    bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
-    if (declare_object) {
-      parm.println("using " + name + " = " + ObjectName(type, name) + ";");
+    if (!parm.parse_declarations_only || type == ast::ObjectType::PACKAGE) { 
+      std::string name = package->name->toString(true);
+      debug.functionStart("packageDeclaration(library = " + library +
+                          ", packet = " + name + ", type = " + toString(type) + ")");
+      topHierarchyStart(parm, library, name, type, a_filename);
+      parm.package_contains_function = false;
+      std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
+      auto createDefinition = [&](parameters& parm) {
+        parm.println(ObjectName(type, name) + "() {init();}");
+      };
+      auto createBody = [&](parameters& parm) {
+      };
+      bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
+      DefineObject(parm, true, name, type, derived_name, NULL,
+                   &package->declarations, NULL, createBody, createDefinition, false, true);
+      bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
+      if (declare_object) {
+        parm.println("using " + name + " = " + ObjectName(type, name) + ";");
+      }
+      parm.println("}");
+      if (declare_object) {
+        std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
+        parm.println("extern " + declaration);
+        parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
+        parm.println(declaration);
+        parm.selectFile(file_select);
+      }
+      parm.println("namespace " + library + " {");
+      topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
+      debug.functionEnd("packageDeclaration");
     }
-    parm.println("}");
-    if (declare_object) {
-      std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
-      parm.println("extern " + declaration);
-      parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
-      parm.println(declaration);
-      parm.selectFile(file_select);
-    }
-    parm.println("namespace " + library + " {");
-    topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
-    debug.functionEnd("packageDeclaration");
   }
 
   void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {

@@ -52,7 +52,7 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     Exceptions exceptions;
     

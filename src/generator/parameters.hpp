@@ -123,6 +123,7 @@ namespace generator {
     };
     int index;
     bool package_contains_function;
+    bool parse_declarations_only = false;
     ast::ObjectValueContainer returnType;
     void DescendHierarchy(Area area);
     void AscendHierarchy();
