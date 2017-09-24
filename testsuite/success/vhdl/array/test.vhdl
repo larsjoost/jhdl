@@ -54,6 +54,10 @@ begin
     if (a(0) /= '0') then
       report "a failed" severity failure;
     end if;
+    a := (others => '0');
+    if (a /= "00000") then
+      report "a = " & a_t'image(a(4)) & ", but expected = ""00000""" severity failure;
+    end if;   
     if (C_B(FIRST) /= 1) then
       report "b(" & enum_t'image(FIRST) & ") = " & integer'image(C_B(FIRST)) &
         ", but expected 1" severity failure;
