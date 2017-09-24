@@ -289,7 +289,8 @@ namespace generator {
         exceptions.printInternal("Could not resolve type of more than one choise", e->text);
       }
     }
-    if (e->parenthis.list.size() > 1) {
+    bool choise_exists = (x.expression ? true : false);
+    if (e->parenthis.list.size() > 1 || choise_exists) {
       ast::ReturnTypes return_types;
       ExpressionReturnTypes(expression, return_types);
       for (auto& i : return_types) {

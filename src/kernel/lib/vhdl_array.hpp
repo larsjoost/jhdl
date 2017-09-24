@@ -120,6 +120,11 @@ namespace vhdl {
         a_value[i] = vec[i];
       }
     }
+
+    Array(const std::string& s) {
+      construct(0, s.size() - 1);
+      set(s);
+    }
     
     void init(std::vector<SUBTYPE> vec) {
       //      a_debug.functionStart("init");
@@ -144,7 +149,20 @@ namespace vhdl {
     template <class T>
     void operator=(const char* other) {std::string s(other); set(s);}
     void operator=(const std::string other) {set(other);}
-
+    bool operator!=(const Array<RANGE, SUBTYPE>& other) {
+      assert(this->LENGTH() != other.LENGTH);
+      for (int i = 0; i < a_value.size(); i++) {
+        if (a_value[i] != other.a_value[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    bool operator!=(const std::string other) {
+      Array<RANGE, SUBTYPE> o(other);
+      return (*this != o);
+    }
+    
     SUBTYPE& operator [](int index) {
       return get(index);
     }
