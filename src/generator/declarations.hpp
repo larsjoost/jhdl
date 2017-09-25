@@ -10,7 +10,7 @@ namespace generator {
                                   bool database_enable) {
     if (v) {
       debug.functionStart("ObjectDeclaration");
-      printSourceLine(parm, v->text);
+      PrintSourceLine(parm, v->text);
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 

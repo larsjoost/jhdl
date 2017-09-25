@@ -36,7 +36,7 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       debug.functionStart("variableAssignment");
-      printSourceLine(parm, p->target);
+      PrintSourceLine(parm, p->target, parameters::Area::IMPLEMENTATION);
       ast::ReturnTypes return_types;
       a_expression.BasicIdentifierReturnTypes(p->target, return_types);
       ast::ObjectValueContainer expectedType;
@@ -130,7 +130,7 @@ namespace generator {
         exceptions.printError("Unable to find " + name);
       }
       parm.println(parameters::Area::IMPLEMENTATION, "w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
-      printSourceLine(parm, p->waitText);
+      PrintSourceLine(parm, p->waitText, parameters::Area::IMPLEMENTATION);
       parm.println(parameters::Area::IMPLEMENTATION, label + ": if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
       parm.index++;
       debug.functionEnd("waitStatement");

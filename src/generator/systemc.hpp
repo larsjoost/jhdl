@@ -241,10 +241,14 @@ namespace generator {
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library);
 
-    void printSourceLine(parameters& parm, ast::Text* t);
-    void printSourceLine(parameters& parm, ast::Text& t);
-    void printSourceLine(parameters& parm, ast::BasicIdentifier* t);
-    void printSourceLine(parameters& parm, ast::SimpleIdentifier* t);
+    void PrintSourceLine(parameters& parm, ast::Text* t);
+    void PrintSourceLine(parameters& parm, ast::Text& t);
+    void PrintSourceLine(parameters& parm, ast::BasicIdentifier* t);
+    void PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t);
+    void PrintSourceLine(parameters& parm, ast::Text* t, parameters::Area area);
+    void PrintSourceLine(parameters& parm, ast::Text& t, parameters::Area area);
+    void PrintSourceLine(parameters& parm, ast::BasicIdentifier* t, parameters::Area area);
+    void PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t, parameters::Area area);
 
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
     void parsePackage(parameters& parm, std::string name, std::string library);

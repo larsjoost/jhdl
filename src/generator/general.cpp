@@ -53,21 +53,38 @@ namespace generator {
     debug.functionEnd("ascendHierarchy");
   }
 
-  void SystemC::printSourceLine(parameters& parm, ast::Text* t) {
+  void SystemC::PrintSourceLine(parameters& parm, ast::Text* t, parameters::Area area) {
+    assert(t);
+    parm.println(area, "// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine());
+  }
+
+  void SystemC::PrintSourceLine(parameters& parm, ast::Text& t, parameters::Area area) {
+    PrintSourceLine(parm, &t, area);
+  }
+  
+  void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t, parameters::Area area) {
+    PrintSourceLine(parm, t->text, area);
+  }
+
+  void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t, parameters::Area area) {
+    PrintSourceLine(parm, t->text, area);
+  }
+
+  void SystemC::PrintSourceLine(parameters& parm, ast::Text* t) {
     assert(t);
     parm.println("// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine());
   }
 
-  void SystemC::printSourceLine(parameters& parm, ast::Text& t) {
-    printSourceLine(parm, &t);
+  void SystemC::PrintSourceLine(parameters& parm, ast::Text& t) {
+    PrintSourceLine(parm, &t);
   }
   
-  void SystemC::printSourceLine(parameters& parm, ast::BasicIdentifier* t) {
-    printSourceLine(parm, t->text);
+  void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t) {
+    PrintSourceLine(parm, t->text);
   }
 
-  void SystemC::printSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
-    printSourceLine(parm, t->text);
+  void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
+    PrintSourceLine(parm, t->text);
   }
 
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,

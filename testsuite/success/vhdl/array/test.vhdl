@@ -29,6 +29,8 @@ architecture rtl of test is
     );
 
   type e_t is array (natural range <>) of bit;
+
+  type f_t is array (0 to SIZE - 1) of natural;
   
 begin
 
@@ -37,6 +39,7 @@ begin
 --    variable a : bit_vector(0 to 5);
     variable a : a_t;
     variable c : c_t;
+    variable f : f_t;
     variable e : e_t(0 to SIZE - 1);
   begin  -- process
     a := "00001";
@@ -54,9 +57,9 @@ begin
     if (a(0) /= '0') then
       report "a failed" severity failure;
     end if;
-    a := (others => '0');
-    if (a /= "00000") then
-      report "a = " & a_t'image(a) & ", but expected = ""00000""" severity failure;
+    f := (1 => 1, 2 | 3 => 2, others => 3);
+    if (f(3) /= 2) then
+      report "f(3) = " & natural'image(f(3)) & ", but expected = 2" severity failure;
     end if;   
     if (C_B(FIRST) /= 1) then
       report "b(" & enum_t'image(FIRST) & ") = " & integer'image(C_B(FIRST)) &
