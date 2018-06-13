@@ -15,7 +15,7 @@ namespace vhdl {
         identifiers.add(scanner->expect<SimpleIdentifier, ElementDeclaration>());
       }
       scanner->expect(":");
-      type = scanner->optional<SubtypeIndication>();
+      type = scanner->expect<SubtypeIndication, ElementDeclaration>();
       return this;
     }
 

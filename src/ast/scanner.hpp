@@ -13,6 +13,7 @@
 #include <iostream>
 #include <typeinfo>
 
+
 #include "text.hpp"
 #include "list.hpp"
 #include "identifier.hpp"
@@ -108,9 +109,12 @@ namespace ast {
       try {
         p->parse(this);
         debug.debug("Parse successfull");
-      } catch (TokenNotAccepted e) {
+      } catch (TokenNotAccepted& e) {
         setTokenPosition(position);
         p = NULL;
+      } catch (SyntaxError& e) {
+        std::cout << "Syntax error backtrace at " << typeid(T).name() << std::endl;
+        throw e;
       }
       if (getTokenPosition() == position) {
         p = NULL;

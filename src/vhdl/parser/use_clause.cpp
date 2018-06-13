@@ -4,6 +4,7 @@
 #include "use_clause.hpp"
 #include "list.hpp"
 #include "simple_identifier.hpp"
+#include "string.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -14,7 +15,9 @@ namespace vhdl {
       scanner->expect(".");
       package = scanner->expect<SimpleIdentifier, UseClause>();
       scanner->expect(".");
-      identifier = scanner->expect<SimpleIdentifier, UseClause>();
+      if (!(string_identifier = scanner->optional<String>())) {
+          identifier = scanner->expect<SimpleIdentifier, UseClause>();
+      }
       scanner->expect(";");
       return this;
     }
