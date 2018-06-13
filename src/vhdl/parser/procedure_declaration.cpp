@@ -16,7 +16,7 @@ namespace vhdl {
     ProcedureDeclaration* ProcedureDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_PROCEDURE);
       type = ast::ObjectType::PROCEDURE;
-      name = scanner->expect<SimpleIdentifier>();
+      name = scanner->expect<SimpleIdentifier, ProcedureDeclaration>();
       interface = scanner->optional<InterfaceList<scanner::Scanner::VHDL_VARIABLE>>();
       body = scanner->optional<ProcedureBody>();
       return this;

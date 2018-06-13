@@ -9,7 +9,7 @@ namespace vhdl {
   
     NumberType* NumberType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_RANGE);
-      range = scanner->expect<RangeType>();
+      range = scanner->expect<RangeType, NumberType>();
       physical = scanner->optional<PhysicalType>();
       return this;
     }

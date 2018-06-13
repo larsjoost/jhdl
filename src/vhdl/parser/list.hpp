@@ -16,12 +16,11 @@ namespace vhdl {
       
     public:
 
-      ::ast::List<Type>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
+      void parse(::ast::Scanner<scanner::Scanner>* scanner) {
         add(scanner->accept<Type>());
         while (scanner->optional(separator)) {
-          add(scanner->expect<Type>());
+          add(scanner->expect<Type, List>());
         };
-        this;
       }
     };
 

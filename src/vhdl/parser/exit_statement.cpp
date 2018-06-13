@@ -16,7 +16,7 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_EXIT);
       loop_label = scanner->optional<SimpleIdentifier>();
       if (scanner->optional(scanner::Scanner::VHDL_WHEN)) {
-        expression = scanner->expect<Expression>();
+        expression = scanner->expect<Expression, ExitStatement>();
       }
       return this;
     }

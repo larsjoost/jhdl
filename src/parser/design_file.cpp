@@ -14,7 +14,7 @@ namespace parser {
         a_language_type = LanguageType::VERILOG;
         verilogScanner.loadFile(filename);
         while (true) {
-          ast::DesignUnit* design_unit = verilogScanner.expect<verilog::parser::DesignUnit>();
+          ast::DesignUnit* design_unit = verilogScanner.expect<verilog::parser::DesignUnit, ast::DesignUnit>();
           debug.debug("Design unit " + std::string(design_unit ? "added" : "not found"));
           designUnits.add(design_unit);
         }
@@ -22,7 +22,7 @@ namespace parser {
         a_language_type = LanguageType::VHDL;
         vhdlScanner.loadFile(filename);
         while (true) {
-          designUnits.add(vhdlScanner.expect<vhdl::parser::DesignUnit>());
+          designUnits.add(vhdlScanner.expect<vhdl::parser::DesignUnit, ast::DesignUnit>());
         }
       }
     } catch (ast::TokenEof e) {

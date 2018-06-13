@@ -16,7 +16,8 @@ namespace ast {
     
   class FunctionDeclaration;
   class ProcedureDeclaration;
-
+  class TypeDeclaration;
+  
   class Declaration {
     
   public:

@@ -18,11 +18,11 @@ namespace vhdl {
       scanner->accept(scanner::Scanner::VHDL_FUNCTION);
       type = ast::ObjectType::FUNCTION;
       if (!(string = scanner->optional<String>())) {
-        name = scanner->expect<SimpleIdentifier>();
+        name = scanner->expect<SimpleIdentifier, FunctionDeclaration>();
       }
       interface = scanner->optional<InterfaceList<scanner::Scanner::VHDL_VARIABLE>>();
       scanner->expect(scanner::Scanner::VHDL_RETURN);
-      returnType = scanner->expect<SimpleIdentifier>();
+      returnType = scanner->expect<SimpleIdentifier, FunctionDeclaration>();
       body = scanner->optional<FunctionBody>();
       return this;
     }

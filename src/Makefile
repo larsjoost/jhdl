@@ -3,7 +3,7 @@ MAKEFILES := $(shell find $(DIRS) -type f -iname 'Makefile' -print)
 SUBDIRS := $(patsubst %/Makefile, %, $(MAKEFILES))
 SOURCE := $(shell find $(DIRS) -type f -iname '*.cpp' -print)
 INCLUDE := $(shell find $(DIRS) -type f -iname '*.hpp' -print)
-CXXFLAGS := -std=c++14 -g # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -fconcepts # -Wall -ansi
 # CXX = g++
 
 # OBJ := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRC)))

@@ -9,7 +9,7 @@ namespace vhdl {
   
     LibraryClause* LibraryClause::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_LIBRARY);
-      BasicIdentifier* i = scanner->expect<BasicIdentifier>();
+      BasicIdentifier* i = scanner->expect<BasicIdentifier, LibraryClause>();
       scanner->expect(";");
       return this;
     }

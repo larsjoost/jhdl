@@ -10,7 +10,7 @@ namespace vhdl {
     CaseStatementAlternative* CaseStatementAlternative::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_WHEN);
       do {
-        choises.add(scanner->expect<CaseStatementChoise>());
+        choises.add(scanner->expect<CaseStatementChoise, CaseStatementAlternative>());
       } while(scanner->optional("|"));
       scanner->expect("=>");
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};

@@ -11,7 +11,7 @@ namespace vhdl {
     ElementAssociation* ElementAssociation::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       choises = scanner->optional<Choises>();
       if (scanner->optional("=>")) {
-        expression = scanner->expect<Expression>();
+        expression = scanner->expect<Expression, ElementAssociation>();
       }
       return this;
     }

@@ -14,9 +14,9 @@ namespace vhdl {
         scanner->accept(":");
       }
       scanner->accept(scanner::Scanner::VHDL_CASE);
-      identifier = scanner->expect<SimpleIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier, CaseStatement>();
       if (scanner->optional("(")) {
-        arguments = scanner->expect<AssociationList>();
+        arguments = scanner->expect<AssociationList, CaseStatement>();
         scanner->expect(")");
       }
       scanner->expect(scanner::Scanner::VHDL_IS);

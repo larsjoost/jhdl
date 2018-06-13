@@ -13,11 +13,11 @@ namespace verilog {
       scanner->accept(scanner::Scanner::VERILOG_MODULE);
       interface = new ::ast::Interface();
       implementation = new ::ast::Implementation();
-      SimpleIdentifier* name = scanner->expect<SimpleIdentifier>(); 
+      SimpleIdentifier* name = scanner->expect<SimpleIdentifier, Module>(); 
       interface->name = name;
       implementation->name = name;
       if (scanner->optional("(")) {
-        auto i = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+        auto i = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Module>();
         scanner->expect(")");
       }
       scanner->expect(";");

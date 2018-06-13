@@ -14,7 +14,7 @@ namespace vhdl {
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = *(scanner->accept(::ast::TOKEN_IDENTIFIER));
       while (scanner->optional(".")) {
-        elements.add(scanner->expect<SimpleIdentifier>());
+        elements.add(scanner->expect<SimpleIdentifier, BasicIdentifier>());
       }
       if (scanner->optional("'")) {
         if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {

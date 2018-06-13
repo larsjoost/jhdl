@@ -14,9 +14,9 @@ namespace vhdl {
       name = scanner->accept<SimpleIdentifier>();
       scanner->accept(":");
       scanner->accept(scanner::Scanner::VHDL_FOR);
-      identifier = scanner->expect<SimpleIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier, ForGenerateStatement>();
       scanner->expect(scanner::Scanner::VHDL_IN);
-      iteration = scanner->expect<IterationScheme>();
+      iteration = scanner->expect<IterationScheme, ForGenerateStatement>();
       scanner->expect(scanner::Scanner::VHDL_GENERATE); 
       if (declarations.add(scanner->optional<Declaration>())) {
         while (declarations.add(scanner->optional<Declaration>())) {};
@@ -25,7 +25,7 @@ namespace vhdl {
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->expect(scanner::Scanner::VHDL_GENERATE);
-      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
+      SimpleIdentifier* i = scanner->expect<SimpleIdentifier, ForGenerateStatement>();
       if (!name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match generate name '" +

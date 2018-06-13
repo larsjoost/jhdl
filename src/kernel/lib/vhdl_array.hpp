@@ -103,7 +103,7 @@ namespace vhdl {
     Array(RANGE left, RANGE right) { // : a_debug("Array") {
       construct(left, right);
     }
-
+    /*
     Array(std::vector<int> vec) { // : a_debug("Array") {
       if (LENGTH() != vec.size()) {
         std::cout << "Warning: Array of length " << LENGTH() << " assigned to integer array of length " << vec.size() << std::endl;
@@ -120,12 +120,15 @@ namespace vhdl {
         a_value[i] = vec[i];
       }
     }
+    */
+    Array(std::vector<SUBTYPE> vec) {
+      init(vec);
+    }
 
-    Array(const std::string& s) {
+    void init_string(const std::string& s) {
       construct(0, s.size() - 1);
       set(s);
     }
-    
     void init(std::vector<SUBTYPE> vec) {
       //      a_debug.functionStart("init");
       if (LENGTH() != vec.size()) {
@@ -139,18 +142,17 @@ namespace vhdl {
         construct(left, right);
       }
       for (int i = 0; i < LENGTH(); i++) {
-        // std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
+         // std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
         a_value[i] = vec[i];
       }
       //      a_debug.functionEnd("init");
     }
 
     void operator=(const SUBTYPE other) { a_value = other; }
-    template <class T>
     void operator=(const char* other) {std::string s(other); set(s);}
     void operator=(const std::string other) {set(other);}
     bool operator!=(const Array<RANGE, SUBTYPE>& other) {
-      assert(this->LENGTH() != other.LENGTH);
+      assert(this->LENGTH() != other.LENGTH());
       for (int i = 0; i < a_value.size(); i++) {
         if (a_value[i] != other.a_value[i]) {
           return false;
@@ -159,7 +161,8 @@ namespace vhdl {
       return true;
     }
     bool operator!=(const std::string other) {
-      Array<RANGE, SUBTYPE> o(other);
+      Array<RANGE, SUBTYPE> o;
+      o.init_string(other);
       return (*this != o);
     }
     
@@ -175,7 +178,7 @@ namespace vhdl {
       return (a_right > a_left ? true : false);
     }
     
-    unsigned int LENGTH() { return abs(a_left - a_right) + 1; }
+    unsigned int LENGTH() const { return abs(a_left - a_right) + 1; }
     SUBTYPE& HIGH() { return (a_left > a_right ? LEFT() : RIGHT()); }
     SUBTYPE& LOW() { return (a_left < a_right ? LEFT() : RIGHT()); }
     SUBTYPE& LEFT() { return a_value[0]; }

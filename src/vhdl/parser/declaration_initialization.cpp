@@ -9,7 +9,7 @@ namespace vhdl {
 
     DeclarationInitialization* DeclarationInitialization::parse(::ast::Scanner<scanner::Scanner>* scanner) {
         scanner->accept(":=");
-        value = scanner->expect<Expression>();
+        value = scanner->expect<Expression, DeclarationInitialization>();
         return this;
     }
 

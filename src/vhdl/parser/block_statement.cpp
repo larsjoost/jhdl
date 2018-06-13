@@ -20,7 +20,7 @@ namespace vhdl {
       while (concurrentStatements.add(scanner->optional<ConcurrentStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_BLOCK);
-      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
+      SimpleIdentifier* i = scanner->expect<SimpleIdentifier, BlockStatement>();
       if (!name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match block name '" +

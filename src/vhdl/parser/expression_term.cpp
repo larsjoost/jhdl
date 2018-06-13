@@ -17,7 +17,7 @@ namespace vhdl {
       text = scanner->getCurrentTextPosition();
       if (scanner->optional("(")) {
         do {
-          parenthis.add(scanner->expect<ElementAssociation>());
+          parenthis.add(scanner->expect<ElementAssociation, ExpressionTerm>());
         } while (scanner->optional(","));
         scanner->expect(")");
       } else {

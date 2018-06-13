@@ -13,7 +13,7 @@ namespace vhdl {
       if (scanner->optional("<")) {
         scanner->expect(">");
       } else {
-        range = scanner->expect<RangeType>();
+        range = scanner->expect<RangeType, ArraySubtypeDefinition>();
       }
       return this;
     }

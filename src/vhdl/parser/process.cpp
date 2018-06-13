@@ -20,7 +20,7 @@ namespace vhdl {
       }
       scanner->accept(scanner::Scanner::VHDL_PROCESS);
       if (scanner->optional("(")) {
-        sensitivity = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+        sensitivity = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Process>();
         scanner->expect(")");
       }
       scanner->expect(scanner::Scanner::VHDL_IS);

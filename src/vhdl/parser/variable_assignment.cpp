@@ -12,7 +12,7 @@ namespace vhdl {
       target = scanner->accept<BasicIdentifier>();
       scanner->accept(":=");
       new_operation = scanner->optional(scanner::Scanner::VHDL_NEW) ? true : false;
-      expression = scanner->expect<Expression>();
+      expression = scanner->expect<Expression, VariableAssignment>();
       return this;
     }
 

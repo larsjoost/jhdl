@@ -4,6 +4,7 @@
 #include "package.hpp"
 #include "simple_identifier.hpp"
 #include "declaration.hpp"
+#include "interface_list.hpp"
 
 namespace vhdl {
   namespace parser {
@@ -12,8 +13,12 @@ namespace vhdl {
       debug.functionStart("parse");
       scanner->accept(scanner::Scanner::VHDL_PACKAGE);
       body = scanner->optional(scanner::Scanner::VHDL_BODY);
-      name = scanner->expect<SimpleIdentifier>();
+      name = scanner->expect<SimpleIdentifier, Package>();
       scanner->expect(scanner::Scanner::VHDL_IS);
+      if (scanner->optional(scanner::Scanner::VHDL_GENERIC)) {
+        generics = scanner->optional<InterfaceList<scanner::Scanner::VHDL_CONSTANT>>();
+        scanner->expect(";");
+      }
       while (declarations.add(scanner->optional<Declaration>())) {}
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_PACKAGE);

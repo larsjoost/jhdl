@@ -7,7 +7,7 @@ namespace vhdl {
   namespace parser {
 
     DesignFile* DesignFile::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      designUnits.add(scanner->expect<DesignUnit>());
+      designUnits.add(scanner->expect<DesignUnit, DesignFile>());
       return this;
     }
 

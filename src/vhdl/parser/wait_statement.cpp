@@ -9,7 +9,7 @@ namespace vhdl {
     WaitStatement* WaitStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       waitText = scanner->accept(scanner::Scanner::VHDL_WAIT);
       scanner->expect(scanner::Scanner::VHDL_FOR);
-      physical = scanner->expect<Physical>();
+      physical = scanner->expect<Physical, WaitStatement>();
       return this;
     }
 

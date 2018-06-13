@@ -11,7 +11,7 @@ namespace vhdl {
     RangeDirectionType* RangeDirectionType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       left = scanner->accept<Expression>();
       range_direction = scanner->accept<RangeDirection>();
-      right = scanner->expect<Expression>();
+      right = scanner->expect<Expression, RangeDirectionType>();
       return this;
     }
 

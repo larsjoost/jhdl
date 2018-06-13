@@ -4,9 +4,15 @@
 
 #include "simple_identifier.hpp"
 #include "type_definition.hpp"
+#include "interface_list.hpp"
+#include "list.hpp"
+#include "record_declaration.hpp"
 
 namespace ast {
-    
+
+  class Declaration;
+  class TypeDefinition;
+  
   class TypeDeclaration {
     
   public:
@@ -15,6 +21,7 @@ namespace ast {
     SimpleIdentifier* fileType = NULL;
     SimpleIdentifier* identifier;
     TypeDefinition* typeDefinition;
+    RecordDeclaration* record;
     
   };
 

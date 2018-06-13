@@ -10,9 +10,9 @@ namespace vhdl {
     ArrayType* ArrayType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ARRAY);
       scanner->expect("(");
-      definition.add(scanner->expect<ArrayDefinition>());
+      definition.add(scanner->expect<ArrayDefinition, ArrayType>());
       while (scanner->optional(",")) {
-        definition.add(scanner->expect<ArrayDefinition>());
+        definition.add(scanner->expect<ArrayDefinition, ArrayType>());
       }
       scanner->expect(")");
       scanner->accept(scanner::Scanner::VHDL_OF);

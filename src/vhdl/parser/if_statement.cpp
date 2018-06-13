@@ -12,13 +12,13 @@ namespace vhdl {
     IfStatement* IfStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_IF);
       ::ast::ConditionalStatement *c = new ::ast::ConditionalStatement();
-      c->condition = scanner->expect<Expression>();
+      c->condition = scanner->expect<Expression, IfStatement>();
       scanner->expect(scanner::Scanner::VHDL_THEN);
       while (c->sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       conditionalStatements.add(c);
       while (scanner->optional(scanner::Scanner::VHDL_ELSIF)) {
 	c = new ::ast::ConditionalStatement();
-	c->condition = scanner->expect<Expression>();
+	c->condition = scanner->expect<Expression, IfStatement>();
 	scanner->expect(scanner::Scanner::VHDL_THEN);
 	while (c->sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
 	conditionalStatements.add(c);

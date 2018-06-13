@@ -9,7 +9,7 @@ namespace vhdl {
   
     Entity* Entity::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ENTITY);
-      name = scanner->expect<SimpleIdentifier>();
+      name = scanner->expect<SimpleIdentifier, Entity>();
       scanner->expect(scanner::Scanner::VHDL_IS);
       if (scanner->optional(scanner::Scanner::VHDL_GENERIC)) {
         generics = scanner->optional<InterfaceList<scanner::Scanner::VHDL_CONSTANT>>();
@@ -21,7 +21,7 @@ namespace vhdl {
       }
       scanner->expect(scanner::Scanner::VHDL_END);
       scanner->optional(scanner::Scanner::VHDL_ENTITY);
-      SimpleIdentifier* i = scanner->expect<SimpleIdentifier>();
+      SimpleIdentifier* i = scanner->expect<SimpleIdentifier, Entity>();
       if (!name->equals(i)) {
         scanner->error("Identifier '" + i->toString() +
                        "' does not match entity name '" +

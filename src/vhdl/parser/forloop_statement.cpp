@@ -15,9 +15,9 @@ namespace vhdl {
         scanner->accept(":");
       }
       scanner->accept(scanner::Scanner::VHDL_FOR);
-      identifier = scanner->expect<SimpleIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier, ForLoopStatement>();
       scanner->expect(scanner::Scanner::VHDL_IN);
-      iteration = scanner->expect<IterationScheme>();
+      iteration = scanner->expect<IterationScheme, ForLoopStatement>();
       scanner->expect(scanner::Scanner::VHDL_LOOP);
       while (sequentialStatements.add(scanner->optional<SequentialStatement>())) {};
       scanner->expect(scanner::Scanner::VHDL_END);

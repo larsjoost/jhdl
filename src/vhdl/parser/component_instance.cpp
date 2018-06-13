@@ -12,25 +12,25 @@ namespace vhdl {
       instanceName = scanner->accept<SimpleIdentifier>();
       scanner->accept(":");
       scanner->optional(scanner::Scanner::VHDL_ENTITY);
-      componentName = scanner->expect<SimpleIdentifier>();
+      componentName = scanner->expect<SimpleIdentifier, ComponentInstance>();
       if (scanner->optional(".")) {
         libraryName = componentName;
-        componentName = scanner->expect<SimpleIdentifier>();
+        componentName = scanner->expect<SimpleIdentifier, ComponentInstance>();
       }
       if (scanner->optional("(")) {
-        architectureName = scanner->expect<SimpleIdentifier>();
+        architectureName = scanner->expect<SimpleIdentifier, ComponentInstance>();
         scanner->expect(")");
       }
       if (scanner->optional(scanner::Scanner::VHDL_GENERIC)) {
         scanner->expect(scanner::Scanner::VHDL_MAP);
         scanner->expect("(");
-        generics = scanner->expect<AssociationList>();
+        generics = scanner->expect<AssociationList, ComponentInstance>();
         scanner->expect(")");
       }
       if (scanner->optional(scanner::Scanner::VHDL_PORT)) {
         scanner->expect(scanner::Scanner::VHDL_MAP);
         scanner->expect("(");
-        ports = scanner->expect<AssociationList>();
+        ports = scanner->expect<AssociationList, ComponentInstance>();
         scanner->expect(")");
       }
       return this;

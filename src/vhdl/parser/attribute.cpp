@@ -13,13 +13,13 @@ namespace vhdl {
   
     Attribute* Attribute::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept(scanner::Scanner::VHDL_ATTRIBUTE);
-      identifier = scanner->expect<SimpleIdentifier>();
+      identifier = scanner->expect<SimpleIdentifier, Attribute>();
       if (scanner->optional(scanner::Scanner::VHDL_OF)) {
         if (!(string = scanner->optional<String>())) {
-          item = scanner->expect<SimpleIdentifier>();
+          item = scanner->expect<SimpleIdentifier, Attribute>();
         }
         if (scanner->optional("[")) {
-          arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>>();
+          arguments = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Attribute>();
           returnStatement = scanner->optional<ReturnStatement>();
           scanner->expect("]");
         }
@@ -44,7 +44,7 @@ namespace vhdl {
         scanner->error("Did not find attribute class");
       }
       if (scanner->optional(scanner::Scanner::VHDL_IS)) {
-        expression = scanner->expect<ScalarType>();
+        expression = scanner->expect<ScalarType, Attribute>();
       }
       return this;
     }

@@ -10,7 +10,7 @@ namespace vhdl {
     PhysicalElement* PhysicalElement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       unit = scanner->accept<SimpleIdentifier>();
       if (scanner->optional("=")) {
-        physical = scanner->expect<Physical>();
+        physical = scanner->expect<Physical, PhysicalElement>();
       }
       scanner->expect(";");
       return this;

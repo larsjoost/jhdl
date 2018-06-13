@@ -37,7 +37,7 @@ namespace vhdl {
         }
         identifiers.add(scanner->accept<SimpleIdentifier>());
         while (scanner->optional(",")) {
-          identifiers.add(scanner->expect<SimpleIdentifier>());
+          identifiers.add(scanner->expect<SimpleIdentifier, ObjectDeclaration>());
         }
         scanner->accept(":");
         static const int NUMBER_OF_DIRECTIONS = 4;

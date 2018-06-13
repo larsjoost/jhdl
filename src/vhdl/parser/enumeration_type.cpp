@@ -9,7 +9,7 @@ namespace vhdl {
   
     EnumerationType* EnumerationType::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       scanner->accept("(");
-      enumerations = scanner->expect<List<EnumerationElement, ::ast::EnumerationElement, ','>>();
+      enumerations = scanner->expect<List<EnumerationElement, ::ast::EnumerationElement, ','>, EnumerationType>();
       scanner->expect(")");
       return this;
     }

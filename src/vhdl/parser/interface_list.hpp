@@ -10,19 +10,25 @@
 namespace vhdl {
   namespace parser {
 
-    template<scanner::Scanner::Keyword defaultType>
+    template<scanner::Scanner::Keyword defaultType, bool parenthis = true>
     class InterfaceList :
       public ::ast::InterfaceList  {
 
     public:
 
-      InterfaceList<defaultType>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
-        scanner->accept("(");
-        interfaceElements.add(scanner->expect<InterfaceElement<defaultType>>());
-        while (scanner->optional(";")) {
-          interfaceElements.add(scanner->expect<InterfaceElement<defaultType>>());
-        };
-        scanner->expect(")");
+      InterfaceList<defaultType, parenthis>* parse(::ast::Scanner<scanner::Scanner>* scanner) {
+        if (parenthis) {
+          scanner->accept("(");
+          interfaceElements.add(scanner->expect<InterfaceElement<defaultType>, InterfaceList>());
+          while (scanner->optional(";")) {
+            interfaceElements.add(scanner->expect<InterfaceElement<defaultType>, InterfaceList>());
+          };
+          scanner->expect(")");
+        } else {
+          while (interfaceElements.add(scanner->accept<InterfaceElement<defaultType>>())) {
+            scanner->expect(";");
+          };
+        }
         return this;
       }
 

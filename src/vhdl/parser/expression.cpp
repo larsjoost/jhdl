@@ -16,10 +16,10 @@ namespace vhdl {
     Expression* Expression::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       text = scanner->getCurrentTextPosition();
       if (unaryOperator = scanner->optional<UnaryOperator>()) {
-        expression = scanner->expect<Expression>();
+        expression = scanner->expect<Expression, Expression>();
       } else if (term = scanner->optional<ExpressionTerm>()) {
         if (op = scanner->optional<ExpressionOperator>()) {
-          expression = scanner->expect<Expression>();
+          expression = scanner->expect<Expression, Expression>();
         }
       }
       return this;

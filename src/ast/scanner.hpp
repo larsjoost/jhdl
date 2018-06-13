@@ -120,14 +120,14 @@ namespace ast {
       return p; 
     }
 
-    template<typename T>
+    template<typename T, typename Parent>
     T* expect() {
       T* p = optional<T>();
       if (verbose) {
         std::cout << "Expect: " << typeid(p).name() << std::endl;
       }
       if (!p) {
-        error("Expected something else.");
+        error(std::string(typeid(Parent).name()) + std::string(" expected ") + std::string(typeid(T).name()));
       }
       return p; 
     }

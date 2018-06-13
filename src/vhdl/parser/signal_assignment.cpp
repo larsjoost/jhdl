@@ -18,9 +18,9 @@ namespace vhdl {
       scanner->accept("<=");
       do {
         ::ast::SignalAssignmentCondition s;
-        s.expression = scanner->expect<Expression>();
+        s.expression = scanner->expect<Expression, SignalAssignment>();
         if (scanner->optional(scanner::Scanner::VHDL_WHEN)) {
-          s.condition = scanner->expect<Expression>();
+          s.condition = scanner->expect<Expression, SignalAssignment>();
         } else {
           s.condition = NULL;
           signalAssignmentConditions.add(&s);
