@@ -47,7 +47,7 @@ namespace generator {
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
     if (p) {
       debug.functionStart("signalAssignment");
-      printSourceLine(parm, p->target->identifier);
+      PrintSourceLine(parm, p->target->identifier, parameters::Area::IMPLEMENTATION);
       std::string name = p->target->identifier->toString(true);
       DatabaseResult object;
       if (a_database.findOne(object, name, ast::ObjectType::SIGNAL)) {  

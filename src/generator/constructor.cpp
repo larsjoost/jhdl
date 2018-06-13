@@ -83,7 +83,7 @@ namespace generator {
   void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
     if (c) {
       assert(c->instanceName);
-      printSourceLine(parm, c->instanceName->text);
+      PrintSourceLine(parm, c->instanceName->text);
       std::string instanceName = c->instanceName->toString(true);
       std::string componentName = c->componentName->toString(true);
       std::string s = componentName;

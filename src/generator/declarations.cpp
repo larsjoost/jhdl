@@ -241,7 +241,7 @@ namespace generator {
   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
     if (t) {
       debug.functionStart("type_declarations");
-      printSourceLine(parm, t->identifier);
+      PrintSourceLine(parm, t->identifier);
       ast::ObjectValueContainer value;
       if (t->accessType) {
         value = AccessType(parm, t->identifier, t->accessType);
@@ -268,7 +268,7 @@ namespace generator {
   void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
     if (file) {
       debug.functionStart("FileDeclaration");
-      printSourceLine(parm, file->handle);
+      PrintSourceLine(parm, file->handle);
       std::string name = file->handle->toString(true);
       std::string type = file->type->toString(true);
       DatabaseResult result;
@@ -285,7 +285,7 @@ namespace generator {
   void SystemC::AliasDeclaration(parameters& parm, ast::AliasDeclaration* alias) {
     if (alias) {
       debug.functionStart("AliasDeclaration");
-      printSourceLine(parm, alias->designator);
+      PrintSourceLine(parm, alias->designator);
       std::string designator = alias->designator->toString(true);
       std::string name = alias->name->toString(true);
       std::string type;
@@ -486,7 +486,7 @@ namespace generator {
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       std::string returnTypeName = FunctionReturn(parm, f);
-      printSourceLine(parm, text);
+      PrintSourceLine(parm, text);
       std::string argumentNames = getArgumentNames(parm, f->interface);
       a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
       if (!parm.parse_declarations_only) {
@@ -614,7 +614,7 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
-      printSourceLine(parm, t->identifier);
+      PrintSourceLine(parm, t->identifier);
       std::string name = t->identifier->toString(true);
       std::string type_name = t->type->name->toString(true);
       DatabaseResult database_result;
@@ -632,7 +632,7 @@ namespace generator {
   void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       debug.functionStart("ObjectDeclarations");
-      printSourceLine(parm, v->text);
+      PrintSourceLine(parm, v->text);
       auto func = [&](std::string& name, std::string& type, std::string& init,
 		      std::string& factory_name, ast::ObjectType id,
                       ast::ObjectDeclaration::Direction direction) {

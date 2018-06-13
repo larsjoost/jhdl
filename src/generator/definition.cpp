@@ -10,7 +10,7 @@ namespace generator {
                                          ast::BlockStatement* blockStatement) {
     debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
-      printSourceLine(parm, blockStatement->name);
+      PrintSourceLine(parm, blockStatement->name);
       std::string name = blockStatement->name->toString(true);
       DefineObject(parm, false, name, ast::ObjectType::BLOCK, "sc_module", NULL, 
                    &blockStatement->declarations,
@@ -24,7 +24,7 @@ namespace generator {
   void SystemC::forGenerateStatementDefinition(parameters& parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
-      printSourceLine(parm, forGenerateStatement->name);
+      PrintSourceLine(parm, forGenerateStatement->name);
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       auto createDeclaration = [&](parameters& parm) {

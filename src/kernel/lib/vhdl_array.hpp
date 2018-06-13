@@ -100,6 +100,16 @@ namespace vhdl {
     Array() { // : a_debug("Array") {
     }
 
+    bool equals(const std::string& other) {
+      assert(LENGTH() == other.size());
+      for (int i = 0; i < LENGTH(); i++) {
+        if (a_value[i] != other[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     Array(RANGE left, RANGE right) { // : a_debug("Array") {
       construct(left, right);
     }
@@ -129,6 +139,7 @@ namespace vhdl {
       construct(0, s.size() - 1);
       set(s);
     }
+
     void init(std::vector<SUBTYPE> vec) {
       //      a_debug.functionStart("init");
       if (LENGTH() != vec.size()) {
