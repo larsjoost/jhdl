@@ -13,6 +13,7 @@ namespace ast {
   public:
 
     SimpleIdentifier* identifier;
+    Target* element;
     List<TargetArgument> arguments;
     
   };

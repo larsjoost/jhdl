@@ -6,6 +6,7 @@
 #include "list.hpp"
 #include "declaration.hpp"
 #include "interface_list.hpp"
+#include "new_package_declaration.hpp"
 
 namespace ast {
     
@@ -17,6 +18,7 @@ namespace ast {
     InterfaceList* generics;
     bool body;
     List<Declaration> declarations;
+    NewPackageDeclaration* new_package_declaration;
     
   };
 

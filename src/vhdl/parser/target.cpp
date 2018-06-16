@@ -11,7 +11,9 @@ namespace vhdl {
   
     Target* Target::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       identifier = scanner->accept<SimpleIdentifier>();
-      if (scanner->optional("(")) {
+      if (scanner->optional(".")) {
+        element = scanner->expect<Target, Target>();
+      } else if (scanner->optional("(")) {
         do {
           arguments.add(scanner->accept<TargetArgument>());
         } while (scanner->optional(","));
