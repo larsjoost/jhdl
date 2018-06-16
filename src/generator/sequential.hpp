@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 #include "systemc.hpp"
 #include "expression/expression.hpp"
 
@@ -43,39 +51,45 @@ namespace generator {
     debug.functionEnd("forLoop");
   }  
 
+  template<typename Func>
+  void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::Target* target, ast::ObjectType object_type, Func callback) {
+    std::string command = "if";
+    std::string noConditionCommand = "";
+    std::string noConditionDelimiter = "";
+
+    PrintSourceLine(parm, target->identifier, parameters::Area::IMPLEMENTATION);
+    std::string name = target->identifier->toString(true);
+    DatabaseResult object;
+    if (a_database.findOne(object, name, object_type)) {  
+      std::string name = a_name_converter.GetName(object);
+      for (ast::AssignmentCondition s : p->assignment_conditions.list) {
+        if (s.condition) {
+          static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
+          parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
+          command = "else if";
+          noConditionCommand = "else {";
+          noConditionDelimiter = "}";
+        } else {
+          parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
+        }
+        parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
+        if (s.condition) {
+          parm.println(parameters::Area::IMPLEMENTATION, "}");
+        } else {
+          parm.println(parameters::Area::IMPLEMENTATION, noConditionDelimiter);
+        }
+      }
+    } else {
+      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->identifier->text);
+      a_database.printAllObjects(name);
+    }
+  }
+  
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
     if (p) {
       debug.functionStart("signalAssignment");
-      PrintSourceLine(parm, p->target->identifier, parameters::Area::IMPLEMENTATION);
-      std::string name = p->target->identifier->toString(true);
-      DatabaseResult object;
-      if (a_database.findOne(object, name, ast::ObjectType::SIGNAL)) {  
-        std::string command = "if";
-        std::string noConditionCommand = "";
-        std::string noConditionDelimiter = "";
-        name = a_name_converter.GetName(object);
-        for (ast::SignalAssignmentCondition s : p->signalAssignmentConditions.list) {
-          if (s.condition) {
-            static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-            parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
-            command = "else if";
-            noConditionCommand = "else {";
-            noConditionDelimiter = "}";
-          } else {
-            parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
-          }
-          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
-          if (s.condition) {
-            parm.println(parameters::Area::IMPLEMENTATION, "}");
-          } else {
-            parm.println(parameters::Area::IMPLEMENTATION, noConditionDelimiter);
-          }
-        }
-      } else {
-        exceptions.printError("Could not find definition of signal \"" + name + "\"", &p->target->identifier->text);
-	a_database.printAllObjects(name);
-      }
+      assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, callback);
       debug.functionEnd("signalAssignment");
     }
   }

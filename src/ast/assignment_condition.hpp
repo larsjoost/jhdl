@@ -1,12 +1,12 @@
 
-#ifndef AST_SIGNAL_ASSIGNMENT_CONDITION_HPP_
-#define AST_SIGNAL_ASSIGNMENT_CONDITION_HPP_
+#ifndef AST_ASSIGNMENT_CONDITION_HPP_
+#define AST_ASSIGNMENT_CONDITION_HPP_
 
 #include "expression.hpp"
 
 namespace ast {
     
-  class SignalAssignmentCondition {
+  class AssignmentCondition {
     
   public:
 

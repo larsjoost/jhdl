@@ -1,9 +1,9 @@
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/signal_assignment_condition.hpp"
 #include "simple_identifier.hpp"
 #include "expression.hpp"
 #include "signal_assignment.hpp"
+#include "assignment.hpp"
 #include "target.hpp"
 
 namespace vhdl {
@@ -16,18 +16,7 @@ namespace vhdl {
       }
       target = scanner->accept<Target>();
       scanner->accept("<=");
-      do {
-        ::ast::SignalAssignmentCondition s;
-        s.expression = scanner->expect<Expression, SignalAssignment>();
-        if (scanner->optional(scanner::Scanner::VHDL_WHEN)) {
-          s.condition = scanner->expect<Expression, SignalAssignment>();
-        } else {
-          s.condition = NULL;
-          signalAssignmentConditions.add(&s);
-          break;
-        }
-        signalAssignmentConditions.add(&s);
-      } while (scanner->optional(scanner::Scanner::VHDL_ELSE));
+      assignment = scanner->expect<Assignment, SignalAssignment>();
       return this;
     }
 

@@ -36,18 +36,7 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       debug.functionStart("variableAssignment");
-      PrintSourceLine(parm, p->target, parameters::Area::IMPLEMENTATION);
-      ast::ReturnTypes return_types;
-      a_expression.BasicIdentifierReturnTypes(p->target, return_types);
-      ast::ObjectValueContainer expectedType;
-      if (a_expression.UniqueReturnType(return_types, expectedType, &p->target->text)) {
-        std::string name = a_expression.BasicIdentifierToString(p->target);
-        try {
-          parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(p->expression, expectedType) + ";");
-        } catch (ExpressionParser::ObjectNotFound e) {
-          e.print();
-        }
-      }
+      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object) {});
       debug.functionEnd("variableAssignment");
     }
   }
