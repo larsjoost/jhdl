@@ -139,6 +139,8 @@ namespace generator {
       a_expression.CollectAllReturnTypes(r->range_direction_type->left, expectedType);
       left = a_expression.toString(r->range_direction_type->left, expectedType);
       right = a_expression.toString(r->range_direction_type->right, expectedType);
+    } else if (r->range_attribute_type) {
+      
     } else {
       assert(false);
     }
