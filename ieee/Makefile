@@ -12,7 +12,7 @@ all: $(OBJS)
 
 hpp: $(VHDL_HPP)
 
-%.hpp: %.vhd 
+%.hpp .jhdl.ini : %.vhd ../src/hdlc
 	../src/hdlc.sh -f $< -l ieee -s 
 
 %.o: %.cpp %.hpp

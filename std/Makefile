@@ -2,7 +2,7 @@ SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
-CXXFLAGS := -std=c++14 -g -MMD -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -MMD -fconcepts -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
 
 all: $(OBJS)
 

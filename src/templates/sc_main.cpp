@@ -57,5 +57,6 @@ int sc_main(int argc, char* argv[]) {
     sc_close_vcd_trace_file(fp);
     */
   }
-    
+
+  return 0;
 }

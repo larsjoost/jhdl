@@ -1,7 +1,7 @@
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -MMD # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -fconcepts -MMD # -Wall -ansi
 INC_DIR := -I${JHDL}/src/kernel/lib -I${JHDL}/std
 
 all: $(OBJS)
