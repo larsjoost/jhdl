@@ -62,7 +62,7 @@ namespace generator {
     ast::ReturnTypes return_types;
     a_expression.BasicIdentifierReturnTypes(target, return_types);
     ast::ObjectValueContainer expectedType;
-    if (a_expression.UniqueReturnType(return_types, expectedType, &target->text)) {
+    if (a_expression.UniqueReturnType(return_types, expectedType, &target->getText())) {
       for (ast::AssignmentCondition s : p->assignment_conditions.list) {
         if (s.condition) {
           static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
@@ -81,7 +81,7 @@ namespace generator {
         }
       }
     } else {
-      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->text);
+      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->getText());
       a_database.printAllObjects(name);
     }
   }

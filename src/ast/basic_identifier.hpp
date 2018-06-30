@@ -1,7 +1,8 @@
 
-#ifndef AST_BASICINDETIFIER_H_
-#define AST_BASICINDETIFIER_H_
+#ifndef AST_BASICIDENTIFIER_HPP_
+#define AST_BASICIDENTIFIER_HPP_
 
+#include <cassert>
 #include <list>
 
 #include "object_type.hpp"
@@ -23,8 +24,8 @@ namespace ast {
 
     ReturnTypes returnTypes;
     
-    Text text;
-    List<SimpleIdentifier> elements;
+    SimpleIdentifier* identifier;
+    BasicIdentifier* element;
     bool range_attribute = false;
     Text* attribute = NULL; 
     Expression* type_select = NULL;
@@ -33,13 +34,18 @@ namespace ast {
     
     bool equals(BasicIdentifier* b) {
       if (b) {
-	return text.equals(b->text);
+	return identifier->text.equals(b->identifier->text);
       }
       return false;
     }
 
+    Text& getText() {
+      return identifier->text;
+    }
+    
     std::string toString(bool setCase = false) {
-      return text.toString(setCase);
+      assert (identifier);
+      return identifier->text.toString(setCase);
     }
 
   };

@@ -455,7 +455,7 @@ namespace generator {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
         throw ObjectNotFound(this, name, "Could not find definition of " + name + args +
-                             " with type " + (expected_type ? expected_type->toString() : "None"), &identifier->text);
+                             " with type " + (expected_type ? expected_type->toString() : "None"), &identifier->getText());
       }
     } 
     debug.functionEnd("BasicIdentifierToString = " + name);

@@ -12,11 +12,10 @@ namespace vhdl {
   namespace parser {
   
     void BasicIdentifier::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      text = *(scanner->accept(::ast::TOKEN_IDENTIFIER));
-      while (scanner->optional(".")) {
-        elements.add(scanner->expect<SimpleIdentifier, BasicIdentifier>());
-      }
-      if (scanner->optional("'")) {
+      identifier = scanner->accept<SimpleIdentifier>();
+      if (scanner->optional(".")) {
+	element = scanner->expect<BasicIdentifier, BasicIdentifier>();
+      } else if (scanner->optional("'")) {
         if (scanner->optional(scanner::Scanner::VHDL_RANGE)) {
           range_attribute = true;
         } else {

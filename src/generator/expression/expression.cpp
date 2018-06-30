@@ -389,7 +389,7 @@ namespace generator {
 
   void ExpressionParser::BasicIdentifierReturnTypes(ast::BasicIdentifier* b,
                                                     ast::ReturnTypes& return_types) {
-    std::string name = b->text.toString(true);
+    std::string name = b->toString(true);
     debug.functionStart("BasicIdentifierReturnTypes(name = " + name + ")", true);
     if (b->attribute) {
       std::string attribute = b->attribute->toString(true);
@@ -403,7 +403,7 @@ namespace generator {
       GetReturnTypes(name, valid, b->returnTypes);
     }
     if (b->returnTypes.empty()) {
-      exceptions.printError("Could not resolve type of " + name, &b->text);
+      exceptions.printError("Could not resolve type of " + name, &b->getText());
       a_database->printAllObjects(name);
     }
     return_types.insert(b->returnTypes.begin(), b->returnTypes.end());

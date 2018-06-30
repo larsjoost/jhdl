@@ -63,7 +63,7 @@ namespace generator {
   }
   
   void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t, parameters::Area area) {
-    PrintSourceLine(parm, t->text, area);
+    PrintSourceLine(parm, t->getText(), area);
   }
 
   void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t, parameters::Area area) {
@@ -80,7 +80,7 @@ namespace generator {
   }
   
   void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t) {
-    PrintSourceLine(parm, t->text);
+    PrintSourceLine(parm, t->getText());
   }
 
   void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
