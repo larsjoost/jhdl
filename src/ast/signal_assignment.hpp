@@ -3,7 +3,7 @@
 #define AST_SIGNAL_ASSIGNMENT_H_
 
 #include "assignment.hpp"
-#include "target.hpp"
+#include "basic_identifier.hpp"
 #include "simple_identifier.hpp"
 #include "expression.hpp"
 #include "list.hpp"
@@ -16,7 +16,7 @@ namespace ast {
 
     std::string name = "";
     SimpleIdentifier* label;
-    Target* target;
+    BasicIdentifier* target;
     Assignment* assignment;
     
   };

@@ -52,16 +52,17 @@ namespace generator {
   }  
 
   template<typename Func>
-  void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::Target* target, ast::ObjectType object_type, Func callback) {
+  void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, Func callback) {
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
-    PrintSourceLine(parm, target->identifier, parameters::Area::IMPLEMENTATION);
-    std::string name = target->identifier->toString(true);
-    DatabaseResult object;
-    if (a_database.findOne(object, name, object_type)) {  
-      std::string name = a_name_converter.GetName(object);
+    std::string name = a_expression.BasicIdentifierToString(target);
+    PrintSourceLine(parm, target, parameters::Area::IMPLEMENTATION);
+    ast::ReturnTypes return_types;
+    a_expression.BasicIdentifierReturnTypes(target, return_types);
+    ast::ObjectValueContainer expectedType;
+    if (a_expression.UniqueReturnType(return_types, expectedType, &target->text)) {
       for (ast::AssignmentCondition s : p->assignment_conditions.list) {
         if (s.condition) {
           static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
@@ -72,7 +73,7 @@ namespace generator {
         } else {
           parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
         }
-        parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, object.object->type, callback) + ";");
+        parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, expectedType, callback) + ";");
         if (s.condition) {
           parm.println(parameters::Area::IMPLEMENTATION, "}");
         } else {
@@ -80,7 +81,7 @@ namespace generator {
         }
       }
     } else {
-      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->identifier->text);
+      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->text);
       a_database.printAllObjects(name);
     }
   }

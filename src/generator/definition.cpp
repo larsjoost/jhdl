@@ -93,7 +93,7 @@ namespace generator {
       if (s->label) {
         name = s->label->toString(true);
       } else {
-        name = "line" + std::to_string(s->target->identifier->text.getLine());
+        name = "line" + std::to_string(s->target->text.getLine());
       }
       s->name = name;
       {

@@ -42,7 +42,11 @@ namespace generator {
   }
 
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
-    signalAssignment(parm, p,  [](DatabaseResult& object) {});
+    if (p) {
+      debug.functionStart("signalAssignment");
+      signalAssignment(parm, p, [](DatabaseResult& object) {});
+      debug.functionEnd("signalAssignment");
+    }
   }
 
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {

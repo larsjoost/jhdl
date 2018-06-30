@@ -3,7 +3,7 @@
 #define AST_VARIABLE_ASSIGNMENT_H_
 
 #include "assignment.hpp"
-#include "target.hpp"
+#include "basic_identifier.hpp"
 
 namespace ast {
     
@@ -11,7 +11,7 @@ namespace ast {
     
   public:
 
-    Target* target;
+    BasicIdentifier* target;
     bool new_operation;
     Assignment* assignment;
     

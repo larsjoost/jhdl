@@ -89,7 +89,7 @@ namespace generator {
 
     // sequential.cpp
     template<typename Func>
-    void assignment(parameters& parm, ast::Assignment* p, ast::Target* target, ast::ObjectType object_type, Func callback);
+    void assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, Func callback);
     void signalAssignment(parameters& parm, ast::SignalAssignment* p);
     template<typename Func>
     void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
