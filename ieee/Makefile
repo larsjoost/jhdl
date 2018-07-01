@@ -1,18 +1,18 @@
 SOURCE := $(wildcard *.cpp)
-VHDL_SOURCE := $(wildcard *.vhd)
+VHDL_SOURCE := std_logic_1164.vhd
 VHDL_HPP := $(VHDL_SOURCE:.vhd=.hpp)
 VHDL_CPP := $(VHDL_SOURCE:.vhd=.cpp)
 VHDL_INC := $(VHDL_SOURCE:.vhd=.i)
-OBJS := $(SOURCE:.cpp=.o)
+OBJS := $(SOURCE:.cpp=.o) 
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
-CXXFLAGS := -std=c++14 -g -MMD -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -MMD -fconcepts -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
 
-all: $(OBJS)
+all: hpp $(VHDL_CPP) $(OBJS)
 
 hpp: $(VHDL_HPP)
 
-%.hpp .jhdl.ini : %.vhd ../src/hdlc
+%.hpp: %.vhd ../src/hdlc
 	../src/hdlc.sh -f $< -l ieee -s 
 
 %.o: %.cpp %.hpp
