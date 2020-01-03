@@ -73,8 +73,8 @@ namespace generator {
     
     void topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type);
     void topHierarchyEnd(bool globalize);
-    void descendHierarchy(const std::string& name, ast::ObjectType type);
-    void ascendHierarchy();
+    void openHierarchy(const std::string& name, ast::ObjectType type);
+    void closeHierarchy();
     int getHierarchyLevel();
     
     bool setVisible(std::string& name, std::string package = "", std::string library = "");

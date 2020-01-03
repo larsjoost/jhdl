@@ -1,18 +1,10 @@
-
-
-
-
-
-
-
-
 #include "systemc.hpp"
 #include "expression/expression.hpp"
 
 namespace generator {
 
   template<typename Func>
-  void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
+  void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback, bool constructor) {
     debug.functionStart("forLoop");
     std::string typeName;
     ast::ObjectValueContainer type;
@@ -21,9 +13,9 @@ namespace generator {
       typeName = name + "_type";
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
-      parm.println(parameters::Area::DECLARATION, typeName + " " + name + ";");
+      parm.addClassContents(typeName + " " + name + ";");
       std::string factory_name = "factory_" + typeName + ".create()";
-      parm.println(parameters::Area::CONSTRUCTOR, name + ".construct(" + factory_name + ");");
+      parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (a_database.findOne(object, iteration->identifier)) {  
@@ -40,14 +32,21 @@ namespace generator {
       } 
     }
     a_database.add(ast::ObjectType::VARIABLE, name, type);
-    parameters::Area area =
-      (parm.IsArea(parameters::Area::CONSTRUCTOR) ? parameters::Area::CONSTRUCTOR : parameters::Area::IMPLEMENTATION);
-    parm.println(area, "for (" +
-                 name + " = " + name + ".LEFT(); " +
-                 name + " <= " + name + ".RIGHT(); " +
-                 name + " = " + name + ".RIGHTOF()) {");
+    std::string t = "for (" +
+      name + " = " + name + ".LEFT(); " +
+      name + " <= " + name + ".RIGHT(); " +
+      name + " = " + name + ".RIGHTOF()) {";
+    if (constructor) {
+      parm.addClassConstructorContents(t);
+    } else {
+      parm.addClassContents(t);
+    }
     callback(parm);
-    parm.println(area, "}");
+    if (constructor) {
+      parm.addClassConstructorContents("}");
+    } else {
+      parm.addClassContents("}");
+    }
     debug.functionEnd("forLoop");
   }  
 
@@ -58,7 +57,7 @@ namespace generator {
     std::string noConditionDelimiter = "";
 
     std::string name = a_expression.BasicIdentifierToString(target);
-    PrintSourceLine(parm, target, parameters::Area::IMPLEMENTATION);
+    parm.addImplementationContents(getSourceLine(target));
     ast::ReturnTypes return_types;
     a_expression.BasicIdentifierReturnTypes(target, return_types);
     ast::ObjectValueContainer expectedType;
@@ -66,18 +65,18 @@ namespace generator {
       for (ast::AssignmentCondition s : p->assignment_conditions.list) {
         if (s.condition) {
           static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-          parm.println(parameters::Area::IMPLEMENTATION, command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
+          parm.addImplementationContents(command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
           command = "else if";
           noConditionCommand = "else {";
           noConditionDelimiter = "}";
         } else {
-          parm.println(parameters::Area::IMPLEMENTATION, noConditionCommand);
+          parm.addImplementationContents(noConditionCommand);
         }
-        parm.println(parameters::Area::IMPLEMENTATION, name + " = " + a_expression.toString(s.expression, expectedType, callback) + ";");
+        parm.addImplementationContents(name + " = " + a_expression.toString(s.expression, expectedType, callback) + ";");
         if (s.condition) {
-          parm.println(parameters::Area::IMPLEMENTATION, "}");
+          parm.addImplementationContents("}");
         } else {
-          parm.println(parameters::Area::IMPLEMENTATION, noConditionDelimiter);
+          parm.addImplementationContents(noConditionDelimiter);
         }
       }
     } else {

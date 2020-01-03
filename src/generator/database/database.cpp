@@ -128,21 +128,21 @@ namespace generator {
 
   void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
     localDatabase.initialize(library, name, type);
-    descendHierarchy(name, type);
+    openHierarchy(name, type);
   }
   
   void Database::topHierarchyEnd(bool globalize) {
     if (globalize) {
       Globalize();
     }
-    ascendHierarchy();
+    closeHierarchy();
   }
 
-  void Database::descendHierarchy(const std::string& name, ast::ObjectType type) {
-    localDatabase.descendHierarchy(name, type);
+  void Database::openHierarchy(const std::string& name, ast::ObjectType type) {
+    localDatabase.openHierarchy(name, type);
   }
-  void Database::ascendHierarchy() {
-    localDatabase.ascendHierarchy();
+  void Database::closeHierarchy() {
+    localDatabase.closeHierarchy();
   }
 
   int Database::getHierarchyLevel() {

@@ -1,0 +1,1 @@
+include $(JHDL)/systemc/include.mak

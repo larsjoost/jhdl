@@ -10,7 +10,6 @@ namespace generator {
                                   bool database_enable) {
     if (v) {
       debug.functionStart("ObjectDeclaration");
-      PrintSourceLine(parm, v->text);
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
@@ -47,7 +46,7 @@ namespace generator {
   template<typename Func>
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
     debug.functionStart("PrintTypeObject");
-    DefineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, func,
+    defineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, func,
                  [](parameters& parm) {}, false, false);
 
     debug.functionEnd("PrintTypeObject");
@@ -61,18 +60,18 @@ namespace generator {
       func(parm, left, right);
       bool arguments_exists = !left.empty();
       std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
-      parm.println(parameters::Area::DECLARATION, name + " create() {");
-      parm.println(parameters::Area::DECLARATION, name + " x" + arguments + ";");
-      parm.println(parameters::Area::DECLARATION, "return x;");
-      parm.println(parameters::Area::DECLARATION, "}");
-      parm.println(parameters::Area::DECLARATION, "template <typename T>");
-      parm.println(parameters::Area::DECLARATION, name + " create(T left, T right) {");
-      parm.println(parameters::Area::DECLARATION, name + " x(left, right);");
-      parm.println(parameters::Area::DECLARATION, "return x;");
-      parm.println(parameters::Area::DECLARATION, "}");
+      parm.addImplementationContents(name + " create() {");
+      parm.addImplementationContents(name + " x" + arguments + ";");
+      parm.addImplementationContents("return x;");
+      parm.addImplementationContents("}");
+      parm.addImplementationContents("template <typename T>");
+      parm.addImplementationContents(name + " create(T left, T right) {");
+      parm.addImplementationContents(name + " x(left, right);");
+      parm.addImplementationContents("return x;");
+      parm.addImplementationContents("}");
     };
     PrintTypeObject(parm, name, f);
-    parm.println(parameters::Area::DECLARATION, "Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
+    parm.addImplementationContents("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
   }
 
 

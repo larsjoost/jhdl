@@ -74,15 +74,11 @@ namespace generator {
 
     int methodId = 0;
 
-    void namespaceStart(parameters& parm, std::string& library);
-    void namespaceEnd(parameters& parm);
-    
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, bool globalize);
-    void descendHierarchy(parameters& parm, std::string parent_name, parameters::Area area,
-                          ast::ObjectType);
-    void ascendHierarchy(parameters& parm);
+    void openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType, std::string class_description);
+    void closeHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
     std::string rangeStruct(std::string& name, std::string& left, std::string& right);
@@ -97,7 +93,7 @@ namespace generator {
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
     template<typename Func>
-    void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback);
+    void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback, bool constructor);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
@@ -180,19 +176,17 @@ namespace generator {
 
     // definition.cpp
     template <typename Func>
-    void createProcess(parameters& parm, Func func);
+    void createProcess(parameters& parm, Func func, std::string name);
     template <typename Func>
     void printSensitivityListWait(parameters& parm, auto sensitivity, Func func);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    std::string getConstructorDeclaration(parameters& parm, ast::ObjectType type, std::string& name, std::string* argument,
-                                          const std::string& initializer_list);
     bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
-    void DefineObject(parameters& parm,
+    void defineObject(parameters& parm,
                       bool topHierarchy,
                       std::string name,
                       ast::ObjectType type,
@@ -233,8 +227,7 @@ namespace generator {
     void componentInstantiation(parameters& parm, ast::ComponentInstance* c);
     void createConstructor(parameters& parm, bool toopHierarchy, ast::ObjectType type,
                            std::string& name, std::string* argument,
-                           ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                           bool init_enable);
+                           ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     // systemc.cpp
     std::string ObjectName(ast::ObjectType type, const std::string& name);
@@ -243,15 +236,11 @@ namespace generator {
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);
     void implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library);
 
-    void PrintSourceLine(parameters& parm, ast::Text* t);
-    void PrintSourceLine(parameters& parm, ast::Text& t);
-    void PrintSourceLine(parameters& parm, ast::BasicIdentifier* t);
-    void PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t);
-    void PrintSourceLine(parameters& parm, ast::Text* t, parameters::Area area);
-    void PrintSourceLine(parameters& parm, ast::Text& t, parameters::Area area);
-    void PrintSourceLine(parameters& parm, ast::BasicIdentifier* t, parameters::Area area);
-    void PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t, parameters::Area area);
-
+    std::string getSourceLine(ast::Text* t);
+    std::string getSourceLine(ast::Text& t);
+    std::string getSourceLine(ast::BasicIdentifier* t);
+    std::string getSourceLine(ast::SimpleIdentifier* t);
+    
     void parse(parameters& parm, ast::DesignFile& designFile, std::string& library);
     void parsePackage(parameters& parm, std::string name, std::string library);
 

@@ -1,0 +1,1 @@
+SYSTEMC:=$(shell find $(JHDL)/systemc -name systemc-* -type d)

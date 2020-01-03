@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
       debug.functionStart("procedureCallStatement");
-      parm.println(parameters::Area::IMPLEMENTATION, a_expression.procedureCallStatementToString(p) + ";");
+      parm.addImplementationContents(a_expression.procedureCallStatementToString(p) + ";");
       debug.functionEnd("procedureCallStatement");
     }
   }
@@ -59,8 +59,7 @@ namespace generator {
       DatabaseResult object;
       if (a_database.findOne(object, severity, ast::ObjectType::ENUM)) {
         std::string name = a_name_converter.GetName(object);
-        parm.println(parameters::Area::IMPLEMENTATION,
-                     "report(" + a_expression.toString(p->message, expected_type) + ", " +
+        parm.addImplementationContents("report(" + a_expression.toString(p->message, expected_type) + ", " +
                      name + ");");
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
@@ -79,17 +78,17 @@ namespace generator {
           static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
           try {
             std::string condition = a_expression.toString(c.condition, expectedType);
-            parm.println(parameters::Area::IMPLEMENTATION, command + " (" + condition + ") {");
+            parm.addImplementationContents(command + " (" + condition + ") {");
           } catch (ExpressionParser::ObjectNotFound e) {
             e.print();
           }
 	} else {
-	  parm.println(parameters::Area::IMPLEMENTATION, "} else {");
+	  parm.addImplementationContents("} else {");
 	}
 	command = "} elsif";
         sequentialStatements(parm, c.sequentialStatements);
       }
-      parm.println(parameters::Area::IMPLEMENTATION, "}");
+      parm.addImplementationContents("}");
       debug.functionEnd("ifStatement");
     }
   }
@@ -102,7 +101,7 @@ namespace generator {
       auto callback = [&](parameters& parm) {
 	sequentialStatements(parm, f->sequentialStatements);
       };
-      forLoop(parm, name, f->iteration, callback);
+      forLoop(parm, name, f->iteration, callback, false);
       debug.functionEnd("forLoopStatement");
     }
   }
@@ -111,21 +110,8 @@ namespace generator {
     if (p) {
       debug.functionStart("waitStatement");
       assert(p->waitText);
-      std::string index = std::to_string(parm.index);
-      std::string label = "line" + std::to_string(p->waitText->getLine());
-      parm.println(parameters::Area::INITIALIZATION, "case " + index + ": goto " + label + ";");
-      std::string now;
-      std::string name = "NOW";
-      DatabaseResult object;
-      if (a_database.findOne(object, name)) {
-        now = a_name_converter.GetName(object) + "()";
-      } else {
-        exceptions.printError("Unable to find " + name);
-      }
-      parm.println(parameters::Area::IMPLEMENTATION, "w.waitFor(" + a_expression.physicalToString(p->physical) + ");"); 
-      PrintSourceLine(parm, p->waitText, parameters::Area::IMPLEMENTATION);
-      parm.println(parameters::Area::IMPLEMENTATION, label + ": if (w.done()) {w.index = 0;} else {w.index = " + index + "; return;};");
-      parm.index++;
+      parm.addImplementationContents(getSourceLine(p->waitText));
+      parm.addImplementationContents("wait(" + a_expression.physicalToString(p->physical) + ");"); 
       debug.functionEnd("waitStatement");
     }
   }
@@ -134,7 +120,7 @@ namespace generator {
     if (r) {
        debug.functionStart("returnStatement");
        try {
-         parm.println(parameters::Area::IMPLEMENTATION, "return " + a_expression.toString(r->value, parm.returnType) + ";");
+         parm.addImplementationContents("return " + a_expression.toString(r->value, parm.returnType) + ";");
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }

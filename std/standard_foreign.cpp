@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <systemc.h>
+
 #include "standard.h"
 #include "env.hpp"
 
@@ -23,24 +25,11 @@ namespace vhdl {
     } 
   }
 
-  STD::STANDARD::TIME_enum convert(SC_UNITS u) {
-    switch (u) {
-    case SC_FS : return STD::STANDARD::FS;
-    case SC_PS : return STD::STANDARD::PS;
-    case SC_NS : return STD::STANDARD::NS;
-    case SC_US : return STD::STANDARD::US;
-    case SC_MS : return STD::STANDARD::MS;
-    case SC_SEC : return STD::STANDARD::SEC;
-    case SC_MIN : return STD::STANDARD::MIN;
-    case SC_HR : return STD::STANDARD::HR;
-    }
-    assert(false);
-  };
- 
   namespace STD {
 
     Package_STANDARD::DELAY_LENGTH Package_STANDARD::vhdl_now() {
-      DELAY_LENGTH t = {sc_now.value, convert(sc_now.unit)};
+      sc_time x = sc_time_stamp();
+      DELAY_LENGTH t = {(int)(x.to_seconds() * 1.0e15), STD::STANDARD::FS};
       return t;
     }
 

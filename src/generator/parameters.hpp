@@ -19,135 +19,106 @@ namespace generator {
 
     bool verbose = false;
 
-    InfoWriter a_info_writer;
+    InfoWriter info_writer;
     
-  public:
-    
-    enum class FileSelect {HEADER, SOURCE};
-    enum class Area {TOP, INITIALIZER_LIST, CONSTRUCTOR, DECLARATION, INITIALIZATION, IMPLEMENTATION, INTERFACE, NONE};
+    /*
+      <hpp file>:
 
-  private:
+      top
 
-    struct AreaInfo {
-      FileSelect a_file_select;
-      Area a_area;
-      parameters* a_parm;
-      std::list<std::string> lines;
-      ~AreaInfo() {
-        if (!lines.empty()) {
-          std::cerr <<
-            "AreaInfo(" << a_parm->GetAreas().size() << ") " <<
-            a_parm->ToString(a_area) << " of file " <<
-            a_parm->ToString(a_file_select) << " not empty" << std::endl;
-          std::cerr << "<Lines>" << std::endl;
-          while(!lines.empty()) {
-            std::cerr << lines.front() << std::endl;
-            lines.pop_front();
-          }
-          std::cerr << "</Lines>" << std::endl;
-          assert(false);
-        }
+      class_description {
+
+        constructor_description : constructor_initilizer_list {
+	  constructor_contents
+	}
+	
+	class_contents
+
+	children
+	
       }
+
+      bottom
+
+      <cpp file>:
+
+      implementation_top
+
+      implementation_contents
+
+     */
+
+    static void println(std::ostream& handle, std::string text);
+    static void print(std::ostream& handle, std::string text);
+    static void println(std::ostream& handle, std::list<std::string>& lines);
+    static void print(std::ostream& handle, std::list<std::string>& elements, std::string delimiter = ",");
+    
+    struct ClassContainer {
+      bool active = true;
+      std::string class_description;
+      std::string constructor_description;
+      std::list<std::string> constructor_initializer_list;
+      std::list<std::string> constructor_contents;
+      std::list<std::string> class_contents;
+      std::list<ClassContainer> children;
+      void flush(std::ostream& handle, int hierarchy, bool verbose);
     };
     
-    typedef std::unordered_map<int, AreaInfo> AreaInfoMap;
-
-    struct Areas {
-      Area area;
-      AreaInfoMap map;
-      std::list<std::string> buffer;
-      ~Areas() {
-        if (!buffer.empty()) {
-          std::cerr << "Buffer is not empty. Contents:" << std::endl;
-          for (auto& i : buffer) {
-            std::cerr << i << std::endl;
-          }
-          assert(false);
-        }
-      }
+    struct AreaContainer {
+      std::list<std::string> top;
+      std::list<ClassContainer> children;
+      std::list<std::string> bottom;
+      std::list<std::string> implementation_top;
+      std::list<std::string> implementation_contents;
+      static const bool verbose = true;
+      void flush(std::ostream& header_file, std::ostream& implementation_file, int hierarchy, bool verbose);
     };
     
-    typedef std::list<Areas> AreasHierarchy;
-    
-    struct FileInfo {
-      std::string fileName;
-      std::ofstream outputFile;
+    struct FileContainer {
+      Debug<true> debug;
+      std::string library;
+      std::string file_name;
       int line_number = 1;
-      AreasHierarchy printlines;
+      AreaContainer content;
+      FileContainer() : debug("FileContainer") {};
+      ClassContainer* getCurrentClassContainer();
+      void flush(bool verbose = false);
     };
 
-    FileInfo sourceFileInfo;
-    FileInfo headerFileInfo;
+    FileContainer file_container;
 
     bool quiet = false;
     
-    void open(FileInfo& fileInfo, std::string& filename, std::string extension);
-    void write(const std::string& line);
-
-    FileInfo& getFileInfo();
-
-    AreasHierarchy& GetAreas();
+    ClassContainer* getCurrentClassContainer();
+    ClassContainer* getActiveClassContainer();
     
-    int ConvertInteger(Area a);
-    FileSelect a_file_select;
-    std::string ToString(Area a);
-    std::string ToString(FileSelect f);
-    
-    template <typename Func>
-    void AccessAreaInfo(Area a, Func func, bool second_element = false) {
-      int index = ConvertInteger(a);
-      auto areas = GetAreas().begin();
-      if (second_element) {
-        areas = std::next(areas);
-      }
-      auto lines = areas->map.find(index);
-      if (lines != areas->map.end()) {
-        func(*areas, lines->second);
-      } else {
-        AreaInfo l;
-        l.a_file_select = a_file_select;
-        l.a_area = a;
-        l.a_parm = this;
-        AreaInfoMap& m = GetAreas().front().map;
-        m[index] = l;
-        func(*areas, m[index]);
-      }
-    }
-
   public:
-    parameters() : debug("parameters") {
-      selectFile(FileSelect::SOURCE);
-      DescendHierarchy(Area::TOP);
-      selectFile(FileSelect::HEADER);
-      DescendHierarchy(Area::TOP);
-    };
-    int index;
+    parameters() : debug("parameters") {};
     bool package_contains_function;
     bool parse_declarations_only = false;
     ast::ObjectValueContainer returnType;
-    void DescendHierarchy(Area area);
-    void AscendHierarchy();
-    void open(std::string filename);
+
+    void addTop(std::string text);
+    void newClass(std::string description);
+    void setClassConstructorDescription(std::string text);
+    void addClassConstructorInitializerList(std::string text);
+    void addClassConstructorContents(std::string text);
+    void addClassContents(std::string text);
+    void endClass();
+    void addBottom(std::string text);
+    void addImplementationTop(std::string text);
+    void addImplementationContents(std::string text);
+    
+    void open(std::string filename, std::string library);
     void close();
-    void println(std::string message);
-    void println(Area a, std::string message);
-    Area SetArea(Area area);
-    void Flush(Area a);
-    void Flush();
-    Area GetArea();
-    bool IsArea(Area area);
-    std::string ToList(Area a);
-    FileSelect selectFile(FileSelect s);
-    bool isFile(FileSelect s) {return s == a_file_select; };
     bool isQuiet();
     bool setQuiet(bool quiet);
-    std::string getFileName(FileSelect s); 
-    std::string replaceFileExtension(std::string filename, std::string extension);
-    std::string baseName(std::string filename);
+    static std::string replaceFileExtension(std::string filename, std::string extension);
+    static std::string baseName(std::string filename);
 
-    void SetPackageName(const std::string& path, const std::string& name) {
-      a_info_writer.SetPackageName(path, name);
-    }
+    void setPackageName(const std::string& path, const std::string& name);
+
+    void printHierarchy();
   };
 
 }

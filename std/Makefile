@@ -1,8 +1,13 @@
+JHDL := $(shell pwd)/..
+include $(JHDL)/include.mak
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
 CXXFLAGS := -std=c++14 -g -MMD -fconcepts -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
+INC_DIR := -I$(SYSTEMC)/include
+LIBS := -lsystemc
+INC := -L$(SYSTEMC)/lib-linux64
 
 all: $(OBJS)
 
@@ -16,7 +21,7 @@ textio.hpp: textio.vhd ../src/hdlc
 	../src/hdlc.sh -f textio.vhd -l std -s
 
 %.o: %.cpp standard.hpp env.hpp textio.hpp
-	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib 
+	g++ $(CXXFLAGS) $(INC_DIR) $(INC) $(LIBS) -c $< -o $@ -I../src/kernel/lib 
 
 -include $(DEPS)
 

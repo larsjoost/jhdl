@@ -8,7 +8,7 @@ namespace generator {
   void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
                                 ast::ObjectType object_type, std::string arguments) {
     debug.functionStart("instantiateType");
-    parm.println(parameters::Area::CONSTRUCTOR, type + "(new " + ObjectName(object_type, name) + "(this" + arguments + "));");
+    parm.addClassConstructorContents(type + "(new " + ObjectName(object_type, name) + "(this" + arguments + "));");
     debug.functionEnd("instantiateType");
   }
 
@@ -54,7 +54,7 @@ namespace generator {
       a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ast::ObjectType::GENERATE, ", " + identifier);
-        });
+        }, true);
       debug.functionEnd("forGenerateStatementInstantiation");
     }
   }
@@ -76,14 +76,13 @@ namespace generator {
         }
         return std::string();
       };
-      parm.println(listToString(parm, l->associationElements.list, "; ", func) + ";");
+      parm.addClassContents(listToString(parm, l->associationElements.list, "; ", func) + ";");
     }
   }
   
   void SystemC::componentInstantiation(parameters& parm, ast::ComponentInstance* c) {
     if (c) {
       assert(c->instanceName);
-      PrintSourceLine(parm, c->instanceName->text);
       std::string instanceName = c->instanceName->toString(true);
       std::string componentName = c->componentName->toString(true);
       std::string s = componentName;
@@ -95,7 +94,8 @@ namespace generator {
         }
       }
       std::string object_name = ObjectName(ast::ObjectType::ARCHITECTURE, s);
-      parm.println(parameters::Area::CONSTRUCTOR, "auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");");
+      parm.addClassConstructorContents(getSourceLine(c->instanceName->text));
+      parm.addClassConstructorContents("auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
       componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
@@ -118,29 +118,21 @@ namespace generator {
     return ObjectName(type, info.name);
   }
   
-  std::string SystemC::getConstructorDeclaration(parameters& parm, ast::ObjectType type, std::string& name,
-                                                 std::string* argument, const std::string& initializer_list) {
-    ParentInfo parent_info;
-    a_database.GetParent(parent_info);
-    if (parent_info.name.size() > 0) {
-      std::string p1 = ObjectName(parent_info) +"* parent";
-      std::string p2 = " : p(parent)";
-      if (argument) {
-        p1 += ", auto " + *argument;
-        p2 += ", " + *argument + "(" + *argument + ")";
-      }
-      return ObjectName(type, name) + "(" + p1 + ") " + p2 + (initializer_list.empty() ? "" : ", " + initializer_list);
-    }
-    return ObjectName(type, name) + (initializer_list.empty() ? "" : " : " + initializer_list);
-  }
-
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, ast::ObjectType type,
                                   std::string& name, std::string* argument,
-                                  ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                                  bool init_enable) {
+                                  ast::List<ast::ConcurrentStatement>* concurrentStatements) {
     if (!topHierarchy) {
-      std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
-      parm.println(getConstructorDeclaration(parm, type, name, argument, initializer_list) + " {" + (init_enable ? "init();" : "") + "}");
+      ParentInfo parent_info;
+      a_database.GetParent(parent_info);
+      if (parent_info.name.size() > 0) {
+	std::string constructor_description = ObjectName(parent_info) +"* parent";
+	parm.addClassConstructorInitializerList("p(parent)");
+	if (argument) {
+	  constructor_description += ", auto " + *argument;
+	  parm.addClassConstructorInitializerList(*argument + "(" + *argument + ")");
+	}
+	parm.setClassConstructorDescription(ObjectName(type, name) + "(" + constructor_description + ")");
+      }
     }
   }
 

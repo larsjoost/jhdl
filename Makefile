@@ -1,4 +1,5 @@
-DIRS := src std src/kernel/lib
+JHDL := $(shell pwd)
+DIRS := systemc src std src/kernel/lib
 
 .PHONY: all test clean 
 

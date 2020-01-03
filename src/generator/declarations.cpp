@@ -67,13 +67,13 @@ namespace generator {
     */
     std::string valueName = name + "_value";
     std::string s = std::to_string(total_size);
-    parm.println("enum class " + enumName + " {" + enumList + "};");
-    parm.println("struct " + valueName + " {");
-    parm.println("const static int size = " + s + ";");
-    parm.println("const static int enum_size = " + std::to_string(enum_size) + ";");
-    parm.println("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
-    parm.println("};");
-    parm.println("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
+    parm.addClassContents("enum class " + enumName + " {" + enumList + "};");
+    parm.addClassContents("struct " + valueName + " {");
+    parm.addClassContents("const static int size = " + s + ";");
+    parm.addClassContents("const static int enum_size = " + std::to_string(enum_size) + ";");
+    parm.addClassContents("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
+    parm.addClassContents("};");
+    parm.addClassContents("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
     };
     PrintFactory(parm, name, f);
@@ -114,7 +114,6 @@ namespace generator {
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition,
                                std::string& subtype, ast::ObjectValueContainer::Array& arguments) {
     debug.functionStart("printArrayType");
-    parm.println("");
     std::string array_template_start;
     std::string array_template_end;
     for (auto& r : definition.list) { 
@@ -151,7 +150,7 @@ namespace generator {
       array_template_start = "Array<" + range + ", " + array_template_start;
       array_template_end += ">";
     }
-    parm.println("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
+    parm.addTop("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       for (auto& r : definition.list) { 
         if (r.range) {
@@ -213,7 +212,7 @@ namespace generator {
     if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = a_name_converter.GetName(database_result);
-      parm.println("using " + name + " = " + definition + "<" + n + ">;"); 
+      parm.addTop("using " + name + " = " + definition + "<" + n + ">;"); 
       auto f = [&](parameters& parm, std::string& left, std::string& right) {
       };
       PrintFactory(parm, name, f);
@@ -226,14 +225,14 @@ namespace generator {
 
   ast::ObjectValueContainer SystemC::AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
     debug.functionStart("AccessType");
-    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "sc_access");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "vhdl_access");
     debug.functionEnd("AccessType");
     return value;
   }
 
   ast::ObjectValueContainer SystemC::FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
     debug.functionStart("FileType");
-    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "sc_file");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "vhdl_file");
     debug.functionEnd("FileType");
     return value;
   }
@@ -241,7 +240,6 @@ namespace generator {
   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
     if (t) {
       debug.functionStart("type_declarations");
-      PrintSourceLine(parm, t->identifier);
       ast::ObjectValueContainer value;
       if (t->accessType) {
         value = AccessType(parm, t->identifier, t->accessType);
@@ -268,7 +266,6 @@ namespace generator {
   void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
     if (file) {
       debug.functionStart("FileDeclaration");
-      PrintSourceLine(parm, file->handle);
       std::string name = file->handle->toString(true);
       std::string type = file->type->toString(true);
       DatabaseResult result;
@@ -276,8 +273,9 @@ namespace generator {
         type = a_name_converter.GetName(result);
         a_database.add(ast::ObjectType::FILE, name, result.object->type);
       }
-      parm.println(type + " " + name + " = " + type + "(" +
-                   file->direction->toString(true) + ", " + file->filename->toString() + ");"); 
+      parm.addClassContents(getSourceLine(file->handle));
+      parm.addClassContents(type + " " + name + " = " + type + "(" +
+			    file->direction->toString(true) + ", " + file->filename->toString() + ");"); 
       debug.functionEnd("FileDeclaration");
     }
   }
@@ -285,7 +283,6 @@ namespace generator {
   void SystemC::AliasDeclaration(parameters& parm, ast::AliasDeclaration* alias) {
     if (alias) {
       debug.functionStart("AliasDeclaration");
-      PrintSourceLine(parm, alias->designator);
       std::string designator = alias->designator->toString(true);
       std::string name = alias->name->toString(true);
       std::string type;
@@ -294,7 +291,8 @@ namespace generator {
         type = a_name_converter.GetName(result);
         a_database.add(result.object->id, designator, result.object->type);
       }
-      parm.println("using " + designator + " = " + type + ";"); 
+      parm.addTop(getSourceLine(alias->designator));
+      parm.addTop("using " + designator + " = " + type + ";"); 
       debug.functionEnd("AliasDeclaration");
     }
   }
@@ -486,7 +484,7 @@ namespace generator {
       ast::ObjectArguments arguments(true);
       generateObjectArguments(f->interface, arguments);
       std::string returnTypeName = FunctionReturn(parm, f);
-      PrintSourceLine(parm, text);
+      parm.addImplementationContents(getSourceLine(text));
       std::string argumentNames = getArgumentNames(parm, f->interface);
       a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
       if (!parm.parse_declarations_only) {
@@ -506,35 +504,34 @@ namespace generator {
             if (f->body) {
               std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
-              parm.println(returnTypeName + " " + run_prefix + "run" + interface + "{");
+              parm.addImplementationContents(returnTypeName + " " + run_prefix + "run" + interface + "{");
               if (!foreignFunctionName.empty()) {
-                parm.println("// Foreign function call");
-                parm.println("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+                parm.addImplementationContents("// Foreign function call");
+                parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
               }
               sequentialStatements(parm, f->body->sequentialStatements);
-              parm.println("}");
+              parm.addImplementationContents("}");
             } else {
-              parm.println(returnTypeName + " run" + interface_with_initialization + ";");
+              parm.addImplementationContents(returnTypeName + " run" + interface_with_initialization + ";");
             }
           };
-          DefineObject(parm, false, class_name, type, "", NULL,
+          defineObject(parm, false, class_name, type, "", NULL,
                        &f->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
-        parm.SetArea(parameters::Area::DECLARATION);
         std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";
-        parm.println(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
+        parm.addClassContents(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
                      translatedName + interface +
                      (f->body ? "{" : " = 0;"));
         if (f->body) {
-          parm.println("auto inst = " + ObjectName(type, class_name) + "(this);");
+          parm.addClassContents("auto inst = " + ObjectName(type, class_name) + "(this);");
           std::string s,d;
           for (auto& i : arguments.list) {
             s += d + i.name;
             d = ", ";
           }
           std::string r = returnTypeName == "void" ? "" : "return ";
-          parm.println(r + "inst.run(" + s + ");");
-          parm.println("}");
+          parm.addClassContents(r + "inst.run(" + s + ");");
+          parm.addClassContents("}");
         }
       }
       debug.functionEnd("function_declarations");
@@ -570,12 +567,12 @@ namespace generator {
         a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE);
         returnName = a_name_converter.GetName(result);
       }
-      parm.println("/*");
-      parm.println(" * This is the definition of the foreign function set as an attribute.");
-      parm.println(" * The implementation must be defined in a .cpp file in this directory.");
-      parm.println("*/");
+      parm.addBottom("/*");
+      parm.addBottom(" * This is the definition of the foreign function set as an attribute.");
+      parm.addBottom(" * The implementation must be defined in a .cpp file in this directory.");
+      parm.addBottom("*/");
       std::string foreignName = AttributeName(a);
-      parm.println(returnName + " " + foreignName + interface + ";");
+      parm.addBottom(returnName + " " + foreignName + interface + ";");
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
       a_database.printAllObjects(name);
@@ -614,14 +611,14 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     if (t) {
-      PrintSourceLine(parm, t->identifier);
       std::string name = t->identifier->toString(true);
       std::string type_name = t->type->name->toString(true);
       DatabaseResult database_result;
       if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
         std::string type_name = a_name_converter.GetName(database_result, false);
         a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
-        parm.println("using " + name + " = " + type_name + ";");
+	parm.addTop(getSourceLine(t->identifier));
+        parm.addTop("using " + name + " = " + type_name + ";");
         PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
       } else {
         exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
@@ -632,7 +629,6 @@ namespace generator {
   void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       debug.functionStart("ObjectDeclarations");
-      PrintSourceLine(parm, v->text);
       auto func = [&](std::string& name, std::string& type, std::string& init,
 		      std::string& factory_name, ast::ObjectType id,
                       ast::ObjectDeclaration::Direction direction) {
@@ -640,10 +636,11 @@ namespace generator {
           type = "sc_signal<" + type + ">";
         }
         std::string s = type + " " + name;
-        parm.println(s + ";");
-        parm.println(parameters::Area::CONSTRUCTOR, name + ".construct(" + factory_name + ");");
+	parm.addClassContents(getSourceLine(v->text));
+      	parm.addClassContents(s + ";");
+        parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
         if (init.size() > 0) {
-          parm.println(parameters::Area::CONSTRUCTOR, name + ".init(" + init + ");");
+          parm.addClassConstructorContents(name + ".init(" + init + ");");
         }
       };
       ObjectDeclaration(parm, v, func);

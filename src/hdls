@@ -2,7 +2,13 @@
 
 set -e
 
-SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
+SCRIPT=$(realpath $0)
+SCRIPTPATH=$(dirname $SCRIPT)
+
+function error {
+    local message=$1
+    echo "[ERROR] $SCRIPT: $message" 1>&2
+}
 
 usage()
 {
@@ -62,7 +68,7 @@ do
 done
 
 if [ -z "$FILENAME" ]; then
-    echo "Filename must be specified" 1>&2
+    error "Filename must be specified"
     usage
     exit 1
 fi
@@ -70,6 +76,8 @@ fi
 if [ -z "$JHDL" ]; then
     export JHDL=$SCRIPTPATH/../
 fi
+
+source $SCRIPTPATH/setup.sh
 
 KERNEL=$SCRIPTPATH/kernel/lib
 
@@ -97,7 +105,7 @@ INCLUDES=""
 for i in $INCLUDE_PATHS; do
     INCLUDES+=" -I$i"
 done
-g++ -std=c++14 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib $INCLUDES -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
+g++ -std=c++14 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $KERNEL/*.o $SCRIPTPATH/../std/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

@@ -20,21 +20,10 @@ namespace generator {
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                          bool standardPackage) {
-    debug.functionStart("SystemC");
+    debug.functionStart("generate");
     a_filename = designFile.filename;
     parameters parm;
-    parm.open(a_filename); 
-    transform(library.begin(), library.end(), library.begin(), toupper);
-    parm.selectFile(parameters::FileSelect::SOURCE);
-    parm.SetArea(parameters::Area::TOP);
-    parm.println("#include \"" + parm.getFileName(parameters::FileSelect::HEADER) + "\"");
-    parm.println("namespace vhdl {");
-    parm.selectFile(parameters::FileSelect::HEADER);
-    parm.SetArea(parameters::Area::TOP);
-    std::string ifndefName = library + "_" + parm.baseName(a_filename) + "_HPP";
-    parm.println("#ifndef " + ifndefName);
-    parm.println("#define " + ifndefName);
-    parm.println("");
+    parm.open(a_filename, library); 
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
@@ -45,50 +34,29 @@ namespace generator {
         }
       }
     }
-    parm.SetArea(parameters::Area::TOP);
-    parm.println("#include <string.h>");
-    parm.println("#include \"systemc.h\"");
-    parm.println("#include \"vhdl.h\"");
-    if (!standardPackage) {parm.println("#include \"standard.h\"");}
+    if (!standardPackage) {parm.addTop("#include <standard.h>");}
     parse(parm, designFile, library);
-    parm.selectFile(parameters::FileSelect::HEADER);
-    parm.println("#endif");
-    parm.selectFile(parameters::FileSelect::SOURCE);
-    parm.println("}");
     parm.close();
+    debug.functionEnd("generate");
   }
 
   void SystemC::saveLibraryInfo() {
     libraryInfo.save();
   }
 
-  void SystemC::namespaceStart(parameters& parm, std::string& library) {
-    parm.println("namespace vhdl { namespace " + library + " {");
-  }
-
-  void SystemC::namespaceEnd(parameters& parm) {
-    parm.println("}}");
-  }
-
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
     debug.functionStart("parse(designFile = " + designFile.filename + ", library = " + library + ")");
-    parm.SetArea(parameters::Area::TOP);
     if (!designFile.designUnits.list.empty()) {
       for (ast::DesignUnit& it : designFile.designUnits.list) {
         includes(parm, it.module.contextClause, true);
       }
-      parm.SetArea(parameters::Area::TOP);
       bool unit_found = false;
       for (ast::DesignUnit& it : designFile.designUnits.list) {
         debug.debug("Parsing design unit");
-        parm.SetArea(parameters::Area::TOP);
         includes(parm, it.module.contextClause, false);
-        parm.SetArea(parameters::Area::TOP);
-        namespaceStart(parm, library);
         if (it.module.package) {packageDeclaration(parm, it.module.package, library); unit_found = true;}
         if (it.module.interface) {interfaceDeclaration(parm, it.module.interface, library); unit_found = true;}
         if (it.module.implementation) {implementationDeclaration(parm, it.module.implementation, library); unit_found = true;}
-        namespaceEnd(parm);
       }
       if (!unit_found) {
         exceptions.printWarning("Did not find any design units in file " + designFile.filename);
@@ -109,8 +77,8 @@ namespace generator {
       if (!filename.empty()) {
 	if (filename != a_filename) {
           std::string hpp_filename = parm.replaceFileExtension(filename, ".hpp");
-	  parm.println(parameters::Area::TOP, "#include \"" + hpp_filename + "\"");
-          parm.SetPackageName(stdPath, filename);
+	  parm.addTop("#include \"" + hpp_filename + "\"");
+          parm.setPackageName(stdPath, filename);
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
@@ -152,7 +120,7 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(r, left, right, type);
-    parm.println(parameters::Area::DECLARATION, "using " + name + " = Range<decltype(" + left + ")>;");
+    parm.addTop("using " + name + " = Range<decltype(" + left + ")>;");
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }
@@ -174,7 +142,7 @@ namespace generator {
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
-    parm.println("enum " + enumName + " {" + enumList + "};");
+    parm.addClassContents("enum " + enumName + " {" + enumList + "};");
     int size = 0;
     std::string baseUnitName;
     std::string upperUnitName;
@@ -195,26 +163,26 @@ namespace generator {
 					    [&](ast::PhysicalElement& e){
 					      return "\"" + e.unit->toString() + "\""; 
 					    });
-    parm.println("struct " + unitName + " {");
+    parm.addClassContents("struct " + unitName + " {");
     {
-      parm.println("std::string toString(" + enumName + " e) {");
-      parm.println("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};");
-      parm.println("return translate[e];");
-      parm.println("}");
+      parm.addClassContents("std::string toString(" + enumName + " e) {");
+      parm.addClassContents("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};");
+      parm.addClassContents("return translate[e];");
+      parm.addClassContents("}");
     }
-    parm.println("};");
+    parm.addClassContents("};");
     std::string valueName = name + "_value";
-    parm.println("struct " + valueName + " {");
+    parm.addClassContents("struct " + valueName + " {");
     {
       std::string x = std::to_string(size);
-      parm.println("const int size = " + x + ";");
-      parm.println("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
+      parm.addClassContents("const int size = " + x + ";");
+      parm.addClassContents("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
     }
-    parm.println("};");
+    parm.addClassContents("};");
     std::string typeName = name + "_type";
     std::string declType = "decltype(" + left + ")";
-    parm.println("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
-    parm.println("using " + name + " = PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
+    parm.addClassContents("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
+    parm.addClassContents("using " + name + " = PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
     auto f = [&](parameters& parm, std::string& l, std::string& r) {
       l = "{" + left + ", " + baseUnitName + "}";
       r = "{" + right + ", " + upperUnitName + "}";
@@ -238,26 +206,22 @@ namespace generator {
       parm.package_contains_function = false;
       std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
       auto createDefinition = [&](parameters& parm) {
-        parm.println(ObjectName(type, name) + "() {init();}");
+        parm.setClassConstructorDescription(ObjectName(type, name));
       };
       auto createBody = [&](parameters& parm) {
       };
       bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
-      DefineObject(parm, true, name, type, derived_name, NULL,
+      defineObject(parm, true, name, type, derived_name, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
       bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
       if (declare_object) {
-        parm.println("using " + name + " = " + ObjectName(type, name) + ";");
+        parm.addClassContents("using " + name + " = " + ObjectName(type, name) + ";");
       }
-      parm.println("}");
       if (declare_object) {
         std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
-        parm.println("extern " + declaration);
-        parameters::FileSelect file_select = parm.selectFile(parameters::FileSelect::SOURCE);
-        parm.println(declaration);
-        parm.selectFile(file_select);
+        parm.addBottom("extern " + declaration);
+        parm.addBottom(declaration);
       }
-      parm.println("namespace " + library + " {");
       topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");
     }
@@ -268,12 +232,11 @@ namespace generator {
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
     topHierarchyStart(parm, library, name, type, a_filename);
-    parm.println("");
-    parm.println("class " + ast::toString(type) + "_" + name + " {");
-    parm.println("public:");
+    parm.newClass("SC_MODULE(" + ast::toString(type) + "_" + name + ")");
     if (interface->generics) {
-      parm.println("// Generics");
-      parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
+      assert(false);
+      // Not implemented yet
+      // parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
     }
     if (interface->ports) {
       auto func = [&](std::string& type, ast::ObjectType id,
@@ -286,10 +249,10 @@ namespace generator {
         }
         return type;
       };
-      parm.println("// Ports");
-      parm.println(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
+      parm.addClassContents("// Ports");
+      parm.addClassContents(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
     }
-    parm.println("};");
+    parm.endClass();
     topHierarchyEnd(parm, true);
     debug.functionEnd("interfaceDeclaration");
   }
@@ -308,12 +271,9 @@ namespace generator {
         }
       }
       auto declaration_callback = [&](parameters& parm) {
-        std::string initializer_list = parm.ToList(parameters::Area::INITIALIZER_LIST);
-        parm.println(ObjectName(type, name) + "(const char* name)" +
-                     (initializer_list.empty() ? "" : " : " + initializer_list) + " {init();}");
+        parm.setClassConstructorDescription(ObjectName(type, name) + "(const sc_module_name& name)");
       };
-      parm.println("");
-      DefineObject(parm, true, name, type, "sc_module, " + ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
+      defineObject(parm, true, name, type, ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

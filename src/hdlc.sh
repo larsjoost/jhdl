@@ -2,9 +2,17 @@
 
 set -e
 
-SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
+SCRIPT=$(realpath $0)
+SCRIPTPATH=$(dirname $SCRIPT)
 
-export JHDL=$(realpath $SCRIPTPATH/..)
+function error {
+    local message=$1
+    echo "[ERROR] $SCRIPT: $message" 1>&2
+}
+
+export JHDL=$SCRIPTPATH/..
+
+source $SCRIPTPATH/setup.sh
 
 if [ -n "$DEBUG" ]; then
     OPTIONS="gdb --args"

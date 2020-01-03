@@ -12,9 +12,7 @@ namespace generator {
     bool packageExists = a_database.exists(library, package);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
-      parm.SetArea(parameters::Area::TOP);
       parsePackage(parm, package, library);
-      parm.Flush();
       packageExists = a_database.exists(library, package);
     }
     if (packageExists) {

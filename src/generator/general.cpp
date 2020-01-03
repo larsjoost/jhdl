@@ -19,72 +19,54 @@ namespace generator {
     }
     a_database.topHierarchyStart(library, name, type);
     if (verbose) {
-      parm.println("// Hierarchy top start, library = " + library +
-                   ", name = " + name + ", type = " + ast::toString(type) +
-                   ", hierarchy = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addTop("// Hierarchy top start, library = " + library +
+		  ", name = " + name + ", type = " + ast::toString(type) +
+		  ", hierarchy = " + std::to_string(a_database.getHierarchyLevel()));
     }
   }
   
   void SystemC::topHierarchyEnd(parameters& parm, bool globalize) {
     if (verbose) {
-      parm.println("// Hierarchy top end = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addBottom("// Hierarchy top end = " + std::to_string(a_database.getHierarchyLevel()));
     }
     a_database.topHierarchyEnd(globalize);
   }
 
-  void SystemC::descendHierarchy(parameters& parm, std::string parent_name, parameters::Area area,
-                                 ast::ObjectType parent_type) {
-    debug.functionStart("descendHierarchy");
-    parm.DescendHierarchy(area);
-    a_database.descendHierarchy(parent_name, parent_type);
+  void SystemC::openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type, std::string class_description) {
+    debug.functionStart("openHierarchy");
+    parm.newClass(class_description);
+    a_database.openHierarchy(parent_name, parent_type);
     if (verbose) {
-      parm.println("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addTop("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
     }
-    debug.functionEnd("descendHierarchy");
+    debug.functionEnd("openHierarchy");
   }
 
-  void SystemC::ascendHierarchy(parameters& parm) {
-    debug.functionStart("ascendHierarchy");
+  void SystemC::closeHierarchy(parameters& parm) {
+    debug.functionStart("closeHierarchy");
     if (verbose) {
-      parm.println("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addBottom("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
     }
-    parm.AscendHierarchy();
-    a_database.ascendHierarchy();
-    debug.functionEnd("ascendHierarchy");
+    parm.endClass();
+    a_database.closeHierarchy();
+    debug.functionEnd("closeHierarchy");
   }
 
-  void SystemC::PrintSourceLine(parameters& parm, ast::Text* t, parameters::Area area) {
+  std::string SystemC::getSourceLine(ast::Text* t) {
     assert(t);
-    parm.println(area, "// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine());
+    return "// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine();
   }
 
-  void SystemC::PrintSourceLine(parameters& parm, ast::Text& t, parameters::Area area) {
-    PrintSourceLine(parm, &t, area);
+  std::string SystemC::getSourceLine(ast::Text& t) {
+    return getSourceLine(&t);
   }
   
-  void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t, parameters::Area area) {
-    PrintSourceLine(parm, t->getText(), area);
+  std::string SystemC::getSourceLine(ast::BasicIdentifier* t) {
+    return getSourceLine(t->getText());
   }
 
-  void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t, parameters::Area area) {
-    PrintSourceLine(parm, t->text, area);
-  }
-
-  void SystemC::PrintSourceLine(parameters& parm, ast::Text* t) {
-    assert(t);
-    parm.println("// line " + std::to_string(t->getLine()) + ": " + t->getCurrentLine());
-  }
-
-  void SystemC::PrintSourceLine(parameters& parm, ast::Text& t) {
-    PrintSourceLine(parm, &t);
-  }
-  
-  void SystemC::PrintSourceLine(parameters& parm, ast::BasicIdentifier* t) {
-    PrintSourceLine(parm, t->getText());
-  }
-
-  void SystemC::PrintSourceLine(parameters& parm, ast::SimpleIdentifier* t) {
-    PrintSourceLine(parm, t->text);
+  std::string SystemC::getSourceLine(ast::SimpleIdentifier* t) {
+    return getSourceLine(t->text);
   }
 
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,

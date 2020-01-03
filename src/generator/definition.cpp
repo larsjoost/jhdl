@@ -10,9 +10,8 @@ namespace generator {
                                          ast::BlockStatement* blockStatement) {
     debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
-      PrintSourceLine(parm, blockStatement->name);
       std::string name = blockStatement->name->toString(true);
-      DefineObject(parm, false, name, ast::ObjectType::BLOCK, "sc_module", NULL, 
+      defineObject(parm, false, name, ast::ObjectType::BLOCK, "sc_module", NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
@@ -24,16 +23,16 @@ namespace generator {
   void SystemC::forGenerateStatementDefinition(parameters& parm,
                                                ast::ForGenerateStatement* forGenerateStatement) {
     if (forGenerateStatement) {
-      PrintSourceLine(parm, forGenerateStatement->name);
+      parm.addImplementationContents(getSourceLine(forGenerateStatement->name));
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       auto createDeclaration = [&](parameters& parm) {
         a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       };
       auto createBody = [&](parameters& parm) {
-      	parm.println("STD::STANDARD::INTEGER " + identifier + ";");
+      	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
       };
-      DefineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
+      defineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
 		   createBody, createDeclaration, false, true);
@@ -41,10 +40,11 @@ namespace generator {
   }
 
   template <typename Func>
-  void SystemC::createProcess(parameters& parm, Func func) {
-    parm.println("void process() {");
+  void SystemC::createProcess(parameters& parm, Func func, std::string name) {
+    parm.addClassConstructorContents("SC_METHOD(" + name + ")");
+    parm.addClassContents("void " + name + "() {");
     func(parm);
-    parm.println("}");
+    parm.addClassContents("}");
   }
   
   void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
@@ -61,26 +61,10 @@ namespace generator {
       };
       auto createBody = [&](parameters& parm) {
         createProcess(parm,
-                      [&](parameters& parm) {
-			parm.SetArea(parameters::Area::INITIALIZATION);
-                        parm.println("// Wait statements goto tree");
-			parm.println("switch (w.index) {");
-                        parm.index = 1;
-                        sequentialStatements(parm, method->sequentialStatements);
-			parm.println("}");
-                        if (method->sensitivity) {
-                          auto s = [&](ast::SimpleIdentifier& name) {
-                            std::string x = name.toString(true);
-                            getObjectName(x, ast::ObjectType::SIGNAL);
-                            return x;
-                          };
-                          printSensitivityListWait(parm, method->sensitivity, s);
-                        }
-                        parm.SetArea(parameters::Area::IMPLEMENTATION);
-                      });
+                      [&](parameters& parm) {},
+		      methodName);
       };
-      parm.println("");
-      DefineObject(parm, false, methodName, ast::ObjectType::PROCESS, "sc_thread", NULL,
+      defineObject(parm, false, methodName, ast::ObjectType::PROCESS, "sc_thread", NULL,
                    &method->declarations, NULL, createBody, createDefinition, true, true);
     }
     debug.functionEnd("methodDefinition");
@@ -114,10 +98,10 @@ namespace generator {
                         [&](parameters& parm) {
                           printSensitivityListWait(parm, sensitivity, func);
                           signalAssignment(parm, s);
-                        });
+                        },
+			name);
         };
-        parm.println("");
-        DefineObject(parm, false, name, ast::ObjectType::PROCESS, "sc_thread", NULL, NULL, NULL, createBody,
+        defineObject(parm, false, name, ast::ObjectType::PROCESS, "sc_thread", NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {}, true, true);
       }
       debug.functionEnd("concurrentSignalAssignment");

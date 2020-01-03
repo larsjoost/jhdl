@@ -7,8 +7,6 @@ namespace vhdl {
 
   void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity);
 
-  STD::STANDARD::TIME_enum convert(SC_UNITS u);
-  
   bool wait(const STD::STANDARD::TIME& t);
 
   class Wait {

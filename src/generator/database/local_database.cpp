@@ -130,12 +130,12 @@ namespace generator {
     m.add(other->a_map.front());
   }
   
-  void LocalDatabase::descendHierarchy(const std::string& name, ast::ObjectType type) {
+  void LocalDatabase::openHierarchy(const std::string& name, ast::ObjectType type) {
     NameMap m(name, type);
     a_map.push_front(m);
   }
 
-  void LocalDatabase::ascendHierarchy() {
+  void LocalDatabase::closeHierarchy() {
     a_map.pop_front();
   }
 
