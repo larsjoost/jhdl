@@ -34,7 +34,7 @@ namespace generator {
         }
       }
     }
-    if (!standardPackage) {parm.addTop("#include <standard.h>");}
+    if (!standardPackage) {parm.addInclude("#include <standard.h>");}
     parse(parm, designFile, library);
     parm.close();
     debug.functionEnd("generate");
@@ -77,7 +77,7 @@ namespace generator {
       if (!filename.empty()) {
 	if (filename != a_filename) {
           std::string hpp_filename = parm.replaceFileExtension(filename, ".hpp");
-	  parm.addTop("#include \"" + hpp_filename + "\"");
+	  parm.addInclude("#include \"" + hpp_filename + "\"");
           parm.setPackageName(stdPath, filename);
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
@@ -211,7 +211,8 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       };
       bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
-      defineObject(parm, true, name, type, derived_name, NULL,
+      std::string class_description = "struct " + name;
+      defineObject(parm, true, name, type, class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
       bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
       if (declare_object) {
@@ -231,28 +232,40 @@ namespace generator {
     debug.functionStart("interfaceDeclaration");
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
+    std::string class_name = ObjectName(type, name);
     topHierarchyStart(parm, library, name, type, a_filename);
-    parm.newClass("SC_MODULE(" + ast::toString(type) + "_" + name + ")");
-    if (interface->generics) {
-      assert(false);
-      // Not implemented yet
-      // parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
-    }
-    if (interface->ports) {
-      auto func = [&](std::string& type, ast::ObjectType id,
-                      ast::ObjectDeclaration::Direction direction) {
-        switch (direction) {
-        case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
-        case ast::ObjectDeclaration::Direction::OUT: 
-        case ast::ObjectDeclaration::Direction::INOUT: 
-        case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
-        }
-        return type;
+    auto declaration_callback =
+      [&](parameters& parm) {
+	if (interface->generics) {
+	  assert(false);
+	  // Not implemented yet
+	  // parm.println(interfaceListToString(parm, interface->generics, "; ", false) + ";");
+	}
+	if (interface->ports) {
+	  auto func = [&](std::string& type, ast::ObjectType id,
+			  ast::ObjectDeclaration::Direction direction) {
+			switch (direction) {
+			case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
+			case ast::ObjectDeclaration::Direction::OUT: 
+			case ast::ObjectDeclaration::Direction::INOUT: 
+			case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
+			}
+			return type;
+		      };
+	  parm.addClassContents("// Ports");
+	  parm.addClassContents(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
+	}
+	parm.setClassConstructorDescription(class_name + "(const sc_module_name& name)");
+	parm.addClassConstructorInitializer("sc_module(name)");
+	parm.addClassContents("SC_HAS_PROCESS(" + class_name + ");");
       };
-      parm.addClassContents("// Ports");
-      parm.addClassContents(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
-    }
-    parm.endClass();
+    std::string class_description = "SC_MODULE(" + class_name + ")";
+    defineObject(parm, true, name, type, class_description, NULL,
+		 NULL,
+		 NULL,
+		 [&](parameters& parm){},
+		 declaration_callback,
+		 false, true);
     topHierarchyEnd(parm, true);
     debug.functionEnd("interfaceDeclaration");
   }
@@ -260,20 +273,27 @@ namespace generator {
   void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
       debug.functionStart("implementationDeclaration");
-      std::string name = implementation->name->toString(true);
+      std::string entity_name = implementation->entity_name->toString(true);
+      std::string architecture_name = implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
-      topHierarchyStart(parm, library, name, type, a_filename);
-      if (!a_database.localize(library, name, ast::ObjectType::ENTITY)) {
+      topHierarchyStart(parm, library, architecture_name, type, a_filename);
+      if (!a_database.localize(library, entity_name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
-                              library + "." + name, &implementation->name->text);
+                              library + "." + entity_name, &implementation->entity_name->text);
         if (verbose) {
           a_database.print(library);
         }
       }
-      auto declaration_callback = [&](parameters& parm) {
-        parm.setClassConstructorDescription(ObjectName(type, name) + "(const sc_module_name& name)");
-      };
-      defineObject(parm, true, name, type, ast::toString(ast::ObjectType::ENTITY) + "_" + name, NULL,
+      std::string class_name = ObjectName(type, architecture_name);
+      auto declaration_callback =
+	[&](parameters& parm) {
+	  std::string derived_class = ObjectName(ast::ObjectType::ENTITY, entity_name);
+	  parm.addDerivedClass(derived_class);
+	  parm.setClassConstructorDescription(class_name + "(const sc_module_name& name)");
+	  parm.addClassConstructorInitializer(derived_class + "(name)");
+	};
+      std::string class_description = "struct " + class_name;
+      defineObject(parm, true, architecture_name, type, class_description, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

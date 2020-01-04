@@ -8,7 +8,7 @@ namespace generator {
                              bool topHierarchy,
                              std::string name,
                              ast::ObjectType type,
-                             std::string derived_classes,
+			     std::string class_description,
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
@@ -17,9 +17,7 @@ namespace generator {
                              bool wait_statements,
                              bool init_enable) {
     debug.functionStart("defineObject");
-    std::string description = ObjectName(type, name);
-    openHierarchy(parm, name, type, description);
-    parm.setClassConstructorDescription("struct " + description + (derived_classes.empty() ? "" : " : public " + derived_classes));
+    openHierarchy(parm, name, type, class_description, name);
     ParentInfo parent_info;
     a_database.GetParent(parent_info);
     if (!topHierarchy) {

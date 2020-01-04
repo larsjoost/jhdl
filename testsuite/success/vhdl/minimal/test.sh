@@ -2,4 +2,4 @@
 
 source ../../../envsetup.sh
 
-analyse test.vhdl
+analyse test.vhdl $@

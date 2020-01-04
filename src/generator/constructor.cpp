@@ -126,10 +126,10 @@ namespace generator {
       a_database.GetParent(parent_info);
       if (parent_info.name.size() > 0) {
 	std::string constructor_description = ObjectName(parent_info) +"* parent";
-	parm.addClassConstructorInitializerList("p(parent)");
+	parm.addClassConstructorInitializer("p(parent)");
 	if (argument) {
 	  constructor_description += ", auto " + *argument;
-	  parm.addClassConstructorInitializerList(*argument + "(" + *argument + ")");
+	  parm.addClassConstructorInitializer(*argument + "(" + *argument + ")");
 	}
 	parm.setClassConstructorDescription(ObjectName(type, name) + "(" + constructor_description + ")");
       }

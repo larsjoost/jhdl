@@ -77,7 +77,7 @@ namespace generator {
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, bool globalize);
-    void openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType, std::string class_description);
+    void openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType, std::string class_description, std::string name);
     void closeHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
@@ -190,7 +190,7 @@ namespace generator {
                       bool topHierarchy,
                       std::string name,
                       ast::ObjectType type,
-                      std::string derived_classes,
+		      std::string class_description,
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,

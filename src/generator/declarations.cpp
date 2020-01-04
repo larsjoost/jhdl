@@ -515,7 +515,8 @@ namespace generator {
               parm.addImplementationContents(returnTypeName + " run" + interface_with_initialization + ";");
             }
           };
-          defineObject(parm, false, class_name, type, "", NULL,
+	  std::string class_description = "struct " + class_name;
+          defineObject(parm, false, class_name, type, class_description, NULL,
                        &f->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
         std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";

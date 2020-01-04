@@ -15,9 +15,9 @@ if [ -n "$VERBOSE" ]; then
 fi
 
 function analyse {
-    $JHDL/src/hdlc.sh -f $1 $VERBOSE
+    $JHDL/src/hdlc.sh -f $1 $VERBOSE $@
 }
 
 function simulate {
-    $JHDL/src/hdls -f $@ $HDLS_DEBUG
+    $JHDL/src/hdls -f $@ $HDLS_DEBUG $@
 }

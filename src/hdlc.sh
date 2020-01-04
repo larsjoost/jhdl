@@ -10,18 +10,23 @@ function error {
     echo "[ERROR] $SCRIPT: $message" 1>&2
 }
 
+for i in $@; do
+    case $i in
+        "-x")
+            OPTIONS="gdb --args"
+	    ;;
+        "-y")
+            OPTIONS="valgrind --leak-check=yes"
+            ;;
+	*)
+	    ARGS="$ARGS $i"
+            ;;
+    esac
+done
+
 export JHDL=$SCRIPTPATH/..
 
 source $SCRIPTPATH/setup.sh
 
-if [ -n "$DEBUG" ]; then
-    OPTIONS="gdb --args"
-    HDLS_DEBUG="-x"
-fi
-
-if [ -n "$VALGRIND" ]; then
-    OPTIONS="valgrind --leak-check=yes"
-fi
-
-$OPTIONS $JHDL/src/hdlc -c $JHDL/config/jhdl.conf $@
+$OPTIONS $JHDL/src/hdlc -c $JHDL/config/jhdl.conf $ARGS 
 

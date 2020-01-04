@@ -15,7 +15,7 @@ namespace verilog {
       implementation = new ::ast::Implementation();
       SimpleIdentifier* name = scanner->expect<SimpleIdentifier, Module>(); 
       interface->name = name;
-      implementation->name = name;
+      implementation->entity_name = name;
       if (scanner->optional("(")) {
         auto i = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Module>();
         scanner->expect(")");

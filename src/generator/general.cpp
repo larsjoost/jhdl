@@ -32,9 +32,9 @@ namespace generator {
     a_database.topHierarchyEnd(globalize);
   }
 
-  void SystemC::openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type, std::string class_description) {
+  void SystemC::openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type, std::string class_description, std::string name) {
     debug.functionStart("openHierarchy");
-    parm.newClass(class_description);
+    parm.newClass(class_description, name);
     a_database.openHierarchy(parent_name, parent_type);
     if (verbose) {
       parm.addTop("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));

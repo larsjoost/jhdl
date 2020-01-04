@@ -13,7 +13,8 @@ namespace ast {
     
   public:
 
-    SimpleIdentifier* name;
+    SimpleIdentifier* architecture_name;
+    SimpleIdentifier* entity_name;
     List<Declaration> declarations;
     List<ConcurrentStatement> concurrentStatements;
     

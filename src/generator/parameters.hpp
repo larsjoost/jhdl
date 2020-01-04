@@ -55,9 +55,11 @@ namespace generator {
     
     struct ClassContainer {
       bool active = true;
+      std::string name;
       std::string class_description;
+      std::list<std::string> derived_classes;
       std::string constructor_description;
-      std::list<std::string> constructor_initializer_list;
+      std::list<std::string> constructor_initializer;
       std::list<std::string> constructor_contents;
       std::list<std::string> class_contents;
       std::list<ClassContainer> children;
@@ -65,17 +67,20 @@ namespace generator {
     };
     
     struct AreaContainer {
+      std::list<std::string> include;
+      std::string namespace_start;
       std::list<std::string> top;
       std::list<ClassContainer> children;
       std::list<std::string> bottom;
       std::list<std::string> implementation_top;
       std::list<std::string> implementation_contents;
+      std::string namespace_end;
       static const bool verbose = true;
       void flush(std::ostream& header_file, std::ostream& implementation_file, int hierarchy, bool verbose);
     };
     
     struct FileContainer {
-      Debug<true> debug;
+      Debug<false> debug;
       std::string library;
       std::string file_name;
       int line_number = 1;
@@ -98,10 +103,12 @@ namespace generator {
     bool parse_declarations_only = false;
     ast::ObjectValueContainer returnType;
 
+    void addInclude(std::string text);
     void addTop(std::string text);
-    void newClass(std::string description);
+    void newClass(std::string description, std::string name);
+    void addDerivedClass(std::string text);
     void setClassConstructorDescription(std::string text);
-    void addClassConstructorInitializerList(std::string text);
+    void addClassConstructorInitializer(std::string text);
     void addClassConstructorContents(std::string text);
     void addClassContents(std::string text);
     void endClass();

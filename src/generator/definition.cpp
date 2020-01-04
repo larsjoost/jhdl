@@ -11,7 +11,9 @@ namespace generator {
     debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
       std::string name = blockStatement->name->toString(true);
-      defineObject(parm, false, name, ast::ObjectType::BLOCK, "sc_module", NULL, 
+      std::string class_description = "struct " + name;
+      defineObject(parm, false, name, ast::ObjectType::BLOCK,
+		   class_description, NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
@@ -32,7 +34,9 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
       };
-      defineObject(parm, false, name, ast::ObjectType::GENERATE, "sc_module", &identifier,
+      std::string class_description = "struct " + name;
+      defineObject(parm, false, name, ast::ObjectType::GENERATE,
+		   class_description, &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
 		   createBody, createDeclaration, false, true);
@@ -64,7 +68,9 @@ namespace generator {
                       [&](parameters& parm) {},
 		      methodName);
       };
-      defineObject(parm, false, methodName, ast::ObjectType::PROCESS, "sc_thread", NULL,
+      std::string class_description = "struct " + methodName;
+      defineObject(parm, false, methodName, ast::ObjectType::PROCESS,
+		   class_description, NULL,
                    &method->declarations, NULL, createBody, createDefinition, true, true);
     }
     debug.functionEnd("methodDefinition");
@@ -101,7 +107,9 @@ namespace generator {
                         },
 			name);
         };
-        defineObject(parm, false, name, ast::ObjectType::PROCESS, "sc_thread", NULL, NULL, NULL, createBody,
+        std::string class_description = "struct " + name;
+	defineObject(parm, false, name, ast::ObjectType::PROCESS,
+		     class_description, NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {}, true, true);
       }
       debug.functionEnd("concurrentSignalAssignment");
