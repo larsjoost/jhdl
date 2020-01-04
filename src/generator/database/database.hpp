@@ -86,6 +86,7 @@ namespace generator {
     void print(std::string name = "");
     void PrintLocal();
     void printAllObjects(std::string name);
+    void printAll();
   };
 
   template<typename Func>

@@ -182,6 +182,11 @@ namespace generator {
       std::cerr << "Found no objects with name \"" + name + "\"." << std::endl;
     }
   }
+
+  void Database::printAll() {
+    globalDatabase.print();
+    localDatabase.print();
+  }
   
 }
   

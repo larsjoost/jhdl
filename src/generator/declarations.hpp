@@ -38,6 +38,7 @@ namespace generator {
         }
       } else {
         exceptions.printError("Could not find type \"" + type_name + "\"", v->text);
+      	if (verbose) {a_database.printAll();}
       }
       debug.functionEnd("ObjectDeclaration");
     }

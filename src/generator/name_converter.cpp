@@ -45,6 +45,7 @@ namespace generator {
 
   std::string NameConverter::GetName(DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
     a_debug.functionStart("getName");
+    assert(object.object != NULL);
     std::string name = object.object->name;
     a_debug.debug("name = " + name);
     int hierarchyLevel = a_database->getHierarchyLevel();

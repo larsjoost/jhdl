@@ -12,10 +12,10 @@ INC := -L$(SYSTEMC)/lib-linux64
 all: $(OBJS)
 
 standard.hpp: standard.vhd ../src/hdlc
-	../src/hdlc -f standard.vhd -l std -s -p
+	../src/hdlc.sh -f standard.vhd -l std -s -p $(VERBOSE) $(GDB)
 
 env.hpp: env.vhd ../src/hdlc
-	../src/hdlc.sh -f env.vhd -l std -s
+	../src/hdlc.sh -f env.vhd -l std -s $(VERBOSE) $(GDB)
 
 textio.hpp: textio.vhd ../src/hdlc
 	../src/hdlc.sh -f textio.vhd -l std -s

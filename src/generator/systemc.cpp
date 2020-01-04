@@ -205,24 +205,24 @@ namespace generator {
       topHierarchyStart(parm, library, name, type, a_filename);
       parm.package_contains_function = false;
       std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
-      auto createDefinition = [&](parameters& parm) {
-        parm.setClassConstructorDescription(ObjectName(type, name));
-      };
+      auto createDefinition =
+	[&](parameters& parm)
+	{
+	  parm.setClassConstructorDescription(ObjectName(type, name));
+	  bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
+	  if (declare_object) {
+	    parm.addClassContents("using " + name + " = " + ObjectName(type, name) + ";");
+	    std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
+	    parm.addBottom("extern " + declaration);
+	    parm.addBottom(declaration);
+	  }
+	};
       auto createBody = [&](parameters& parm) {
-      };
+			};
       bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
       std::string class_description = "struct " + name;
       defineObject(parm, true, name, type, class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
-      bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
-      if (declare_object) {
-        parm.addClassContents("using " + name + " = " + ObjectName(type, name) + ";");
-      }
-      if (declare_object) {
-        std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
-        parm.addBottom("extern " + declaration);
-        parm.addBottom(declaration);
-      }
       topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");
     }

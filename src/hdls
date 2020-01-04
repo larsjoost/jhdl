@@ -50,6 +50,7 @@ do
             ;;
         x)
             DEBUG="gdb --args"
+	    HDLC_DEBUG="-x"
             ;;
         y)
             DEBUG="valgrind --leak-check=yes"
@@ -84,7 +85,7 @@ KERNEL=$SCRIPTPATH/kernel/lib
 make -C $KERNEL > /dev/null
 
 filebase="${FILENAME%.*}"
-$SCRIPTPATH/hdlc.sh -f $FILENAME 
+$SCRIPTPATH/hdlc.sh -f $FILENAME $VERBOSE $HDLC_DEBUG
 headerfile="$filebase.hpp"
 sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)

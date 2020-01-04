@@ -104,7 +104,8 @@ namespace generator {
           right = id + ".RIGHT()";
         } else {
           exceptions.printError("Could not find type " + type_name, &id->text);
-        }
+	  if (verbose) {a_database.printAll();}
+	}
       }
     };
     PrintFactory(parm, name, f);
@@ -197,6 +198,7 @@ namespace generator {
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
+      if (verbose) {a_database.printAll();}
     }
     debug.functionEnd("arrayType");
     return value;
@@ -218,6 +220,7 @@ namespace generator {
       PrintFactory(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
+      if (verbose) {a_database.printAll();}
     }
     debug.functionEnd("SimpleType");
     return value;
@@ -303,13 +306,14 @@ namespace generator {
         ast::ObjectArgument a;
         DatabaseResult result;
         a.type_name = i.object->type->name->toString(true);
-        a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
-        a.type = result.object->type;
-        a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
-        for (ast::SimpleIdentifier& id : i.object->identifiers.list) { 
-          a.name = id.toString(true);
-          arguments.push_back(a);
-        }
+        if (a_database.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
+	  a.type = result.object->type;
+	  a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
+	  for (ast::SimpleIdentifier& id : i.object->identifiers.list) { 
+	    a.name = id.toString(true);
+	    arguments.push_back(a);
+	  }
+	}
       }
     }
   }
@@ -321,10 +325,13 @@ namespace generator {
         a.name = "";
         DatabaseResult result;
         a.type_name = i.toString(true);
-        a_database.findOne(result, a.type_name, ast::ObjectType::TYPE);
-        a.type = result.object->type;
-        a.default_value = NULL;
-        arguments.push_back(a);
+        if (a_database.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
+	  a.type = result.object->type;
+	  a.default_value = NULL;
+	  arguments.push_back(a);
+	} else {
+	  debug.debug("Did not find object argument type " + a.type_name);
+	}
       }
     }
   }
@@ -565,8 +572,11 @@ namespace generator {
       std::string returnName = "void";
       if (id == ast::ObjectType::FUNCTION) {
         DatabaseResult result;
-        a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE);
-        returnName = a_name_converter.GetName(result);
+        if (a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE)) {
+	  returnName = a_name_converter.GetName(result);
+	} else {
+	  debug.debug("Could not find function return type");
+	}
       }
       parm.addBottom("/*");
       parm.addBottom(" * This is the definition of the foreign function set as an attribute.");
@@ -622,7 +632,8 @@ namespace generator {
         parm.addTop("using " + name + " = " + type_name + ";");
         PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
       } else {
-        exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
+	exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
+	if (verbose) {a_database.printAll();}
       }
     }
   }
