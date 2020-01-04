@@ -1,5 +1,7 @@
 #!/bin/bash
 
+JDHL=${JHDL:=$1}
+
 set -e
 
 SCRIPTPATH=$(dirname $(readlink -f $0))

@@ -5,7 +5,7 @@ DIRS := systemc src std src/kernel/lib
 
 all:
 	for m in $(DIRS); do \
-	$(MAKE) -C $$m; \
+	$(MAKE) JHDL=$(JHDL) -C $$m; \
 	done
 
 test:

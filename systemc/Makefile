@@ -2,5 +2,5 @@
 all: install.complete
 
 install.complete:
-	./install.sh
+	./install.sh $(JHDL)
 	touch install.complete
