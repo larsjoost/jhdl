@@ -11,11 +11,7 @@
 namespace generator {
 
   class LocalDatabase {
-    std::string a_library;
-    ast::ObjectType a_type;
-    std::string a_name;
-    std::list<ast::Attribute*> a_package_attributes;
-    std::list<NameMap> a_map;
+    NameMap a_content;
 
     bool a_verbose = false;
     
@@ -27,10 +23,8 @@ namespace generator {
 
   public:
            
-    void find(DatabaseResults& results, const std::string& name, bool local = true);
+    void find(DatabaseResults& results, const std::string& name);
 
-    int getHierarchyLevel();
-    
     bool setVisible(std::string name = "");
 
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
@@ -44,17 +38,10 @@ namespace generator {
                      ast::FunctionDeclaration* function,
                      ast::Text* text = NULL);
 
-    void add(LocalDatabase* other);
-    
-    void initialize(std::string& library, std::string& name, ast::ObjectType type);
     std::string getLibrary();
     std::string getName();
     ast::ObjectType getType();
     
-    void openHierarchy(const std::string& name, ast::ObjectType type);
-    void closeHierarchy();
-
-    void GetParent(ParentInfo& parent_info);
     void print();
   };
   

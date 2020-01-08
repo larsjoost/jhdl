@@ -22,7 +22,7 @@ namespace generator {
                          bool standardPackage) {
     debug.functionStart("generate");
     a_filename = designFile.filename;
-    parameters parm;
+    parameters parm(a_global_database);
     parm.open(a_filename, library); 
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
@@ -82,7 +82,7 @@ namespace generator {
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
-	  parameters p;
+	  parameters p(a_global_database);
           p.setQuiet(true);
           p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);
@@ -100,13 +100,13 @@ namespace generator {
   
 
 
-  void SystemC::rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
+  void SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
     debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")");
     assert(r);
     if (r->range_direction_type) {
-      a_expression.CollectAllReturnTypes(r->range_direction_type->left, expectedType);
-      left = a_expression.toString(r->range_direction_type->left, expectedType);
-      right = a_expression.toString(r->range_direction_type->right, expectedType);
+      a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
+      left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
+      right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
     } else if (r->range_attribute_type) {
       
     } else {
@@ -119,7 +119,7 @@ namespace generator {
     debug.functionStart("printRangeType");
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
-    rangeToString(r, left, right, type);
+    rangeToString(parm, r, left, right, type);
     parm.addTop("using " + name + " = Range<decltype(" + left + ")>;");
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
@@ -134,11 +134,11 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer physical_type(ast::ObjectValue::PHYSICAL, name);
-    rangeToString(r, left, right, type);
+    rangeToString(parm, r, left, right, type);
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
-                                   a_database.add(ast::ObjectType::ENUM, unit, physical_type);
+                                   parm.addObject(ast::ObjectType::ENUM, unit, physical_type);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
@@ -277,11 +277,11 @@ namespace generator {
       std::string architecture_name = implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
       topHierarchyStart(parm, library, architecture_name, type, a_filename);
-      if (!a_database.localize(library, entity_name, ast::ObjectType::ENTITY)) {
+      if (!parm.exists(library, entity_name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
                               library + "." + entity_name, &implementation->entity_name->text);
         if (verbose) {
-          a_database.print(library);
+	  parm.printDatabase(library);
         }
       }
       std::string class_name = ObjectName(type, architecture_name);
@@ -299,7 +299,7 @@ namespace generator {
                    [&](parameters& parm){},
                    declaration_callback,
                    false, true);
-      topHierarchyEnd(parm, false);
+      topHierarchyEnd(parm);
       debug.functionEnd("implementationDeclaration");
     }
   }

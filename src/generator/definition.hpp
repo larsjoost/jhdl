@@ -17,9 +17,9 @@ namespace generator {
                              bool wait_statements,
                              bool init_enable) {
     debug.functionStart("defineObject");
-    openHierarchy(parm, name, type, class_description, name);
+    openHierarchy(parm, name, type, class_description);
     ParentInfo parent_info;
-    a_database.GetParent(parent_info);
+    parm.getParent(parent_info);
     if (!topHierarchy) {
       parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.");
     }

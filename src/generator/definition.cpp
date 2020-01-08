@@ -29,7 +29,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       auto createDeclaration = [&](parameters& parm) {
-        a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
+        parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       };
       auto createBody = [&](parameters& parm) {
       	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
@@ -89,14 +89,15 @@ namespace generator {
       {
         bool q = parm.setQuiet(true);
         std::list<std::string> sensitivity;
-        auto sensitivityListGenerator = [&](DatabaseResult& object) {
-          sensitivity.push_back(a_name_converter.GetName(object));
-        };
+        auto sensitivityListGenerator =
+	  [&](DatabaseResult& object) {
+	    sensitivity.push_back(parm.getName(object));
+	  };
         signalAssignment(parm, s, sensitivityListGenerator);
         parm.setQuiet(q);
         auto func = [&](std::string& s) {
           std::string name = s;
-          getObjectName(name, ast::ObjectType::SIGNAL);
+          getObjectName(parm, name, ast::ObjectType::SIGNAL);
           return name;
         };
         auto createBody = [&](parameters& parm) {

@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "database/database.hpp"
+#include "database/global_database.hpp"
 #include "expression/expression.hpp"
 
 #include "../exceptions/exceptions.hpp"
@@ -62,13 +62,9 @@ namespace generator {
 
     std::string a_filename;
 
-    parameters headerParameters;
-    parameters sourceParameters;
-    
-    Database a_database;
-    NameConverter a_name_converter = NameConverter(a_database);
-    ExpressionParser a_expression = ExpressionParser(a_database, a_name_converter); 
-    
+    GlobalDatabase a_global_database;
+    ExpressionParser a_expression; 
+
     Config config;
     Config libraryInfo;
 
@@ -76,8 +72,8 @@ namespace generator {
 
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
-    void topHierarchyEnd(parameters& parm, bool globalize);
-    void openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType, std::string class_description, std::string name);
+    void topHierarchyEnd(parameters& parm, bool globalize = false);
+    void openHierarchy(parameters& parm, std::string name, ast::ObjectType type , std::string class_description);
     void closeHierarchy(parameters& parm);
 
     DatabaseElement* getName(parameters& parm, ast::BasicIdentifier* i, std::string& name);
@@ -124,7 +120,7 @@ namespace generator {
                       ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype,
                         ast::ObjectValueContainer::Array& arguments);
-    void rangeToString(ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
+    void rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
@@ -161,8 +157,8 @@ namespace generator {
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
-    void generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
-    void generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments);
+    void generateObjectArguments(parameters& parm, ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments);
+    void generateObjectArguments(parameters& parm, ast::InterfaceList* interface, ast::ObjectArguments& arguments);
     std::string FunctionAttribute(parameters& parm, std::string& name, ast::ObjectType type,
                                   ast::ObjectArguments& arguments, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
@@ -183,8 +179,8 @@ namespace generator {
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    bool getObjectName(std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
-    bool getObjectName(std::string& name, ast::ObjectType id, ast::Text* text = NULL);
+    bool getObjectName(parameters& parm, std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
+    bool getObjectName(parameters& parm, std::string& name, ast::ObjectType id, ast::Text* text = NULL);
     template <typename BodyFunc, typename DeclFunc>
     void defineObject(parameters& parm,
                       bool topHierarchy,

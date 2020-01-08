@@ -15,9 +15,6 @@ namespace generator {
 
   struct DatabaseElement {
     ast::ObjectType id;
-    std::string library;
-    ast::ObjectType sectionType;
-    std::string sectionName;
     std::string name;
     ast::ObjectArguments arguments;
     ast::ObjectValueContainer type;
@@ -25,13 +22,14 @@ namespace generator {
     ast::Attribute* attribute = NULL;
     ast::FunctionDeclaration* function;
     ast::Text* text;
-    int hierarchyLevel = 0;
     void print();
     std::string toString();
   };
   
   struct DatabaseResult {
     bool local;
+    std::string library;
+    std::list<std::string> hierarchy;
     DatabaseElement* object;
     std::string toString();
   };

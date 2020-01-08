@@ -51,7 +51,7 @@ namespace generator {
       assert(forGenerateStatement->identifier);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string name = forGenerateStatement->name->toString(true);
-      a_database.add(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
+      parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
           instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ast::ObjectType::GENERATE, ", " + identifier);
         }, true);
@@ -66,13 +66,13 @@ namespace generator {
         std::string formalName = a.formalPart->name->toString(true);
         auto valid = [&] (DatabaseElement* e) { return true; };
         DatabaseResult object;
-        if (a_database.findOne(object, formalName, valid, entityName, library)) {
+        if (parm.findOne(object, formalName, valid, entityName, library)) {
           ast::ObjectValueContainer formalType = object.object->type;
           return instanceName + "->" + formalName +
-            ".bind(" + a_expression.toString(a.actualPart, formalType) + ")";
+            ".bind(" + a_expression.toString(parm, a.actualPart, formalType) + ")";
         } else {
           exceptions.printError("Formal name " + formalName + " not found in entity " + library + "::" + entityName);
-          a_database.printAllObjects(formalName);
+          parm.printAllObjects(formalName);
         }
         return std::string();
       };
@@ -123,7 +123,7 @@ namespace generator {
                                   ast::List<ast::ConcurrentStatement>* concurrentStatements) {
     if (!topHierarchy) {
       ParentInfo parent_info;
-      a_database.GetParent(parent_info);
+      parm.getParent(parent_info);
       if (parent_info.name.size() > 0) {
 	std::string constructor_description = ObjectName(parent_info) +"* parent";
 	parm.addClassConstructorInitializer("p(parent)");

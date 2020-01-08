@@ -3,33 +3,23 @@
 
 #include "../debug/debug.hpp"
 
-#include "database/database.hpp"
-#include "database/general.hpp"
+#include "parameters.hpp"
 
 namespace generator {
 
   class NameConverter {
 
-    Debug<false> a_debug;
-
-    Database *a_database;
-  
   public:
 
-    NameConverter(Database& database) : a_debug("NameConverter") {
-      a_database = &database;
-    };
+    static std::string toLower(std::string s);
+    static std::string toUpper(std::string s);
 
-    std::string ToLower(std::string s);
-    std::string ToUpper(std::string s);
+    static std::string globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension = false);
+    static std::string getPrefix(parameters& parm, DatabaseResult& object, std::string first_separator, std::string last_separator);
 
-    std::string GlobalPrefix(DatabaseResult& object, bool factory_extension = false);
-    std::string getPrefix(DatabaseResult& object, std::string first_separator, std::string last_separator);
-
-    std::string GetName(DatabaseResult& object, bool factory_extension = false, std::string factory_arguments = "");
-    std::string getName(std::string& name, ast::ObjectArguments& arguments,
-                        ast::ObjectValueContainer& return_type);
-    std::string GetName(ast::SimpleIdentifier* i, ast::ObjectType);
+    static std::string getName(parameters& parm, DatabaseResult& object, bool factory_extension = false, std::string factory_arguments = "");
+    static std::string getName(std::string& name, ast::ObjectArguments& arguments,
+			       ast::ObjectValueContainer& return_type);
     
   };
 

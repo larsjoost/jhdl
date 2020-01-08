@@ -5,22 +5,22 @@
 
 namespace generator {
   
-  void GlobalDatabase::append(LocalDatabase& d) {
-    auto l = a_map.find(d.getLibrary());
+  void GlobalDatabase::append(std::shared_ptr<LocalDatabase> d, std::string& library, std::string& object_name) {
+    auto l = a_map.find(library);
     if (l != a_map.end()) {
-      if (l->second.find(d.getName()) == l->second.end()) {
-        l->second[d.getName()] = d;
+      if (l->second.find(object_name) == l->second.end()) {
+        l->second[object_name] = d;
       } else {
-        exceptions.printError(ast::toString(d.getType()) + " " + d.getLibrary() + "." + d.getName() + " is already defined");
+        exceptions.printError(library + "." + object_name + " is already defined");
       }
     } else {
-      std::unordered_map<std::string, LocalDatabase> l;
-      l[d.getName()] = d;
-      a_map[d.getLibrary()] = l;
+      std::unordered_map<std::string, std::shared_ptr<LocalDatabase>> l;
+      l[object_name] = d;
+      a_map[library] = l;
     }
   }
 
-  LocalDatabase* GlobalDatabase::find(std::string& library, const std::string& name) {
+  std::shared_ptr<LocalDatabase>* GlobalDatabase::find(std::string& library, const std::string& name) {
     auto l = a_map.find(library);
     if (l != a_map.end()) {
       auto x = l->second.find(name);
@@ -32,27 +32,29 @@ namespace generator {
   }
 
   bool GlobalDatabase::find(DatabaseResults& results, const std::string& name, std::string package, std::string library) {
-    auto func = [&](LocalDatabase& l) {
-      l.find(results, name, false);
+    auto func = [&](std::shared_ptr<LocalDatabase>& l) {
+      l->find(results, name);
     };
     return traverse(package, library, func);
   }
 
   bool GlobalDatabase::setVisible(std::string name, std::string package, std::string library) {
-    auto func = [&](LocalDatabase& l) {
-      l.setVisible(name);
+    std::string n = (name == "ALL") ? "" : name;
+    auto func = [&](std::shared_ptr<LocalDatabase>& l) {
+      l->setVisible(n);
     };
     return traverse(package, library, func);
   }
 
-  bool GlobalDatabase::exists(std::string& library, std::string& package) {
-    return (find(library, package) ? true : false);
+  bool GlobalDatabase::exists(std::string& library, std::string& package, std::string object_name) {
+    DatabaseResults d;
+    return (find(d, object_name, library, package) ? true : false);
   }
 
-  void GlobalDatabase::print(std::unordered_map<std::string, LocalDatabase>& m) {
+  void GlobalDatabase::print(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m) {
     for (auto& i : m) {
       std::cout << "[GLOBAL] name = " << i.first << std::endl;
-      i.second.print();
+      i.second->print();
     }
   }
   

@@ -2,13 +2,13 @@
 #define _DATABASE_HPP_
 
 #include <unordered_map>
+#include <memory>
 #include <list>
 
 #include "../../exceptions/exceptions.hpp"
 #include "../../debug/debug.hpp"
 #include "general.hpp"
 #include "local_database.hpp"
-#include "global_database.hpp"
 
 namespace generator {
 
@@ -16,8 +16,7 @@ namespace generator {
 
     Debug<false> debug;
 
-    LocalDatabase localDatabase;
-    GlobalDatabase globalDatabase;
+    std::shared_ptr<LocalDatabase> local_database;
     Exceptions exceptions;
 
     bool verbose = false;
@@ -25,11 +24,12 @@ namespace generator {
     template<typename Func>
     bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
 
-    void Globalize();
 
   public:
 
-    Database() : debug("Database") {};
+    Database() : debug("Database") {
+      local_database = std::make_shared<LocalDatabase>();
+    };
     
     class ObjectNotFoundException {
     public:
@@ -56,32 +56,12 @@ namespace generator {
 
     template<typename Func>
     bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
-    template<typename Func>
-    bool findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
     void findAll(DatabaseResults& objects, const std::string& name, std::string package = "", std::string library = "");
     ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
-
-    bool localize(std::string& library, std::string& name, ast::ObjectType type);
-    
-    std::string getLibrary();
-    std::string getName();
-    ast::ObjectType getType();
-    
-    void topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type);
-    void topHierarchyEnd(bool globalize);
-    void openHierarchy(const std::string& name, ast::ObjectType type);
-    void closeHierarchy();
-    int getHierarchyLevel();
-    
-    bool setVisible(std::string& name, std::string package = "", std::string library = "");
-
-    void GetParent(ParentInfo& parent_info);
-
-    bool exists(std::string& library, std::string& package);
 
     void print(std::string name = "");
     void PrintLocal();
@@ -97,8 +77,7 @@ namespace generator {
     bestMatch = {false, NULL};
     for (auto& i : matches) {
       if (valid(i.object)) {
-        if (bestMatch.object == NULL || (!bestMatch.local && i.local) ||
-            (bestMatch.object->hierarchyLevel < i.object->hierarchyLevel)) {
+        if (bestMatch.object == NULL) {
           bestMatch = i;
           if (found) {
             if (found == 1) {
@@ -119,19 +98,6 @@ namespace generator {
     DatabaseResults objects;
     findAll(objects, name, package, library);
     return findBestMatch(objects, object, valid);
-  }
-  
-  template<typename Func>
-  bool Database::findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package, std::string library) {
-    DatabaseResults objects;
-    assert(identifier);
-    std::string name = identifier->toString(true);
-    bool result = true;
-    if (!findOne(object, name, valid, package, library)) {
-      result = false;
-      exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
-    }
-    return result;
   }
   
 }

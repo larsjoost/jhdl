@@ -60,12 +60,13 @@ namespace generator {
     file_container.content.top.push_back(text);
   }
 
-  void parameters::newClass(std::string description, std::string name) {
+  void parameters::newClass(std::string description, std::string name, ast::ObjectType type) {
     debug.functionStart("newClass(" + description + ")");
     ClassContainer a;
     a.active = true;
     a.class_description = description;
     a.name = name;
+    a.type = type;
     ClassContainer* c = file_container.getCurrentClassContainer();
     if (c == NULL) {
       file_container.content.children.push_back(a);
@@ -120,6 +121,13 @@ namespace generator {
     return a;
   }
 
+ parameters::ClassContainer* parameters::getParentClassContainer() {
+    debug.functionStart("getParentClassContainer");
+    ClassContainer* a = file_container.getParentClassContainer();
+    debug.functionEnd("getParentClassContainer");
+    return a;
+  }
+  
   parameters::ClassContainer* parameters::getActiveClassContainer() {
     debug.functionStart("getActiveClassContainer");
     ClassContainer* a = getCurrentClassContainer();
@@ -150,5 +158,39 @@ namespace generator {
     file_container.content.flush(std::cout, std::cout, 0, true);
     std::cout << "</printHierarchy>" << std::endl;
   }
+
+  void parameters::printAll() {
+    printHierarchy();
+  }
+
+  parameters::ClassContainer* parameters::FileContainer::getParentClassContainer() {
+    ClassContainer* parent = NULL;
+    ClassContainer* current = NULL;
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	parent = current;
+	current = &class_container;
+      };
+    traverseClassContainerHierarchy(class_container_callback);
+    return parent;
+  }
+
+  std::string parameters::getLibrary() {
+    return file_container.library;
+  }
+
+  std::string parameters::getName() {
+    return getActiveClassContainer()->name;
+  }
   
+  int parameters::getHierarchyLevel() {
+    int h = 0;
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	h = hierarchy; 
+      };
+    file_container.traverseClassContainerHierarchy(class_container_callback);
+    return h;
+  }
+    
 }

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "parameters.hpp"
+#include "name_converter.hpp"
 
 namespace generator {
 
@@ -15,7 +16,7 @@ namespace generator {
     content.implementation_top.push_front("#include \"" + header_file_name + "\"");
     std::string header_def = file_name + "_HPP";
     std::replace(header_def.begin(), header_def.end(), '.', '_');
-    std::transform(header_def.begin(), header_def.end(), header_def.begin(), ::toupper);
+    header_def = NameConverter::toUpper(header_def);
     header_file << "#ifndef " << header_def << std::endl;
     header_file << "#define " << header_def << std::endl;
     content.include.push_front("#include <string.h>");
@@ -36,28 +37,11 @@ namespace generator {
   parameters::ClassContainer* parameters::FileContainer::getCurrentClassContainer() {
     debug.functionStart("getCurrentClassContainer");
     ClassContainer* a = NULL;
-    if (!content.children.empty()) {
-      ClassContainer& x = content.children.back();
-      if (x.active) {
-	a = &x;
-	int index = 0;
-	bool done = false;
-	do {
-	  debug.debug("Index = " + std::to_string(index));
-	  if (a->children.empty()) {
-	    done = true;
-	  } else {
-	    ClassContainer& x = a->children.back();
-	    if (x.active) {
-	      a = &x;
-	    } else {
-	      done = true;
-	    }
-	  }
-	  index++;
-	} while (!done);
-      }
-    }
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	a = &class_container;
+      };
+    traverseClassContainerHierarchy(class_container_callback);
     debug.functionEnd("getCurrentClassContainer");
     return a;
   }

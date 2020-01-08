@@ -18,8 +18,8 @@ namespace generator {
       parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
     } else if (iteration->identifier) {
       DatabaseResult object;
-      if (a_database.findOne(object, iteration->identifier)) {  
-        typeName = a_name_converter.GetName(object);
+      if (parm.findOne(object, iteration->identifier)) {  
+        typeName = NameConverter::getName(parm, object);
         if (iteration->range_attribute) {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
             type = object.object->type.GetArgument();
@@ -31,7 +31,7 @@ namespace generator {
         }
       } 
     }
-    a_database.add(ast::ObjectType::VARIABLE, name, type);
+    parm.addObject(ast::ObjectType::VARIABLE, name, type);
     std::string t = "for (" +
       name + " = " + name + ".LEFT(); " +
       name + " <= " + name + ".RIGHT(); " +
@@ -56,23 +56,23 @@ namespace generator {
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
-    std::string name = a_expression.BasicIdentifierToString(target);
+    std::string name = a_expression.basicIdentifierToString(parm, target);
     parm.addImplementationContents(getSourceLine(target));
     ast::ReturnTypes return_types;
-    a_expression.BasicIdentifierReturnTypes(target, return_types);
+    a_expression.basicIdentifierReturnTypes(parm, target, return_types);
     ast::ObjectValueContainer expectedType;
-    if (a_expression.UniqueReturnType(return_types, expectedType, &target->getText())) {
+    if (a_expression.uniqueReturnType(parm, return_types, expectedType, &target->getText())) {
       for (ast::AssignmentCondition s : p->assignment_conditions.list) {
         if (s.condition) {
           static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-          parm.addImplementationContents(command + " (" + a_expression.toString(s.condition, expectedValue, callback) + ") {");
+          parm.addImplementationContents(command + " (" + a_expression.toString(parm, s.condition, expectedValue, callback) + ") {");
           command = "else if";
           noConditionCommand = "else {";
           noConditionDelimiter = "}";
         } else {
           parm.addImplementationContents(noConditionCommand);
         }
-        parm.addImplementationContents(name + " = " + a_expression.toString(s.expression, expectedType, callback) + ";");
+        parm.addImplementationContents(name + " = " + a_expression.toString(parm, s.expression, expectedType, callback) + ";");
         if (s.condition) {
           parm.addImplementationContents("}");
         } else {
@@ -81,7 +81,7 @@ namespace generator {
       }
     } else {
       exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->getText());
-      a_database.printAllObjects(name);
+      parm.printAllObjects(name);
     }
   }
   

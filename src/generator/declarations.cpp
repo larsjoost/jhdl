@@ -38,10 +38,10 @@ namespace generator {
                      if (e.identifier) {
                        enum_size++;
                        s = e.identifier->toString(true);
-                       a_database.add(ast::ObjectType::ENUM, s, type);
+                       parm.addObject(ast::ObjectType::ENUM, s, type);
                      } else if (e.character) {
                        std::string name = e.character->toString();
-                       a_database.add(ast::ObjectType::ENUM, name, type); 
+                       parm.addObject(ast::ObjectType::ENUM, name, type); 
                      }
                      return s;
                    });
@@ -88,7 +88,7 @@ namespace generator {
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
-        rangeToString(range, left, right, type);
+        rangeToString(parm, range, left, right, type);
       } else if (identifier || subtype) {
         ast::SimpleIdentifier* id;
         if (identifier) {
@@ -98,13 +98,13 @@ namespace generator {
         } 
         std::string type_name = id->toString(true);
         DatabaseResult database_result;
-        if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-          std::string id = a_name_converter.GetName(database_result, true);
+        if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+          std::string id = NameConverter::getName(parm, database_result, true);
           left = id + ".LEFT()";
           right = id + ".RIGHT()";
         } else {
           exceptions.printError("Could not find type " + type_name, &id->text);
-	  if (verbose) {a_database.printAll();}
+	  if (verbose) {parm.printAll();}
 	}
       }
     };
@@ -123,7 +123,7 @@ namespace generator {
       if (r.range) {
         if (r.range->range_direction_type) {
           ast::ObjectValueContainer t;
-          a_expression.CollectUniqueReturnType(r.range->range_direction_type->left, t);
+          a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
           type = t.GetValue();
           range = "Range<int>";
           arguments.push_back(t);
@@ -136,14 +136,14 @@ namespace generator {
         auto f = [&](DatabaseElement* e) {
           return e->type.IsValue(type);
         };
-        if (a_database.findOne(database_result, r.identifier, f)) { 
-          range = a_name_converter.GetName(database_result);
+        if (parm.findOne(database_result, r.identifier, f)) { 
+          range = NameConverter::getName(parm, database_result);
           arguments.push_back(database_result.object->type);
         }
       } else if (r.subtype) {
         DatabaseResult database_result;
-        if (a_database.findOne(database_result, r.subtype->identifier)) { 
-          range = a_name_converter.GetName(database_result);
+        if (parm.findOne(database_result, r.subtype->identifier)) { 
+          range = NameConverter::getName(parm, database_result);
           arguments.push_back(database_result.object->type);
           type = database_result.object->type.GetValue();
         }
@@ -157,8 +157,8 @@ namespace generator {
         if (r.range) {
           if (r.range->range_direction_type) {
             ast::ObjectValueContainer t;
-            a_expression.CollectUniqueReturnType(r.range->range_direction_type->left, t);
-            rangeToString(r.range, left, right, t);
+            a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
+            rangeToString(parm, r.range, left, right, t);
           } else {
             assert(false);
           }
@@ -191,14 +191,14 @@ namespace generator {
     std::string type_name = t->type->name->toString(true);
     DatabaseResult database_result;
     ast::ObjectValueContainer value;
-    if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-      std::string subtypeName = a_name_converter.GetName(database_result);
+    if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+      std::string subtypeName = NameConverter::getName(parm, database_result);
       ast::ObjectValueContainer::Array arguments;
       printArrayType(parm, name, t->definition, subtypeName, arguments);
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
-      if (verbose) {a_database.printAll();}
+      if (verbose) {parm.printAll();}
     }
     debug.functionEnd("arrayType");
     return value;
@@ -211,16 +211,16 @@ namespace generator {
     std::string type_name = type->toString(true);
     DatabaseResult database_result;
     ast::ObjectValueContainer value;
-    if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
+    if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
-      std::string n = a_name_converter.GetName(database_result);
+      std::string n = NameConverter::getName(parm, database_result);
       parm.addTop("using " + name + " = " + definition + "<" + n + ">;"); 
       auto f = [&](parameters& parm, std::string& left, std::string& right) {
       };
       PrintFactory(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
-      if (verbose) {a_database.printAll();}
+      if (verbose) {parm.printAll();}
     }
     debug.functionEnd("SimpleType");
     return value;
@@ -261,7 +261,7 @@ namespace generator {
         }
       }
       std::string name = t->identifier->toString(true);
-      a_database.add(ast::ObjectType::TYPE, name, value);
+      parm.addObject(ast::ObjectType::TYPE, name, value);
       debug.functionEnd("type_declarations");
     }
   }
@@ -272,9 +272,9 @@ namespace generator {
       std::string name = file->handle->toString(true);
       std::string type = file->type->toString(true);
       DatabaseResult result;
-      if (a_database.findOne(result, type, ast::ObjectType::TYPE)) {
-        type = a_name_converter.GetName(result);
-        a_database.add(ast::ObjectType::FILE, name, result.object->type);
+      if (parm.findOne(result, type, ast::ObjectType::TYPE)) {
+        type = NameConverter::getName(parm, result);
+        parm.addObject(ast::ObjectType::FILE, name, result.object->type);
       }
       parm.addClassContents(getSourceLine(file->handle));
       parm.addClassContents(type + " " + name + " = " + type + "(" +
@@ -290,9 +290,9 @@ namespace generator {
       std::string name = alias->name->toString(true);
       std::string type;
       DatabaseResult result;
-      if (a_database.findOne(result, alias->name)) {
-        type = a_name_converter.GetName(result);
-        a_database.add(result.object->id, designator, result.object->type);
+      if (parm.findOne(result, alias->name)) {
+        type = NameConverter::getName(parm, result);
+        parm.addObject(result.object->id, designator, result.object->type);
       }
       parm.addTop(getSourceLine(alias->designator));
       parm.addTop("using " + designator + " = " + type + ";"); 
@@ -300,13 +300,13 @@ namespace generator {
     }
   }
   
-  void SystemC::generateObjectArguments(ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
+  void SystemC::generateObjectArguments(parameters& parm, ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
     if (interface) {
       for (ast::InterfaceElement& i : interface->interfaceElements.list) {
         ast::ObjectArgument a;
         DatabaseResult result;
         a.type_name = i.object->type->name->toString(true);
-        if (a_database.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
+        if (parm.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
 	  a.type = result.object->type;
 	  a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
 	  for (ast::SimpleIdentifier& id : i.object->identifiers.list) { 
@@ -318,14 +318,14 @@ namespace generator {
     }
   }
   
-  void SystemC::generateObjectArguments(ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments) {
+  void SystemC::generateObjectArguments(parameters& parm, ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments) {
     if (args) {
       for (ast::SimpleIdentifier& i : args->list) {
         ast::ObjectArgument a;
         a.name = "";
         DatabaseResult result;
         a.type_name = i.toString(true);
-        if (a_database.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
+        if (parm.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
 	  a.type = result.object->type;
 	  a.default_value = NULL;
 	  arguments.push_back(a);
@@ -446,7 +446,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (a_database.findOne(object, name, valid)) {
+    if (parm.findOne(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
         foreignName = AttributeName(e->attribute);
@@ -465,8 +465,8 @@ namespace generator {
     parm.returnType = ast::ObjectValueContainer(ast::ObjectValue::NONE);
     if (f->returnType) {
       DatabaseResult returnType;
-      if (a_database.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
-        returnTypeName = a_name_converter.GetName(returnType, false);
+      if (parm.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
+        returnTypeName = NameConverter::getName(parm, returnType, false);
         parm.returnType = returnType.object->type;
       }
     }
@@ -474,41 +474,41 @@ namespace generator {
     return returnTypeName;
   }
   
-  void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* f) {
-    if (f) {
+  void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* function_declaration) {
+    if (function_declaration) {
       debug.functionStart("function_declarations");
       parm.package_contains_function = true;
-      bool operatorName = (f->name == NULL);
-      ast::Text& text = operatorName ? f->string->text : f->name->text;
-      std::string origin_name = operatorName ? f->string->toString(true) : f->name->toString(true);
-      ast::ObjectType type = f->type;
+      bool operatorName = (function_declaration->name == NULL);
+      ast::Text& text = operatorName ? function_declaration->string->text : function_declaration->name->text;
+      std::string origin_name = operatorName ? function_declaration->string->toString(true) : function_declaration->name->toString(true);
+      ast::ObjectType type = function_declaration->type;
       std::string translatedName = origin_name;
       std::string class_name = origin_name;
       if (operatorName) {
-        translatedName = "operator " + a_expression.TranslateOperator(origin_name);
+        translatedName = "operator " + a_expression.translateOperator(parm, origin_name);
         class_name = "line" + std::to_string(text.getLine());
       } 
       ast::ObjectArguments arguments(true);
-      generateObjectArguments(f->interface, arguments);
-      std::string returnTypeName = FunctionReturn(parm, f);
+      generateObjectArguments(parm, function_declaration->interface, arguments);
+      std::string returnTypeName = FunctionReturn(parm, function_declaration);
       parm.addImplementationContents(getSourceLine(text));
-      std::string argumentNames = getArgumentNames(parm, f->interface);
-      a_database.addFunction(type, origin_name, arguments, parm.returnType, f);
+      std::string argumentNames = getArgumentNames(parm, function_declaration->interface);
+      parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration);
       if (!parm.parse_declarations_only) {
-        class_name = a_name_converter.getName(origin_name, arguments, parm.returnType);
+        class_name = NameConverter::getName(origin_name, arguments, parm.returnType);
         ParentInfo parent_info;
-        a_database.GetParent(parent_info);
+        parm.getParent(parent_info);
         std::string prefix = ObjectName(parent_info) + "::" + ObjectName(type, class_name) + "::";
         std::string run_prefix;
-        std::string interface_with_initialization = "(" + GetInterface(parm, f->interface, true) + ")";
-        std::string interface_without_initialization = "(" + GetInterface(parm, f->interface, false) + ")";
+        std::string interface_with_initialization = "(" + GetInterface(parm, function_declaration->interface, true) + ")";
+        std::string interface_without_initialization = "(" + GetInterface(parm, function_declaration->interface, false) + ")";
         bool package_body = parent_info.type == ast::ObjectType::PACKAGE_BODY;
-        if (f->body) {
+        if (function_declaration->body) {
           auto createDefinition = [&](parameters& parm) {
-            PrintInterface(parm, f->interface);
+            PrintInterface(parm, function_declaration->interface);
           };
           auto createBody = [&](parameters& parm) {
-            if (f->body) {
+            if (function_declaration->body) {
               std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
               parm.addImplementationContents(returnTypeName + " " + run_prefix + "run" + interface + "{");
@@ -516,7 +516,7 @@ namespace generator {
                 parm.addImplementationContents("// Foreign function call");
                 parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
               }
-              sequentialStatements(parm, f->body->sequentialStatements);
+              sequentialStatements(parm, function_declaration->body->sequentialStatements);
               parm.addImplementationContents("}");
             } else {
               parm.addImplementationContents(returnTypeName + " run" + interface_with_initialization + ";");
@@ -524,13 +524,13 @@ namespace generator {
           };
 	  std::string class_description = "struct " + class_name;
           defineObject(parm, false, class_name, type, class_description, NULL,
-                       &f->body->declarations, NULL, createBody, createDefinition, false, true);
+                       &function_declaration->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
-        std::string interface = "(" + GetInterface(parm, f->interface, !package_body, class_name + "::") + ")";
-        parm.addClassContents(std::string(f->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
+        std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
+        parm.addClassContents(std::string(function_declaration->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
                      translatedName + interface +
-                     (f->body ? "{" : " = 0;"));
-        if (f->body) {
+                     (function_declaration->body ? "{" : " = 0;"));
+        if (function_declaration->body) {
           parm.addClassContents("auto inst = " + ObjectName(type, class_name) + "(this);");
           std::string s,d;
           for (auto& i : arguments.list) {
@@ -551,10 +551,10 @@ namespace generator {
     ast::Text* text = a->item ? &a->item->text : &a->string->text;
     std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
     ast::ObjectArguments arguments(false);
-    generateObjectArguments(a->arguments, arguments);
+    generateObjectArguments(parm, a->arguments, arguments);
     ast::ObjectType id = a->objectType;
     debug.debug("id = " + ast::toString(id) + ", name = " + name + ", arguments = " + arguments.toString());
-    a_database.addAttribute(name, arguments, id, a, text);
+    parm.addAttribute(name, arguments, id, a, text);
     auto valid = [&](DatabaseElement* e) {
       bool arguments_match = arguments.empty() || e->arguments.ExactMatch(arguments);
       bool match = (e->id == id) && arguments_match;
@@ -563,7 +563,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (a_database.findOne(object, name, valid)) {
+    if (parm.findOne(object, name, valid)) {
       DatabaseElement* e = object.object;
       assert(e->function);
       ast::InterfaceList* i = e->function->interface;
@@ -572,8 +572,8 @@ namespace generator {
       std::string returnName = "void";
       if (id == ast::ObjectType::FUNCTION) {
         DatabaseResult result;
-        if (a_database.findOne(result, e->function->returnType, ast::ObjectType::TYPE)) {
-	  returnName = a_name_converter.GetName(result);
+        if (parm.findOne(result, e->function->returnType, ast::ObjectType::TYPE)) {
+	  returnName = NameConverter::getName(parm, result);
 	} else {
 	  debug.debug("Could not find function return type");
 	}
@@ -586,7 +586,7 @@ namespace generator {
       parm.addBottom(returnName + " " + foreignName + interface + ";");
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
-      a_database.printAllObjects(name);
+      parm.printAllObjects(name);
     }
     debug.functionEnd("ForeignAttribute");
   }
@@ -625,15 +625,15 @@ namespace generator {
       std::string name = t->identifier->toString(true);
       std::string type_name = t->type->name->toString(true);
       DatabaseResult database_result;
-      if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
-        std::string type_name = a_name_converter.GetName(database_result, false);
-        a_database.add(ast::ObjectType::TYPE, name, database_result.object->type);
+      if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
+        std::string type_name = NameConverter::getName(parm, database_result, false);
+        parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
 	parm.addTop(getSourceLine(t->identifier));
         parm.addTop("using " + name + " = " + type_name + ";");
         PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
       } else {
 	exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
-	if (verbose) {a_database.printAll();}
+	if (verbose) {parm.printAll();}
       }
     }
   }

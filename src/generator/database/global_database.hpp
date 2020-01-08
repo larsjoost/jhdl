@@ -2,6 +2,7 @@
 #define _GLOBAL_DATABASE_HPP_
 
 #include <unordered_map>
+#include <memory>
 #include <list>
 
 #include "../../exceptions/exceptions.hpp"
@@ -15,21 +16,21 @@ namespace generator {
     
     Exceptions exceptions;
 
-    std::unordered_map<std::string, std::unordered_map<std::string, LocalDatabase>> a_map;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>> a_map;
 
-    void print(std::unordered_map<std::string, LocalDatabase>& m);
+    void print(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m);
 
     template<typename Func>
     bool traverse(std::string& package, std::string& library, Func func);
     template<typename Func>
-    bool traverse(std::unordered_map<std::string, LocalDatabase>& m, std::string& package, Func func);
+    bool traverse(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m, std::string& package, Func func);
     
   public:
-    void append(LocalDatabase& d);
+    void append(std::shared_ptr<LocalDatabase> d, std::string& library, std::string& object_name);
     bool find(DatabaseResults& results, const std::string& name, std::string package = "", std::string library = "");
-    LocalDatabase* find(std::string& library, const std::string& name);
+    std::shared_ptr<LocalDatabase>* find(std::string& library, const std::string& name);
     bool setVisible(std::string name = "", std::string package = "", std::string library = "");
-    bool exists(std::string& library, std::string& package);
+    bool exists(std::string& library, std::string& package, std::string name = "");
     void print(std::string name = "");
   };
 
@@ -50,7 +51,7 @@ namespace generator {
   }
   
   template<typename Func>
-  bool GlobalDatabase::traverse(std::unordered_map<std::string, LocalDatabase>& m, std::string& package, Func func) {
+  bool GlobalDatabase::traverse(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m, std::string& package, Func func) {
     bool found = false;
     if (package.empty()) {
       for (auto& i : m) {

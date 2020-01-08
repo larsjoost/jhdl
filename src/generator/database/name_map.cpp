@@ -30,7 +30,7 @@ namespace generator {
       i->visible = true;
     }
   }
-  
+
   bool NameMap::setVisible(std::string name) {
     bool found = false;
     if (name.empty()) {

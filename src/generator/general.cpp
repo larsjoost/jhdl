@@ -17,27 +17,24 @@ namespace generator {
       }
       libraryInfo.add(s, name, filename);
     }
-    a_database.topHierarchyStart(library, name, type);
     if (verbose) {
       parm.addTop("// Hierarchy top start, library = " + library +
-		  ", name = " + name + ", type = " + ast::toString(type) +
-		  ", hierarchy = " + std::to_string(a_database.getHierarchyLevel()));
+		  ", name = " + name + ", type = " + ast::toString(type));
     }
   }
   
   void SystemC::topHierarchyEnd(parameters& parm, bool globalize) {
     if (verbose) {
-      parm.addBottom("// Hierarchy top end = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addBottom("// Hierarchy top end ");
     }
-    a_database.topHierarchyEnd(globalize);
+    parm.globalizeClass();
   }
 
-  void SystemC::openHierarchy(parameters& parm, std::string parent_name, ast::ObjectType parent_type, std::string class_description, std::string name) {
+  void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description) {
     debug.functionStart("openHierarchy");
-    parm.newClass(class_description, name);
-    a_database.openHierarchy(parent_name, parent_type);
+    parm.newClass(class_description, name, type);
     if (verbose) {
-      parm.addTop("// Hierarchy start = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addTop("// Hierarchy start");
     }
     debug.functionEnd("openHierarchy");
   }
@@ -45,10 +42,9 @@ namespace generator {
   void SystemC::closeHierarchy(parameters& parm) {
     debug.functionStart("closeHierarchy");
     if (verbose) {
-      parm.addBottom("// Hierarchy end = " + std::to_string(a_database.getHierarchyLevel()));
+      parm.addBottom("// Hierarchy end");
     }
     parm.endClass();
-    a_database.closeHierarchy();
     debug.functionEnd("closeHierarchy");
   }
 

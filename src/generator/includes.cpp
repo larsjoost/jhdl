@@ -9,14 +9,14 @@ namespace generator {
                             std::string library, std::string identifier,
                             ast::Text* text) {
     debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")");
-    bool packageExists = a_database.exists(library, package);
+    bool packageExists = parm.exists(library, package);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
       parsePackage(parm, package, library);
-      packageExists = a_database.exists(library, package);
+      packageExists = parm.exists(library, package);
     }
     if (packageExists) {
-      if (!a_database.setVisible(identifier, package, library)) {
+      if (!parm.setVisible(identifier, package, library)) {
         exceptions.printError("Could not find " + identifier + " in package " + package + " of library " + library, text);
       }
     } else {

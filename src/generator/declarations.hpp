@@ -12,8 +12,8 @@ namespace generator {
       debug.functionStart("ObjectDeclaration");
       DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
-      if (a_database.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-        type_name = a_name_converter.GetName(database_result, false);
+      if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
+        type_name = NameConverter::getName(parm, database_result, false);
         std::string factory_arguments;
         if (v->type->range) {
           std::string left, right;
@@ -21,24 +21,24 @@ namespace generator {
           try {
             i = database_result.object->type.GetArgument();
           } catch (ast::ObjectValueContainer::IndexOutOfRange e) {}
-          rangeToString(v->type->range, left, right, i);
+          rangeToString(parm, v->type->range, left, right, i);
           factory_arguments = left + ", " + right;
         }
-        std::string factory_name = a_name_converter.GetName(database_result, true, factory_arguments);
+        std::string factory_name = NameConverter::getName(parm, database_result, true, factory_arguments);
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
           std::string name = id.toString(true);
           debug.debug("Name = " + name + ", type = " + type_name);
-          if (database_enable) {a_database.add(v->objectType, name, database_result.object->type);}
+          if (database_enable) {parm.addObject(v->objectType, name, database_result.object->type);}
           std::string init = "";
           if (v->initialization) {
-            init = a_expression.toString(v->initialization->value, database_result.object->type);
+            init = a_expression.toString(parm, v->initialization->value, database_result.object->type);
             debug.debug("Init = " + init, true);
           }
           callback(name, type_name, init, factory_name, v->objectType, v->direction);
         }
       } else {
         exceptions.printError("Could not find type \"" + type_name + "\"", v->text);
-      	if (verbose) {a_database.printAll();}
+      	if (verbose) {parm.printAll();}
       }
       debug.functionEnd("ObjectDeclaration");
     }

@@ -16,67 +16,28 @@ namespace generator {
     return result;
   }
 
-  std::string Database::getLibrary() {
-    return localDatabase.getLibrary();
-  }
-  
-  std::string Database::getName() {
-    return localDatabase.getName();
-  }
-
-  ast::ObjectType Database::getType() {
-    return localDatabase.getType();
-  }
-
-  void Database::Globalize() {
-    assert(localDatabase.getHierarchyLevel() == 0);
-    globalDatabase.append(localDatabase);
-  }
-
-  bool Database::localize(std::string& library, std::string& name, ast::ObjectType type) {
-    LocalDatabase* l = globalDatabase.find(library, name);
-    if (l) {
-      if (l->getType() == type) {
-        localDatabase.add(l);
-        return true;
-      }
-      if (verbose) {
-        std::cout << "Expected type = " << ast::toString(type) << ", but found = " << ast::toString(l->getType()) << std::endl;
-      }
-      return false;
-    }
-      if (verbose) {
-        std::cout << "Did not find " + ast::toString(type) + " " + library + "." + name << std::endl;
-      }
-    return false;
-  }
-  
-  void Database::GetParent(ParentInfo& parent_info) {
-    localDatabase.GetParent(parent_info);
-  }
-  
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                      ast::ObjectArguments arguments, ast::Text* text) {
     debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + type.toString() + ")", true);
-    localDatabase.add(id, name, type, arguments, text);
+    local_database.get()->add(id, name, type, arguments, text);
     debug.functionEnd("add");
   }
 
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type, ast::Text* text) {
     debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + ast::toString(type) + ")", true);
     ast::ObjectValueContainer t = ast::ObjectValueContainer(type);
-    localDatabase.add(id, name, type, text); 
+    local_database.get()->add(id, name, type, text); 
     debug.functionEnd("add");
   }
 
   void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                               ast::Attribute* attribute, ast::Text* text) {
-    localDatabase.addAttribute(name, arguments, id, attribute, text);
+    local_database.get()->addAttribute(name, arguments, id, attribute, text);
   }
   void Database::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
                              ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
                              ast::Text* text) {
-    localDatabase.addFunction(type, name, arguments, returnType, function, text);
+    local_database.get()->addFunction(type, name, arguments, returnType, function, text);
   }
 
   bool Database::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type,
@@ -119,54 +80,18 @@ namespace generator {
   }
 
   void Database::findAll(DatabaseResults& objects, const std::string& name, std::string package, std::string library) {
-    if ((package.empty() || package == localDatabase.getName()) &&
-        (library.empty() || library == localDatabase.getLibrary())) {
-      localDatabase.find(objects, name);
+    if (package.empty() && library.empty()) {
+      local_database.get()->find(objects, name);
     }
-    globalDatabase.find(objects, name, package, library);
-  }
-
-  void Database::topHierarchyStart(std::string& library, std::string& name, ast::ObjectType type) {
-    localDatabase.initialize(library, name, type);
-    openHierarchy(name, type);
-  }
-  
-  void Database::topHierarchyEnd(bool globalize) {
-    if (globalize) {
-      Globalize();
-    }
-    closeHierarchy();
-  }
-
-  void Database::openHierarchy(const std::string& name, ast::ObjectType type) {
-    localDatabase.openHierarchy(name, type);
-  }
-  void Database::closeHierarchy() {
-    localDatabase.closeHierarchy();
-  }
-
-  int Database::getHierarchyLevel() {
-    return localDatabase.getHierarchyLevel();
-  }
-  
-  bool Database::setVisible(std::string& name, std::string package, std::string library) {
-    std::string n = (name == "ALL") ? "" : name;
-    return globalDatabase.setVisible(n, package, library);
-  }
-
-  bool Database::exists(std::string& library, std::string& package) {
-    return globalDatabase.exists(library, package);
   }
 
   void Database::print(std::string name) {
     PrintLocal();
-    std::cout << "Global Database:" << std::endl;
-    globalDatabase.print(name);
   }
 
   void Database::PrintLocal() {
     std::cout << "Local Database:" << std::endl;
-    localDatabase.print();
+    local_database.get()->print();
   }
   
   void Database::printAllObjects(std::string name) {
@@ -184,8 +109,7 @@ namespace generator {
   }
 
   void Database::printAll() {
-    globalDatabase.print();
-    localDatabase.print();
+    local_database.get()->print();
   }
   
 }
