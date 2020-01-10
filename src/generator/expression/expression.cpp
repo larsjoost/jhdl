@@ -105,7 +105,7 @@ namespace generator {
       return result;
     };
     DatabaseResult object;
-    if (parm.findOne(object, name, valid)) {
+    if (parm.findOneGeneric(object, name, valid)) {
       bool double_brackets = false;
       name = objectToString(parm, object, p->arguments, [&](DatabaseResult& e) {}, double_brackets);
     } else {
@@ -156,10 +156,10 @@ namespace generator {
     debug.functionStart("functionReturnTypes(name = " + name + ")");
     assert(associationList);
     ast::ObjectArguments arguments = toObjectArguments(parm, associationList);
-    auto valid =
+    /* auto valid =
       [&](DatabaseElement* e) {
 	return objectWithArguments(parm, e, arguments);
-      };
+	}; */
     DatabaseResults objects;
     parm.findAll(objects, name);
     for (auto& i : objects) {

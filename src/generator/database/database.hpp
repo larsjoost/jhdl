@@ -16,7 +16,10 @@ namespace generator {
 
     Debug<false> debug;
 
+  public:
     std::shared_ptr<LocalDatabase> local_database;
+
+  private:
     Exceptions exceptions;
 
     bool verbose = false;
@@ -73,8 +76,8 @@ namespace generator {
   bool Database::findBestMatch(DatabaseResults& matches,
                                DatabaseResult& bestMatch,
                                Func valid) {
+    debug.functionStart("findBestMatch");
     int found = 0;
-    bestMatch = {false, NULL};
     for (auto& i : matches) {
       if (valid(i.object)) {
         if (bestMatch.object == NULL) {
@@ -90,14 +93,18 @@ namespace generator {
         }
       }
     }
+    debug.functionEnd("findBestMatch");
     return (found == 1);
   }
 
   template<typename Func>
   bool Database::findOne(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
+    debug.functionStart("findOne");
     DatabaseResults objects;
     findAll(objects, name, package, library);
-    return findBestMatch(objects, object, valid);
+    bool found = findBestMatch(objects, object, valid);
+    debug.functionEnd("findOne");
+    return found;
   }
   
 }

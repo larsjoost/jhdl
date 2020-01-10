@@ -632,7 +632,8 @@ namespace ast {
     case TOKEN_KEYWORD:
       s += ": " + toString(t->keyword);
       break;
-    case TOKEN_INTEGER || TOKEN_REAL:
+    case TOKEN_INTEGER:
+    case TOKEN_REAL:
       s += ": " + t->text.toString();
       break;
     case TOKEN_IDENTIFIER:

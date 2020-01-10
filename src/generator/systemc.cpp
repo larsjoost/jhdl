@@ -219,7 +219,6 @@ namespace generator {
 	};
       auto createBody = [&](parameters& parm) {
 			};
-      bool init_enable = (type == ast::ObjectType::PACKAGE_BODY);
       std::string class_description = "struct " + name;
       defineObject(parm, true, name, type, class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
@@ -249,6 +248,7 @@ namespace generator {
 			case ast::ObjectDeclaration::Direction::OUT: 
 			case ast::ObjectDeclaration::Direction::INOUT: 
 			case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
+			default: {}
 			}
 			return type;
 		      };

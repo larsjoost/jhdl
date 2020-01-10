@@ -30,7 +30,7 @@ bool Config::load(std::string filename) {
       removeWhitespace(line);
       if (!line.empty()) {
         if(line[0] == '[') {
-          int delimiterPos = line.find("]");
+          unsigned int delimiterPos = line.find("]");
           if (delimiterPos != std::string::npos) {
             currentSection = line.substr(1, delimiterPos-1);
           } else {

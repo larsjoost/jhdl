@@ -70,7 +70,7 @@ namespace ast {
       return result;
     }
     Array& GetArguments() { return a_arguments; }
-    ObjectValueContainer& GetArgument(const int index = 0) {
+    ObjectValueContainer& GetArgument(const unsigned int index = 0) {
       if (a_arguments.size() > index) { 
         auto it = a_arguments.begin();
         std::advance(it, index);
@@ -153,7 +153,10 @@ namespace ast {
     int match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose);
   public:
     std::list<ObjectArgument> list;
-    ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) : list(o), isInterface(isInterface) {};
+    ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) {
+      list = o;
+      isInterface = isInterface;
+    };
     void push_back(ObjectArgument& o) {list.push_back(o);}
     bool equals(ObjectArguments& other, bool array_type = false, bool verbose = false);
     bool equals(ObjectValueContainer::Array& other, bool array_type = false, bool verbose = false);

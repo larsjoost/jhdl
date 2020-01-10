@@ -5,7 +5,7 @@
 
 namespace generator {
   
-  void GlobalDatabase::append(std::shared_ptr<LocalDatabase> d, std::string& library, std::string& object_name) {
+  void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& d, std::string& library, std::string& object_name) {
     auto l = a_map.find(library);
     if (l != a_map.end()) {
       if (l->second.find(object_name) == l->second.end()) {

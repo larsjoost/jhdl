@@ -262,6 +262,7 @@ namespace generator {
       }
       std::string name = t->identifier->toString(true);
       parm.addObject(ast::ObjectType::TYPE, name, value);
+      debug.debug("Name = " + name);
       debug.functionEnd("type_declarations");
     }
   }
@@ -446,7 +447,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (parm.findOne(object, name, valid)) {
+    if (parm.findOneGeneric(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
         foreignName = AttributeName(e->attribute);
@@ -563,7 +564,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (parm.findOne(object, name, valid)) {
+    if (parm.findOneGeneric(object, name, valid)) {
       DatabaseElement* e = object.object;
       assert(e->function);
       ast::InterfaceList* i = e->function->interface;
@@ -621,21 +622,21 @@ namespace generator {
     using TYPE_T = INTEGER<T>;
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
-    if (t) {
-      std::string name = t->identifier->toString(true);
-      std::string type_name = t->type->name->toString(true);
-      DatabaseResult database_result;
-      if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
-        std::string type_name = NameConverter::getName(parm, database_result, false);
-        parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
-	parm.addTop(getSourceLine(t->identifier));
-        parm.addTop("using " + name + " = " + type_name + ";");
-        PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
-      } else {
-	exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
-	if (verbose) {parm.printAll();}
-      }
+    debug.functionStart("subtype_declarations");
+    std::string name = t->identifier->toString(true);
+    std::string type_name = t->type->name->toString(true);
+    DatabaseResult database_result;
+    if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
+      std::string type_name = NameConverter::getName(parm, database_result, false);
+      parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
+      parm.addTop(getSourceLine(t->identifier));
+      parm.addTop("using " + name + " = " + type_name + ";");
+      PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
+    } else {
+      exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
+      if (verbose) {parm.printAll();}
     }
+    debug.functionEnd("subtype_declarations");
   }
 
   void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
@@ -664,7 +665,7 @@ namespace generator {
     debug.functionStart("declarations");
     for (ast::Declaration i : d.list) {
       type_declarations(parm, i.type);
-      subtype_declarations(parm, i.subtype);
+      if (i.subtype) {subtype_declarations(parm, i.subtype);}
       ObjectDeclarations(parm, i.variable);
       ObjectDeclarations(parm, i.signal);
       ObjectDeclarations(parm, i.constant);

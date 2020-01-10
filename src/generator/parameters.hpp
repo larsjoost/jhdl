@@ -137,7 +137,7 @@ namespace generator {
 
     // Database access
     template<typename Func>
-    bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
+    bool findOneGeneric(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
     template<typename Func>
     bool findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
@@ -190,11 +190,13 @@ namespace generator {
 	c = &x.children;
       }
     } while (!done);
+    
     debug.functionEnd("traverseClassContainerHierarchy");
   }
 
   template<typename Func>
-  bool parameters::findOne(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
+  bool parameters::findOneGeneric(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
+    debug.functionStart("findOneGeneric");
     bool found = false;
     int hierarchy_level = 0;
     int last_hierarchy_level = 0;
@@ -210,9 +212,10 @@ namespace generator {
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
     object.local = (last_hierarchy_level == hierarchy_level);
-    for (int i = hierarchy_level; i < object.hierarchy.size(); i++) {
+    for (unsigned int i = hierarchy_level; i < object.hierarchy.size(); i++) {
       object.hierarchy.pop_back();
     }
+    debug.functionEnd("findOneGeneric: " + std::to_string(found));
     return found;
   }
 
@@ -221,7 +224,7 @@ namespace generator {
     assert(identifier);
     std::string name = identifier->toString(true);
     bool result = true;
-    if (!findOne(object, name, valid, package, library)) {
+    if (!findOneGeneric(object, name, valid, package, library)) {
       result = false;
       exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
     }

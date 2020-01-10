@@ -2,7 +2,7 @@
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -fconcepts -MMD # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O0 # -Wall -ansi
 INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/std 
 LIBS := -lsystemc
 INC := -L$(SYSTEMC)/lib-linux64

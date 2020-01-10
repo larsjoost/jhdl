@@ -6,18 +6,21 @@
 namespace generator {
 
   bool parameters::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package, std::string library) {
+    debug.functionStart("findOne");
     auto valid =
       [&](DatabaseElement* e) {
 	return e->id == type;
       };
-    return findOne(object, name, valid, package, library);
+    bool found = findOneGeneric(object, name, valid, package, library);
+    debug.functionEnd("findOne");
+    return found;
   }
   
   bool parameters::findOne(DatabaseResult& object, std::string& name, std::string package, std::string library) {
     auto valid = [&](DatabaseElement* e) {
       return true;
     };
-    return findOne(object, name, valid, package, library);
+    return findOneGeneric(object, name, valid, package, library);
   }
   
   bool parameters::findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type) {
@@ -36,7 +39,7 @@ namespace generator {
     auto valid = [&](DatabaseElement* e) {
       return true;
     };
-    if (!findOne(result, name, valid)) {
+    if (!findOneGeneric(result, name, valid)) {
       exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
       return false;
     }
@@ -123,7 +126,7 @@ namespace generator {
 
   void parameters::globalizeClass() {
     ClassContainer& current_top_class = file_container.content.children.back();
-    
+    a_global_database->append(current_top_class.database.local_database, file_container.library, current_top_class.name);
   }
   
 }

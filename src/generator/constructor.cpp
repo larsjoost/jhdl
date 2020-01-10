@@ -66,7 +66,7 @@ namespace generator {
         std::string formalName = a.formalPart->name->toString(true);
         auto valid = [&] (DatabaseElement* e) { return true; };
         DatabaseResult object;
-        if (parm.findOne(object, formalName, valid, entityName, library)) {
+        if (parm.findOneGeneric(object, formalName, valid, entityName, library)) {
           ast::ObjectValueContainer formalType = object.object->type;
           return instanceName + "->" + formalName +
             ".bind(" + a_expression.toString(parm, a.actualPart, formalType) + ")";

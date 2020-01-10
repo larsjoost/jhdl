@@ -1,7 +1,7 @@
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -fconcepts -MMD # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O0 -Wall # -ansi
 
 all: $(OBJS)
 

@@ -80,9 +80,11 @@ namespace generator {
   }
 
   void Database::findAll(DatabaseResults& objects, const std::string& name, std::string package, std::string library) {
+    debug.functionStart("findAll");
     if (package.empty() && library.empty()) {
       local_database.get()->find(objects, name);
     }
+    debug.functionEnd("findAll");
   }
 
   void Database::print(std::string name) {
@@ -95,7 +97,6 @@ namespace generator {
   }
   
   void Database::printAllObjects(std::string name) {
-    auto valid = [&](DatabaseElement* e) { return true; };
     DatabaseResults objects;
     findAll(objects, name);
     if (!objects.empty()) {

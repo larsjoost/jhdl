@@ -500,7 +500,7 @@ namespace generator {
 	  return result;
 	};
       DatabaseResult object;
-      if (parm.findOne(object, name, valid)) {
+      if (parm.findOneGeneric(object, name, valid)) {
         if (object.object->id == ast::ObjectType::SIGNAL) {
           sensitivityListCallback(object);
         }
@@ -526,17 +526,15 @@ namespace generator {
                                                   ast::AssociationList* associationList,
                                                   Func sensitivityListCallback) {
     assert(attribute);
-    auto valid = [&](DatabaseElement* e) {
-      return e->arguments.equals(arguments);
-    };
+    //auto valid = [&](DatabaseElement* e) {
+    //  return e->arguments.equals(arguments);
+    //};
     DatabaseResults objects;
     parm.findAll(objects, name);
     std::string attributeName = attribute->toString(true);
     DatabaseResult match;
     if (findAttributeMatch(parm, objects, match, expectedType, attributeName)) {
       assert(match.object);
-      bool objectMatch = (match.object->id == ast::ObjectType::VARIABLE) ||
-        (match.object->id == ast::ObjectType::SIGNAL);
       name = NameConverter::getName(parm, match, true) + "." + attributeName;
       std::string a = "";
       if (associationList) {
