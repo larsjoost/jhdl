@@ -14,11 +14,10 @@ namespace generator {
     return filename.substr(0, lastdot);
   }
   
-  void parameters::open(std::string filename, std::string library) {
+  void parameters::open(std::string filename) {
     debug.functionStart("open(filename = " + filename + ")");
     info_writer.Open(replaceFileExtension(filename, ".i"));
     file_container.file_name = filename;
-    file_container.library = library;
     debug.functionEnd("open");
   }
   

@@ -60,7 +60,7 @@ public:
     }
   }
 
-  inline bool IsVerbose() {
+  inline bool isVerbose() {
     return enable;
   }
   

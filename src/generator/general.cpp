@@ -17,14 +17,14 @@ namespace generator {
       }
       libraryInfo.add(s, name, filename);
     }
-    if (verbose) {
+    if (a_verbose) {
       parm.addTop("// Hierarchy top start, library = " + library +
 		  ", name = " + name + ", type = " + ast::toString(type));
     }
   }
   
   void SystemC::topHierarchyEnd(parameters& parm, bool globalize) {
-    if (verbose) {
+    if (a_verbose) {
       parm.addBottom("// Hierarchy top end ");
     }
     parm.globalizeClass();
@@ -33,7 +33,7 @@ namespace generator {
   void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description) {
     debug.functionStart("openHierarchy");
     parm.newClass(class_description, name, type);
-    if (verbose) {
+    if (a_verbose) {
       parm.addTop("// Hierarchy start");
     }
     debug.functionEnd("openHierarchy");
@@ -41,7 +41,7 @@ namespace generator {
 
   void SystemC::closeHierarchy(parameters& parm) {
     debug.functionStart("closeHierarchy");
-    if (verbose) {
+    if (a_verbose) {
       parm.addBottom("// Hierarchy end");
     }
     parm.endClass();

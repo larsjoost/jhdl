@@ -6,6 +6,9 @@
 namespace generator {
   
   void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& d, std::string& library, std::string& object_name) {
+    debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")");
+    assert(library.size() > 0);
+    assert(object_name.size() > 0);
     auto l = a_map.find(library);
     if (l != a_map.end()) {
       if (l->second.find(object_name) == l->second.end()) {
@@ -14,10 +17,14 @@ namespace generator {
         exceptions.printError(library + "." + object_name + " is already defined");
       }
     } else {
-      std::unordered_map<std::string, std::shared_ptr<LocalDatabase>> l;
-      l[object_name] = d;
-      a_map[library] = l;
+      std::unordered_map<std::string, std::shared_ptr<LocalDatabase>> x;
+      x[object_name] = d;
+      a_map[library] = x;
     }
+    if (debug.isVerbose()) {
+      print();
+    }
+    debug.functionEnd("append");
   }
 
   std::shared_ptr<LocalDatabase>* GlobalDatabase::find(std::string& library, const std::string& name) {
@@ -58,19 +65,19 @@ namespace generator {
     }
   }
   
-  void GlobalDatabase::print(std::string name) {
-    if (name.empty()) {
+  void GlobalDatabase::print(std::string library) {
+    if (library.empty()) {
       for (auto& i : a_map) {
         std::cout << "[GLOBAL] library = " << i.first << std::endl;
         print(i.second);
       }
     } else {
-      auto i = a_map.find(name);
+      auto i = a_map.find(library);
       if (i != a_map.end()) {
         std::cout << "[GLOBAL] library = " << i->first << std::endl;
         print(i->second);
       } else {
-        std::cerr << "Did not find " + name + " in global database" << std::endl;
+        std::cerr << "Did not find " + library + " in global database" << std::endl;
       }
              
     }

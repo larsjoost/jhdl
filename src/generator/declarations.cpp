@@ -13,8 +13,9 @@ namespace generator {
   */
   ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier,
 						ast::NumberType* t) {
-    assert(t);
     std::string name = identifier->toString(true);
+    debug.functionStart("numberType(name = " + name + ")");
+    assert(t);
     ast::ObjectValue value;
     if (t->physical) {
       printPhysicalType(parm, name, t);
@@ -23,7 +24,9 @@ namespace generator {
       printRangeType(parm, name, t->range);
       value = ast::ObjectValue::INTEGER;
     }
-    return ast::ObjectValueContainer(value, name);
+    ast::ObjectValueContainer type(value, name);
+    debug.functionEnd("numberType: " + type.toString());
+    return type;
   }
   
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
@@ -104,7 +107,7 @@ namespace generator {
           right = id + ".RIGHT()";
         } else {
           exceptions.printError("Could not find type " + type_name, &id->text);
-	  if (verbose) {parm.printAll();}
+	  if (a_verbose) {parm.printAll();}
 	}
       }
     };
@@ -198,7 +201,7 @@ namespace generator {
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
-      if (verbose) {parm.printAll();}
+      if (a_verbose) {parm.printAll();}
     }
     debug.functionEnd("arrayType");
     return value;
@@ -220,7 +223,7 @@ namespace generator {
       PrintFactory(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
-      if (verbose) {parm.printAll();}
+      if (a_verbose) {parm.printAll();}
     }
     debug.functionEnd("SimpleType");
     return value;
@@ -241,30 +244,27 @@ namespace generator {
   }
 
   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
-    if (t) {
-      debug.functionStart("type_declarations");
-      ast::ObjectValueContainer value;
-      if (t->accessType) {
-        value = AccessType(parm, t->identifier, t->accessType);
-      } else if (t->fileType) {
-        value = FileType(parm, t->identifier, t->fileType);
+    std::string name = t->identifier->toString(true);
+    debug.functionStart("type_declarations(name = " + name + ")");
+    ast::ObjectValueContainer value;
+    if (t->accessType) {
+      value = AccessType(parm, t->identifier, t->accessType);
+    } else if (t->fileType) {
+      value = FileType(parm, t->identifier, t->fileType);
+    } else {
+      assert(t->typeDefinition);
+      if (t->typeDefinition->numberType) {
+	value = numberType(parm, t->identifier, t->typeDefinition->numberType);
+      } else if (t->typeDefinition->enumerationType) {
+	value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
+      } else if (t->typeDefinition->arrayType) {
+	value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
       } else {
-        assert(t->typeDefinition);
-        if (t->typeDefinition->numberType) {
-          value = numberType(parm, t->identifier, t->typeDefinition->numberType);
-        } else if (t->typeDefinition->enumerationType) {
-          value = enumerationType(parm, t->identifier, t->typeDefinition->enumerationType);
-        } else if (t->typeDefinition->arrayType) {
-          value = arrayType(parm, t->identifier, t->typeDefinition->arrayType);
-        } else {
-          assert(false);
-        }
+	assert(false);
       }
-      std::string name = t->identifier->toString(true);
-      parm.addObject(ast::ObjectType::TYPE, name, value);
-      debug.debug("Name = " + name);
-      debug.functionEnd("type_declarations");
     }
+    parm.addObject(ast::ObjectType::TYPE, name, value);
+    debug.functionEnd("type_declarations");
   }
 
   void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
@@ -622,8 +622,8 @@ namespace generator {
     using TYPE_T = INTEGER<T>;
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
-    debug.functionStart("subtype_declarations");
     std::string name = t->identifier->toString(true);
+    debug.functionStart("subtype_declarations(name = " + name + ")");
     std::string type_name = t->type->name->toString(true);
     DatabaseResult database_result;
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
@@ -634,7 +634,7 @@ namespace generator {
       PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
-      if (verbose) {parm.printAll();}
+      if (a_verbose) {parm.printDatabase();}
     }
     debug.functionEnd("subtype_declarations");
   }
@@ -664,7 +664,7 @@ namespace generator {
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
     debug.functionStart("declarations");
     for (ast::Declaration i : d.list) {
-      type_declarations(parm, i.type);
+      if (i.type) {type_declarations(parm, i.type);}
       if (i.subtype) {subtype_declarations(parm, i.subtype);}
       ObjectDeclarations(parm, i.variable);
       ObjectDeclarations(parm, i.signal);

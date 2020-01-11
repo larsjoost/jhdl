@@ -19,7 +19,7 @@ namespace generator {
 
     Debug<false> debug;
     Exceptions exceptions;
-    bool verbose = false;
+    bool a_verbose = false;
 
     InfoWriter info_writer;
 
@@ -108,7 +108,11 @@ namespace generator {
     ClassContainer* getActiveClassContainer();
     
   public:
-    parameters(GlobalDatabase& g) : debug("parameters") {a_global_database = &g;};
+    parameters(GlobalDatabase& g, std::string& library, bool verbose = false) : debug("parameters") {
+      a_global_database = &g;
+      file_container.library = library;
+      a_verbose = verbose;
+    };
     bool package_contains_function;
     bool parse_declarations_only = false;
     ast::ObjectValueContainer returnType;
@@ -126,7 +130,7 @@ namespace generator {
     void addImplementationTop(std::string text);
     void addImplementationContents(std::string text);
     
-    void open(std::string filename, std::string library);
+    void open(std::string filename);
     void close();
     bool isQuiet();
     bool setQuiet(bool quiet);
@@ -227,6 +231,9 @@ namespace generator {
     if (!findOneGeneric(object, name, valid, package, library)) {
       result = false;
       exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
+      if (a_verbose) {
+	printDatabase();
+      }
     }
     return result;
   }

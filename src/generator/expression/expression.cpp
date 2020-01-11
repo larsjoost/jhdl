@@ -123,11 +123,11 @@ namespace generator {
     debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")");
     bool result;
     bool cast_operation = (e->id == ast::ObjectType::TYPE);
-    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, false, debug.IsVerbose())) {
+    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, false, debug.isVerbose())) {
       result = false;
     } else if (cast_operation) {
-      result = arguments.equals(e->type, debug.IsVerbose());
-    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, debug.IsVerbose())) {
+      result = arguments.equals(e->type, debug.isVerbose());
+    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, debug.isVerbose())) {
       result = false;
     } else {
       if (expectedReturnType) {

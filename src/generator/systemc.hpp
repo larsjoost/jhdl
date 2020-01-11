@@ -52,13 +52,13 @@ namespace generator {
   
   class SystemC { 
 
-    Debug<false> debug;
+    Debug<true> debug;
 
     Exceptions exceptions;
     
     const std::string libraryInfoFilename = ".jhdl.ini";
     
-    bool verbose = false;
+    bool a_verbose = false;
 
     std::string a_filename;
 

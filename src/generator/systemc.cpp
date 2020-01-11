@@ -15,15 +15,15 @@
 namespace generator {
 
   SystemC::SystemC(bool verbose) : debug("SystemC") {
-    this->verbose |= verbose; 
+    a_verbose |= verbose; 
   }
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                          bool standardPackage) {
-    debug.functionStart("generate");
+    debug.functionStart("generate(library = " + library + ")");
     a_filename = designFile.filename;
-    parameters parm(a_global_database);
-    parm.open(a_filename, library); 
+    parameters parm(a_global_database, library, a_verbose);
+    parm.open(a_filename); 
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
@@ -82,7 +82,7 @@ namespace generator {
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
-	  parameters p(a_global_database);
+	  parameters p(a_global_database, library, a_verbose);
           p.setQuiet(true);
           p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);
@@ -280,7 +280,7 @@ namespace generator {
       if (!parm.exists(library, entity_name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
                               library + "." + entity_name, &implementation->entity_name->text);
-        if (verbose) {
+        if (a_verbose) {
 	  parm.printDatabase(library);
         }
       }

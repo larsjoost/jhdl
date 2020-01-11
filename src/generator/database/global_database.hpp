@@ -9,11 +9,14 @@
 
 #include "general.hpp"
 #include "local_database.hpp"
+#include "../../debug/debug.hpp"
 
 namespace generator {
 
   class GlobalDatabase {
     
+    Debug<true> debug;
+
     Exceptions exceptions;
 
     std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>> a_map;
@@ -26,12 +29,13 @@ namespace generator {
     bool traverse(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m, std::string& package, Func func);
     
   public:
+    GlobalDatabase() : debug("GlobalDatabase") {};
     void append(std::shared_ptr<LocalDatabase>& d, std::string& library, std::string& object_name);
     bool find(DatabaseResults& results, const std::string& name, std::string package = "", std::string library = "");
     std::shared_ptr<LocalDatabase>* find(std::string& library, const std::string& name);
     bool setVisible(std::string name = "", std::string package = "", std::string library = "");
     bool exists(std::string& library, std::string& package, std::string name = "");
-    void print(std::string name = "");
+    void print(std::string library = "");
   };
 
   template<typename Func>

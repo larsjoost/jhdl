@@ -28,6 +28,9 @@ namespace generator {
     std::string name = identifier->toString(true);
     if (!findOne(result, name, type)) {
       exceptions.printError("Could not find declaration of " + ast::toString(type) + "\"" + name + "\"", &identifier->text);
+      if (a_verbose) {
+	printDatabase();
+      }
       return false;
     }
     return true;
@@ -41,6 +44,9 @@ namespace generator {
     };
     if (!findOneGeneric(result, name, valid)) {
       exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
+      if (a_verbose) {
+	printDatabase();
+      }
       return false;
     }
     return true;
@@ -95,16 +101,19 @@ namespace generator {
 			     ast::ObjectValueContainer type,
 			     ast::ObjectArguments arguments,
 			     ast::Text* text) {
+    debug.functionStart("addObject");
     getActiveClassContainer()->database.add(id, name,  type,
 					    arguments, text);
+    debug.functionEnd("addObject");
   }
   
   void parameters::addObject(ast::ObjectType id, std::string& name,
 			     ast::ObjectValue type,
 			     ast::Text* text) {
+    debug.functionStart("addObject");
     getActiveClassContainer()->database.add(id, name,  type,
 					    text);
-
+    debug.functionEnd("addObject");
   }
 
   bool parameters::exists(std::string& library, std::string& package) {
@@ -121,12 +130,17 @@ namespace generator {
   }
 
   void parameters::printDatabase(std::string name) {
-    getActiveClassContainer()->database.print(name);
+    ClassContainer* c = getCurrentClassContainer();
+    if (c) {c->database.print(name);}
+    a_global_database->print(name);
   }
 
   void parameters::globalizeClass() {
+    debug.functionStart("globalizeClass");
+    assert(!file_container.content.children.empty());
     ClassContainer& current_top_class = file_container.content.children.back();
     a_global_database->append(current_top_class.database.local_database, file_container.library, current_top_class.name);
+    debug.functionEnd("globalizeClass");
   }
   
 }
