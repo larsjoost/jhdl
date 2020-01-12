@@ -456,7 +456,8 @@ namespace generator {
     debug.functionStart("getAttributeType(attributeName = " + attributeName + ")");
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(parm, attributeName, result)) {
-      if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" || attributeName == "RIGHT" || attributeName == "LAST_VALUE") {
+      if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" ||
+	  attributeName == "RIGHT" || attributeName == "LAST_VALUE") {
         switch(type.GetValue()) {
         case ast::ObjectValue::INTEGER: 
         case ast::ObjectValue::PHYSICAL: 
@@ -477,6 +478,7 @@ namespace generator {
                                             DatabaseResult& match,
                                             ast::ObjectValueContainer& expectedType,
                                             std::string& name) {
+    debug.functionStart("findAttributeMatch(name = " + name + ")");
     bool foundMatch = false;;
     for (auto& i : objects) {
       ast::ObjectValueContainer a = getAttributeType(parm, i.object->type, name);
@@ -491,6 +493,7 @@ namespace generator {
         }
       }
     }
+    debug.functionEnd("findAttributeMatch : " + std::to_string(foundMatch));
     return foundMatch;
   }
   

@@ -212,18 +212,17 @@ namespace generator {
     int found = 0;
     for (auto& i : matches) {
       if (valid(i.object)) {
-	if (bestMatch.object == NULL) {
+	if (found == 0) {
 	  bestMatch = i;
-	  if (found) {
-	    if (found == 1) {
-	      exceptions.printError("More than one match of " + bestMatch.toString());
-	      exceptions.printError("match #1: " + bestMatch.toString()); 
-	    }
-	    exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
+	} else  {
+	  if (found == 1) {
+	    exceptions.printError("More than one match of " + bestMatch.toString());
+	    exceptions.printError("match #1: " + bestMatch.toString()); 
 	  }
-	  found++;
+	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
 	}
       }
+      found++;
     }
     debug.functionEnd("findBestMatch");
     return (found == 1);
@@ -231,11 +230,16 @@ namespace generator {
 
   template<typename Func>
   bool parameters::findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
-    debug.functionStart("findOneBase");
+    debug.functionStart("findOneBase(name = " + name + ")");
     DatabaseResults result;
     findAllLocal(result, name, package, library);
     a_global_database.findAll(result, name, package, library);
     bool found = findBestMatch(result, object, valid);
+    if (!found) {
+      for (auto& i : result) {
+	std::cout << "Found : " << i.toString() << std::endl;
+      }
+    }
     debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;
   }

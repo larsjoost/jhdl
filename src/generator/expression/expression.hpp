@@ -14,7 +14,7 @@ namespace generator {
 
   class ExpressionParser {
 
-    Debug<false> debug;
+    Debug<true> debug;
     
     bool verbose = false;
     Exceptions exceptions;
