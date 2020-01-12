@@ -3,22 +3,17 @@
 #include "database.hpp"
 
 namespace generator {
-  
+
+  void LocalDatabase::findAll(DatabaseResults& results, const std::string& name) {
+    auto action_callback =
+      [&](DatabaseResult& r) {};
+    findAll(results, name, action_callback);
+  }
+
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
     a_content.add(name, e);
   }
   
-  void LocalDatabase::find(DatabaseResults& results, const std::string& name) {
-    std::list<DatabaseElement>* e = a_content.find(name);
-    if (e) {
-      for (auto& j : *e) {
-	DatabaseResult r;
-	r.object = &j;
-	results.push_back(r);
-      }
-    }
-  }
-
   bool LocalDatabase::setVisible(std::string name) {
     return a_content.setVisible(name);
   }
@@ -39,7 +34,7 @@ namespace generator {
     debug.functionStart("addAttribute");
     bool found = false;
     DatabaseResults results;
-    find(results, name);
+    findAll(results, name);
     for (auto& i : results) {
       debug.debug("i = " + i.toString());
       if (id == i.object->id && (arguments.empty() || i.object->arguments.ExactMatch(arguments))) {
@@ -63,7 +58,7 @@ namespace generator {
 
   void LocalDatabase::printAllObjects(std::string& name) {
       DatabaseResults results;
-      find(results, name);
+      findAll(results, name);
       if (!results.empty()) { 
 	std::cerr << "Found the following objects with name \"" + name + "\":" << std::endl;
       	for (auto& i : results) {

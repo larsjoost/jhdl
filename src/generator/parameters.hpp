@@ -17,13 +17,13 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
     Exceptions exceptions;
     bool a_verbose = false;
 
     InfoWriter info_writer;
 
-    GlobalDatabase* a_global_database;
+    static GlobalDatabase a_global_database;
     
     /*
       <hpp file>:
@@ -96,11 +96,13 @@ namespace generator {
       void traverseClassContainerHierarchy(Func callback);
       ClassContainer* getCurrentClassContainer();
       ClassContainer* getParentClassContainer();
+      std::string getClassContainerHierarchy();
       void flush(bool verbose = false);
     };
 
+  public:
     FileContainer file_container;
-
+  private:
     bool quiet = false;
     
     ClassContainer* getCurrentClassContainer();
@@ -108,8 +110,7 @@ namespace generator {
     ClassContainer* getActiveClassContainer();
     
   public:
-    parameters(GlobalDatabase& g, std::string& library, bool verbose = false) : debug("parameters") {
-      a_global_database = &g;
+    parameters(std::string& library, bool verbose = false) : debug("parameters") {
       file_container.library = library;
       a_verbose = verbose;
     };
@@ -140,8 +141,13 @@ namespace generator {
     void setPackageName(const std::string& path, const std::string& name);
 
     // Database access
+  private:
     template<typename Func>
-    bool findOneGeneric(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
+    bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
+    void findAllLocal(DatabaseResults& objects, std::string& name, std::string& package, std::string& library);
+  public:
+    template<typename Func>
+    bool findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
     template<typename Func>
     bool findOne(DatabaseResult& object, ast::SimpleIdentifier* identifier, Func valid, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
@@ -199,27 +205,38 @@ namespace generator {
   }
 
   template<typename Func>
-  bool parameters::findOneGeneric(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
-    debug.functionStart("findOneGeneric");
-    bool found = false;
-    int hierarchy_level = 0;
-    int last_hierarchy_level = 0;
-    object.library = file_container.library;
-    auto class_container_callback =
-      [&](ClassContainer& class_container, int hierarchy) {
-	last_hierarchy_level = hierarchy;
-	if (class_container.database.findOne(object, name, valid, package, library)) {
-	  found = true;
-	  hierarchy_level = hierarchy;
+  bool parameters::findBestMatch(DatabaseResults& matches,
+				 DatabaseResult& bestMatch,
+				 Func valid) {
+    debug.functionStart("findBestMatch");
+    int found = 0;
+    for (auto& i : matches) {
+      if (valid(i.object)) {
+	if (bestMatch.object == NULL) {
+	  bestMatch = i;
+	  if (found) {
+	    if (found == 1) {
+	      exceptions.printError("More than one match of " + bestMatch.toString());
+	      exceptions.printError("match #1: " + bestMatch.toString()); 
+	    }
+	    exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
+	  }
+	  found++;
 	}
-	object.hierarchy.push_back(class_container.name);
-      };
-    file_container.traverseClassContainerHierarchy(class_container_callback);
-    object.local = (last_hierarchy_level == hierarchy_level);
-    for (unsigned int i = hierarchy_level; i < object.hierarchy.size(); i++) {
-      object.hierarchy.pop_back();
+      }
     }
-    debug.functionEnd("findOneGeneric: " + std::to_string(found));
+    debug.functionEnd("findBestMatch");
+    return (found == 1);
+  }
+
+  template<typename Func>
+  bool parameters::findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
+    debug.functionStart("findOneBase");
+    DatabaseResults result;
+    findAllLocal(result, name, package, library);
+    a_global_database.findAll(result, name, package, library);
+    bool found = findBestMatch(result, object, valid);
+    debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;
   }
 
@@ -228,7 +245,7 @@ namespace generator {
     assert(identifier);
     std::string name = identifier->toString(true);
     bool result = true;
-    if (!findOneGeneric(object, name, valid, package, library)) {
+    if (!findOneBase(object, name, valid, package, library)) {
       result = false;
       exceptions.printError("Could not find declaration of \"" + name + "\"", &identifier->text);
       if (a_verbose) {

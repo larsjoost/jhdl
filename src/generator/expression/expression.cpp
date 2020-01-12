@@ -105,7 +105,7 @@ namespace generator {
       return result;
     };
     DatabaseResult object;
-    if (parm.findOneGeneric(object, name, valid)) {
+    if (parm.findOneBase(object, name, valid)) {
       bool double_brackets = false;
       name = objectToString(parm, object, p->arguments, [&](DatabaseResult& e) {}, double_brackets);
     } else {

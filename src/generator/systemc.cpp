@@ -22,7 +22,7 @@ namespace generator {
                          bool standardPackage) {
     debug.functionStart("generate(library = " + library + ")");
     a_filename = designFile.filename;
-    parameters parm(a_global_database, library, a_verbose);
+    parameters parm(library, a_verbose);
     parm.open(a_filename); 
     libraryInfo.load(libraryInfoFilename);
     if (!configurationFilename.empty()) {
@@ -82,7 +82,7 @@ namespace generator {
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
-	  parameters p(a_global_database, library, a_verbose);
+	  parameters p(library, a_verbose);
           p.setQuiet(true);
           p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);

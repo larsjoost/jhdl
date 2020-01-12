@@ -10,9 +10,7 @@ namespace generator {
     std::string name;
     if (!object.local) {
       name = object.library;
-      for (auto& i : object.hierarchy) {
-	name += first_separator + i;
-      }
+      name += object.hierarchyToString(".", ".");
       name += last_separator;
     }
     return name;
@@ -29,7 +27,7 @@ namespace generator {
     } else {
       if (object.local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
-          for (int i=object.hierarchy.size(); i < hierarchyLevel; i++) {
+          for (int i=object.hierarchySize(); i < hierarchyLevel; i++) {
             prefix = "p->" + prefix;
           }
         }

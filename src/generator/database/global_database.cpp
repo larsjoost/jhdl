@@ -38,11 +38,23 @@ namespace generator {
     return NULL;
   }
 
-  bool GlobalDatabase::find(DatabaseResults& results, const std::string& name, std::string package, std::string library) {
-    auto func = [&](std::shared_ptr<LocalDatabase>& l) {
-      l->find(results, name);
+  bool GlobalDatabase::findAll(DatabaseResults& results, const std::string& name,
+			       std::string& package, std::string& library) {
+    std::shared_ptr<std::list<std::string>> hierarchy = std::make_shared<std::list<std::string>>();
+    hierarchy.get()->push_back(library);
+    if (!package.empty()) {
+      hierarchy.get()->push_back(package);
+    }
+    auto action_callback =
+      [&](DatabaseResult& r) {
+	r.hierarchy = hierarchy;
+      };
+    auto func =
+      [&](std::shared_ptr<LocalDatabase>& l) {
+	l->findAll(results, name, action_callback);
     };
-    return traverse(package, library, func);
+    bool found = traverse(package, library, func);
+    return found;
   }
 
   bool GlobalDatabase::setVisible(std::string name, std::string package, std::string library) {
@@ -55,7 +67,7 @@ namespace generator {
 
   bool GlobalDatabase::exists(std::string& library, std::string& package, std::string object_name) {
     DatabaseResults d;
-    return (find(d, object_name, library, package) ? true : false);
+    return (findAll(d, object_name, package, library) ? true : false);
   }
 
   void GlobalDatabase::print(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m) {

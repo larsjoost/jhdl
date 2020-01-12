@@ -500,7 +500,7 @@ namespace generator {
 	  return result;
 	};
       DatabaseResult object;
-      if (parm.findOneGeneric(object, name, valid)) {
+      if (parm.findOneBase(object, name, valid)) {
         if (object.object->id == ast::ObjectType::SIGNAL) {
           sensitivityListCallback(object);
         }

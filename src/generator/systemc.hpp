@@ -8,7 +8,6 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "database/global_database.hpp"
 #include "expression/expression.hpp"
 
 #include "../exceptions/exceptions.hpp"
@@ -62,7 +61,6 @@ namespace generator {
 
     std::string a_filename;
 
-    GlobalDatabase a_global_database;
     ExpressionParser a_expression; 
 
     Config config;

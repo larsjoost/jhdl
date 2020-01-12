@@ -24,10 +24,6 @@ namespace generator {
 
     bool verbose = false;
     
-    template<typename Func>
-    bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
-
-
   public:
 
     Database() : debug("Database") {
@@ -57,14 +53,8 @@ namespace generator {
     void add(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::ObjectValue::NONE,
              ast::Text* text = NULL);
 
-    template<typename Func>
-    bool findOne(DatabaseResult& object, std::string& name, Func valid, std::string package = "", std::string library = "");
-    bool findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package = "", std::string library = "");
-    bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
-    bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
-    bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
-    void findAll(DatabaseResults& objects, const std::string& name, std::string package = "", std::string library = "");
-    ast::ObjectValueContainer getType(std::string name, std::string package, std::string library);
+    template <typename Func>
+    void findAll(DatabaseResults& objects, const std::string& name, Func action);
 
     void print(std::string name = "");
     void PrintLocal();
@@ -72,41 +62,13 @@ namespace generator {
     void printAll();
   };
 
-  template<typename Func>
-  bool Database::findBestMatch(DatabaseResults& matches,
-                               DatabaseResult& bestMatch,
-                               Func valid) {
-    debug.functionStart("findBestMatch");
-    int found = 0;
-    for (auto& i : matches) {
-      if (valid(i.object)) {
-        if (bestMatch.object == NULL) {
-          bestMatch = i;
-          if (found) {
-            if (found == 1) {
-              exceptions.printError("More than one match of " + bestMatch.toString());
-              exceptions.printError("match #1: " + bestMatch.toString()); 
-            }
-            exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
-          }
-          found++;
-        }
-      }
-    }
-    debug.functionEnd("findBestMatch");
-    return (found == 1);
-  }
-
-  template<typename Func>
-  bool Database::findOne(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
-    debug.functionStart("findOne");
-    DatabaseResults objects;
-    findAll(objects, name, package, library);
-    bool found = findBestMatch(objects, object, valid);
-    debug.functionEnd("findOne");
-    return found;
-  }
   
+  template <typename Func>
+  void Database::findAll(DatabaseResults& objects, const std::string& name, Func action) {
+    debug.functionStart("findAll");
+    local_database.get()->findAll(objects, name, action);
+    debug.functionEnd("findAll");
+  }
 }
 
 #endif

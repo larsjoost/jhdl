@@ -2,6 +2,7 @@
 #define _DATABASE_GENERAL_HPP_
 
 #include <unordered_map>
+#include <memory>
 #include <list>
 
 #include "../../exceptions/exceptions.hpp"
@@ -29,9 +30,11 @@ namespace generator {
   struct DatabaseResult {
     bool local;
     std::string library;
-    std::list<std::string> hierarchy;
+    std::shared_ptr<std::list<std::string>> hierarchy;
     DatabaseElement* object;
     std::string toString();
+    std::string hierarchyToString(std::string first_delimiter = "", std::string delimiter = ".");
+    int hierarchySize();
   };
 
   using DatabaseResults = std::list<DatabaseResult>;

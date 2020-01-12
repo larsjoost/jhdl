@@ -4,8 +4,6 @@
 
 namespace generator {
 
-  GlobalDatabase parameters::a_global_database;
-  
   std::string parameters::replaceFileExtension(std::string filename, std::string extension) {
     return baseName(filename) + extension;
   }
@@ -177,11 +175,12 @@ namespace generator {
   }
 
   std::string parameters::FileContainer::getClassContainerHierarchy() {
-    std::string delimiter = ".";
-    std::string hieararchy = library;
+    std::string delimiter;
+    std::string hieararchy = ;
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
 	hieararchy += delimiter + class_container.name;
+	delimiter = ".";
       };
     traverseClassContainerHierarchy(class_container_callback);
     return hieararchy;

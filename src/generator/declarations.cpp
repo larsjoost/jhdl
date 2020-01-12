@@ -107,7 +107,7 @@ namespace generator {
           right = id + ".RIGHT()";
         } else {
           exceptions.printError("Could not find type " + type_name, &id->text);
-	  if (a_verbose) {parm.printAll();}
+	  if (a_verbose) {parm.printDatabase();}
 	}
       }
     };
@@ -201,7 +201,7 @@ namespace generator {
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
-      if (a_verbose) {parm.printAll();}
+      if (a_verbose) {parm.printDatabase();}
     }
     debug.functionEnd("arrayType");
     return value;
@@ -223,7 +223,7 @@ namespace generator {
       PrintFactory(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
-      if (a_verbose) {parm.printAll();}
+      if (a_verbose) {parm.printDatabase();}
     }
     debug.functionEnd("SimpleType");
     return value;
@@ -263,6 +263,7 @@ namespace generator {
 	assert(false);
       }
     }
+    debug.debug("Hierarchy: " + parm.file_container.getClassContainerHierarchy());
     parm.addObject(ast::ObjectType::TYPE, name, value);
     debug.functionEnd("type_declarations");
   }
@@ -447,7 +448,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (parm.findOneGeneric(object, name, valid)) {
+    if (parm.findOneBase(object, name, valid)) {
       DatabaseElement* e = object.object;
       if (e->attribute && e->attribute->expression) {
         foreignName = AttributeName(e->attribute);
@@ -564,7 +565,7 @@ namespace generator {
       return match;
     };
     DatabaseResult object;
-    if (parm.findOneGeneric(object, name, valid)) {
+    if (parm.findOneBase(object, name, valid)) {
       DatabaseElement* e = object.object;
       assert(e->function);
       ast::InterfaceList* i = e->function->interface;

@@ -22,8 +22,10 @@ namespace generator {
     void printAllObjects(std::string& name);
 
   public:
-           
-    void find(DatabaseResults& results, const std::string& name);
+
+    template <typename Func>
+    void findAll(DatabaseResults& results, const std::string& name, Func action);
+    void findAll(DatabaseResults& results, const std::string& name);
 
     bool setVisible(std::string name = "");
 
@@ -44,7 +46,22 @@ namespace generator {
     
     void print();
   };
-  
+
+  template <typename Func>
+  void LocalDatabase::findAll(DatabaseResults& results, const std::string& name,
+			      Func action) {
+    std::list<DatabaseElement>* e = a_content.find(name);
+    if (e) {
+      for (auto& j : *e) {
+	DatabaseResult r;
+	r.object = &j;
+	action(r);
+	results.push_back(r);
+      }
+    }
+  }
+
+
 }
 
 #endif
