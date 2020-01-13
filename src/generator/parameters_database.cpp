@@ -70,7 +70,8 @@ namespace generator {
     return true;
   }
 
-  void parameters::findAll(DatabaseResults& objects, const std::string& name, std::string package, std::string library) {
+  void parameters::findAll(DatabaseResults& objects, std::string& name, std::string package, std::string library) {
+    findAllLocal(objects, name, package, library);
     a_global_database.findAll(objects, name, package, library);
   }
  

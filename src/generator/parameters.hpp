@@ -154,7 +154,7 @@ namespace generator {
     bool findOne(DatabaseResult& object, std::string& name, std::string package = "", std::string library = "");
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
-    void findAll(DatabaseResults& objects, const std::string& name, std::string package = "", std::string library = "");
+    void findAll(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
     void addAttribute(std::string& name, ast::ObjectArguments& arguments,
                       ast::ObjectType id, ast::Attribute* attribute,
                       ast::Text* text = NULL);

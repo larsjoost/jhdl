@@ -5,7 +5,7 @@
 namespace generator {
 
   std::string ExpressionParser::returnTypesToString(parameters& parm,
-						    const ast::ReturnTypes& return_types) {
+						    ast::ReturnTypes& return_types) {
     debug.functionStart("ReturnTypesToString");
     std::string found = "";
     std::string delimiter;
@@ -181,7 +181,7 @@ namespace generator {
   }
 
   std::string ExpressionParser::translateOperator(parameters& parm,
-						  const std::string& op) {
+						  std::string& op) {
     static std::unordered_map<std::string, std::string> translate =
       { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"}, {"**", "^"} };
     auto i = translate.find(op);
@@ -195,7 +195,7 @@ namespace generator {
   }
 
   void ExpressionParser::getStandardOperatorReturnTypes(parameters& parm,
-							const std::string& name,
+							std::string& name,
                                                         const ast::ObjectValueContainer& l,
                                                         const ast::ObjectValueContainer& r,
                                                         ast::ReturnTypes& return_types) {
@@ -242,7 +242,7 @@ namespace generator {
   }
   
   void ExpressionParser::operatorReturnTypes(parameters& parm,
-					     const std::string& name,
+					     std::string& name,
                                              const ast::ObjectValueContainer& l,
                                              const ast::ObjectValueContainer& r,
                                              ast::ReturnTypes& return_types) {
@@ -480,6 +480,7 @@ namespace generator {
                                             std::string& name) {
     debug.functionStart("findAttributeMatch(name = " + name + ")");
     bool foundMatch = false;;
+    debug.debug("objects.empty() = " + std::to_string(objects.empty()));
     for (auto& i : objects) {
       ast::ObjectValueContainer a = getAttributeType(parm, i.object->type, name);
       if (expectedType.equals(a)) {

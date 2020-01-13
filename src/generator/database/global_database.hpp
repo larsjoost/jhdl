@@ -40,6 +40,7 @@ namespace generator {
 
   template<typename Func>
   bool GlobalDatabase::traverse(std::string& package, std::string& library, Func func) {
+    debug.functionStart("traverse(package = " + package + ", library = " + library + ")");
     bool found = false;
     if (library.empty()) {
       for (auto& i : a_map) {
@@ -51,11 +52,13 @@ namespace generator {
         found |= traverse(i->second, package, func);
       }
     }
+    debug.functionEnd("traverse: " + std::to_string(found));
     return found;
   }
   
   template<typename Func>
   bool GlobalDatabase::traverse(std::unordered_map<std::string, std::shared_ptr<LocalDatabase>>& m, std::string& package, Func func) {
+    debug.functionStart("traverse(package = " + package + ")");
     bool found = false;
     if (package.empty()) {
       for (auto& i : m) {
@@ -69,6 +72,7 @@ namespace generator {
         found = true;
       }
     }
+    debug.functionEnd("traverse: " + std::to_string(found));
     return found;
   }
 

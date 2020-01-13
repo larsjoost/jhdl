@@ -48,11 +48,11 @@ namespace generator {
   private:
     template<typename Func>
     void getReturnTypes(parameters& parm,
-			const std::string& name,
+			std::string& name,
 			Func valid,
 			ast::ReturnTypes& return_types); 
     void getStandardOperatorReturnTypes(parameters& parm,
-					const std::string& name,
+					std::string& name,
 					const ast::ObjectValueContainer& l,
 					const ast::ObjectValueContainer& r,
 					ast::ReturnTypes& return_types);
@@ -70,7 +70,7 @@ namespace generator {
     void basicIdentifierReturnTypes(parameters& parm, ast::BasicIdentifier* b, ast::ReturnTypes& return_types);
   private:
     void operatorReturnTypes(parameters& parm,
-			     const std::string& name,
+			     std::string& name,
 			     const ast::ObjectValueContainer& l,
 			     const ast::ObjectValueContainer& r,
 			     ast::ReturnTypes& return_types);
@@ -94,13 +94,13 @@ namespace generator {
 				   ast::Expression* e,
 				   ast::ObjectValueContainer& expectedType,
 				   Func sensitivityListCallback,
-				   const bool double_brackets);
+				   bool double_brackets);
     template <typename Func>
     std::string expressionTermToString(parameters& parm,
 				       ast::ExpressionTerm* e,
 				       ast::ObjectValueContainer& expectedType,
 				       Func sensitivityListCallback,
-				       const bool double_brackets);
+				       bool double_brackets);
   public:
     template <typename Func>
     std::string basicIdentifierToString(parameters& parm,
@@ -116,7 +116,7 @@ namespace generator {
 			       DatabaseResult& object,
 			       ast::AssociationList* arguments,
 			       Func sensitivityListCallback,
-			       const bool double_brackets);
+			       bool double_brackets);
     
     ast::ObjectValueContainer getAttributeType(parameters& parm,
 					       ast::ObjectValueContainer& type,
@@ -153,7 +153,7 @@ namespace generator {
 
 
     std::string returnTypesToString(parameters& parm,
-				    const ast::ReturnTypes& return_types);
+				    ast::ReturnTypes& return_types);
     
     bool getStaticAttributeType(parameters& parm,
 				std::string attributeName,
@@ -205,7 +205,7 @@ namespace generator {
 				 ast::ObjectValueContainer& type);
     
     std::string translateOperator(parameters& parm,
-				  const std::string& op);
+				  std::string& op);
 
     bool uniqueReturnType(parameters& parm,
 			  ast::ReturnTypes& return_types,
@@ -240,7 +240,7 @@ namespace generator {
   }
     
   template<typename Func>
-  void ExpressionParser::getReturnTypes(parameters& parm, const std::string& name, Func valid, ast::ReturnTypes& return_types) {
+  void ExpressionParser::getReturnTypes(parameters& parm, std::string& name, Func valid, ast::ReturnTypes& return_types) {
     debug.functionStart("GetReturnTypes(name = " + name + ")");
     DatabaseResults objects;
     parm.findAll(objects, name);
@@ -322,7 +322,7 @@ namespace generator {
 					       DatabaseResult& object,
                                                ast::AssociationList* arguments,
                                                Func sensitivityListCallback,
-                                               const bool double_brackets) {
+                                               bool double_brackets) {
     debug.functionStart("objectToString");
     assert(object.object);
     std::string name = NameConverter::getName(parm, object);
@@ -409,7 +409,7 @@ namespace generator {
 						   ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback,
-                                                   const bool double_brackets) {
+                                                   bool double_brackets) {
     debug.functionStart("expressionToString");
     assert(e);
     std::string result;
@@ -436,7 +436,7 @@ namespace generator {
 						       ast::ExpressionTerm* e,
                                                        ast::ObjectValueContainer& expectedType,
                                                        Func sensitivityListCallback,
-                                                       const bool double_brackets) {
+                                                       bool double_brackets) {
     std::string result = "";
     if (e) {
       debug.functionStart("expressionTermToString");
@@ -525,6 +525,8 @@ namespace generator {
                                                   ast::Text* attribute,
                                                   ast::AssociationList* associationList,
                                                   Func sensitivityListCallback) {
+    debug.functionStart("attributeToString(name = " + name + (arguments.empty() ? "" : "(" + arguments.toString() + ")") +
+			+ ")", true);
     assert(attribute);
     //auto valid = [&](DatabaseElement* e) {
     //  return e->arguments.equals(arguments);
@@ -550,6 +552,7 @@ namespace generator {
       exceptions.printError("Could not find match for attribute \"" + attributeName +
                             "\" with expected type " + expectedType.toString(), attribute);
     }
+    debug.functionEnd("attributeToString: " + name);
     return name;
   }
 
