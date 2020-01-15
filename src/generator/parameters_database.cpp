@@ -136,13 +136,19 @@ namespace generator {
     debug.functionEnd("addObject");
   }
 
-  bool parameters::exists(std::string& library, std::string& package) {
-    return a_global_database.exists(library, package);
-  }
-
-  bool parameters::exists(std::string& library, std::string& name, ast::ObjectType type) {
-    DatabaseResult x;
-    return findOne(x, name, type, "", library);
+    bool parameters::findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type) {
+    bool found = false;
+    found = a_global_database.findObject(object, library, name, type);
+    if (library == "WORK" and !found) {
+      for (ClassContainer& i : file_container.content.children) {
+	if ((i.name == name) && (type == ast::ObjectType::UNKNOWN || i.type == type)) {
+	  object = i.database.local_database;
+	  found = true;
+	  break;
+	}
+      }
+    }
+    return found;
   }
     
   bool parameters::setVisible(std::string& name, std::string package, std::string library) {
@@ -159,7 +165,8 @@ namespace generator {
     debug.functionStart("globalizeClass");
     assert(!file_container.content.children.empty());
     ClassContainer& current_top_class = file_container.content.children.back();
-    a_global_database.append(current_top_class.database.local_database, file_container.library, current_top_class.name);
+    a_global_database.append(current_top_class.database.local_database, file_container.library,
+			     current_top_class.name, current_top_class.type);
     debug.functionEnd("globalizeClass");
   }
 

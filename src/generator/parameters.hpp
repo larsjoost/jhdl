@@ -166,8 +166,7 @@ namespace generator {
 		     ast::Text* text = NULL);
     void addObject(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::ObjectValue::NONE,
 		     ast::Text* text = NULL);
-    bool exists(std::string& library, std::string& package);
-    bool exists(std::string& library, std::string& name, ast::ObjectType type);
+    bool findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type = ast::ObjectType::UNKNOWN);
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
     void printDatabase(std::string name = "");
     void globalizeClass();
@@ -224,13 +223,14 @@ namespace generator {
       }
       found++;
     }
-    debug.functionEnd("findBestMatch");
+    debug.functionEnd("findBestMatch: " + std::to_string(found));
     return (found == 1);
   }
 
   template<typename Func>
   bool parameters::findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
-    debug.functionStart("findOneBase(name = " + name + ")");
+    debug.functionStart("findOneBase(name = " + name + ", package = " + package + ", library = " + library + ")");
+    library = (library == "WORK") ? "" : library;
     DatabaseResults result;
     findAllLocal(result, name, package, library);
     a_global_database.findAll(result, name, package, library);
@@ -239,6 +239,7 @@ namespace generator {
       for (auto& i : result) {
 	std::cout << "Found : " << i.toString() << std::endl;
       }
+      if (debug.isVerbose()) {printDatabase();}
     }
     debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;

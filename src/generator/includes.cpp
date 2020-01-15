@@ -9,11 +9,12 @@ namespace generator {
                             std::string library, std::string identifier,
                             ast::Text* text) {
     debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")");
-    bool packageExists = parm.exists(library, package);
+    std::shared_ptr<LocalDatabase> object;
+    bool packageExists = parm.findObject(object, library, package, ast::ObjectType::PACKAGE);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
       parsePackage(parm, package, library);
-      packageExists = parm.exists(library, package);
+      packageExists = parm.findObject(object, library, package, ast::ObjectType::PACKAGE);
     }
     if (packageExists) {
       if (!parm.setVisible(identifier, package, library)) {

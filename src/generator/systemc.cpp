@@ -277,7 +277,8 @@ namespace generator {
       std::string architecture_name = implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
       topHierarchyStart(parm, library, architecture_name, type, a_filename);
-      if (!parm.exists(library, entity_name, ast::ObjectType::ENTITY)) {
+      std::shared_ptr<LocalDatabase> object;
+      if (!parm.findObject(object, library, entity_name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +
                               library + "." + entity_name, &implementation->entity_name->text);
         if (a_verbose) {
