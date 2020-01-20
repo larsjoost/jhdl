@@ -61,15 +61,17 @@ namespace generator {
         methodName = "noname" + std::to_string(methodId++);
         method->noname = methodName;
       }
+      ast::ObjectType type = ast::ObjectType::PROCESS;
+      std::string class_name = ObjectName(type, methodName);
       auto createDefinition = [&](parameters& parm) {
       };
       auto createBody = [&](parameters& parm) {
         createProcess(parm,
                       [&](parameters& parm) {},
-		      methodName);
+		      class_name);
       };
-      std::string class_description = "struct " + methodName;
-      defineObject(parm, false, methodName, ast::ObjectType::PROCESS,
+      std::string class_description = "struct " + class_name;
+      defineObject(parm, false, methodName, type,
 		   class_description, NULL,
                    &method->declarations, NULL, createBody, createDefinition, true, true);
     }

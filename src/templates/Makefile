@@ -1,9 +1,15 @@
 # Copy from src/templates/Makefile
+ifndef JHDL
+$(error JHDL is not defined)
+endif
+ifndef SYSTEMC
+include $(JHDL)/systemc/include.mak
+endif
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O0 # -Wall -ansi
-INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/std 
+INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/std -I. 
 LIBS := -lsystemc
 INC := -L$(SYSTEMC)/lib-linux64
 

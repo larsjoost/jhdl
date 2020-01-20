@@ -220,8 +220,8 @@ namespace generator {
 	  }
 	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
 	}
+	found++;
       }
-      found++;
     }
     debug.functionEnd("findBestMatch: " + std::to_string(found));
     return (found == 1);

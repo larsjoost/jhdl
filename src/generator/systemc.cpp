@@ -120,7 +120,7 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(parm, r, left, right, type);
-    parm.addTop("using " + name + " = Range<decltype(" + left + ")>;");
+    parm.addTop("using " + name + " = vhdl::Range<decltype(" + left + ")>;");
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }

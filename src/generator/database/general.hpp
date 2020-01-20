@@ -31,7 +31,7 @@ namespace generator {
     bool local;
     std::string library;
     std::shared_ptr<std::list<std::string>> hierarchy;
-    DatabaseElement* object;
+    DatabaseElement* object = NULL;
     std::string toString();
     std::string hierarchyToString(std::string first_delimiter = "", std::string delimiter = ".");
     int hierarchySize();

@@ -151,7 +151,7 @@ namespace generator {
           type = database_result.object->type.GetValue();
         }
       }
-      array_template_start = "Array<" + range + ", " + array_template_start;
+      array_template_start = "vhdl::Array<" + range + ", " + array_template_start;
       array_template_end += ">";
     }
     parm.addTop("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
@@ -450,6 +450,7 @@ namespace generator {
     DatabaseResult object;
     if (parm.findOneBase(object, name, valid)) {
       DatabaseElement* e = object.object;
+      assert(e != NULL);
       if (e->attribute && e->attribute->expression) {
         foreignName = AttributeName(e->attribute);
       }
@@ -498,9 +499,12 @@ namespace generator {
       parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration);
       if (!parm.parse_declarations_only) {
         class_name = NameConverter::getName(origin_name, arguments, parm.returnType);
-        ParentInfo parent_info;
-        parm.getParent(parent_info);
-        std::string prefix = ObjectName(parent_info) + "::" + ObjectName(type, class_name) + "::";
+	std::string parent_name; 
+	ParentInfo parent_info;
+        if (parm.getParent(parent_info)) {
+	  parent_name = ObjectName(parent_info) + "::";
+	}
+        std::string prefix = parent_name + ObjectName(type, class_name) + "::";
         std::string run_prefix;
         std::string interface_with_initialization = "(" + GetInterface(parm, function_declaration->interface, true) + ")";
         std::string interface_without_initialization = "(" + GetInterface(parm, function_declaration->interface, false) + ")";

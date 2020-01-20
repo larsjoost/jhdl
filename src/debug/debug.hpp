@@ -15,6 +15,7 @@ protected:
   const static Output::Color DEFAULT_HIGHLIGHT_COLOR = Output::Color::GREEN;
 
   std::string a_name;
+  //static int a_indent;
   int a_indent = 0;
   const int INDENT_SIZE = 2;
   
@@ -40,7 +41,9 @@ protected:
 
 public:
   
-  Debug(std::string name) : a_name(name) {}
+  Debug(std::string name) : a_name(name) {
+    // a_indent = 0;
+  }
 
   inline void functionStart(std::string name, bool highlight = false) {
     if (enable) {
@@ -63,8 +66,13 @@ public:
   inline bool isVerbose() {
     return enable;
   }
+
   
 };
 
+/*
+template<bool enable>
+int Debug<enable>::a_indent;
+*/
 
 #endif

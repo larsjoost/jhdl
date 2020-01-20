@@ -41,5 +41,5 @@ namespace generator {
   int DatabaseResult::hierarchySize() {
     return hierarchy.get()->size();
   }
-  
+
 }

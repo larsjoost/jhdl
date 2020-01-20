@@ -56,15 +56,17 @@ namespace generator {
 			      Func action) {
     debug.functionStart("findAll(name = " + name + ")");
     std::list<DatabaseElement>* e = a_content.find(name);
+    int result_size = 0;
     if (e) {
       for (auto& j : *e) {
 	DatabaseResult r;
 	r.object = &j;
 	action(r);
 	results.push_back(r);
+	result_size++;
       }
     }
-    debug.functionEnd("findAll");
+    debug.functionEnd("findAll: " + std::to_string(result_size));
   }
 
 
