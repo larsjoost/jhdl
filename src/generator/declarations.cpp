@@ -74,9 +74,9 @@ namespace generator {
     parm.addClassContents("struct " + valueName + " {");
     parm.addClassContents("const static int size = " + s + ";");
     parm.addClassContents("const static int enum_size = " + std::to_string(enum_size) + ";");
-    parm.addClassContents("EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
+    parm.addClassContents("vhdl::EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
     parm.addClassContents("};");
-    parm.addClassContents("using " + name + " = Enumeration<" + enumName + ", " + valueName + ">;");
+    parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
     };
     PrintFactory(parm, name, f);
@@ -154,7 +154,7 @@ namespace generator {
       array_template_start = "vhdl::Array<" + range + ", " + array_template_start;
       array_template_end += ">";
     }
-    parm.addTop("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
+    parm.addClassContents("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       for (auto& r : definition.list) { 
         if (r.range) {
@@ -217,7 +217,7 @@ namespace generator {
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = NameConverter::getName(parm, database_result);
-      parm.addTop("using " + name + " = " + definition + "<" + n + ">;"); 
+      parm.addClassContents("using " + name + " = " + definition + "<" + n + ">;"); 
       auto f = [&](parameters& parm, std::string& left, std::string& right) {
       };
       PrintFactory(parm, name, f);
@@ -296,8 +296,8 @@ namespace generator {
         type = NameConverter::getName(parm, result);
         parm.addObject(result.object->id, designator, result.object->type);
       }
-      parm.addTop(getSourceLine(alias->designator));
-      parm.addTop("using " + designator + " = " + type + ";"); 
+      parm.addClassContents(getSourceLine(alias->designator));
+      parm.addClassContents("using " + designator + " = " + type + ";"); 
       debug.functionEnd("AliasDeclaration");
     }
   }
@@ -528,7 +528,7 @@ namespace generator {
               parm.addImplementationContents(returnTypeName + " run" + interface_with_initialization + ";");
             }
           };
-	  std::string class_description = "struct " + class_name;
+	  std::string class_description = "struct " + ObjectName(type, class_name);
           defineObject(parm, false, class_name, type, class_description, NULL,
                        &function_declaration->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
@@ -584,12 +584,12 @@ namespace generator {
 	  debug.debug("Could not find function return type");
 	}
       }
-      parm.addBottom("/*");
-      parm.addBottom(" * This is the definition of the foreign function set as an attribute.");
-      parm.addBottom(" * The implementation must be defined in a .cpp file in this directory.");
-      parm.addBottom("*/");
+      parm.addClassContents("/*");
+      parm.addClassContents(" * This is the definition of the foreign function set as an attribute.");
+      parm.addClassContents(" * The implementation must be defined in a .cpp file in this directory.");
+      parm.addClassContents("*/");
       std::string foreignName = AttributeName(a);
-      parm.addBottom(returnName + " " + foreignName + interface + ";");
+      parm.addClassContents(returnName + " " + foreignName + interface + ";");
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
       parm.printAllObjects(name);
@@ -634,8 +634,8 @@ namespace generator {
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       std::string type_name = NameConverter::getName(parm, database_result, false);
       parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
-      parm.addTop(getSourceLine(t->identifier));
-      parm.addTop("using " + name + " = " + type_name + ";");
+      parm.addClassContents(getSourceLine(t->identifier));
+      parm.addClassContents("using " + name + " = " + type_name + ";");
       PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);

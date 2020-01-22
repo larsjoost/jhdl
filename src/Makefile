@@ -1,3 +1,4 @@
+
 DIRS := version ast parser exceptions generator vhdl verilog debug output 
 MAKEFILES := $(shell find $(DIRS) -type f -iname 'Makefile' -print)
 SUBDIRS := $(patsubst %/Makefile, %, $(MAKEFILES))

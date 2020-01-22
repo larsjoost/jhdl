@@ -120,7 +120,7 @@ namespace generator {
     std::string left, right;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     rangeToString(parm, r, left, right, type);
-    parm.addTop("using " + name + " = vhdl::Range<decltype(" + left + ")>;");
+    parm.addClassContents("using " + name + " = vhdl::Range<decltype(" + left + ")>;");
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }
@@ -176,13 +176,13 @@ namespace generator {
     {
       std::string x = std::to_string(size);
       parm.addClassContents("const int size = " + x + ";");
-      parm.addClassContents("const PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
+      parm.addClassContents("const vhdl::PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
     }
     parm.addClassContents("};");
     std::string typeName = name + "_type";
     std::string declType = "decltype(" + left + ")";
-    parm.addClassContents("using " + typeName + " = Physical<" + declType + ", " + enumName + ">;"); 
-    parm.addClassContents("using " + name + " = PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
+    parm.addClassContents("using " + typeName + " = vhdl::Physical<" + declType + ", " + enumName + ">;"); 
+    parm.addClassContents("using " + name + " = vhdl::PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
     auto f = [&](parameters& parm, std::string& l, std::string& r) {
       l = "{" + left + ", " + baseUnitName + "}";
       r = "{" + right + ", " + upperUnitName + "}";
@@ -204,14 +204,17 @@ namespace generator {
                           ", packet = " + name + ", type = " + toString(type) + ")");
       topHierarchyStart(parm, library, name, type, a_filename);
       parm.package_contains_function = false;
-      std::string derived_name = (type == ast::ObjectType::PACKAGE_BODY) ? ObjectName(ast::ObjectType::PACKAGE, name) : "";
+      std::string class_name = ObjectName(type, name);
       auto createDefinition =
 	[&](parameters& parm)
 	{
-	  parm.setClassConstructorDescription(ObjectName(type, name));
+	  parm.setClassConstructorDescription(class_name + "()");
+	  if (type == ast::ObjectType::PACKAGE_BODY) {
+	    parm.addDerivedClass(ObjectName(ast::ObjectType::PACKAGE, name));
+	  }
 	  bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
 	  if (declare_object) {
-	    parm.addClassContents("using " + name + " = " + ObjectName(type, name) + ";");
+	    parm.addClassContents("using " + name + " = " + class_name + ";");
 	    std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
 	    parm.addBottom("extern " + declaration);
 	    parm.addBottom(declaration);
@@ -219,7 +222,7 @@ namespace generator {
 	};
       auto createBody = [&](parameters& parm) {
 			};
-      std::string class_description = "struct " + name;
+      std::string class_description = "struct " + class_name;
       defineObject(parm, true, name, type, class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
       topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
