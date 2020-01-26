@@ -517,15 +517,15 @@ namespace generator {
             if (function_declaration->body) {
               std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
-              parm.addImplementationContents(returnTypeName + " " + run_prefix + "run" + interface + "{");
+              parm.addClassContents(returnTypeName + " " + run_prefix + "run" + interface + "{");
               if (!foreignFunctionName.empty()) {
-                parm.addImplementationContents("// Foreign function call");
-                parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+                parm.addClassContents("// Foreign function call");
+                parm.addClassContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
               }
               sequentialStatements(parm, function_declaration->body->sequentialStatements);
-              parm.addImplementationContents("}");
+              parm.addClassContents("}");
             } else {
-              parm.addImplementationContents(returnTypeName + " run" + interface_with_initialization + ";");
+              parm.addClassContents(returnTypeName + " run" + interface_with_initialization + ";");
             }
           };
 	  std::string class_description = "struct " + ObjectName(type, class_name);

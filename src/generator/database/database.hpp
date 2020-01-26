@@ -14,7 +14,7 @@ namespace generator {
 
   class Database {
 
-    Debug<false> debug;
+    Debug<true> debug;
 
   public:
     std::shared_ptr<LocalDatabase> local_database;

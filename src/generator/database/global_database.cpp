@@ -24,9 +24,6 @@ namespace generator {
       x[object_name] = object;
       a_map[library] = x;
     }
-    if (debug.isVerbose()) {
-      print();
-    }
     debug.functionEnd("append");
   }
 
@@ -49,33 +46,30 @@ namespace generator {
   bool GlobalDatabase::findAll(DatabaseResults& results, const std::string& name,
 			       std::string& package, std::string& library) {
     debug.functionStart("findAll(name = " + name + ", library = " + library + ", package = " + package + ")");
-    std::shared_ptr<std::list<std::string>> hierarchy = std::make_shared<std::list<std::string>>();
-    if (!library.empty()) {
-      hierarchy.get()->push_back(library);
-    }
-    if (!package.empty()) {
-      hierarchy.get()->push_back(package);
-    }
-    auto action_callback =
-      [&](DatabaseResult& r) {
-	r.hierarchy = hierarchy;
-      };
     auto func =
-      [&](std::shared_ptr<LocalDatabase>& l) {
+      [&](std::shared_ptr<LocalDatabase>& l, std::string& library, std::string package) {
+	std::shared_ptr<std::list<std::string>> hierarchy = std::make_shared<std::list<std::string>>();
+	hierarchy->push_back(library);
+	hierarchy->push_back(package);
+	auto action_callback =
+	  [&](DatabaseResult& r) {
+	    r.local = false;
+	    r.hierarchy = hierarchy;
+	  };
 	l->findAll(results, name, action_callback);
     };
-    bool found = traverse(package, library, func);
-    debug.functionEnd("findAll: " + std::to_string(found));
+    bool found = traverseAll(library, package, func);
+    debug.functionEnd("findAll: found = " + std::to_string(found) + ", size = " + std::to_string(results.size()));
     return found;
   }
 
   bool GlobalDatabase::setVisible(std::string name, std::string package, std::string library) {
     std::string n = (name == "ALL") ? "" : name;
     auto func =
-      [&](std::shared_ptr<LocalDatabase>& l) {
+      [&](std::shared_ptr<LocalDatabase>& l, std::string& library, std::string package) {
 	l.get()->setVisible(n);
       };
-    return traverse(package, library, func);
+    return traverseAll(library, package, func);
   }
 
   void GlobalDatabase::print(std::unordered_map<std::string, Object>& m) {

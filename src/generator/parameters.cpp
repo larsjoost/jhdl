@@ -107,6 +107,10 @@ namespace generator {
     file_container.content.bottom.push_back(text);
   }
 
+  void parameters::addNamespaceBottom(std::string text) {
+    file_container.content.namespace_bottom.push_back(text);
+  }
+
   void parameters::addImplementationTop(std::string text) {
     file_container.content.implementation_top.push_back(text);
   }

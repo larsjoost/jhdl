@@ -25,15 +25,19 @@ namespace generator {
   }
 
   std::string DatabaseResult::toString() {
-    return object ? object->toString() : "NIL";
+    std::string l = local ? "local" : "global";
+    std::string s = object ? (l + ":" + hierarchyToString("", ".") + "." + object->toString()) : "NIL";
+    return s;
   }
 
   std::string DatabaseResult::hierarchyToString(std::string first_delimiter, std::string delimiter) {
     std::string result;
-    std::string d = first_delimiter;
-    for (auto& i : *hierarchy.get()) {
+    if (hierarchy.use_count() > 0) {
+      std::string d = first_delimiter;
+      for (auto& i : *hierarchy.get()) {
 	result += d + i;
 	d = delimiter;
+      }
     }
     return result;
   };

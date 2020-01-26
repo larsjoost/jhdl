@@ -29,9 +29,9 @@ namespace generator {
     void print(std::unordered_map<std::string, Object>& m);
 
     template<typename Func>
-    bool traverse(std::string& package, std::string& library, Func func);
+    bool traverseAll(std::string& library, std::string& package, Func func);
     template<typename Func>
-    bool traverse(std::unordered_map<std::string, Object>& m, std::string& package, Func func);
+    bool traverseLibrary(std::unordered_map<std::string, Object>& m, std::string library, std::string& package, Func func);
     
   public:
     GlobalDatabase() : debug("GlobalDatabase") {};
@@ -43,40 +43,40 @@ namespace generator {
   };
 
   template<typename Func>
-  bool GlobalDatabase::traverse(std::string& package, std::string& library, Func func) {
-    debug.functionStart("traverse(package = " + package + ", library = " + library + ")");
+  bool GlobalDatabase::traverseAll(std::string& library, std::string& package, Func func) {
+    debug.functionStart("traverse(library = " + library + ", package = " + package + ")");
     bool found = false;
     if (library.empty()) {
       for (auto& i : a_map) {
-        found |= traverse(i.second, package, func);
+        found |= traverseLibrary(i.second, i.first, package, func);
       }
     } else {
       auto i = a_map.find(library);
       if (i != a_map.end()) {
-        found |= traverse(i->second, package, func);
+        found |= traverseLibrary(i->second, library, package, func);
       }
     }
-    debug.functionEnd("traverse: " + std::to_string(found));
+    debug.functionEnd("traverseAll: " + std::to_string(found));
     return found;
   }
   
   template<typename Func>
-  bool GlobalDatabase::traverse(std::unordered_map<std::string, Object>& m, std::string& package, Func func) {
-    debug.functionStart("traverse(package = " + package + ")");
+  bool GlobalDatabase::traverseLibrary(std::unordered_map<std::string, Object>& m, std::string library, std::string& package, Func func) {
+    debug.functionStart("traverseLibrary(library = " + library + ", package = " + package + ")");
     bool found = false;
     if (package.empty()) {
       for (auto& i : m) {
-        func(i.second.database);
+        func(i.second.database, library, i.first);
         found = true;
       }
     } else {
       auto i = m.find(package);
       if (i != m.end()) {
-        func(i->second.database);
+        func(i->second.database, library, package);
         found = true;
       }
     }
-    debug.functionEnd("traverse: " + std::to_string(found));
+    debug.functionEnd("traverseLibrary: " + std::to_string(found));
     return found;
   }
 

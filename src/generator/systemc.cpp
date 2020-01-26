@@ -212,19 +212,20 @@ namespace generator {
 	  if (type == ast::ObjectType::PACKAGE_BODY) {
 	    parm.addDerivedClass(ObjectName(ast::ObjectType::PACKAGE, name));
 	  }
-	  bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
-	  if (declare_object) {
-	    parm.addClassContents("using " + name + " = " + class_name + ";");
-	    std::string declaration = library + "::" + name + " " + library + "_" + name + ";";
-	    parm.addBottom("extern " + declaration);
-	    parm.addBottom(declaration);
-	  }
 	};
       auto createBody = [&](parameters& parm) {
 			};
       std::string class_description = "struct " + class_name;
       defineObject(parm, true, name, type, class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
+      bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
+      if (declare_object) {
+	parm.addNamespaceBottom("using " + name + " = " + class_name + ";");
+	std::string l = NameConverter::toUpper(library);
+	std::string declaration = l + "::" + name + " " + l + "_" + name + ";";
+	parm.addBottom("extern " + declaration);
+	parm.addImplementationContents(declaration);
+      }
       topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");
     }

@@ -5,23 +5,16 @@
 namespace generator {
 
   std::string NameConverter::getPrefix(parameters& parm, DatabaseResult& object, std::string first_separator, std::string last_separator) {
-    std::string library = parm.getLibrary();
-    std::string sectionName = parm.getName();
     std::string name;
-    if (!object.local) {
-      name = object.library;
-      name += object.hierarchyToString(".", ".");
-      name += last_separator;
-    }
-    return name;
+    name = object.hierarchyToString("", first_separator) + last_separator;
+    return toUpper(name);
   }
 
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension) {
-    Debug<false> a_debug("NameConverter::globalPrefix");
-    a_debug.functionStart("GlobalPrefix");
+    Debug<true> a_debug("NameConverter::globalPrefix");
+    a_debug.functionStart("GlobalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
     int hierarchyLevel = parm.getHierarchyLevel();
-    a_debug.debug("Object = " + object.toString());
     if (object.object->id == ast::ObjectType::ENUM) {
       prefix = getPrefix(parm, object, "::", "::") + object.object->type.GetTypeName() + "_enum::";
     } else {
@@ -42,12 +35,12 @@ namespace generator {
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
       prefix += "factory_";
     } 
-    a_debug.functionEnd("GlobalPrefix");
+    a_debug.functionEnd("GlobalPrefix: " + prefix);
     return prefix;
   }
 
   std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
-    Debug<false> a_debug("NameConverter::getName");
+    Debug<true> a_debug("NameConverter::getName");
     a_debug.functionStart("getName");
     assert(object.object != NULL);
     std::string name = object.object->name;
@@ -57,7 +50,7 @@ namespace generator {
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
       name += ".create(" + factory_arguments + ")";
     } 
-    a_debug.functionEnd("getName");
+    a_debug.functionEnd("getName: " + name);
     return name;
   }
 

@@ -77,6 +77,7 @@ namespace generator {
       std::string namespace_start;
       std::list<std::string> top;
       std::list<ClassContainer> children;
+      std::list<std::string> namespace_bottom;
       std::list<std::string> bottom;
       std::list<std::string> implementation_top;
       std::list<std::string> implementation_contents;
@@ -127,6 +128,7 @@ namespace generator {
     void addClassConstructorContents(std::string text);
     void addClassContents(std::string text);
     void endClass();
+    void addNamespaceBottom(std::string text);
     void addBottom(std::string text);
     void addImplementationTop(std::string text);
     void addImplementationContents(std::string text);
@@ -207,7 +209,7 @@ namespace generator {
   bool parameters::findBestMatch(DatabaseResults& matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    debug.functionStart("findBestMatch");
+    debug.functionStart("findBestMatch(matches.size() = " + std::to_string(matches.size()) + ")");
     int found = 0;
     for (auto& i : matches) {
       if (valid(i.object)) {
@@ -235,11 +237,10 @@ namespace generator {
     findAllLocal(result, name, package, library);
     a_global_database.findAll(result, name, package, library);
     bool found = findBestMatch(result, object, valid);
-    if (!found) {
+    if (!found || debug.isVerbose()) {
       for (auto& i : result) {
 	std::cout << "Found : " << i.toString() << std::endl;
       }
-      if (debug.isVerbose()) {printDatabase();}
     }
     debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;

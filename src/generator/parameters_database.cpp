@@ -20,7 +20,7 @@ namespace generator {
 	current_hierarchy.push_back(class_container.name);
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
-    debug.functionEnd("findAllLocal");
+    debug.functionEnd("findAllLocal: " + std::to_string(objects.size()));
   }
 
   bool parameters::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package, std::string library) {
@@ -123,7 +123,6 @@ namespace generator {
     debug.functionStart("addObject(name = " + name + ")");
     getActiveClassContainer()->database.add(id, name,  type,
 					    arguments, text);
-    if (debug.isVerbose()) {printDatabase();}
     debug.functionEnd("addObject");
   }
   

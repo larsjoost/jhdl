@@ -9,9 +9,9 @@ namespace generator {
   void SystemC::ObjectDeclaration(parameters& parm, ast::ObjectDeclaration* v, Func callback, std::string local_prefix,
                                   bool database_enable) {
     if (v) {
-      debug.functionStart("ObjectDeclaration");
-      DatabaseResult database_result;
       std::string type_name = v->type->name->toString(true);
+      debug.functionStart("ObjectDeclaration(type_name = " + type_name + ")");
+      DatabaseResult database_result;
       if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
         type_name = NameConverter::getName(parm, database_result, false);
         std::string factory_arguments;

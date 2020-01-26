@@ -11,8 +11,9 @@ namespace generator {
     for (auto& i : children) {
       i.flush(header_file, hierarchy, verbose);
     }
-    println(header_file, bottom);
+    println(header_file, namespace_bottom);
     println(header_file, namespace_end);
+    println(header_file, bottom);
     println(implementation_file, implementation_top);
     println(implementation_file, namespace_start);
     println(implementation_file, implementation_contents);

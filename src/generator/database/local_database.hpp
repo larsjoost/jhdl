@@ -12,7 +12,7 @@ namespace generator {
 
   class LocalDatabase {
 
-    Debug<true> debug;
+    Debug<false> debug;
 
     NameMap a_content;
 
