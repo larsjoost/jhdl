@@ -6,18 +6,21 @@
 namespace generator {
 
   void parameters::findAllLocal(DatabaseResults& objects, std::string& name, std::string& package, std::string& library) {
-    debug.functionStart("findAllLocal");
-    std::list<std::string> current_hierarchy;
+    debug.functionStart("findAllLocal(name = " + name + ")");
+    std::list<std::string> current_hierarchy = {file_container.library};
     std::shared_ptr<std::list<std::string>> hierarchy_ptr;
     auto action_callback =
       [&](DatabaseResult& r) {
 	r.hierarchy = hierarchy_ptr;
+	debug.debug("Match = " + r.toString());
       };
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	hierarchy_ptr = std::make_shared<std::list<std::string>>(current_hierarchy);
-	class_container.database.findAll(objects, name, action_callback);
 	current_hierarchy.push_back(class_container.name);
+	debug.debug("Hierarchy name = " + class_container.name);
+	hierarchy_ptr = std::make_shared<std::list<std::string>>();
+	*hierarchy_ptr = current_hierarchy;
+	class_container.database.findAll(objects, name, action_callback);
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
     debug.functionEnd("findAllLocal: " + std::to_string(objects.size()));
@@ -167,6 +170,18 @@ namespace generator {
     a_global_database.append(current_top_class.database.local_database, file_container.library,
 			     current_top_class.name, current_top_class.type);
     debug.functionEnd("globalizeClass");
+  }
+
+  bool parameters::isLocal(DatabaseResult& object) {
+    debug.functionStart("isLocal(object_hierarchy = " + object.toString() + ")");
+    std::string object_hierarchy = object.hierarchyToString();
+    bool local;
+    std::string current_hierarchy = hierarchyToString();
+    debug.debug("current_hierarchy = " + current_hierarchy);
+    local = (NameConverter::toUpper(object_hierarchy) ==
+	     NameConverter::toUpper(current_hierarchy));
+    debug.functionEnd("isLocal: " + std::to_string(local));
+    return local;
   }
 
 }

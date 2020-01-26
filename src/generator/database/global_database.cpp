@@ -53,7 +53,6 @@ namespace generator {
 	hierarchy->push_back(package);
 	auto action_callback =
 	  [&](DatabaseResult& r) {
-	    r.local = false;
 	    r.hierarchy = hierarchy;
 	  };
 	l->findAll(results, name, action_callback);

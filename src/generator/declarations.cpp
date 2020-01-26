@@ -231,14 +231,14 @@ namespace generator {
 
   ast::ObjectValueContainer SystemC::AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
     debug.functionStart("AccessType");
-    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "vhdl_access");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "vhdl::vhdl_access");
     debug.functionEnd("AccessType");
     return value;
   }
 
   ast::ObjectValueContainer SystemC::FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
     debug.functionStart("FileType");
-    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "vhdl_file");
+    ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "vhdl::vhdl_file");
     debug.functionEnd("FileType");
     return value;
   }

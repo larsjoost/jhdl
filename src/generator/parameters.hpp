@@ -97,7 +97,7 @@ namespace generator {
       void traverseClassContainerHierarchy(Func callback);
       ClassContainer* getCurrentClassContainer();
       ClassContainer* getParentClassContainer();
-      std::string getClassContainerHierarchy();
+      std::string getClassContainerHierarchy(std::string first_delimiter = ".", std::string delimiter = ".");
       void flush(bool verbose = false);
     };
 
@@ -172,6 +172,8 @@ namespace generator {
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
     void printDatabase(std::string name = "");
     void globalizeClass();
+    bool isLocal(DatabaseResult& object);
+    std::string hierarchyToString(std::string delimiter = ".");
     
     void printAllObjects(std::string name);
     std::string getName(ast::SimpleIdentifier* i, ast::ObjectType);

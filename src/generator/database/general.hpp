@@ -28,7 +28,6 @@ namespace generator {
   };
   
   struct DatabaseResult {
-    bool local;
     std::shared_ptr<std::list<std::string>> hierarchy;
     DatabaseElement* object = NULL;
     std::string toString();

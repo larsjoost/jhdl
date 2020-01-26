@@ -30,8 +30,10 @@ namespace generator {
         exceptions.printError("Could not open configuration file " + configurationFilename);
       } else {
         if (designFile.IsLanguage(ast::DesignFile::LanguageType::VHDL)) {
-          loadPackage(parm, "STANDARD", "STD", "ALL");
-        }
+	  if (!standardPackage) {
+	    loadPackage(parm, "STANDARD", "STD", "ALL");
+	  }
+	}
       }
     }
     if (!standardPackage) {parm.addInclude("#include <standard.h>");}
@@ -72,7 +74,8 @@ namespace generator {
     std::string stdPath = (library == "WORK") ? "." : config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
-      c.load(stdPath + "/" + libraryInfoFilename);
+      std::string config_file = stdPath + "/" + libraryInfoFilename;
+      c.load(config_file);
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
 	if (filename != a_filename) {
@@ -87,7 +90,8 @@ namespace generator {
           p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);
 	} else {
-	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename);
+	  exceptions.printError("Could not find package \"" + name + "\" in file " + filename +
+				", when using config file: " + config_file);
 	}
       } else {
         exceptions.printError("Could not resolve filename of package \"" + name + "\"");

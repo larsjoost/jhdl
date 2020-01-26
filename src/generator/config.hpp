@@ -4,8 +4,11 @@
 #include <string>
 #include <unordered_map>
 #include "../exceptions/exceptions.hpp"
+#include "../debug/debug.hpp"
 
 class Config {
+
+  Debug<false> debug;
 
   Exceptions exceptions;
   
@@ -14,7 +17,8 @@ class Config {
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> map;
   
 public:
-  
+  Config() : debug("Config") {};
+    
   void toLower(std::string& s);
   void toUpper(std::string& s);
   void removeWhitespace(std::string& s);

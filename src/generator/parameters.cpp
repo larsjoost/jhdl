@@ -168,30 +168,6 @@ namespace generator {
     printHierarchy();
   }
 
-  parameters::ClassContainer* parameters::FileContainer::getParentClassContainer() {
-    ClassContainer* parent = NULL;
-    ClassContainer* current = NULL;
-    auto class_container_callback =
-      [&](ClassContainer& class_container, int hierarchy) {
-	parent = current;
-	current = &class_container;
-      };
-    traverseClassContainerHierarchy(class_container_callback);
-    return parent;
-  }
-
-  std::string parameters::FileContainer::getClassContainerHierarchy() {
-    std::string delimiter = ".";
-    std::string hieararchy = library;
-    auto class_container_callback =
-      [&](ClassContainer& class_container, int hierarchy) {
-	hieararchy += delimiter + class_container.name;
-      };
-    traverseClassContainerHierarchy(class_container_callback);
-    return hieararchy;
-  }
-    
-
   std::string parameters::getLibrary() {
     return file_container.library;
   }
@@ -209,5 +185,10 @@ namespace generator {
     file_container.traverseClassContainerHierarchy(class_container_callback);
     return h;
   }
+
+  std::string parameters::hierarchyToString(std::string delimiter) {
+    return file_container.getClassContainerHierarchy(delimiter, delimiter);
+  }
     
+  
 }

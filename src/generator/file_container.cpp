@@ -45,5 +45,31 @@ namespace generator {
     debug.functionEnd("getCurrentClassContainer");
     return a;
   }
+
+  parameters::ClassContainer* parameters::FileContainer::getParentClassContainer() {
+    ClassContainer* parent = NULL;
+    ClassContainer* current = NULL;
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	parent = current;
+	current = &class_container;
+      };
+    traverseClassContainerHierarchy(class_container_callback);
+    return parent;
+  }
+
+  std::string parameters::FileContainer::getClassContainerHierarchy(std::string first_delimiter, std::string delimiter) {
+    std::string d = first_delimiter;
+    std::string hieararchy = library;
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	hieararchy += d + class_container.name;
+	d = delimiter;
+      };
+    traverseClassContainerHierarchy(class_container_callback);
+    return hieararchy;
+  }
+    
+
   
 }

@@ -12,14 +12,18 @@ namespace generator {
 
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension) {
     Debug<true> a_debug("NameConverter::globalPrefix");
-    a_debug.functionStart("GlobalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
+    a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
-    int hierarchyLevel = parm.getHierarchyLevel();
+    bool local = parm.isLocal(object); 
     if (object.object->id == ast::ObjectType::ENUM) {
-      prefix = getPrefix(parm, object, "::", "::") + object.object->type.GetTypeName() + "_enum::";
+      if (!local) {
+	prefix = getPrefix(parm, object, "::", "::");
+      }
+      prefix += object.object->type.GetTypeName() + "_enum::";
     } else {
-      if (object.local) {
+      if (local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
+	  int hierarchyLevel = parm.getHierarchyLevel();
           for (int i=object.hierarchySize(); i < hierarchyLevel; i++) {
             prefix = "p->" + prefix;
           }
@@ -35,7 +39,7 @@ namespace generator {
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
       prefix += "factory_";
     } 
-    a_debug.functionEnd("GlobalPrefix: " + prefix);
+    a_debug.functionEnd("globalPrefix: " + prefix);
     return prefix;
   }
 

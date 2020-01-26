@@ -15,7 +15,7 @@ namespace generator {
 
   class GlobalDatabase {
     
-    Debug<true> debug;
+    Debug<false> debug;
 
     Exceptions exceptions;
 
