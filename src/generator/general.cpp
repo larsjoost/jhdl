@@ -23,11 +23,13 @@ namespace generator {
     }
   }
   
-  void SystemC::topHierarchyEnd(parameters& parm, bool globalize) {
+  void SystemC::topHierarchyEnd(parameters& parm, ast::Text* text, bool globalize) {
     if (a_verbose) {
       parm.addBottom("// Hierarchy top end ");
     }
-    parm.globalizeClass();
+    if (globalize) {
+      parm.globalizeClass(text);
+    }
   }
 
   void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description) {

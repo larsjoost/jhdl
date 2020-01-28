@@ -5,19 +5,22 @@
 
 namespace generator {
   
-  void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& database, std::string& library, std::string& object_name, ast::ObjectType type) {
+  void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& database, std::string& library, std::string& object_name, ast::ObjectType type, ast::Text* source_text) {
     debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")");
     Object object;
     object.type = type;
     object.database = database;
+    object.source_text = source_text;
     assert(library.size() > 0);
     assert(object_name.size() > 0);
     auto l = a_map.find(library);
     if (l != a_map.end()) {
-      if (l->second.find(object_name) == l->second.end()) {
+      auto found_object = l->second.find(object_name);
+      if (found_object == l->second.end()) {
 	l->second[object_name] = object;
       } else {
-        exceptions.printError(library + "." + object_name + " is already defined");
+        exceptions.printError(library + "." + object_name + " is already defined", source_text);
+        exceptions.printError("Defined here:", found_object->second.source_text);
       }
     } else {
       std::unordered_map<std::string, Object> x;

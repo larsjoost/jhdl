@@ -5,11 +5,13 @@
 #include <memory>
 #include <list>
 
-#include "../../exceptions/exceptions.hpp"
 
 #include "general.hpp"
 #include "local_database.hpp"
+
+#include "../../exceptions/exceptions.hpp"
 #include "../../debug/debug.hpp"
+#include "../../ast/text.hpp"
 
 namespace generator {
 
@@ -21,6 +23,7 @@ namespace generator {
 
     struct Object {
       ast::ObjectType type;
+      ast::Text* source_text;
       std::shared_ptr<LocalDatabase> database;
     };
     
@@ -35,7 +38,7 @@ namespace generator {
     
   public:
     GlobalDatabase() : debug("GlobalDatabase") {};
-    void append(std::shared_ptr<LocalDatabase>& d, std::string& library, std::string& object_name, ast::ObjectType type);
+    void append(std::shared_ptr<LocalDatabase>& d, std::string& library, std::string& object_name, ast::ObjectType type, ast::Text* source_text);
     bool findAll(DatabaseResults& results, const std::string& name, std::string& package, std::string& library);
     bool findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, const std::string& name, ast::ObjectType type = ast::ObjectType::UNKNOWN);
     bool setVisible(std::string name = "", std::string package = "", std::string library = "");

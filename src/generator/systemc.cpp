@@ -230,7 +230,7 @@ namespace generator {
 	parm.addBottom("extern " + declaration);
 	parm.addImplementationContents(declaration);
       }
-      topHierarchyEnd(parm, (type == ast::ObjectType::PACKAGE));
+      topHierarchyEnd(parm, &package->name->text, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");
     }
   }
@@ -274,7 +274,7 @@ namespace generator {
 		 [&](parameters& parm){},
 		 declaration_callback,
 		 false, true);
-    topHierarchyEnd(parm, true);
+    topHierarchyEnd(parm, &interface->name->text, true);
     debug.functionEnd("interfaceDeclaration");
   }
   
@@ -308,7 +308,7 @@ namespace generator {
                    [&](parameters& parm){},
                    declaration_callback,
                    false, true);
-      topHierarchyEnd(parm);
+      topHierarchyEnd(parm, &implementation->architecture_name->text);
       debug.functionEnd("implementationDeclaration");
     }
   }

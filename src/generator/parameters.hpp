@@ -171,7 +171,7 @@ namespace generator {
     bool findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type = ast::ObjectType::UNKNOWN);
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
     void printDatabase(std::string name = "");
-    void globalizeClass();
+    void globalizeClass(ast::Text* text);
     bool isLocal(DatabaseResult& object);
     std::string hierarchyToString(std::string delimiter = ".");
     

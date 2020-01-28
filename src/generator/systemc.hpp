@@ -70,7 +70,7 @@ namespace generator {
 
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
-    void topHierarchyEnd(parameters& parm, bool globalize = false);
+    void topHierarchyEnd(parameters& parm, ast::Text* text, bool globalize = false);
     void openHierarchy(parameters& parm, std::string name, ast::ObjectType type , std::string class_description);
     void closeHierarchy(parameters& parm);
 

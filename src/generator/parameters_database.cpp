@@ -163,12 +163,12 @@ namespace generator {
     a_global_database.print(name);
   }
 
-  void parameters::globalizeClass() {
+  void parameters::globalizeClass(ast::Text* text) {
     debug.functionStart("globalizeClass");
     assert(!file_container.content.children.empty());
     ClassContainer& current_top_class = file_container.content.children.back();
     a_global_database.append(current_top_class.database.local_database, file_container.library,
-			     current_top_class.name, current_top_class.type);
+			     current_top_class.name, current_top_class.type, text);
     debug.functionEnd("globalizeClass");
   }
 
