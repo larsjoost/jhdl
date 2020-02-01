@@ -220,9 +220,9 @@ namespace generator {
 	} else  {
 	  if (found == 1) {
 	    exceptions.printError("More than one match of " + bestMatch.toString());
-	    exceptions.printError("match #1: " + bestMatch.toString()); 
+	    exceptions.printError("match #1: " + bestMatch.toString(), bestMatch.object->text); 
 	  }
-	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString()); 
+	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString(), bestMatch.object->text); 
 	}
 	found++;
       }
@@ -237,7 +237,9 @@ namespace generator {
     library = (library == "WORK") ? "" : library;
     DatabaseResults result;
     findAllLocal(result, name, package, library);
+    debug.debug("Local matches = " + std::to_string(result.size()));
     a_global_database.findAll(result, name, package, library);
+    debug.debug("Total matches = " + std::to_string(result.size()));
     bool found = findBestMatch(result, object, valid);
     if (!found || debug.isVerbose()) {
       for (auto& i : result) {

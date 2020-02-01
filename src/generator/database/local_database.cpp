@@ -30,8 +30,11 @@ namespace generator {
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    Debug<false> debug = Debug<false>("LocalDatabase");
-    debug.functionStart("addAttribute");
+    Debug<true> debug("LocalDatabase");
+    debug.functionStart("addAttribute(name = " + name + ")");
+    if (debug.isVerbose()) {
+      print();
+    }
     bool found = false;
     DatabaseResults results;
     findAll(results, name);
@@ -52,6 +55,9 @@ namespace generator {
       if (a_verbose) {
 	print();
       }
+    }
+    if (debug.isVerbose()) {
+      print();
     }
     debug.functionEnd("addAttribute");
   };

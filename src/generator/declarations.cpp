@@ -496,7 +496,7 @@ namespace generator {
       std::string returnTypeName = FunctionReturn(parm, function_declaration);
       parm.addImplementationContents(getSourceLine(text));
       std::string argumentNames = getArgumentNames(parm, function_declaration->interface);
-      parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration);
+      parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration, &text);
       if (!parm.parse_declarations_only) {
         class_name = NameConverter::getName(origin_name, arguments, parm.returnType);
 	std::string parent_name; 

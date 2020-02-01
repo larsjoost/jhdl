@@ -5,23 +5,15 @@
 namespace generator {
 
   void DatabaseElement::print() {
-    std::cout << "      name      = " << name << std::endl;
-    std::string a = arguments.toString();
-    if (!a.empty()) {
-      std::cout << "      arguments = " << a << std::endl;
-    }
-    std::cout << "      value     = " << type.toString() << std::endl;
-    if (attribute) {
-      std::cout << "      attribute = true" << std::endl;
-    }
-    std::cout << "      type      = " << ast::toString(id) << std::endl;
+    std::cout << toString() << std::endl;
   }
 
   std::string DatabaseElement::toString() {
     std::string args = arguments.toString();
     args = args.empty() ? "" : "(" + args + ")";
     std::string attr = (attribute ? " [ATTRIBUTE]" : "");
-    return ast::toString(id) + " " + name + args + ": " + type.toString() + attr;
+    std::string v = (visible ? "visible" : "hidden");
+    return ast::toString(id) + " " + name + args + ": " + type.toString() + attr + " (" + v + ")";
   }
 
   std::string DatabaseResult::toString() {
