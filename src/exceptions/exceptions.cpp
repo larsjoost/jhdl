@@ -6,9 +6,8 @@ int Exceptions::a_number_of_warnings = 0;
 void Exceptions::print(std::string severity, Output::Color color, std::string& message, ast::Text* text) {
   auto func = [&](std::ostream* out) {
     std::string location = text ?
-    (" in " + text->getFilename() + " at " +
-     std::to_string(text->getLine()) + ", " +
-     std::to_string(text->getColumn())) : ""; 
+    (" in " + text->getFilename() + "(" +
+     std::to_string(text->getLine()) + ")") : ""; 
     *out << "#" << severity << location << ": " << message << std::endl;
     if (text) {
       *out << text->getCurrentLine() << std::endl;

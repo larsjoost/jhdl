@@ -145,7 +145,9 @@ namespace generator {
     // Database access
   private:
     template<typename Func>
-    bool findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
+    int findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
+    template<typename Func>
+    bool findBestMatch(DatabaseResults& global_matches, DatabaseResults& local_matches, DatabaseResult& bestMatch, Func valid);
     void findAllLocal(DatabaseResults& objects, std::string& name, std::string& package, std::string& library);
   public:
     template<typename Func>
@@ -203,15 +205,14 @@ namespace generator {
 	c = &x.children;
       }
     } while (!done);
-    
     debug.functionEnd("traverseClassContainerHierarchy");
   }
 
   template<typename Func>
-  bool parameters::findBestMatch(DatabaseResults& matches,
+  int parameters::findBestMatch(DatabaseResults& matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    debug.functionStart("findBestMatch(matches.size() = " + std::to_string(matches.size()) + ")");
+    debug.functionStart("findBestMatch)");
     int found = 0;
     for (auto& i : matches) {
       if (valid(i.object)) {
@@ -228,6 +229,20 @@ namespace generator {
       }
     }
     debug.functionEnd("findBestMatch: " + std::to_string(found));
+    return found;
+  }
+
+  template<typename Func>
+  bool parameters::findBestMatch(DatabaseResults& global_matches,
+				 DatabaseResults& local_matches,
+				 DatabaseResult& bestMatch,
+				 Func valid) {
+    debug.functionStart("findBestMatch)");
+    int found = findBestMatch(global_matches, bestMatch, valid);
+    if (found == 0) {
+      found = findBestMatch(local_matches, bestMatch, valid);
+    }
+    debug.functionEnd("findBestMatch: " + std::to_string(found));
     return (found == 1);
   }
 
@@ -235,15 +250,29 @@ namespace generator {
   bool parameters::findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
     debug.functionStart("findOneBase(name = " + name + ", package = " + package + ", library = " + library + ")");
     library = (library == "WORK") ? "" : library;
-    DatabaseResults result;
-    findAllLocal(result, name, package, library);
-    debug.debug("Local matches = " + std::to_string(result.size()));
-    a_global_database.findAll(result, name, package, library);
-    debug.debug("Total matches = " + std::to_string(result.size()));
-    bool found = findBestMatch(result, object, valid);
+    DatabaseResults global_results;
+    a_global_database.findAll(global_results, name, package, library);
+    if (debug.isVerbose()) {
+      std::cout << "Global database:" << std::endl;
+      for (auto& i : global_results) {
+	std::cout << i.toString() << std::endl;
+      }
+    }
+    DatabaseResults local_results;
+    findAllLocal(local_results, name, package, library);
+    if (debug.isVerbose()) {
+      std::cout << "Local database:" << std::endl;
+      for (auto& i : local_results) {
+	std::cout << i.toString() << std::endl;
+      }
+    }
+    bool found = findBestMatch(global_results, local_results, object, valid);
     if (!found || debug.isVerbose()) {
-      for (auto& i : result) {
-	std::cout << "Found : " << i.toString() << std::endl;
+      for (auto& i : global_results) {
+	std::cout << "Found global: " << i.toString() << std::endl;
+      }
+      for (auto& i : local_results) {
+	std::cout << "Found local: " << i.toString() << std::endl;
       }
     }
     debug.functionEnd("findOneBase: " + std::to_string(found));
