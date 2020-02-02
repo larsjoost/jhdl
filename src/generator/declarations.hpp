@@ -74,10 +74,10 @@ namespace generator {
       parm.addClassContents(name + " x(left, right);");
       parm.addClassContents("return x;");
       parm.addClassContents("}");
+      std::string factory_name = ObjectName(ast::ObjectType::FACTORY, name);
+      parm.addClassTrailer(factory_name + " factory_" + name + " = " + factory_name + "(this);");
     };
     PrintTypeObject(parm, name, f);
-    std::string factory_name = ObjectName(ast::ObjectType::FACTORY, name);
-    parm.addClassBottom(factory_name + " factory_" + name + " = " + factory_name + "(this);");
     debug.functionEnd("PrintFactory");
   }
 

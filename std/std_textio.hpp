@@ -197,6 +197,7 @@ LINE x(left, right);
 return x;
 }
 }; // class LINE end
+Factory_LINE factory_LINE = Factory_LINE(this);
 // Area Content (name = TEXT, hierarchy = 1, active = false)
 struct Factory_TEXT {
 Factory_TEXT(Package_TEXTIO* parent) : p(parent) {
@@ -212,6 +213,7 @@ TEXT x(left, right);
 return x;
 }
 }; // class TEXT end
+Factory_TEXT factory_TEXT = Factory_TEXT(this);
 // Area Content (name = SIDE, hierarchy = 1, active = false)
 struct Factory_SIDE {
 Factory_SIDE(Package_TEXTIO* parent) : p(parent) {
@@ -227,6 +229,7 @@ SIDE x(left, right);
 return x;
 }
 }; // class SIDE end
+Factory_SIDE factory_SIDE = Factory_SIDE(this);
 // Area Content (name = WIDTH, hierarchy = 1, active = false)
 struct Factory_WIDTH {
 Factory_WIDTH(Package_TEXTIO* parent) : p(parent) {
@@ -242,9 +245,6 @@ WIDTH x(left, right);
 return x;
 }
 }; // class WIDTH end
-Factory_LINE factory_LINE = Factory_LINE(this);
-Factory_TEXT factory_TEXT = Factory_TEXT(this);
-Factory_SIDE factory_SIDE = Factory_SIDE(this);
 Factory_WIDTH factory_WIDTH = Factory_WIDTH(this);
 }; // class TEXTIO end
 // Area Content (name = TEXTIO, hierarchy = 0, active = false)

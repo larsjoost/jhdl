@@ -17,7 +17,8 @@ namespace generator {
   }
 
   std::string DatabaseResult::toString() {
-    std::string s = object ? (hierarchyToString("", ".") + " " + object->toString()) : "NIL";
+    std::string l = local ? "local" : "global"; 
+    std::string s = object ? (hierarchyToString("", ".") + " " + object->toString() + " (" + l + ")") : "NIL";
     return s;
   }
 

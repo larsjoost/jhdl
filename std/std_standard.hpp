@@ -95,6 +95,7 @@ BOOLEAN x(left, right);
 return x;
 }
 }; // class BOOLEAN end
+Factory_BOOLEAN factory_BOOLEAN = Factory_BOOLEAN(this);
 // Area Content (name = BIT, hierarchy = 1, active = false)
 struct Factory_BIT {
 Factory_BIT(Package_STANDARD* parent) : p(parent) {
@@ -110,6 +111,7 @@ BIT x(left, right);
 return x;
 }
 }; // class BIT end
+Factory_BIT factory_BIT = Factory_BIT(this);
 // Area Content (name = CHARACTER, hierarchy = 1, active = false)
 struct Factory_CHARACTER {
 Factory_CHARACTER(Package_STANDARD* parent) : p(parent) {
@@ -125,6 +127,7 @@ CHARACTER x(left, right);
 return x;
 }
 }; // class CHARACTER end
+Factory_CHARACTER factory_CHARACTER = Factory_CHARACTER(this);
 // Area Content (name = SEVERITY_LEVEL, hierarchy = 1, active = false)
 struct Factory_SEVERITY_LEVEL {
 Factory_SEVERITY_LEVEL(Package_STANDARD* parent) : p(parent) {
@@ -140,6 +143,7 @@ SEVERITY_LEVEL x(left, right);
 return x;
 }
 }; // class SEVERITY_LEVEL end
+Factory_SEVERITY_LEVEL factory_SEVERITY_LEVEL = Factory_SEVERITY_LEVEL(this);
 // Area Content (name = FILE_OPEN_KIND, hierarchy = 1, active = false)
 struct Factory_FILE_OPEN_KIND {
 Factory_FILE_OPEN_KIND(Package_STANDARD* parent) : p(parent) {
@@ -155,6 +159,7 @@ FILE_OPEN_KIND x(left, right);
 return x;
 }
 }; // class FILE_OPEN_KIND end
+Factory_FILE_OPEN_KIND factory_FILE_OPEN_KIND = Factory_FILE_OPEN_KIND(this);
 // Area Content (name = FILE_OPEN_STATUS, hierarchy = 1, active = false)
 struct Factory_FILE_OPEN_STATUS {
 Factory_FILE_OPEN_STATUS(Package_STANDARD* parent) : p(parent) {
@@ -170,6 +175,7 @@ FILE_OPEN_STATUS x(left, right);
 return x;
 }
 }; // class FILE_OPEN_STATUS end
+Factory_FILE_OPEN_STATUS factory_FILE_OPEN_STATUS = Factory_FILE_OPEN_STATUS(this);
 // Area Content (name = INTEGER, hierarchy = 1, active = false)
 struct Factory_INTEGER {
 Factory_INTEGER(Package_STANDARD* parent) : p(parent) {
@@ -185,6 +191,7 @@ INTEGER x(left, right);
 return x;
 }
 }; // class INTEGER end
+Factory_INTEGER factory_INTEGER = Factory_INTEGER(this);
 // Area Content (name = REAL, hierarchy = 1, active = false)
 struct Factory_REAL {
 Factory_REAL(Package_STANDARD* parent) : p(parent) {
@@ -200,6 +207,7 @@ REAL x(left, right);
 return x;
 }
 }; // class REAL end
+Factory_REAL factory_REAL = Factory_REAL(this);
 // Area Content (name = TIME, hierarchy = 1, active = false)
 struct Factory_TIME {
 Factory_TIME(Package_STANDARD* parent) : p(parent) {
@@ -215,13 +223,14 @@ TIME x(left, right);
 return x;
 }
 }; // class TIME end
+Factory_TIME factory_TIME = Factory_TIME(this);
 // Area Content (name = DELAY_LENGTH, hierarchy = 1, active = false)
 struct Factory_DELAY_LENGTH {
 Factory_DELAY_LENGTH(Package_STANDARD* parent) : p(parent) {
 }; // constructor DELAY_LENGTH end
 Package_STANDARD* p = NULL; // Used to access parent class.
 DELAY_LENGTH create() {
-DELAY_LENGTH x({0, TIME_enum::FS}, factory_TIME.create().HIGH());
+DELAY_LENGTH x({0, TIME_enum::FS}, p->factory_TIME.create().HIGH());
 return x;
 }
 template <typename T>
@@ -230,13 +239,14 @@ DELAY_LENGTH x(left, right);
 return x;
 }
 }; // class DELAY_LENGTH end
+Factory_DELAY_LENGTH factory_DELAY_LENGTH = Factory_DELAY_LENGTH(this);
 // Area Content (name = NATURAL, hierarchy = 1, active = false)
 struct Factory_NATURAL {
 Factory_NATURAL(Package_STANDARD* parent) : p(parent) {
 }; // constructor NATURAL end
 Package_STANDARD* p = NULL; // Used to access parent class.
 NATURAL create() {
-NATURAL x(0, factory_INTEGER.create().HIGH());
+NATURAL x(0, p->factory_INTEGER.create().HIGH());
 return x;
 }
 template <typename T>
@@ -245,13 +255,14 @@ NATURAL x(left, right);
 return x;
 }
 }; // class NATURAL end
+Factory_NATURAL factory_NATURAL = Factory_NATURAL(this);
 // Area Content (name = POSITIVE, hierarchy = 1, active = false)
 struct Factory_POSITIVE {
 Factory_POSITIVE(Package_STANDARD* parent) : p(parent) {
 }; // constructor POSITIVE end
 Package_STANDARD* p = NULL; // Used to access parent class.
 POSITIVE create() {
-POSITIVE x(1, factory_INTEGER.create().HIGH());
+POSITIVE x(1, p->factory_INTEGER.create().HIGH());
 return x;
 }
 template <typename T>
@@ -260,6 +271,7 @@ POSITIVE x(left, right);
 return x;
 }
 }; // class POSITIVE end
+Factory_POSITIVE factory_POSITIVE = Factory_POSITIVE(this);
 // Area Content (name = STRING, hierarchy = 1, active = false)
 struct Factory_STRING {
 Factory_STRING(Package_STANDARD* parent) : p(parent) {
@@ -275,6 +287,7 @@ STRING x(left, right);
 return x;
 }
 }; // class STRING end
+Factory_STRING factory_STRING = Factory_STRING(this);
 // Area Content (name = BIT_VECTOR, hierarchy = 1, active = false)
 struct Factory_BIT_VECTOR {
 Factory_BIT_VECTOR(Package_STANDARD* parent) : p(parent) {
@@ -290,19 +303,6 @@ BIT_VECTOR x(left, right);
 return x;
 }
 }; // class BIT_VECTOR end
-Factory_BOOLEAN factory_BOOLEAN = Factory_BOOLEAN(this);
-Factory_BIT factory_BIT = Factory_BIT(this);
-Factory_CHARACTER factory_CHARACTER = Factory_CHARACTER(this);
-Factory_SEVERITY_LEVEL factory_SEVERITY_LEVEL = Factory_SEVERITY_LEVEL(this);
-Factory_FILE_OPEN_KIND factory_FILE_OPEN_KIND = Factory_FILE_OPEN_KIND(this);
-Factory_FILE_OPEN_STATUS factory_FILE_OPEN_STATUS = Factory_FILE_OPEN_STATUS(this);
-Factory_INTEGER factory_INTEGER = Factory_INTEGER(this);
-Factory_REAL factory_REAL = Factory_REAL(this);
-Factory_TIME factory_TIME = Factory_TIME(this);
-Factory_DELAY_LENGTH factory_DELAY_LENGTH = Factory_DELAY_LENGTH(this);
-Factory_NATURAL factory_NATURAL = Factory_NATURAL(this);
-Factory_POSITIVE factory_POSITIVE = Factory_POSITIVE(this);
-Factory_STRING factory_STRING = Factory_STRING(this);
 Factory_BIT_VECTOR factory_BIT_VECTOR = Factory_BIT_VECTOR(this);
 }; // class STANDARD end
 // Area Content (name = STANDARD, hierarchy = 0, active = false)

@@ -45,6 +45,9 @@ namespace generator {
       if (object.local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
 	  int hierarchyLevel = parm.getHierarchyLevel();
+	  a_debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel) +
+			", current hierarchy = " + parm.hierarchyToString() +
+			", object hierarchy size = " + std::to_string(object.hierarchySize()));
           for (int i=object.hierarchySize(); i < hierarchyLevel; i++) {
             prefix = "p->" + prefix;
           }

@@ -48,6 +48,7 @@ namespace generator {
     }
     println(handle, class_bottom);
     println(handle, "}; // class " + name + " end");
+    println(handle, class_trailer);
   }
   
 }

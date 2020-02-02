@@ -92,6 +92,10 @@ namespace generator {
     getActiveClassContainer()->class_bottom.push_back(text);
   }
 
+  void parameters::addClassTrailer(std::string text) {
+    getActiveClassContainer()->class_trailer.push_back(text);
+  }
+
   void parameters::endClass() {
     debug.functionStart("endClass");
     getActiveClassContainer()->active = false;
@@ -172,12 +176,16 @@ namespace generator {
   }
   
   int parameters::getHierarchyLevel() {
+    debug.functionStart("getHierarchyLevel");
+    const int library_level = 1;
     int h = 0;
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	h = hierarchy; 
+	debug.debug("Hierarchy = " + std::to_string(hierarchy));
+	h = hierarchy + library_level; 
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
+    debug.functionEnd("getHierarchyLevel: " + std::to_string(h));
     return h;
   }
 

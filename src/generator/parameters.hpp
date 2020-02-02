@@ -69,6 +69,7 @@ namespace generator {
       std::list<std::string> constructor_contents;
       std::list<std::string> class_contents;
       std::list<std::string> class_bottom;
+      std::list<std::string> class_trailer;
       std::list<ClassContainer> children;
       void flush(std::ostream& handle, int hierarchy, bool verbose);
     };
@@ -130,6 +131,7 @@ namespace generator {
     void addClassConstructorContents(std::string text);
     void addClassContents(std::string text);
     void addClassBottom(std::string text);
+    void addClassTrailer(std::string text);
     void endClass();
     void addNamespaceBottom(std::string text);
     void addBottom(std::string text);
@@ -203,7 +205,7 @@ namespace generator {
 	done = true;
       } else {
 	ClassContainer& x = c->back();
-	if (x.active) callback(x, hierarchy_level++); else done = true;
+	if (x.active) callback(x, ++hierarchy_level); else done = true;
 	c = &x.children;
       }
     } while (!done);
