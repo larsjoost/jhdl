@@ -20,6 +20,12 @@ namespace generator {
     static std::string getName(parameters& parm, DatabaseResult& object, bool factory_extension = false, std::string factory_arguments = "");
     static std::string getName(std::string& name, ast::ObjectArguments& arguments,
 			       ast::ObjectValueContainer& return_type);
+
+    static std::string baseName(std::string filename);
+
+    static std::string replaceFileExtension(std::string filename, std::string extension);
+
+    static std::string getHeaderFileName(std::string& library, std::string& file_name);
     
   };
 

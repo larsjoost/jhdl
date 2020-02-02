@@ -51,8 +51,7 @@ namespace generator {
   void NameMap::print() {
     for (auto i = a_map.begin(); i != a_map.end(); i++) {
       for (auto j = i->second.begin(); j != i->second.end(); j++) {
-        std::cout << "  [NAME] = " << i->first << std::endl;
-        j->print();
+        std::cout << "  [NAME] = " << i->first << ": " << j->toString() << std::endl;
       }
     }
   }

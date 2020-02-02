@@ -30,6 +30,7 @@ namespace generator {
   struct DatabaseResult {
     std::shared_ptr<std::list<std::string>> hierarchy;
     DatabaseElement* object = NULL;
+    bool local;
     std::string toString();
     std::string hierarchyToString(std::string first_delimiter = "", std::string delimiter = ".");
     int hierarchySize();

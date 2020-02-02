@@ -1,7 +1,7 @@
 #ifndef _STANDARD_H
 #define _STANDARD_H
 
-#include "standard.hpp"
+#include "std_standard.hpp"
 
 namespace vhdl {
 

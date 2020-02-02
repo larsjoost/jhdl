@@ -30,6 +30,7 @@ namespace generator {
   }
   
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
+    debug.functionStart("enumerationType");
     assert(t); 
     std::string name = identifier->toString(true);
     ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
@@ -80,6 +81,7 @@ namespace generator {
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
     };
     PrintFactory(parm, name, f);
+    debug.functionEnd("enumerationType");
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
@@ -87,7 +89,7 @@ namespace generator {
                              ast::RangeType* range, ast::SimpleIdentifier* identifier,
                              ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
-    debug.functionStart("PrintFactory(expected_value = " + ast::toString(expected_value) + ")");
+    debug.functionStart("PrintFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")");
     auto f = [&](parameters& parm, std::string& left, std::string& right) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
@@ -270,17 +272,21 @@ namespace generator {
 
   void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
     if (file) {
-      debug.functionStart("FileDeclaration");
       std::string name = file->handle->toString(true);
       std::string type = file->type->toString(true);
+      std::string direction = file->direction->toString(true);
+      debug.functionStart("FileDeclaration(name = " + name + ", type = " + type + ", direction = " + direction + ")");
       DatabaseResult result;
       if (parm.findOne(result, type, ast::ObjectType::TYPE)) {
         type = NameConverter::getName(parm, result);
         parm.addObject(ast::ObjectType::FILE, name, result.object->type);
       }
+      if (parm.findOne(result, direction)) {
+        direction = NameConverter::getName(parm, result);
+      }
       parm.addClassContents(getSourceLine(file->handle));
       parm.addClassContents(type + " " + name + " = " + type + "(" +
-			    file->direction->toString(true) + ", " + file->filename->toString() + ");"); 
+			    direction + ", " + file->filename->toString() + ");"); 
       debug.functionEnd("FileDeclaration");
     }
   }

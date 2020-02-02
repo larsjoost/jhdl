@@ -1,24 +1,15 @@
 #include <cassert>
 
 #include "parameters.hpp"
+#include "name_converter.hpp"
 
 namespace generator {
 
   GlobalDatabase parameters::a_global_database;
   
-  std::string parameters::replaceFileExtension(std::string filename, std::string extension) {
-    return baseName(filename) + extension;
-  }
-
-  std::string parameters::baseName(std::string filename) {
-    size_t lastdot = filename.find_last_of(".");
-    if (lastdot == std::string::npos) return filename;
-    return filename.substr(0, lastdot);
-  }
-  
   void parameters::open(std::string filename) {
     debug.functionStart("open(filename = " + filename + ")");
-    info_writer.Open(replaceFileExtension(filename, ".i"));
+    info_writer.Open(NameConverter::replaceFileExtension(filename, ".i"));
     file_container.file_name = filename;
     debug.functionEnd("open");
   }
@@ -95,6 +86,10 @@ namespace generator {
 
   void parameters::addClassContents(std::string text) {
     getActiveClassContainer()->class_contents.push_back(text);
+  }
+
+  void parameters::addClassBottom(std::string text) {
+    getActiveClassContainer()->class_bottom.push_back(text);
   }
 
   void parameters::endClass() {
@@ -189,6 +184,9 @@ namespace generator {
   std::string parameters::hierarchyToString(std::string delimiter) {
     return file_container.getClassContainerHierarchy(delimiter, delimiter);
   }
-    
+
+  void parameters::getHierarchy(std::list<std::string>& hierarchy) {
+    file_container.getHierarchy(hierarchy);
+  }
   
 }

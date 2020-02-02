@@ -10,9 +10,9 @@ namespace generator {
   void parameters::FileContainer::flush(bool verbose) {
     std::ofstream header_file;
     std::ofstream implementation_file;
-    std::string header_file_name = replaceFileExtension(file_name, ".hpp");
+    std::string header_file_name = NameConverter::getHeaderFileName(library, file_name);
     header_file.open(header_file_name);
-    implementation_file.open(replaceFileExtension(file_name, ".cpp"));
+    implementation_file.open(NameConverter::replaceFileExtension(file_name, ".cpp"));
     content.implementation_top.push_front("#include \"" + header_file_name + "\"");
     std::string header_def = file_name + "_HPP";
     std::replace(header_def.begin(), header_def.end(), '.', '_');
@@ -70,6 +70,13 @@ namespace generator {
     return hieararchy;
   }
     
+  void parameters::FileContainer::getHierarchy(std::list<std::string>& current_hierarchy) {
+    auto class_container_callback =
+      [&](ClassContainer& class_container, int hierarchy) {
+	current_hierarchy.push_back(class_container.name);
+      };
+    traverseClassContainerHierarchy(class_container_callback);
+  }
 
   
 }

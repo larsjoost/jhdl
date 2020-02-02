@@ -16,7 +16,7 @@ namespace generator {
 			     DeclFunc declarationCallback,
                              bool wait_statements,
                              bool init_enable) {
-    debug.functionStart("defineObject");
+    debug.functionStart("defineObject(name = " + name + ")");
     openHierarchy(parm, name, type, class_description);
     ParentInfo parent_info;
     parm.getParent(parent_info);

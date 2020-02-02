@@ -2,6 +2,8 @@
 
 #include "systemc.hpp"
 #include "expression/expression.hpp"
+#include "parameters.hpp"
+#include "database/general.hpp"
 
 namespace generator {
 
@@ -46,7 +48,7 @@ namespace generator {
 
   template<typename Func>
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
-    debug.functionStart("PrintTypeObject");
+    debug.functionStart("PrintTypeObject(name = " + name + ")");
     std::string class_description = "struct " + ObjectName(ast::ObjectType::FACTORY, name);
     defineObject(parm, false, name, ast::ObjectType::FACTORY, class_description, NULL, NULL, NULL, func,
                  [](parameters& parm) {}, false, false);
@@ -56,24 +58,27 @@ namespace generator {
 
   template<typename Func>
   void SystemC::PrintFactory(parameters& parm, const std::string& name, Func func) {
+    debug.functionStart("PrintFactory(name = " + name + ")");
     std::string left;
     std::string right;
     auto f = [&](parameters& parm) {
       func(parm, left, right);
       bool arguments_exists = !left.empty();
       std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
-      parm.addImplementationContents(name + " create() {");
-      parm.addImplementationContents(name + " x" + arguments + ";");
-      parm.addImplementationContents("return x;");
-      parm.addImplementationContents("}");
-      parm.addImplementationContents("template <typename T>");
-      parm.addImplementationContents(name + " create(T left, T right) {");
-      parm.addImplementationContents(name + " x(left, right);");
-      parm.addImplementationContents("return x;");
-      parm.addImplementationContents("}");
+      parm.addClassContents(name + " create() {");
+      parm.addClassContents(name + " x" + arguments + ";");
+      parm.addClassContents("return x;");
+      parm.addClassContents("}");
+      parm.addClassContents("template <typename T>");
+      parm.addClassContents(name + " create(T left, T right) {");
+      parm.addClassContents(name + " x(left, right);");
+      parm.addClassContents("return x;");
+      parm.addClassContents("}");
     };
     PrintTypeObject(parm, name, f);
-    parm.addImplementationContents("Factory_" + name + " factory_" + name + " = " + "Factory_" + name + "(this);");
+    std::string factory_name = ObjectName(ast::ObjectType::FACTORY, name);
+    parm.addClassBottom(factory_name + " factory_" + name + " = " + factory_name + "(this);");
+    debug.functionEnd("PrintFactory");
   }
 
 

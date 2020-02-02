@@ -46,6 +46,7 @@ namespace generator {
     for (auto& i : children) {
       i.flush(handle, hierarchy + 1, verbose);
     }
+    println(handle, class_bottom);
     println(handle, "}; // class " + name + " end");
   }
   

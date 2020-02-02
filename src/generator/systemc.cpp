@@ -79,8 +79,8 @@ namespace generator {
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
 	if (filename != a_filename) {
-          std::string hpp_filename = parm.replaceFileExtension(filename, ".hpp");
-	  parm.addInclude("#include \"" + hpp_filename + "\"");
+          std::string header_filename = NameConverter::getHeaderFileName(library, filename);
+	  parm.addInclude("#include \"" + header_filename + "\"");
           parm.setPackageName(stdPath, filename);
 	  filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
@@ -130,6 +130,7 @@ namespace generator {
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
+    debug.functionStart("printPhysicalType");
     assert(n);
     ast::RangeType* r = n->range;
     assert(r);
@@ -192,6 +193,7 @@ namespace generator {
       r = "{" + right + ", " + upperUnitName + "}";
     };
     PrintFactory(parm, name, f);
+    debug.functionEnd("printPhysicalType");
   }
 
   std::string SystemC::ObjectName(ast::ObjectType type, const std::string& name) {

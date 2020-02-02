@@ -243,59 +243,6 @@ namespace vhdl {
   
   };
 
-  enum VHDL_FILE_DIRECTION {READ_MODE, WRITE_MODE, UNKNOWN};
-
-  template<class T>
-  class vhdl_file {
-    VHDL_FILE_DIRECTION a_direction;
-    std::string a_filename;
-    std::ofstream* fout = NULL;
-    bool file = false;
-  public:
-
-    vhdl_file() { }
-  
-    vhdl_file(VHDL_FILE_DIRECTION direction, std::string filename) {
-      a_direction = direction;
-      a_filename = filename;
-      fout = NULL;
-      if (direction == WRITE_MODE) {
-	if (filename != "STD_OUTPUT") {
-	  file = true;
-	}
-      }
-    }
-
-    ~vhdl_file() {
-      if (file) {
-	if (fout) {
-	  std::cout << "Dealloc" << std::endl;
-	  fout->close();
-	  delete fout;
-	  fout = NULL;
-	}
-      }
-    }
-  
-    void write(std::string& s) {
-      // std::cout << "Write = " + s << std::endl;
-      if (file) {
-	if (fout == NULL) {
-	  // std::cout << "Alloc" << std::endl;
-	  fout = new std::ofstream(a_filename);
-	}
-	// std::cout << "Output" << std::endl;
-	*fout << s;
-      } else {
-	std::cout << s;
-      }
-    }
-
-    void init(const vhdl_file<T>& s) {
-    }
- 
-
-  };
 
 }
 

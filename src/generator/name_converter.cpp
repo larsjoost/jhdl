@@ -4,24 +4,45 @@
 
 namespace generator {
 
-  std::string NameConverter::getPrefix(parameters& parm, DatabaseResult& object, std::string first_separator, std::string last_separator) {
+  std::string NameConverter::getPrefix(parameters& parm, DatabaseResult& object,
+				       std::string first_separator,
+				       std::string last_separator) {
+    Debug<true> a_debug("NameConverter::getPrefix");
+    a_debug.functionStart("getPrefix");
     std::string name;
     name = object.hierarchyToString("", first_separator) + last_separator;
     return toUpper(name);
+    /*
+    std::list<std::string> current_hierarchy;
+    parm.getHierarchy(current_hierarchy);
+    std::list<std::string> object_hierarchy;
+    for (auto& i : *object.hierarchy) {
+      std::string u = toUpper(i);
+      if (!name.empty()) {
+	name += first_separator + u; 
+      } else if (u != toUpper(current_hierarchy.front())) {
+	name = u;
+      } else {
+	current_hierarchy.pop_front();
+      }
+    }
+    name += last_separator;
+    a_debug.functionEnd("getPrefix: " + name);
+    return name;
+    */
   }
 
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension) {
     Debug<true> a_debug("NameConverter::globalPrefix");
     a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
-    bool local = parm.isLocal(object); 
     if (object.object->id == ast::ObjectType::ENUM) {
-      if (!local) {
+      if (!object.local) {
 	prefix = getPrefix(parm, object, "::", "::");
       }
       prefix += object.object->type.GetTypeName() + "_enum::";
     } else {
-      if (local) {
+      if (object.local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
 	  int hierarchyLevel = parm.getHierarchyLevel();
           for (int i=object.hierarchySize(); i < hierarchyLevel; i++) {
@@ -45,10 +66,9 @@ namespace generator {
 
   std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
     Debug<true> a_debug("NameConverter::getName");
-    a_debug.functionStart("getName");
-    assert(object.object != NULL);
     std::string name = object.object->name;
-    a_debug.debug("name = " + name);
+    a_debug.functionStart("getName(name = " + name + ")");
+    assert(object.object != NULL);
     a_debug.debug("Object = " + object.toString());
     name = globalPrefix(parm, object, factory_extension) + name;
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
@@ -78,5 +98,17 @@ namespace generator {
     return s;
   }
  
- 
+  std::string NameConverter::replaceFileExtension(std::string filename, std::string extension) {
+    return baseName(filename) + extension;
+  }
+
+  std::string NameConverter::baseName(std::string filename) {
+    size_t lastdot = filename.find_last_of(".");
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot);
+  }
+  
+ std::string NameConverter::getHeaderFileName(std::string& library, std::string& file_name) {
+   return toLower(library) + "_" + replaceFileExtension(toLower(file_name), ".hpp");
+ }
 }

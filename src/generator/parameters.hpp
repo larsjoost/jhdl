@@ -68,6 +68,7 @@ namespace generator {
       std::list<std::string> constructor_initializer;
       std::list<std::string> constructor_contents;
       std::list<std::string> class_contents;
+      std::list<std::string> class_bottom;
       std::list<ClassContainer> children;
       void flush(std::ostream& handle, int hierarchy, bool verbose);
     };
@@ -98,6 +99,7 @@ namespace generator {
       ClassContainer* getCurrentClassContainer();
       ClassContainer* getParentClassContainer();
       std::string getClassContainerHierarchy(std::string first_delimiter = ".", std::string delimiter = ".");
+      void getHierarchy(std::list<std::string>& current_hierarchy);
       void flush(bool verbose = false);
     };
 
@@ -127,6 +129,7 @@ namespace generator {
     void addClassConstructorInitializer(std::string text);
     void addClassConstructorContents(std::string text);
     void addClassContents(std::string text);
+    void addClassBottom(std::string text);
     void endClass();
     void addNamespaceBottom(std::string text);
     void addBottom(std::string text);
@@ -137,9 +140,7 @@ namespace generator {
     void close();
     bool isQuiet();
     bool setQuiet(bool quiet);
-    static std::string replaceFileExtension(std::string filename, std::string extension);
-    static std::string baseName(std::string filename);
-
+    
     void setPackageName(const std::string& path, const std::string& name);
 
     // Database access
@@ -176,6 +177,7 @@ namespace generator {
     void globalizeClass(ast::Text* text);
     bool isLocal(DatabaseResult& object);
     std::string hierarchyToString(std::string delimiter = ".");
+    void getHierarchy(std::list<std::string>& hierarchy);
     
     void printAllObjects(std::string name);
     std::string getName(ast::SimpleIdentifier* i, ast::ObjectType);
@@ -239,8 +241,10 @@ namespace generator {
 				 Func valid) {
     debug.functionStart("findBestMatch)");
     int found = findBestMatch(global_matches, bestMatch, valid);
+    bestMatch.local = false;
     if (found == 0) {
       found = findBestMatch(local_matches, bestMatch, valid);
+      bestMatch.local = true;
     }
     debug.functionEnd("findBestMatch: " + std::to_string(found));
     return (found == 1);
@@ -267,13 +271,16 @@ namespace generator {
       }
     }
     bool found = findBestMatch(global_results, local_results, object, valid);
-    if (!found || debug.isVerbose()) {
+    if (!found) {
+      std::cout << "Did not find any matches of " << name << std::endl;
       for (auto& i : global_results) {
 	std::cout << "Found global: " << i.toString() << std::endl;
       }
       for (auto& i : local_results) {
 	std::cout << "Found local: " << i.toString() << std::endl;
       }
+    } else if (debug.isVerbose()) {
+      std::cout << "Found: " << object.toString() << std::endl;
     }
     debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;
