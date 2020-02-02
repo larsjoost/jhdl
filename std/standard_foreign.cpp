@@ -7,8 +7,7 @@
 namespace vhdl {
 
   bool wait(const STD::STANDARD::TIME& t) {
-    STD::STANDARD s;
-    return (s.NOW() == t);
+    return (STD_STANDARD.NOW() == t);
   };
 
   void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity) {

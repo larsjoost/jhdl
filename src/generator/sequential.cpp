@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
       debug.functionStart("procedureCallStatement");
-      parm.addImplementationContents(a_expression.procedureCallStatementToString(parm, p) + ";");
+      parm.addClassContents(a_expression.procedureCallStatementToString(parm, p) + ";");
       debug.functionEnd("procedureCallStatement");
     }
   }
@@ -59,8 +59,8 @@ namespace generator {
       DatabaseResult object;
       if (parm.findOne(object, severity, ast::ObjectType::ENUM)) {
         std::string name = NameConverter::getName(parm, object);
-        parm.addImplementationContents("report(" +
-				       a_expression.toString(parm, p->message, expected_type) + ", " +
+        parm.addClassContents("vhdl::report(" +
+			      a_expression.toString(parm, p->message, expected_type) + ", " +
 				       name + ");");
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
@@ -121,7 +121,7 @@ namespace generator {
     if (r) {
        debug.functionStart("returnStatement");
        try {
-         parm.addImplementationContents("return " + a_expression.toString(parm, r->value, parm.returnType) + ";");
+         parm.addClassContents("return " + a_expression.toString(parm, r->value, parm.returnType) + ";");
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }

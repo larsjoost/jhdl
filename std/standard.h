@@ -10,15 +10,14 @@ namespace vhdl {
   bool wait(const STD::STANDARD::TIME& t);
 
   class Wait {
-    STD::STANDARD s;
     STD::STANDARD::TIME timeout;
   public:
     int index = 0;
     void waitFor(const STD::STANDARD::TIME& t) {
-      timeout = s.NOW() + t;
+      timeout = STD_STANDARD.NOW() + t;
     }
     bool done() {
-      return s.NOW() == timeout;
+      return STD_STANDARD.NOW() == timeout;
     }
   };
   

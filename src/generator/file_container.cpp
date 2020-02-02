@@ -71,6 +71,7 @@ namespace generator {
   }
     
   void parameters::FileContainer::getHierarchy(std::list<std::string>& current_hierarchy) {
+    current_hierarchy.push_back(library);
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
 	current_hierarchy.push_back(class_container.name);

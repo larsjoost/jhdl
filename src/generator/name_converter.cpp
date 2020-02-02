@@ -36,13 +36,14 @@ namespace generator {
     Debug<true> a_debug("NameConverter::globalPrefix");
     a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
+    bool local = parm.isLocal(object);
     if (object.object->id == ast::ObjectType::ENUM) {
-      if (!object.local) {
+      if (!local) {
 	prefix = getPrefix(parm, object, "::", "::");
       }
       prefix += object.object->type.GetTypeName() + "_enum::";
     } else {
-      if (object.local) {
+      if (local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
 	  int hierarchyLevel = parm.getHierarchyLevel();
 	  a_debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel) +

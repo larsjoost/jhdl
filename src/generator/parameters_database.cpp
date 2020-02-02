@@ -173,13 +173,31 @@ namespace generator {
   }
 
   bool parameters::isLocal(DatabaseResult& object) {
-    debug.functionStart("isLocal(object_hierarchy = " + object.toString() + ")");
-    std::string object_hierarchy = object.hierarchyToString();
-    bool local;
-    std::string current_hierarchy = hierarchyToString();
-    debug.debug("current_hierarchy = " + current_hierarchy);
-    local = (NameConverter::toUpper(object_hierarchy) ==
-	     NameConverter::toUpper(current_hierarchy));
+    debug.functionStart("isLocal(object  = " + object.toString() + ")");
+
+    bool local = false;
+    if (object.local) {
+      local = true;
+    } else {
+      auto object_hierarchy = object.hierarchy;
+      std::list<std::string> current_hierarchy;
+      getHierarchy(current_hierarchy);
+      const int compare_level = 2;
+      if (object_hierarchy->size() >= compare_level && current_hierarchy.size() >= compare_level) {
+	auto lst1 = object_hierarchy->begin();
+	auto lst2 = current_hierarchy.begin();
+	local = true;
+	for (int i = 0; i < compare_level; i++) { 
+	  std::string s1 = NameConverter::toUpper(*lst1++);
+	  std::string s2 = NameConverter::toUpper(*lst2++);
+	  debug.debug("s1 = " + s1 + ", s2 = " + s2);
+	  if (s1 != s2) {
+	    local = false;
+	    break;
+	  }
+	}
+      }
+    }
     debug.functionEnd("isLocal: " + std::to_string(local));
     return local;
   }
