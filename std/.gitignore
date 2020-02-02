@@ -1,9 +1,9 @@
-/standard.hpp
+/std_standard.hpp
 /standard.cpp
 /standard.i
-/env.hpp
+/std_env.hpp
 /env.cpp
 /env.i
-/textio.hpp
+/std_textio.hpp
 /textio.cpp
 /textio.i
