@@ -17,11 +17,14 @@ namespace generator {
     std::string header_def = file_name + "_HPP";
     std::replace(header_def.begin(), header_def.end(), '.', '_');
     header_def = NameConverter::toUpper(header_def);
-    header_file << "#ifndef " << header_def << std::endl;
-    header_file << "#define " << header_def << std::endl;
-    content.include.push_front("#include <string.h>");
-    content.include.push_front("#include <systemc.h>");
-    content.include.push_front("#include <vhdl.h>");
+    header_file << "#ifndef " << header_def << "_INCLUDE" << std::endl;
+    header_file << "#define " << header_def << "_INCLUDE" << std::endl;
+    header_file << "#include <string.h>" << std::endl;
+    header_file << "#include <systemc.h>" << std::endl;
+    header_file << "#include <vhdl.h>" << std::endl;
+    header_file << "#endif" << std::endl;
+    header_file << "#ifndef " << header_def << "_SOURCE" << std::endl;
+    header_file << "#define " << header_def << "_SOURCE" << std::endl;
     content.namespace_start = "namespace " + NameConverter::toUpper(library) + " {";
     content.namespace_end = "} // namespace " + NameConverter::toUpper(library) + " end ";
     if (verbose) {
