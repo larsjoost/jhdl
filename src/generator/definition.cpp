@@ -45,8 +45,7 @@ namespace generator {
 
   template <typename Func>
   void SystemC::createProcess(parameters& parm, Func func, std::string name) {
-    parm.addClassConstructorContents("SC_METHOD(" + name + ")");
-    parm.addClassContents("void " + name + "() {");
+    parm.addClassContents("void run() {");
     func(parm);
     parm.addClassContents("}");
   }
@@ -63,17 +62,19 @@ namespace generator {
       }
       ast::ObjectType type = ast::ObjectType::PROCESS;
       std::string class_name = ObjectName(type, methodName);
-      auto createDefinition = [&](parameters& parm) {
-      };
+      auto createDefinition =
+	[&](parameters& parm) {
+	  createProcess(parm,
+			[&](parameters& parm) {},
+			class_name);
+	};
       auto createBody = [&](parameters& parm) {
-        createProcess(parm,
-                      [&](parameters& parm) {},
-		      class_name);
       };
       std::string class_description = "struct " + class_name;
       defineObject(parm, false, methodName, type,
 		   class_description, NULL,
                    &method->declarations, NULL, createBody, createDefinition, true, true);
+      instantiateType(parm, methodName, ast::ObjectType::PROCESS);
     }
     debug.functionEnd("methodDefinition");
   }

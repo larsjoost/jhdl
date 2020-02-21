@@ -209,9 +209,8 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
 
     // constructor.cpp
-    void instantiateType(parameters& parm, std::string type, std::string name, ast::ObjectType object_type, std::string arguments = "");
+    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::string arguments = "");
     void signalInstantiation(parameters& parm, ast::SignalAssignment* s);
-    void methodInstantiation(parameters& parm, ast::Method* method);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);

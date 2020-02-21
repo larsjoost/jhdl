@@ -1,3 +1,6 @@
+/*
+  Copy from $JHDL/src/templates/sc_main.cpp
+ */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +43,7 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  auto* dut = new vhdl::WORK::Architecture_TEST("DUT"); 
+  auto* dut = new WORK::Architecture_TEST("DUT"); 
 
   if (vcdFilename) {
 
@@ -58,5 +61,7 @@ int sc_main(int argc, char* argv[]) {
     */
   }
 
+  sc_start(1);
+  
   return 0;
 }

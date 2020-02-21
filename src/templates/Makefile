@@ -1,4 +1,4 @@
-# Copy from src/templates/Makefile
+# Copy from $(JHDL)/src/templates/Makefile
 ifndef JHDL
 $(error JHDL is not defined)
 endif
@@ -30,7 +30,7 @@ simulate: %.o
 -include $(DEPS)
 
 clean:
-	rm test.hpp
+	rm work_test.hpp
 	rm test.cpp
 	find . -name "*.o" -type f -delete
 	find . -name "*.d" -type f -delete

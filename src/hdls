@@ -84,9 +84,11 @@ KERNEL=$SCRIPTPATH/kernel/lib
 
 make -C $KERNEL > /dev/null
 
+library="work"
+
 filebase="${FILENAME%.*}"
 $SCRIPTPATH/hdlc.sh -f $FILENAME $VERBOSE $HDLC_DEBUG
-headerfile="$filebase.hpp"
+headerfile="${library}_$filebase.hpp"
 sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)
 templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)

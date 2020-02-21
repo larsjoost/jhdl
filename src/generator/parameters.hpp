@@ -39,6 +39,8 @@ namespace generator {
 	class_contents
 
 	children
+
+	class_bottom
 	
       }
 

@@ -5,31 +5,21 @@
 
 namespace generator {
 
-  void SystemC::instantiateType(parameters& parm, std::string type, std::string name,
+  void SystemC::instantiateType(parameters& parm, std::string name,
                                 ast::ObjectType object_type, std::string arguments) {
     debug.functionStart("instantiateType");
-    parm.addClassConstructorContents(type + "(new " + ObjectName(object_type, name) + "(this" + arguments + "));");
+    std::string n = ObjectName(object_type, name);
+    std::string i = n + "_INST";
+    parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
+    parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
+    parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\");");
     debug.functionEnd("instantiateType");
-  }
-
-  void SystemC::methodInstantiation(parameters& parm, ast::Method* method) {
-    if (method) {
-      debug.functionStart("methodInstantiation");
-      std::string methodName;
-      if (method->label) {
-        methodName = method->label->toString(true);
-      } else {
-        methodName = method->noname;
-      }
-      instantiateType(parm, "AddMethod", methodName, ast::ObjectType::PROCESS);
-      debug.functionEnd("methodInstantiation");
-    }
   }
 
   void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
       debug.functionStart("signalInstantiation");
-      instantiateType(parm, "AddMethod", s->name, ast::ObjectType::PROCESS);
+      instantiateType(parm, s->name, ast::ObjectType::PROCESS);
       debug.functionEnd("signalInstantiation");
     }
   }
@@ -38,7 +28,7 @@ namespace generator {
                                             ast::BlockStatement* blockStatement) {
     if (blockStatement) {
       debug.functionStart("blockStatementInstantiation");
-      instantiateType(parm, "AddBlock", blockStatement->name->toString(true), ast::ObjectType::BLOCK);
+      instantiateType(parm, blockStatement->name->toString(true), ast::ObjectType::BLOCK);
       debug.functionEnd("blockStatementInstantiation");
     }
   }
@@ -53,7 +43,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          instantiateType(parm, "SC_NEW_FOR_GENERATE", name, ast::ObjectType::GENERATE, ", " + identifier);
+          instantiateType(parm, name, ast::ObjectType::GENERATE, ", " + identifier);
         }, true);
       debug.functionEnd("forGenerateStatementInstantiation");
     }
@@ -100,12 +90,12 @@ namespace generator {
       componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
   }
-  
+
+  /* TODO: Move to concurrentStatementsDefinition */ 
   void SystemC::concurrentStatementsInstantiation(parameters& parm,
                                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     debug.functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
-      methodInstantiation(parm, c.method);
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
       blockStatementInstantiation(parm, c.blockStatement);
       signalInstantiation(parm, c.signalAssignment);
