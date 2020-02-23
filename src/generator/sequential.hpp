@@ -52,37 +52,43 @@ namespace generator {
 
   template<typename Func>
   void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, Func callback) {
+    debug.functionStart("assignment");
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
-    std::string name = a_expression.basicIdentifierToString(parm, target);
-    parm.addImplementationContents(getSourceLine(target));
-    ast::ReturnTypes return_types;
-    a_expression.basicIdentifierReturnTypes(parm, target, return_types);
-    ast::ObjectValueContainer expectedType;
-    if (a_expression.uniqueReturnType(parm, return_types, expectedType, &target->getText())) {
-      for (ast::AssignmentCondition s : p->assignment_conditions.list) {
-        if (s.condition) {
-          static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-          parm.addImplementationContents(command + " (" + a_expression.toString(parm, s.condition, expectedValue, callback) + ") {");
-          command = "else if";
-          noConditionCommand = "else {";
-          noConditionDelimiter = "}";
-        } else {
-          parm.addImplementationContents(noConditionCommand);
-        }
-        parm.addImplementationContents(name + " = " + a_expression.toString(parm, s.expression, expectedType, callback) + ";");
-        if (s.condition) {
-          parm.addImplementationContents("}");
-        } else {
-          parm.addImplementationContents(noConditionDelimiter);
-        }
+    try {
+      std::string name = a_expression.basicIdentifierToString(parm, target);
+      parm.addImplementationContents(getSourceLine(target));
+      ast::ReturnTypes return_types;
+      a_expression.basicIdentifierReturnTypes(parm, target, return_types);
+      ast::ObjectValueContainer expectedType;
+      if (a_expression.uniqueReturnType(parm, return_types, expectedType, &target->getText())) {
+	for (ast::AssignmentCondition s : p->assignment_conditions.list) {
+	  if (s.condition) {
+	    static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
+	    parm.addImplementationContents(command + " (" + a_expression.toString(parm, s.condition, expectedValue, callback) + ") {");
+	    command = "else if";
+	    noConditionCommand = "else {";
+	    noConditionDelimiter = "}";
+	  } else {
+	    parm.addImplementationContents(noConditionCommand);
+	  }
+	  parm.addImplementationContents(name + " = " + a_expression.toString(parm, s.expression, expectedType, callback) + ";");
+	  if (s.condition) {
+	    parm.addImplementationContents("}");
+	  } else {
+	    parm.addImplementationContents(noConditionDelimiter);
+	  }
+	}
+      } else {
+	exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->getText());
+	parm.printAllObjects(name);
       }
-    } else {
-      exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->getText());
-      parm.printAllObjects(name);
+    } catch (ExpressionParser::ObjectNotFound e) {
+      e.print();
     }
+    debug.functionEnd("assignment");
   }
   
   template <typename Func>
