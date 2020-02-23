@@ -4,7 +4,7 @@
 
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
-#include "../../ast/method.hpp"
+#include "../../ast/process.hpp"
 #include "../../ast/procedure_call_statement.hpp"
 #include "../../ast/report_statement.hpp"
 
@@ -12,7 +12,7 @@ namespace vhdl {
   namespace parser {
 
     class Process :
-      public ::ast::Method  {
+      public ::ast::Process  {
 
     public:
 

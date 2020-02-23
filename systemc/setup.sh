@@ -17,3 +17,5 @@ if [ -z "$SYSTEMC" ]; then
     fi
     export SYSTEMC=$(find $JHDL/systemc -name systemc-* -type d)
 fi
+
+export LD_LIBRARY_PATH=$SYSTEMC/lib-linux64

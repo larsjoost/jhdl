@@ -2,7 +2,7 @@
 #ifndef AST_CONCURRENT_STATEMENT_H_
 #define AST_CONCURRENT_STATEMENT_H_
 
-#include "method.hpp"
+#include "process.hpp"
 #include "forgenerate_statement.hpp"
 #include "block_statement.hpp"
 #include "signal_assignment.hpp"
@@ -18,7 +18,7 @@ namespace ast {
   public:
 
     SignalAssignment* signalAssignment;
-    Method* method;
+    Process* process;
     ForGenerateStatement* forGenerateStatement;
     BlockStatement* blockStatement;
     ComponentInstance* componentInstance;

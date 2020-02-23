@@ -7,7 +7,8 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "systemc.h"
+#define SC_INCLUDE_DYNAMIC_PROCESSES
+#include <systemc.h>
 #include "%include%"
 
 int sc_main(int argc, char* argv[]) {
@@ -43,7 +44,7 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  auto* dut = new WORK::Architecture_TEST("DUT"); 
+  auto* dut = new WORK::Architecture_RTL("DUT"); 
 
   if (vcdFilename) {
 
@@ -61,7 +62,7 @@ int sc_main(int argc, char* argv[]) {
     */
   }
 
-  sc_start(1);
+  sc_start(1, SC_US);
   
   return 0;
 }

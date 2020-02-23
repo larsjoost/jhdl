@@ -15,7 +15,7 @@ namespace vhdl {
   
     ConcurrentStatement* ConcurrentStatement::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       if ((signalAssignment = scanner->optional<SignalAssignment>()) ||
-          (method = scanner->optional<Process>()) ||
+          (process = scanner->optional<Process>()) ||
           (forGenerateStatement = scanner->optional<ForGenerateStatement>()) ||
           (blockStatement = scanner->optional<BlockStatement>()) ||
           (componentInstance = scanner->optional<ComponentInstance>())) {

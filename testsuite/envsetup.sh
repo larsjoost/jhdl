@@ -14,6 +14,8 @@ if [ -n "$VERBOSE" ]; then
     VERBOSE="-v"
 fi
 
+source $JHDL/setup.sh
+
 function analyse {
     $JHDL/src/hdlc.sh -f $1 $VERBOSE $@
 }

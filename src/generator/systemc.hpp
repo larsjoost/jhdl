@@ -66,7 +66,7 @@ namespace generator {
     Config config;
     Config libraryInfo;
 
-    int methodId = 0;
+    int processId = 0;
 
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
@@ -194,7 +194,7 @@ namespace generator {
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
-    void methodDefinition(parameters& parm, ast::Method* method);
+    void processDefinition(parameters& parm, ast::Process* process);
 
     
     template<class Key, class Value, typename Func>

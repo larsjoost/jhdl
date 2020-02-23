@@ -15,9 +15,7 @@ namespace generator {
     println(header_file, namespace_end);
     println(header_file, bottom);
     println(implementation_file, implementation_top);
-    println(implementation_file, namespace_start);
     println(implementation_file, implementation_contents);
-    println(implementation_file, namespace_end);
   }
 
 }

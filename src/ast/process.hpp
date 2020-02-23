@@ -1,6 +1,6 @@
 
-#ifndef AST_METHOD_H_
-#define AST_METHOD_H_
+#ifndef AST_PROCESS_H_
+#define AST_PROCESS_H_
 
 #include <string>
 
@@ -11,7 +11,7 @@
 
 namespace ast {
     
-  class Method {
+  class Process {
     
   public:
     

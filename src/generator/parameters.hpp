@@ -17,7 +17,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<true> debug;
+    Debug<false> debug;
     Exceptions exceptions;
     bool a_verbose = false;
 

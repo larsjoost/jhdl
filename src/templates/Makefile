@@ -32,6 +32,7 @@ simulate: %.o
 clean:
 	rm work_test.hpp
 	rm test.cpp
+	rm sc_main.cpp
 	find . -name "*.o" -type f -delete
 	find . -name "*.d" -type f -delete
 

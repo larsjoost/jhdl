@@ -50,33 +50,35 @@ namespace generator {
     parm.addClassContents("}");
   }
   
-  void SystemC::methodDefinition(parameters& parm, ast::Method* method) {
-    debug.functionStart("methodDefinition");
-    if (method) {
-      std::string methodName;
-      if (method->label) {
-        methodName = method->label->toString(true);
+  void SystemC::processDefinition(parameters& parm, ast::Process* process) {
+    debug.functionStart("processDefinition");
+    if (process) {
+      std::string processName;
+      if (process->label) {
+        processName = process->label->toString(true);
       } else {
-        methodName = "noname" + std::to_string(methodId++);
-        method->noname = methodName;
+        processName = "noname" + std::to_string(processId++);
+        process->noname = processName;
       }
       ast::ObjectType type = ast::ObjectType::PROCESS;
-      std::string class_name = ObjectName(type, methodName);
+      std::string class_name = ObjectName(type, processName);
       auto createDefinition =
 	[&](parameters& parm) {
 	  createProcess(parm,
-			[&](parameters& parm) {},
+			[&](parameters& parm) {
+			  sequentialStatements(parm, process->sequentialStatements);
+			},
 			class_name);
 	};
       auto createBody = [&](parameters& parm) {
       };
       std::string class_description = "struct " + class_name;
-      defineObject(parm, false, methodName, type,
+      defineObject(parm, false, processName, type,
 		   class_description, NULL,
-                   &method->declarations, NULL, createBody, createDefinition, true, true);
-      instantiateType(parm, methodName, ast::ObjectType::PROCESS);
+                   &process->declarations, NULL, createBody, createDefinition, true, true);
+      instantiateType(parm, processName, ast::ObjectType::PROCESS);
     }
-    debug.functionEnd("methodDefinition");
+    debug.functionEnd("processDefinition");
   }
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
@@ -124,7 +126,7 @@ namespace generator {
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     debug.functionStart("concurrentStatementsDefinition");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
-      methodDefinition(parm, c.method);
+      processDefinition(parm, c.process);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
       concurrentSignalAssignment(parm, c.signalAssignment);

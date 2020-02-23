@@ -101,6 +101,7 @@ namespace generator {
       signalInstantiation(parm, c.signalAssignment);
       componentInstantiation(parm, c.componentInstance);
     }
+    debug.functionEnd("concurrentStatementsInstantiation");
   }
 
   std::string SystemC::ObjectName(const ParentInfo& info) {
