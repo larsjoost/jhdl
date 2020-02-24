@@ -45,9 +45,11 @@ namespace generator {
 
   template <typename Func>
   void SystemC::createProcess(parameters& parm, Func func, std::string name) {
-    parm.addClassContents("void run() {");
+    parm.addClassContents("void run();");
+    std::string prefix = parm.hierarchyToString("::", true);
+    parm.addImplementationContents("void " + prefix + "::run() {");
     func(parm);
-    parm.addClassContents("}");
+    parm.addImplementationContents("}");
   }
   
   void SystemC::processDefinition(parameters& parm, ast::Process* process) {
@@ -61,7 +63,7 @@ namespace generator {
         process->noname = processName;
       }
       ast::ObjectType type = ast::ObjectType::PROCESS;
-      std::string class_name = ObjectName(type, processName);
+      std::string class_name = NameConverter::objectName(type, processName);
       auto createDefinition =
 	[&](parameters& parm) {
 	  createProcess(parm,

@@ -39,13 +39,13 @@ namespace generator {
     if (constructor) {
       parm.addClassConstructorContents(t);
     } else {
-      parm.addClassContents(t);
+      parm.addImplementationContents(t);
     }
     callback(parm);
     if (constructor) {
       parm.addClassConstructorContents("}");
     } else {
-      parm.addClassContents("}");
+      parm.addImplementationContents("}");
     }
     debug.functionEnd("forLoop");
   }  

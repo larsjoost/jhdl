@@ -93,13 +93,13 @@ namespace generator {
 
   std::string ExpressionParser::procedureCallStatementToString(parameters& parm,
 							       ast::ProcedureCallStatement* p) {
-    debug.functionStart("procedureCallStatementToString");
     assert(p);
     std::string name = p->name->toString(true);
+    debug.functionStart("procedureCallStatementToString(name = " + name + ")");
     ast::ObjectArguments arguments = toObjectArguments(parm, p->arguments);
     auto valid = [&](DatabaseElement* e) {
       bool result = ((e->id == ast::ObjectType::PROCEDURE) &&
-                     e->arguments.equals(arguments));
+                     e->arguments.equals(arguments, debug.isVerbose()));
       debug.debug(e->toString() + (result ? " == " : " != ") + name + "(" + arguments.toString() + ")",
                   true, (result ? Output::Color::GREEN : Output::Color::RED));
       return result;

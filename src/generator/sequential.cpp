@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
     if (p) {
       debug.functionStart("procedureCallStatement");
-      parm.addClassContents(a_expression.procedureCallStatementToString(parm, p) + ";");
+      parm.addImplementationContents(a_expression.procedureCallStatementToString(parm, p) + ";");
       debug.functionEnd("procedureCallStatement");
     }
   }
@@ -59,8 +59,8 @@ namespace generator {
       DatabaseResult object;
       if (parm.findOne(object, severity, ast::ObjectType::ENUM)) {
         std::string name = NameConverter::getName(parm, object);
-        parm.addClassContents("vhdl::report(" +
-			      a_expression.toString(parm, p->message, expected_type) + ", " +
+        parm.addImplementationContents("vhdl::report(" +
+				       a_expression.toString(parm, p->message, expected_type) + ", " +
 				       name + ");");
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
@@ -96,9 +96,9 @@ namespace generator {
 
   void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f) {
     if (f) {
-      debug.functionStart("forLoopStatement");
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
+      debug.functionStart("forLoopStatement(name = " + name + ")");
       auto callback = [&](parameters& parm) {
 	sequentialStatements(parm, f->sequentialStatements);
       };

@@ -2,6 +2,7 @@
 #define GENERATOR_NAME_CONVERTER_HPP_
 
 #include "../debug/debug.hpp"
+#include "../ast/object_type.hpp"
 
 #include "parameters.hpp"
 
@@ -27,6 +28,7 @@ namespace generator {
 
     static std::string getHeaderFileName(std::string& library, std::string& file_name);
     
+    static std::string objectName(ast::ObjectType type, const std::string& name);
   };
 
 }

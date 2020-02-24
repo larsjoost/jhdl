@@ -33,7 +33,7 @@ namespace generator {
   }
 
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension) {
-    Debug<false> a_debug("NameConverter::globalPrefix");
+    Debug<true> a_debug("NameConverter::globalPrefix");
     a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
     bool local = parm.isLocal(object);
@@ -69,7 +69,7 @@ namespace generator {
   }
 
   std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
-    Debug<false> a_debug("NameConverter::getName");
+    Debug<true> a_debug("NameConverter::getName");
     std::string name = object.object->name;
     a_debug.functionStart("getName(name = " + name + ")");
     assert(object.object != NULL);
@@ -115,4 +115,12 @@ namespace generator {
  std::string NameConverter::getHeaderFileName(std::string& library, std::string& file_name) {
    return toLower(library) + "_" + replaceFileExtension(toLower(file_name), ".hpp");
  }
+
+  std::string NameConverter::objectName(ast::ObjectType type, const std::string& name) {
+    std::string type_name = ast::toString(type);
+    type_name[0] = toupper(type_name[0]);
+    return type_name + "_" + name;
+  }
+  
+
 }

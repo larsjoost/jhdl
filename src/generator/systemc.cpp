@@ -196,12 +196,6 @@ namespace generator {
     debug.functionEnd("printPhysicalType");
   }
 
-  std::string SystemC::ObjectName(ast::ObjectType type, const std::string& name) {
-    std::string type_name = ast::toString(type);
-    type_name[0] = toupper(type_name[0]);
-    return type_name + "_" + name;
-  }
-  
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
     if (!parm.parse_declarations_only || type == ast::ObjectType::PACKAGE) { 
@@ -211,13 +205,13 @@ namespace generator {
       topHierarchyStart(parm, library, name, type, a_filename);
       parm.package_contains_function = false;
       // bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
-      std::string class_name = ObjectName(type, name);
+      std::string class_name = NameConverter::objectName(type, name);
       auto createDefinition =
 	[&](parameters& parm)
 	{
 	  parm.setClassConstructorDescription(class_name + "()");
 	  if (type == ast::ObjectType::PACKAGE_BODY) {
-	    parm.addDerivedClass(ObjectName(ast::ObjectType::PACKAGE, name));
+	    parm.addDerivedClass(NameConverter::objectName(ast::ObjectType::PACKAGE, name));
 	  }
 	  if (type == ast::ObjectType::PACKAGE) {
 	    parm.addClassTrailer("using " + name + " = " + class_name + ";");
@@ -243,7 +237,7 @@ namespace generator {
     debug.functionStart("interfaceDeclaration");
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
-    std::string class_name = ObjectName(type, name);
+    std::string class_name = NameConverter::objectName(type, name);
     topHierarchyStart(parm, library, name, type, a_filename);
     auto declaration_callback =
       [&](parameters& parm) {
@@ -297,10 +291,10 @@ namespace generator {
 	  parm.printDatabase(library);
         }
       }
-      std::string class_name = ObjectName(type, architecture_name);
+      std::string class_name = NameConverter::objectName(type, architecture_name);
       auto declaration_callback =
 	[&](parameters& parm) {
-	  std::string derived_class = ObjectName(ast::ObjectType::ENTITY, entity_name);
+	  std::string derived_class = NameConverter::objectName(ast::ObjectType::ENTITY, entity_name);
 	  parm.addDerivedClass(derived_class);
 	  parm.setClassConstructorDescription(class_name + "(const sc_module_name& name)");
 	  parm.addClassConstructorInitializer(derived_class + "(name)");

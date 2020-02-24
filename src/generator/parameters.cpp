@@ -189,8 +189,8 @@ namespace generator {
     return h;
   }
 
-  std::string parameters::hierarchyToString(std::string delimiter) {
-    return file_container.getClassContainerHierarchy(delimiter, delimiter);
+  std::string parameters::hierarchyToString(std::string delimiter, bool add_type) {
+    return file_container.getClassContainerHierarchy(delimiter, delimiter, add_type);
   }
 
   void parameters::getHierarchy(std::list<std::string>& hierarchy) {

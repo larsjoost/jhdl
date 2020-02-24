@@ -57,6 +57,7 @@ namespace generator {
 	auto action_callback =
 	  [&](DatabaseResult& r) {
 	    r.hierarchy = hierarchy;
+	    r.local = false;
 	  };
 	l->findAll(results, name, action_callback);
     };

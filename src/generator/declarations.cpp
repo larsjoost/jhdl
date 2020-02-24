@@ -510,7 +510,7 @@ namespace generator {
         if (parm.getParent(parent_info)) {
 	  parent_name = ObjectName(parent_info) + "::";
 	}
-        std::string prefix = parent_name + ObjectName(type, class_name) + "::";
+        std::string prefix = parent_name + NameConverter::objectName(type, class_name) + "::";
         std::string run_prefix;
         std::string interface_with_initialization = "(" + GetInterface(parm, function_declaration->interface, true) + ")";
         std::string interface_without_initialization = "(" + GetInterface(parm, function_declaration->interface, false) + ")";
@@ -534,7 +534,7 @@ namespace generator {
               parm.addClassContents(returnTypeName + " run" + interface_with_initialization + ";");
             }
           };
-	  std::string class_description = "struct " + ObjectName(type, class_name);
+	  std::string class_description = "struct " + NameConverter::objectName(type, class_name);
           defineObject(parm, false, class_name, type, class_description, NULL,
                        &function_declaration->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
@@ -543,7 +543,7 @@ namespace generator {
                      translatedName + interface +
                      (function_declaration->body ? "{" : " = 0;"));
         if (function_declaration->body) {
-          parm.addClassContents("auto inst = " + ObjectName(type, class_name) + "(this);");
+          parm.addClassContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);");
           std::string s,d;
           for (auto& i : arguments.list) {
             s += d + i.name;

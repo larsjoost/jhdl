@@ -24,10 +24,10 @@ namespace generator {
       parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.");
     }
     debug.debug("Declaration");
-    declarationCallback(parm);
     if (declarationList) {
       declarations(parm, *declarationList);
     }
+    declarationCallback(parm);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);

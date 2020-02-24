@@ -8,7 +8,7 @@ namespace generator {
   void SystemC::instantiateType(parameters& parm, std::string name,
                                 ast::ObjectType object_type, std::string arguments) {
     debug.functionStart("instantiateType");
-    std::string n = ObjectName(object_type, name);
+    std::string n = NameConverter::objectName(object_type, name);
     std::string i = n + "_INST";
     parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
     parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
@@ -83,7 +83,7 @@ namespace generator {
           s = libraryName + "::" + s;
         }
       }
-      std::string object_name = ObjectName(ast::ObjectType::ARCHITECTURE, s);
+      std::string object_name = NameConverter::objectName(ast::ObjectType::ARCHITECTURE, s);
       parm.addClassConstructorContents(getSourceLine(c->instanceName->text));
       parm.addClassConstructorContents("auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");");
       componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
@@ -106,7 +106,7 @@ namespace generator {
 
   std::string SystemC::ObjectName(const ParentInfo& info) {
     ast::ObjectType type = (info.type == ast::ObjectType::PACKAGE_BODY ? ast::ObjectType::PACKAGE : info.type);
-    return ObjectName(type, info.name);
+    return NameConverter::objectName(type, info.name);
   }
   
   void SystemC::createConstructor(parameters& parm, bool topHierarchy, ast::ObjectType type,
@@ -122,7 +122,7 @@ namespace generator {
 	  constructor_description += ", auto " + *argument;
 	  parm.addClassConstructorInitializer(*argument + "(" + *argument + ")");
 	}
-	parm.setClassConstructorDescription(ObjectName(type, name) + "(" + constructor_description + ")");
+	parm.setClassConstructorDescription(NameConverter::objectName(type, name) + "(" + constructor_description + ")");
       }
     }
   }

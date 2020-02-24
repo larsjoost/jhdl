@@ -19,3 +19,5 @@ if [ -z "$SYSTEMC" ]; then
 fi
 
 export LD_LIBRARY_PATH=$SYSTEMC/lib-linux64
+
+export SC_COPYRIGHT_MESSAGE="DISABLE"

@@ -63,12 +63,16 @@ namespace generator {
     return parent;
   }
 
-  std::string parameters::FileContainer::getClassContainerHierarchy(std::string first_delimiter, std::string delimiter) {
+  std::string parameters::FileContainer::getClassContainerHierarchy(std::string first_delimiter, std::string delimiter, bool add_type) {
     std::string d = first_delimiter;
     std::string hieararchy = library;
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	hieararchy += d + class_container.name;
+	std::string n = class_container.name;
+	if (add_type) {
+	  n = NameConverter::objectName(class_container.type, n); 
+	}
+	hieararchy += d + n;
 	d = delimiter;
       };
     traverseClassContainerHierarchy(class_container_callback);
