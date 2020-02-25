@@ -12,6 +12,7 @@
 #include "vhdl_array.hpp"
 #include "vhdl_enum.hpp"
 #include "vhdl_file.hpp"
+#include "vhdl_interface.hpp"
 
 namespace vhdl {
   

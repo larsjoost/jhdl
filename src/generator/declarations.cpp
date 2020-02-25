@@ -468,28 +468,30 @@ namespace generator {
     return foreignName;
   };
 
-  std::string SystemC::FunctionReturn(parameters& parm, ast::FunctionDeclaration* f) {
+  std::string SystemC::FunctionReturn(parameters& parm, ast::FunctionDeclaration* f, bool global_scope) {
     debug.functionStart("FunctionReturn");
     std::string returnTypeName = "void";
     parm.returnType = ast::ObjectValueContainer(ast::ObjectValue::NONE);
     if (f->returnType) {
       DatabaseResult returnType;
       if (parm.findOne(returnType, f->returnType, ast::ObjectType::TYPE)) {
-        returnTypeName = NameConverter::getName(parm, returnType, false);
+	returnTypeName = NameConverter::getName(parm, returnType, false, "", global_scope);
         parm.returnType = returnType.object->type;
       }
     }
-    debug.functionEnd("FunctionReturn");
+    debug.functionEnd("FunctionReturn: name = " + returnTypeName);
     return returnTypeName;
   }
   
   void SystemC::function_declarations(parameters& parm, ast::FunctionDeclaration* function_declaration) {
     if (function_declaration) {
-      debug.functionStart("function_declarations");
-      parm.package_contains_function = true;
       bool operatorName = (function_declaration->name == NULL);
+      std::string origin_name = operatorName ? function_declaration->string->toString(true) :
+	function_declaration->name->toString(true);
+      debug.functionStart("function_declarations(name = " + origin_name + ")");
+      parm.package_contains_function = true;
       ast::Text& text = operatorName ? function_declaration->string->text : function_declaration->name->text;
-      std::string origin_name = operatorName ? function_declaration->string->toString(true) : function_declaration->name->toString(true);
+      
       ast::ObjectType type = function_declaration->type;
       std::string translatedName = origin_name;
       std::string class_name = origin_name;
@@ -499,22 +501,18 @@ namespace generator {
       } 
       ast::ObjectArguments arguments(true);
       generateObjectArguments(parm, function_declaration->interface, arguments);
-      std::string returnTypeName = FunctionReturn(parm, function_declaration);
+      std::string localReturnTypeName = FunctionReturn(parm, function_declaration, false);
+      std::string globalReturnTypeName = FunctionReturn(parm, function_declaration, true);
       parm.addImplementationContents(getSourceLine(text));
       std::string argumentNames = getArgumentNames(parm, function_declaration->interface);
       parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration, &text);
       if (!parm.parse_declarations_only) {
         class_name = NameConverter::getName(origin_name, arguments, parm.returnType);
-	std::string parent_name; 
 	ParentInfo parent_info;
-        if (parm.getParent(parent_info)) {
-	  parent_name = ObjectName(parent_info) + "::";
-	}
-        std::string prefix = parent_name + NameConverter::objectName(type, class_name) + "::";
-        std::string run_prefix;
+        parm.getParent(parent_info);
+        bool package_body = (parent_info.type == ast::ObjectType::PACKAGE_BODY);
         std::string interface_with_initialization = "(" + GetInterface(parm, function_declaration->interface, true) + ")";
         std::string interface_without_initialization = "(" + GetInterface(parm, function_declaration->interface, false) + ")";
-        bool package_body = parent_info.type == ast::ObjectType::PACKAGE_BODY;
         if (function_declaration->body) {
           auto createDefinition = [&](parameters& parm) {
             PrintInterface(parm, function_declaration->interface);
@@ -523,15 +521,17 @@ namespace generator {
             if (function_declaration->body) {
               std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
-              parm.addClassContents(returnTypeName + " " + run_prefix + "run" + interface + "{");
+              parm.addClassContents(localReturnTypeName + " " + "run" + interface + ";");
+	      std::string global_prefix = parm.hierarchyToString("::", true) + "::";
+	      parm.addImplementationContents(globalReturnTypeName + " " + global_prefix + "run" + interface_without_initialization + "{");
               if (!foreignFunctionName.empty()) {
-                parm.addClassContents("// Foreign function call");
-                parm.addClassContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+                parm.addImplementationContents("// Foreign function call");
+                parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
               }
               sequentialStatements(parm, function_declaration->body->sequentialStatements);
-              parm.addClassContents("}");
+              parm.addImplementationContents("}");
             } else {
-              parm.addClassContents(returnTypeName + " run" + interface_with_initialization + ";");
+              parm.addClassContents(localReturnTypeName + " run" + interface_with_initialization + ";");
             }
           };
 	  std::string class_description = "struct " + NameConverter::objectName(type, class_name);
@@ -539,20 +539,28 @@ namespace generator {
                        &function_declaration->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
         std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
-        parm.addClassContents(std::string(function_declaration->body ? "" : "virtual ") + (operatorName ? "friend " : "") + returnTypeName + " " +
-                     translatedName + interface +
-                     (function_declaration->body ? "{" : " = 0;"));
         if (function_declaration->body) {
-          parm.addClassContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);");
+	  debug.debug("Function declaration body");
+	  parm.addClassContents((operatorName ? "friend " : "") +
+				localReturnTypeName + " " +
+				translatedName + interface + ";");
+          std::string global_prefix = parm.hierarchyToString("::", true) + "::";
+	  parm.addImplementationContents((operatorName ? "friend " : "") +
+					 globalReturnTypeName + " " +
+					 global_prefix + translatedName + interface_without_initialization + " {");
+          parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);");
           std::string s,d;
           for (auto& i : arguments.list) {
             s += d + i.name;
             d = ", ";
           }
-          std::string r = returnTypeName == "void" ? "" : "return ";
-          parm.addClassContents(r + "inst.run(" + s + ");");
-          parm.addClassContents("}");
-        }
+          std::string r = localReturnTypeName == "void" ? "" : "return ";
+          parm.addImplementationContents(r + "inst.run(" + s + ");");
+          parm.addImplementationContents("}");
+        } else {
+	  parm.addClassContents("virtual " + std::string(operatorName ? "friend " : "") + localReturnTypeName + " " +
+				translatedName + interface + " = 0;");
+	}
       }
       debug.functionEnd("function_declarations");
     }
@@ -657,7 +665,7 @@ namespace generator {
 		      std::string& factory_name, ast::ObjectType id,
                       ast::ObjectDeclaration::Direction direction) {
         if (id == ast::ObjectType::SIGNAL) {
-          type = "sc_signal<" + type + ">";
+          type = "vhdl::interface<sc_signal<" + type + ">, " + type + ">";
         }
         std::string s = type + " " + name;
 	parm.addClassContents(getSourceLine(v->text));

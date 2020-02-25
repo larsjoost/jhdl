@@ -82,11 +82,8 @@ for t in ${TEST[@]}; do
 	if [ "$t" == "success" ]; then
 	    if [ -n "$ERROR_MESSAGE" ]; then
 		if [ -n "$VERBOSE" ]; then
-		    p="$ERROR_MESSAGE"
-		else
-		    p=""
+		    MESSAGE="(Unexpected error message: $ERROR_MESSAGE)"
 		fi
-		MESSAGE="(Unexpected error message: $p)"
 		RESULT=1
 	    fi
 	else

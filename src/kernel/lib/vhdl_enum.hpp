@@ -151,7 +151,7 @@ namespace vhdl {
       return a_value != 0;
     }
 
-    std::string toString(bool with_quotes = true) {
+    const std::string toString(bool with_quotes = true) const {
       const static E valueArray;
       if (valueArray.array[a_value].c == 0) {
         return valueArray.array[a_value].s;

@@ -65,7 +65,7 @@ namespace generator {
 
   std::string parameters::FileContainer::getClassContainerHierarchy(std::string first_delimiter, std::string delimiter, bool add_type) {
     std::string d = first_delimiter;
-    std::string hieararchy = library;
+    std::string hieararchy = NameConverter::toUpper(library);
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
 	std::string n = class_container.name;

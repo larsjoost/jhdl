@@ -191,6 +191,14 @@ namespace vhdl {
       return e.array[0].base;
     }
 
+    UNIT getUnit() {
+      return a_unit;
+    }
+
+    VALUE getValue() {
+      return a_value;
+    }
+    
     static UNIT getHighUnit() {
       ELEMENTS e;
       return e.array[e.size - 1].base;

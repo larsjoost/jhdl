@@ -112,7 +112,7 @@ namespace generator {
       debug.functionStart("waitStatement");
       assert(p->waitText);
       parm.addImplementationContents(getSourceLine(p->waitText));
-      parm.addImplementationContents("wait(" + a_expression.physicalToString(parm, p->physical) + ");"); 
+      parm.addImplementationContents("vhdl::wait(" + a_expression.physicalToString(parm, p->physical) + ");"); 
       debug.functionEnd("waitStatement");
     }
   }
@@ -121,7 +121,7 @@ namespace generator {
     if (r) {
        debug.functionStart("returnStatement");
        try {
-         parm.addClassContents("return " + a_expression.toString(parm, r->value, parm.returnType) + ";");
+         parm.addImplementationContents("return " + a_expression.toString(parm, r->value, parm.returnType) + ";");
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }

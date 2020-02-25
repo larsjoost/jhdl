@@ -7,10 +7,11 @@ namespace generator {
   std::string NameConverter::getPrefix(parameters& parm, DatabaseResult& object,
 				       std::string first_separator,
 				       std::string last_separator) {
-    Debug<false> a_debug("NameConverter::getPrefix");
+    Debug<true> a_debug("NameConverter::getPrefix");
     a_debug.functionStart("getPrefix");
     std::string name;
     name = object.hierarchyToString("", first_separator) + last_separator;
+    a_debug.functionEnd("getPrefix: " + name);
     return toUpper(name);
     /*
     std::list<std::string> current_hierarchy;
@@ -32,11 +33,12 @@ namespace generator {
     */
   }
 
-  std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension) {
+  std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension, bool global_scope) {
     Debug<true> a_debug("NameConverter::globalPrefix");
     a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
     std::string prefix;
-    bool local = parm.isLocal(object);
+    bool local = (!global_scope) && parm.isLocal(object);
+    a_debug.debug("Local = " + std::to_string(local));
     if (object.object->id == ast::ObjectType::ENUM) {
       if (!local) {
 	prefix = getPrefix(parm, object, "::", "::");
@@ -68,13 +70,13 @@ namespace generator {
     return prefix;
   }
 
-  std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments) {
+  std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments, bool global_scope) {
     Debug<true> a_debug("NameConverter::getName");
     std::string name = object.object->name;
     a_debug.functionStart("getName(name = " + name + ")");
     assert(object.object != NULL);
     a_debug.debug("Object = " + object.toString());
-    name = globalPrefix(parm, object, factory_extension) + name;
+    name = globalPrefix(parm, object, factory_extension, global_scope) + name;
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
       name += ".create(" + factory_arguments + ")";
     } 

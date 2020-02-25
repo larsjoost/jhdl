@@ -6,6 +6,7 @@
 #include "database/database.hpp"
 #include "../exceptions/exceptions.hpp"
 #include "../ast/object_type.hpp"
+#include "../ast/text.hpp"
 
 #include "info_writer.hpp"
 
