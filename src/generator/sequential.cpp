@@ -36,7 +36,7 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       debug.functionStart("variableAssignment");
-      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object) {});
+      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object, std::string& name_extension) {});
       debug.functionEnd("variableAssignment");
     }
   }
@@ -44,7 +44,7 @@ namespace generator {
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
     if (p) {
       debug.functionStart("signalAssignment");
-      signalAssignment(parm, p, [](DatabaseResult& object) {});
+      signalAssignment(parm, p, [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
       debug.functionEnd("signalAssignment");
     }
   }
@@ -60,7 +60,7 @@ namespace generator {
       if (parm.findOne(object, severity, ast::ObjectType::ENUM)) {
         std::string name = NameConverter::getName(parm, object);
         parm.addImplementationContents("vhdl::report(" +
-				       a_expression.toString(parm, p->message, expected_type) + ", " +
+				       a_expression.toString(parm, p->message, expected_type, true) + ", " +
 				       name + ");");
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);

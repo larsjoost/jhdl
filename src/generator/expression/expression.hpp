@@ -183,7 +183,8 @@ namespace generator {
 			 Func sensitivityListCallback);
     std::string toString(parameters& parm,
 			 ast::Expression* e,
-			 ast::ObjectValueContainer& expectedType);
+			 ast::ObjectValueContainer& expectedType,
+			 bool add_read_function = false);
     template <typename Func>
     std::string toString(parameters& parm,
 			 ast::Expression* e,
@@ -501,11 +502,12 @@ namespace generator {
 	};
       DatabaseResult object;
       if (parm.findOneBase(object, name, valid)) {
-        if (object.object->id == ast::ObjectType::SIGNAL) {
-          sensitivityListCallback(object);
+	std::string name_extension;
+	if (object.object->id == ast::ObjectType::SIGNAL || object.object->id == ast::ObjectType::PORT) {
+	  sensitivityListCallback(object, name_extension);
         }
         bool double_brackets = false;
-        name = objectToString(parm, object, identifier->arguments, sensitivityListCallback, double_brackets);
+        name = objectToString(parm, object, identifier->arguments, sensitivityListCallback, double_brackets) + name_extension;
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";

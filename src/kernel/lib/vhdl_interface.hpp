@@ -89,6 +89,10 @@ namespace vhdl {
     const std::string toString() const {
       return data.read().toString();
     }
+
+    const T2& read() const {
+      return data.read();
+    }
     
   };
 

@@ -16,9 +16,11 @@ begin
       report "i = " & integer'image(i) severity note;
       clk <= '0';
       report "x = " & bit'image(clk) severity note;
+      report "now = " & time'image(now) severity note;
       wait for 5 ns;
       clk <= '1';
       report "x = " & bit'image(clk) severity note;
+      report "now = " & time'image(now) severity note;
       wait for 5 ns;
     end loop;  -- i
     finish(0);

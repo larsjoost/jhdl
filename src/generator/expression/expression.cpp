@@ -73,10 +73,17 @@ namespace generator {
   
   std::string ExpressionParser::toString(parameters& parm,
 					 ast::Expression* e,
-					 ast::ObjectValueContainer& expectedType) {
+					 ast::ObjectValueContainer& expectedType,
+					 bool add_read_function) {
     debug.functionStart("toString");
-    std::string s = toString(parm, e, expectedType, [&](DatabaseResult& object) {});
-    debug.functionEnd("toString");
+    auto sensitivityListCallback =
+      [&](DatabaseResult& object, std::string& name_extension) {
+	if (add_read_function) {
+	  name_extension = ".read()";
+	}
+      };
+    std::string s = toString(parm, e, expectedType, sensitivityListCallback);
+    debug.functionEnd("toString: s = " + s);
     return s;
   }
 
@@ -107,7 +114,7 @@ namespace generator {
     DatabaseResult object;
     if (parm.findOneBase(object, name, valid)) {
       bool double_brackets = false;
-      name = objectToString(parm, object, p->arguments, [&](DatabaseResult& e) {}, double_brackets);
+      name = objectToString(parm, object, p->arguments, [&](DatabaseResult& e, std::string& name_extension) {}, double_brackets);
     } else {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
       parm.printAllObjects(name);
@@ -501,7 +508,7 @@ namespace generator {
   std::string ExpressionParser::basicIdentifierToString(parameters& parm,
 							ast::BasicIdentifier* identifier,
                                                         ast::ObjectValueContainer* expected_type) {
-    return basicIdentifierToString(parm, identifier, expected_type, [](DatabaseResult& r) {});
+    return basicIdentifierToString(parm, identifier, expected_type, [](DatabaseResult& r, std::string& name_extension) {});
   }
       
 

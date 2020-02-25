@@ -97,8 +97,9 @@ namespace generator {
         bool q = parm.setQuiet(true);
         std::list<std::string> sensitivity;
         auto sensitivityListGenerator =
-	  [&](DatabaseResult& object) {
+	  [&](DatabaseResult& object, std::string& name_extension) {
 	    sensitivity.push_back(parm.getName(object));
+	    name_extension = ".read()";
 	  };
         signalAssignment(parm, s, sensitivityListGenerator);
         parm.setQuiet(q);
