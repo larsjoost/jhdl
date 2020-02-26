@@ -47,7 +47,9 @@ namespace vhdl {
     }
 
     bool operator!=(auto other) {
-      return data != other;
+      T2 x;
+      x = other;
+      return (data.read() != x);
     }
 
     bool operator==(interface<T1, T2>& other) {

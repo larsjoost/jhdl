@@ -148,21 +148,22 @@ namespace ast {
 
 
   class ObjectArguments {
-    bool isInterface;
+    bool a_interface;
     void setDefaultValues(bool m[], ObjectArguments& interface);
     int match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose);
   public:
     std::list<ObjectArgument> list;
-    ObjectArguments(bool isInterface, std::list<ObjectArgument> o = {}) {
+    ObjectArguments(bool interface, std::list<ObjectArgument> o = {}) {
       list = o;
-      isInterface = isInterface;
+      a_interface = interface;
     };
     void push_back(ObjectArgument& o) {list.push_back(o);}
-    bool equals(ObjectArguments& other, bool array_type = false, bool verbose = false);
+    bool equals(ObjectArguments& other, bool array_type = false, const bool verbose = false);
     bool equals(ObjectValueContainer::Array& other, bool array_type = false, bool verbose = false);
     bool equals(const ObjectValueContainer& other, bool verbose = false);
     bool ExactMatch(ObjectArguments& other);
     bool empty() { return list.empty(); }
+    bool isInterface() {return a_interface;}
     int size() { return list.size(); }
     std::string toString();
   };  

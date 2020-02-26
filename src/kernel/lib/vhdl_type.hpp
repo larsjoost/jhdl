@@ -48,17 +48,23 @@ namespace vhdl {
     void operator=(const TYPE other) { a_value = other; }
     void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
 
-    bool operator ==(const Range<TYPE> &other) const { return a_value == other.a_value; }
-    bool operator !=(const Range<TYPE> &other) const { return a_value != other.a_value; }
-    bool operator ==(const TYPE other) const { return a_value == other; }
-    bool operator <=(const TYPE other) const { return a_value <= other; }
-    bool operator >=(const TYPE other) const { return a_value >= other; }
-    bool operator !=(const TYPE other) const { return a_value != other; }
-    TYPE operator +(const TYPE other) const { return a_value + other; }
-    TYPE operator -(const TYPE other) const { return a_value - other; }
-    TYPE operator +(const Range<TYPE>& other) const { return a_value + other.a_value; }
-    TYPE operator -(const Range<TYPE>& other) const { return a_value - other.a_value; }
-    
+    inline bool operator == (const Range<TYPE> &other) const { return a_value == other.a_value; }
+    inline bool operator != (const Range<TYPE> &other) const { return a_value != other.a_value; }
+    inline bool operator == (const TYPE other) const { return a_value == other; }
+    inline bool operator <= (const TYPE other) const { return a_value <= other; }
+    inline bool operator >= (const TYPE other) const { return a_value >= other; }
+    inline bool operator != (const TYPE other) const { return a_value != other; }
+    inline TYPE operator +  (const TYPE other) const { return a_value + other; }
+    inline TYPE operator -  (const TYPE other) const { return a_value - other; }
+    inline TYPE operator +  (const Range<TYPE>& other) const { return a_value + other.a_value; }
+    inline TYPE operator -  (const Range<TYPE>& other) const { return a_value - other.a_value; }
+
+    /* Required by sc_signals */
+    inline friend std::ostream& operator << ( std::ostream& os,  Range<TYPE> const &other) {
+      os << other.toString();
+      return os;
+    }
+
     operator bool() const {
       return a_value != TYPE(0);
     }
@@ -71,7 +77,7 @@ namespace vhdl {
       return a_value;
     }
     
-    std::string toString() {
+    const std::string toString() const {
       return std::to_string(a_value);
     }
 

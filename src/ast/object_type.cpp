@@ -135,25 +135,31 @@ namespace ast {
   }
 
   int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose) {
+    Debug<true> debug = Debug<true>("ObjectArguments::match");
+    debug.setVerbose(verbose);
+    debug.functionStart("match(interface =  " + interface.toString() + ", association = " + association.toString() +
+			", index = " + std::to_string(index) + ")");
+    int result = -1;
     auto it = interface.list.begin();
-    if (verbose) {
-      std::cout << "association.name.empty() " << (association.name.empty() ? "true" : "false") << std::endl;
-    }
+    debug.debug("association.name.empty() " + std::string(association.name.empty() ? "true" : "false"));
     if (association.name.empty() && index >= 0 && interface.list.size() > index) {
       std::advance(it, index);
-      if (verbose) {
-        std::cout << "it->type = " + it->type.toString() << std::endl;
-        std::cout << "association.type = " + association.type.toString() << std::endl;
-      }
-      return it->type.equals(association.type) ? index : -1;
+      debug.debug("it->type = " + it->type.toString());
+      debug.debug("association.type = " + association.type.toString());
+      result = (it->type.equals(association.type) ? index : -1);
     } else {
       for (int i = 0; i < interface.list.size(); i++, it++) {
-        if (it->name == association.name) {
-          return it->type.equals(association.type) ? i : -1;
+	debug.debug("interface name = " + it->name + ", association name = " + association.name);
+	if (it->name == association.name) {
+	  debug.debug("it->type = " + it->type.toString());
+	  debug.debug("association.type = " + association.type.toString());
+          result = (it->type.equals(association.type) ? i : -1);
+	  break;
         }
       }
     }
-    return -1;
+    debug.functionEnd("match: " + std::to_string(result));
+    return result;
   }
 
   void ObjectArguments::setDefaultValues(bool m[], ObjectArguments& interface) {
@@ -171,29 +177,27 @@ namespace ast {
    *    c : type3                  
    */
   
-  bool ObjectArguments::equals(ObjectArguments& other, bool array_type, bool verbose) {
-    if (verbose) {
-      std::cout << "This   = " << this->toString() << std::endl;
-      std::cout << "Other  = " << other.toString() << std::endl;
-    }
-    ObjectArguments& interface   = isInterface ? *this : other;
-    ObjectArguments& association = isInterface ? other : *this;
-    if (verbose) {
-      std::cout << "Interface = " << interface.toString() << std::endl;
-      std::cout << "Association = " << association.toString() << std::endl;
-    }
+  bool ObjectArguments::equals(ObjectArguments& other, bool array_type, const bool verbose) {
+    Debug<true> debug = Debug<true>("ObjectArguments::equals(ObjectArguments& other, bool array_type, bool verbose)");
+    debug.setVerbose(verbose);
+    debug.functionStart("equals(this = " + this->toString() + ", other = " + other.toString() +
+			", array_type = " + std::to_string(array_type) + ")");
+    ObjectArguments& interface   = isInterface() ? *this : other;
+    ObjectArguments& association = isInterface() ? other : *this;
+    bool result = true;
+    debug.debug("Interface = " + interface.toString());
+    debug.debug("Association = " + association.toString());
     int size = interface.list.size();
     bool m[size];
     setDefaultValues(m, interface);
     int index = 0;
     for (ObjectArgument& a : association.list) {
       int i = match(interface, a, index, verbose);
-      if (verbose) {
-        std::cout << "i = " << std::to_string(i) << std::endl;
-        std::cout << "index = " << std::to_string(index) << std::endl;
-      }
+      debug.debug("i = " + std::to_string(i));
+      debug.debug("index = " + std::to_string(index));
       if (i < 0) {
-        return false;
+	result = false;
+	break;
       }
       if (index >= 0) {
         if (i == index) {
@@ -204,13 +208,16 @@ namespace ast {
       }
       m[i] = true;
     }
-    if (array_type) { return true; }
-    for (int i=0; i<size; i++) {
-      if (!m[i]) {
-        return false;
+    if (result && !array_type) {
+      for (int i=0; i<size; i++) {
+	if (!m[i]) {
+	  result = false;
+	  break;
+	}
       }
     }
-    return true;
+    debug.functionEnd("equals: " + std::to_string(result));
+    return result;
   }
 
   bool ObjectArguments::equals(ObjectValueContainer::Array& other, bool array_type, bool verbose) {
@@ -260,7 +267,7 @@ namespace ast {
   
   std::string ObjectArguments::toString() {
     std::string delimiter = "";
-    std::string s = "";
+    std::string s = "interface = " + std::string(isInterface() ? "true" : "false") + ": ";
     for (auto& a : list) {
       s += delimiter + a.toString();
       delimiter = ", ";

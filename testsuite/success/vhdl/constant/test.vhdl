@@ -22,6 +22,9 @@ begin
       report "a = " & integer'image(a) &
         ", but expected = 2"
         severity failure;
+    else
+      report "a = " & integer'image(a)
+        severity note;
     end if;
     finish(0);
   end process;

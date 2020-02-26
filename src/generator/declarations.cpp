@@ -95,13 +95,9 @@ namespace generator {
         ast::ObjectValueContainer type(expected_value);
         rangeToString(parm, range, left, right, type);
       } else if (identifier || subtype) {
-        ast::SimpleIdentifier* id;
-        if (identifier) {
-          id = identifier;
-        } else if (subtype) {
-          id = subtype->identifier;
-        } 
-        std::string type_name = id->toString(true);
+        ast::SimpleIdentifier* id = (identifier ? identifier : subtype->identifier);
+	assert(id);
+	std::string type_name = id->toString(true);
         DatabaseResult database_result;
         if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
           std::string id = NameConverter::getName(parm, database_result, true);

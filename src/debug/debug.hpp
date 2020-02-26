@@ -15,6 +15,7 @@ protected:
   const static Output::Color DEFAULT_HIGHLIGHT_COLOR = Output::Color::GREEN;
 
   std::string a_name;
+  bool a_verbose;
   //static int a_indent;
   int a_indent = 0;
   const int INDENT_SIZE = 2;
@@ -42,31 +43,35 @@ protected:
 public:
   
   Debug(std::string name) : a_name(name) {
+    a_verbose = enable;
     // a_indent = 0;
   }
 
   inline void functionStart(std::string name, bool highlight = false) {
-    if (enable) {
+    if (isVerbose()) {
       print(name, "FUNCTION START", highlight, true);
     }
   }
 
   inline void functionEnd(std::string name, bool highlight = false) {
-    if (enable) {
+    if (isVerbose()) {
       print(name, "FUNCTION END", highlight, false);
     }
   }
 
   inline void debug(std::string name, bool highlight = false, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR) {
-    if (enable) {
+    if (isVerbose()) {
       print(name, "DEBUG", highlight, highlight_color);
     }
   }
 
   inline bool isVerbose() {
-    return enable;
+    return enable && a_verbose;
   }
 
+  void setVerbose(bool verbose) {
+    a_verbose = verbose;
+  }
   
 };
 
