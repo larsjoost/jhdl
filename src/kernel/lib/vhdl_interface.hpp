@@ -30,6 +30,10 @@ namespace vhdl {
       type.construct(other);
     }
   
+    T1* getInterface() {
+      return &data;
+    }
+    
     interface<T1, T2>& operator=(const interface<T1, T2>& s) {
       data = s.data;
       return *this;

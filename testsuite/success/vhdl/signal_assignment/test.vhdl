@@ -42,6 +42,7 @@ begin
           severity failure;
       end if;
     end loop;
+    report "Success" severity note;
     finish(0);
   end process;
 

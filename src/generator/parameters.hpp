@@ -186,7 +186,7 @@ namespace generator {
     
     void printAllObjects(std::string name);
     std::string getName(ast::SimpleIdentifier* i, ast::ObjectType);
-    std::string getName(DatabaseResult& object);
+    std::string getName(DatabaseResult& object, int hierarchy_offset = 0);
     bool getParent(ParentInfo& p);
 
     std::string getLibrary();

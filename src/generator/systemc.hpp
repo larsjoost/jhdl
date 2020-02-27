@@ -170,8 +170,6 @@ namespace generator {
     // definition.cpp
     template <typename Func>
     void createProcess(parameters& parm, Func func, std::string name);
-    template <typename Func>
-    void printSensitivityListWait(parameters& parm, auto sensitivity, Func func);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
@@ -209,8 +207,7 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
 
     // constructor.cpp
-    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::string arguments = "");
-    void signalInstantiation(parameters& parm, ast::SignalAssignment* s);
+    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);

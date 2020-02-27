@@ -93,34 +93,24 @@ namespace generator {
         name = "line" + std::to_string(s->target->getText().getLine());
       }
       s->name = name;
-      {
-        bool q = parm.setQuiet(true);
-        std::list<std::string> sensitivity;
-        auto sensitivityListGenerator =
-	  [&](DatabaseResult& object, std::string& name_extension) {
-	    sensitivity.push_back(parm.getName(object));
-	    name_extension = ".read()";
-	  };
-        signalAssignment(parm, s, sensitivityListGenerator);
-        parm.setQuiet(q);
-        auto func = [&](std::string& s) {
-          std::string name = s;
-          getObjectName(parm, name, ast::ObjectType::SIGNAL);
-          return name;
-        };
-        auto createBody = [&](parameters& parm) {
-          createProcess(parm,
-                        [&](parameters& parm) {
-                          printSensitivityListWait(parm, sensitivity, func);
-                          signalAssignment(parm, s);
-                        },
-			name);
-        };
-        std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::PROCESS, name);
-	defineObject(parm, false, name, ast::ObjectType::PROCESS,
-		     class_description, NULL, NULL, NULL, createBody,
-		     [&](parameters& parm) {}, true, true);
-      }
+      std::list<std::string> sensitivity_list;
+      auto sensitivityListGenerator =
+	[&](DatabaseResult& object, std::string& name_extension) {
+	  sensitivity_list.push_back(parm.getName(object, -1));
+	  name_extension = ".read()";
+	};
+      auto createBody = [&](parameters& parm) {
+			  createProcess(parm,
+					[&](parameters& parm) {
+					  signalAssignment(parm, s, sensitivityListGenerator);
+					},
+					name);
+			};
+      std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::PROCESS, name);
+      defineObject(parm, false, name, ast::ObjectType::PROCESS,
+		   class_description, NULL, NULL, NULL, createBody,
+		   [&](parameters& parm) {}, true, true);
+      instantiateType(parm, name, ast::ObjectType::PROCESS, &sensitivity_list);
       debug.functionEnd("concurrentSignalAssignment");
     }
   }

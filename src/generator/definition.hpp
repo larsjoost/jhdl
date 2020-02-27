@@ -43,12 +43,4 @@ namespace generator {
     debug.functionEnd("defineObject");
   }
 
-  template<typename Func>
-  void SystemC::printSensitivityListWait(parameters& parm, auto sensitivity, Func func) {
-    std::string s = listToString(parm, sensitivity, " << ", [&](auto s){return func(s);}); 
-    if (!s.empty()) {
-      parm.addClassConstructorContents("sensitive << " + s + ";");
-    }
-  }
-
 }

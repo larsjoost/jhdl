@@ -91,8 +91,8 @@ namespace generator {
     return getName(result);
   }
 
-  std::string parameters::getName(DatabaseResult& object) {
-    return NameConverter::getName(*this, object);
+  std::string parameters::getName(DatabaseResult& object, int hierarchy_offset) {
+    return NameConverter::getHierarchyOffsetName(*this, object, hierarchy_offset);
   }
     
   bool parameters::getParent(ParentInfo& p) {

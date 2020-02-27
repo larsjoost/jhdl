@@ -33,9 +33,10 @@ namespace generator {
     */
   }
 
-  std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension, bool global_scope) {
+  std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension, bool global_scope, int hierarchy_offset) {
     Debug<true> a_debug("NameConverter::globalPrefix");
-    a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) + ")");
+    a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) +
+			  ", hierarchy_offset = " + std::to_string(hierarchy_offset) + ")");
     std::string prefix;
     bool local = (!global_scope) && parm.isLocal(object);
     a_debug.debug("Local = " + std::to_string(local));
@@ -51,7 +52,7 @@ namespace generator {
 	  a_debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel) +
 			", current hierarchy = " + parm.hierarchyToString() +
 			", object hierarchy size = " + std::to_string(object.hierarchySize()));
-          for (int i=object.hierarchySize(); i < hierarchyLevel; i++) {
+          for (int i=object.hierarchySize(); i < (hierarchyLevel + hierarchy_offset); i++) {
             prefix = "p->" + prefix;
           }
         }
@@ -83,6 +84,19 @@ namespace generator {
     a_debug.functionEnd("getName: " + name);
     return name;
   }
+
+  std::string NameConverter::getHierarchyOffsetName(parameters& parm, DatabaseResult& object,
+						    int hierarchy_offset) {
+    Debug<true> a_debug("NameConverter::getHierarchyOffsetName");
+    std::string name = object.object->name;
+    a_debug.functionStart("getHierarchyOffsetName(name = " + name + ")");
+    assert(object.object != NULL);
+    a_debug.debug("Object = " + object.toString());
+    name = globalPrefix(parm, object, false, false, hierarchy_offset) + name;
+    a_debug.functionEnd("getHierarchyOffsetName: " + name);
+    return name;
+  }
+
 
   std::string NameConverter::toLower(std::string s) {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);

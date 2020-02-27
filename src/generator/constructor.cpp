@@ -6,7 +6,7 @@
 namespace generator {
 
   void SystemC::instantiateType(parameters& parm, std::string name,
-                                ast::ObjectType object_type, std::string arguments) {
+                                ast::ObjectType object_type, std::list<std::string>* sensitivity_list) {
     debug.functionStart("instantiateType");
     std::string n = NameConverter::objectName(object_type, name);
     std::string i = n + "_INST";
@@ -14,16 +14,13 @@ namespace generator {
     parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
     parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
     parm.addClassConstructorContents("sc_spawn_options " + o + ";");
+    if (sensitivity_list) {
+      for (auto& i : *sensitivity_list) {
+	parm.addClassConstructorContents(o + ".set_sensitivity(" + i + ".getInterface());");
+      }
+    }
     parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\", &" + o +");");
     debug.functionEnd("instantiateType");
-  }
-
-  void SystemC::signalInstantiation(parameters& parm, ast::SignalAssignment* s) {
-    if (s) {
-      debug.functionStart("signalInstantiation");
-      instantiateType(parm, s->name, ast::ObjectType::PROCESS);
-      debug.functionEnd("signalInstantiation");
-    }
   }
 
   void SystemC::blockStatementInstantiation(parameters& parm,
@@ -45,7 +42,7 @@ namespace generator {
       std::string name = forGenerateStatement->name->toString(true);
       parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
       forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          instantiateType(parm, name, ast::ObjectType::GENERATE, ", " + identifier);
+          instantiateType(parm, name, ast::ObjectType::GENERATE);
         }, true);
       debug.functionEnd("forGenerateStatementInstantiation");
     }
@@ -100,7 +97,9 @@ namespace generator {
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       forGenerateStatementInstantiation(parm, c.forGenerateStatement);
       blockStatementInstantiation(parm, c.blockStatement);
-      signalInstantiation(parm, c.signalAssignment);
+
+
+
       componentInstantiation(parm, c.componentInstance);
     }
     debug.functionEnd("concurrentStatementsInstantiation");
