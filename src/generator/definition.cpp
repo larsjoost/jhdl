@@ -116,7 +116,7 @@ namespace generator {
                         },
 			name);
         };
-        std::string class_description = "struct " + name;
+        std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::PROCESS, name);
 	defineObject(parm, false, name, ast::ObjectType::PROCESS,
 		     class_description, NULL, NULL, NULL, createBody,
 		     [&](parameters& parm) {}, true, true);

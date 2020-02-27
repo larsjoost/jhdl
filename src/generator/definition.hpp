@@ -47,7 +47,7 @@ namespace generator {
   void SystemC::printSensitivityListWait(parameters& parm, auto sensitivity, Func func) {
     std::string s = listToString(parm, sensitivity, " << ", [&](auto s){return func(s);}); 
     if (!s.empty()) {
-      parm.addClassConstructorContents("sensitive " + s + ";");
+      parm.addClassConstructorContents("sensitive << " + s + ";");
     }
   }
 

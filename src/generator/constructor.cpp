@@ -10,9 +10,11 @@ namespace generator {
     debug.functionStart("instantiateType");
     std::string n = NameConverter::objectName(object_type, name);
     std::string i = n + "_INST";
+    std::string o = n + "_OPTIONS";
     parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
     parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
-    parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\");");
+    parm.addClassConstructorContents("sc_spawn_options " + o + ";");
+    parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\", &" + o +");");
     debug.functionEnd("instantiateType");
   }
 
