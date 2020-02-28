@@ -44,7 +44,7 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
-  auto* dut = new WORK::Architecture_RTL("DUT"); 
+  auto* dut = new WORK::Architecture_TEST_RTL("DUT"); 
 
   if (vcdFilename) {
 

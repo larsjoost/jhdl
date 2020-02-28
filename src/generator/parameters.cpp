@@ -52,11 +52,13 @@ namespace generator {
     file_container.content.top.push_back(text);
   }
 
-  void parameters::newClass(std::string description, std::string name, ast::ObjectType type) {
+  void parameters::newClass(std::string description, std::string name, ast::ObjectType type,
+			    std::string base_name) {
     debug.functionStart("newClass(" + description + ")");
     ClassContainer a;
     a.active = true;
     a.class_description = description;
+    a.base_name = base_name;
     a.name = name;
     a.type = type;
     ClassContainer* c = file_container.getCurrentClassContainer();
@@ -193,8 +195,8 @@ namespace generator {
     return file_container.getClassContainerHierarchy(delimiter, delimiter, add_type);
   }
 
-  void parameters::getHierarchy(std::list<std::string>& hierarchy) {
-    file_container.getHierarchy(hierarchy);
+  void parameters::getHierarchy(std::list<std::string>& hierarchy, bool base_hierarchy) {
+    file_container.getHierarchy(hierarchy, base_hierarchy);
   }
   
 }

@@ -13,9 +13,19 @@ begin
 
   process (a, b) is
   begin
+    report "a = " & integer'image(a) severity note;
+    report "b = " & integer'image(b) severity note;
     q_i <= a + b;
   end process;
 
+  process 
+  begin
+    report "a = " & integer'image(a) severity note;
+    report "b = " & integer'image(b) severity note;
+    report "now = " & time'image(now) severity note;
+    wait for 5 ns;
+  end process;
+  
   q <= q_i;
   
 end architecture rtl;
@@ -48,14 +58,15 @@ begin
     wait for 10 ns;
     e   := a_i + b_i;
     report "e = " & integer'image(e) severity note;
-    wait for 100 ns;
+    wait for 10 ns;
     report "q = " & integer'image(q_i) severity note;
     if (q_i /= e) then
       report "Q = " & integer'image(q_i) &
-        ", but expected = " & integer'image(e)
+        ", but expected = " & integer'image(e) &
+        ". Now = " & time'image(now)
         severity failure;
     end if;
-    report "Simulation done" severity note;
+    report "Simulation done. Now = "  & time'image(now) severity note;
     finish(0);
   end process;
 

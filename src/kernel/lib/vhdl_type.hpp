@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <systemc.h>
+
 namespace vhdl {
 
   /*
@@ -65,6 +67,11 @@ namespace vhdl {
       return os;
     }
 
+    inline friend void sc_trace(sc_trace_file *tf, const Range<TYPE> & v,
+    const std::string & NAME ) {
+      sc_trace(tf,v.a_value, NAME + ".value");
+    }
+    
     operator bool() const {
       return a_value != TYPE(0);
     }

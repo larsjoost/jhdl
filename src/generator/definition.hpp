@@ -8,6 +8,7 @@ namespace generator {
                              bool topHierarchy,
                              std::string name,
                              ast::ObjectType type,
+			     std::string base_name,
 			     std::string class_description,
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
@@ -16,8 +17,8 @@ namespace generator {
 			     DeclFunc declarationCallback,
                              bool wait_statements,
                              bool init_enable) {
-    debug.functionStart("defineObject(name = " + name + ")");
-    openHierarchy(parm, name, type, class_description);
+    debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")");
+    openHierarchy(parm, name, type, class_description, base_name);
     ParentInfo parent_info;
     parm.getParent(parent_info);
     if (!topHierarchy) {

@@ -79,11 +79,15 @@ namespace generator {
     return hieararchy;
   }
     
-  void parameters::FileContainer::getHierarchy(std::list<std::string>& current_hierarchy) {
+  void parameters::FileContainer::getHierarchy(std::list<std::string>& current_hierarchy, bool base_hierarchy) {
     current_hierarchy.push_back(library);
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	current_hierarchy.push_back(class_container.name);
+	if (base_hierarchy) {
+	  current_hierarchy.push_back(class_container.base_name);
+	} else {
+	  current_hierarchy.push_back(class_container.name);
+	}
       };
     traverseClassContainerHierarchy(class_container_callback);
   }

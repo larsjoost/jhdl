@@ -36,7 +36,7 @@ namespace generator {
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
     if (p) {
       debug.functionStart("variableAssignment");
-      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object, std::string& name_extension) {});
+      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
       debug.functionEnd("variableAssignment");
     }
   }

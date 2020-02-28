@@ -220,7 +220,7 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
 			};
       std::string class_description = "struct " + class_name;
-      defineObject(parm, true, name, type, class_description, NULL,
+      defineObject(parm, true, name, type, "", class_description, NULL,
                    &package->declarations, NULL, createBody, createDefinition, false, true);
       if (type == ast::ObjectType::PACKAGE_BODY) {
 	std::string l = NameConverter::toUpper(library);
@@ -250,10 +250,10 @@ namespace generator {
 	  auto func = [&](std::string& type, ast::ObjectType id,
 			  ast::ObjectDeclaration::Direction direction) {
 			switch (direction) {
-			case ast::ObjectDeclaration::Direction::IN: return "sc_in<" + type + ">";
+			case ast::ObjectDeclaration::Direction::IN: return "vhdl::interface<sc_in<" + type + ">, " + type + ">";
 			case ast::ObjectDeclaration::Direction::OUT: 
 			case ast::ObjectDeclaration::Direction::INOUT: 
-			case ast::ObjectDeclaration::Direction::BUFFER: return "sc_out<" + type + ">";
+			case ast::ObjectDeclaration::Direction::BUFFER: return "vhdl::interface<sc_out<" + type + ">, " + type + ">";
 			default: {}
 			}
 			return type;
@@ -266,7 +266,7 @@ namespace generator {
 	parm.addClassContents("SC_HAS_PROCESS(" + class_name + ");");
       };
     std::string class_description = "SC_MODULE(" + class_name + ")";
-    defineObject(parm, true, name, type, class_description, NULL,
+    defineObject(parm, true, name, type, "", class_description, NULL,
 		 NULL,
 		 NULL,
 		 [&](parameters& parm){},
@@ -280,7 +280,7 @@ namespace generator {
     if (implementation) {
       debug.functionStart("implementationDeclaration");
       std::string entity_name = implementation->entity_name->toString(true);
-      std::string architecture_name = implementation->architecture_name->toString(true);
+      std::string architecture_name = entity_name + "_" + implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
       topHierarchyStart(parm, library, architecture_name, type, a_filename);
       std::shared_ptr<LocalDatabase> object;
@@ -300,7 +300,7 @@ namespace generator {
 	  parm.addClassConstructorInitializer(derived_class + "(name)");
 	};
       std::string class_description = "struct " + class_name;
-      defineObject(parm, true, architecture_name, type, class_description, NULL,
+      defineObject(parm, true, architecture_name, type, entity_name, class_description, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
                    [&](parameters& parm){},

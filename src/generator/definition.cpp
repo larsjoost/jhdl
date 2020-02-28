@@ -12,7 +12,7 @@ namespace generator {
     if (blockStatement) {
       std::string name = blockStatement->name->toString(true);
       std::string class_description = "struct " + name;
-      defineObject(parm, false, name, ast::ObjectType::BLOCK,
+      defineObject(parm, false, name, ast::ObjectType::BLOCK, "", 
 		   class_description, NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
@@ -35,7 +35,7 @@ namespace generator {
       	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
       };
       std::string class_description = "struct " + name;
-      defineObject(parm, false, name, ast::ObjectType::GENERATE,
+      defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
 		   class_description, &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
@@ -62,6 +62,15 @@ namespace generator {
         processName = "noname" + std::to_string(processId++);
         process->noname = processName;
       }
+      std::list<std::string> sensitivity_list;
+      if (process->sensitivity) {
+	for (auto& i : process->sensitivity->list) {
+	  DatabaseResult result;
+	  if (parm.findOne(result, &i)) {
+	    sensitivity_list.push_back(NameConverter::getName(parm, result));
+	  } 
+	}
+      }
       ast::ObjectType type = ast::ObjectType::PROCESS;
       std::string class_name = NameConverter::objectName(type, processName);
       auto createDefinition =
@@ -75,10 +84,10 @@ namespace generator {
       auto createBody = [&](parameters& parm) {
       };
       std::string class_description = "struct " + class_name;
-      defineObject(parm, false, processName, type,
+      defineObject(parm, false, processName, type, "",
 		   class_description, NULL,
                    &process->declarations, NULL, createBody, createDefinition, true, true);
-      instantiateType(parm, processName, ast::ObjectType::PROCESS);
+      instantiateType(parm, processName, ast::ObjectType::PROCESS, &sensitivity_list);
     }
     debug.functionEnd("processDefinition");
   }
@@ -107,7 +116,7 @@ namespace generator {
 					name);
 			};
       std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::PROCESS, name);
-      defineObject(parm, false, name, ast::ObjectType::PROCESS,
+      defineObject(parm, false, name, ast::ObjectType::PROCESS, "", 
 		   class_description, NULL, NULL, NULL, createBody,
 		   [&](parameters& parm) {}, true, true);
       instantiateType(parm, name, ast::ObjectType::PROCESS, &sensitivity_list);

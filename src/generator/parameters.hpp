@@ -18,7 +18,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> debug;
+    Debug<true> debug;
     Exceptions exceptions;
     bool a_verbose = false;
 
@@ -64,6 +64,7 @@ namespace generator {
       bool active = true;
       Database database;
       ast::ObjectType type;
+      std::string base_name;
       std::string name;
       std::string class_description;
       std::list<std::string> derived_classes;
@@ -103,7 +104,7 @@ namespace generator {
       ClassContainer* getCurrentClassContainer();
       ClassContainer* getParentClassContainer();
       std::string getClassContainerHierarchy(std::string first_delimiter = ".", std::string delimiter = ".", bool add_type = false);
-      void getHierarchy(std::list<std::string>& current_hierarchy);
+      void getHierarchy(std::list<std::string>& current_hierarchy, bool base_hierarchy);
       void flush(bool verbose = false);
     };
 
@@ -127,7 +128,7 @@ namespace generator {
 
     void addInclude(std::string text);
     void addTop(std::string text);
-    void newClass(std::string description, std::string name, ast::ObjectType type);
+    void newClass(std::string description, std::string name, ast::ObjectType type, std::string base_name);
     void addDerivedClass(std::string text);
     void setClassConstructorDescription(std::string text);
     void addClassConstructorInitializer(std::string text);
@@ -182,7 +183,7 @@ namespace generator {
     void globalizeClass(ast::Text* text);
     bool isLocal(DatabaseResult& object);
     std::string hierarchyToString(std::string delimiter = ".", bool add_type = false);
-    void getHierarchy(std::list<std::string>& hierarchy);
+    void getHierarchy(std::list<std::string>& hierarchy, bool base_hierarchy = false);
     
     void printAllObjects(std::string name);
     std::string getName(ast::SimpleIdentifier* i, ast::ObjectType);

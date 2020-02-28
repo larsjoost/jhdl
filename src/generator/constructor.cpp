@@ -6,7 +6,8 @@
 namespace generator {
 
   void SystemC::instantiateType(parameters& parm, std::string name,
-                                ast::ObjectType object_type, std::list<std::string>* sensitivity_list) {
+                                ast::ObjectType object_type,
+				std::list<std::string>* sensitivity_list) {
     debug.functionStart("instantiateType");
     std::string n = NameConverter::objectName(object_type, name);
     std::string i = n + "_INST";
@@ -15,8 +16,11 @@ namespace generator {
     parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
     parm.addClassConstructorContents("sc_spawn_options " + o + ";");
     if (sensitivity_list) {
+      if (!sensitivity_list->empty()) {
+	parm.addClassConstructorContents(o + ".spawn_method();");
+      }
       for (auto& i : *sensitivity_list) {
-	parm.addClassConstructorContents(o + ".set_sensitivity(" + i + ".getInterface());");
+	parm.addClassConstructorContents(o + ".set_sensitivity(" + i + ".getInterfacePointer());");
       }
     }
     parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\", &" + o +");");
@@ -58,14 +62,14 @@ namespace generator {
         if (parm.findOneBase(object, formalName, valid, entityName, library)) {
           ast::ObjectValueContainer formalType = object.object->type;
           return instanceName + "->" + formalName +
-            ".bind(" + a_expression.toString(parm, a.actualPart, formalType) + ")";
+            "(" + a_expression.toString(parm, a.actualPart, formalType) + ".getInterfaceReference())";
         } else {
           exceptions.printError("Formal name " + formalName + " not found in entity " + library + "::" + entityName);
           parm.printAllObjects(formalName);
         }
         return std::string();
       };
-      parm.addClassContents(listToString(parm, l->associationElements.list, "; ", func) + ";");
+      parm.addClassConstructorContents(listToString(parm, l->associationElements.list, "; ", func) + ";");
     }
   }
   
@@ -74,7 +78,8 @@ namespace generator {
       assert(c->instanceName);
       std::string instanceName = c->instanceName->toString(true);
       std::string componentName = c->componentName->toString(true);
-      std::string s = componentName;
+      std::string architectureName = c->architectureName->toString(true);
+      std::string s = componentName + "_" + architectureName;
       std::string libraryName;
       if (c->libraryName) {
         libraryName = c->libraryName->toString(true);

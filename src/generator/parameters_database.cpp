@@ -181,17 +181,21 @@ namespace generator {
     } else {
       auto object_hierarchy = object.hierarchy;
       std::list<std::string> current_hierarchy;
-      getHierarchy(current_hierarchy);
+      std::list<std::string> current_base_hierarchy;
+      getHierarchy(current_hierarchy, false);
+      getHierarchy(current_base_hierarchy, true);
       const int compare_level = 2;
       if (object_hierarchy->size() >= compare_level && current_hierarchy.size() >= compare_level) {
 	auto lst1 = object_hierarchy->begin();
 	auto lst2 = current_hierarchy.begin();
+	auto lst3 = current_base_hierarchy.begin();
 	local = true;
 	for (int i = 0; i < compare_level; i++) { 
 	  std::string s1 = NameConverter::toUpper(*lst1++);
 	  std::string s2 = NameConverter::toUpper(*lst2++);
-	  debug.debug("s1 = " + s1 + ", s2 = " + s2);
-	  if (s1 != s2) {
+	  std::string s3 = NameConverter::toUpper(*lst3++);
+	  debug.debug("s1 = " + s1 + ", s2 = " + s2 + ", s3 = " + s3);
+	  if (s1 != s2 && s1 != s3) {
 	    local = false;
 	    break;
 	  }

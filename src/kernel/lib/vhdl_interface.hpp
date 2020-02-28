@@ -30,8 +30,16 @@ namespace vhdl {
       type.construct(other);
     }
   
-    T1* getInterface() {
+    T1& getInterfaceReference() {
+      return data;
+    }
+    
+    T1* getInterfacePointer() {
       return &data;
+    }
+
+    void operator () (auto& other) {
+      data(other);
     }
     
     interface<T1, T2>& operator=(const interface<T1, T2>& s) {
@@ -71,15 +79,9 @@ namespace vhdl {
     }
 
     operator bool() const {
-      return bool(data);
+      return bool(data.read());
     }
   
-    interface<T1, T2> operator+(interface<T1, T2>& other) {
-      interface<T1, T2> r;
-      r.data = data + other.data;
-      return r;
-    }
-
     template<typename TYPE>
     interface<T1, T2> operator+(TYPE other) {
       interface<T1, T2> r;

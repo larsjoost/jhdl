@@ -32,9 +32,9 @@ namespace generator {
     }
   }
 
-  void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description) {
+  void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description, std::string base_name) {
     debug.functionStart("openHierarchy");
-    parm.newClass(class_description, name, type);
+    parm.newClass(class_description, name, type, base_name);
     if (a_verbose) {
       parm.addTop("// Hierarchy start");
     }

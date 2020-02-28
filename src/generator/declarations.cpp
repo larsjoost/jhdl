@@ -531,7 +531,7 @@ namespace generator {
             }
           };
 	  std::string class_description = "struct " + NameConverter::objectName(type, class_name);
-          defineObject(parm, false, class_name, type, class_description, NULL,
+          defineObject(parm, false, class_name, type, "", class_description, NULL,
                        &function_declaration->body->declarations, NULL, createBody, createDefinition, false, true);
         } 
         std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
