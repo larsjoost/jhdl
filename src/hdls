@@ -82,8 +82,6 @@ source $SCRIPTPATH/setup.sh
 
 KERNEL_SRC=$SCRIPTPATH/kernel/lib
 
-make -C $KERNEL_SRC > /dev/null
-
 OUTPUT_SRC=$SCRIPTPATH/output
 
 make -C $OUTPUT_SRC > /dev/null
@@ -116,7 +114,7 @@ INCLUDES=""
 for i in $INCLUDE_PATHS; do
     INCLUDES+=" -I$i"
 done
-g++ -std=c++14 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SCRIPTPATH/kernel/lib -I$SCRIPTPATH/debug -I$SCRIPTPATH/output -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $KERNEL_SRC/*.o $SCRIPTPATH/../std/*.o $OUTPUT_SRC/*.o  $DEBUG_SRC/*.o
+g++ -std=c++14 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$KERNEL_SRC -I$SCRIPTPATH/debug -I$SCRIPTPATH/output -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $SCRIPTPATH/../std/*.o $OUTPUT_SRC/*.o  $DEBUG_SRC/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME
