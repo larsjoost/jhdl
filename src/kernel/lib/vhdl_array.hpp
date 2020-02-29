@@ -10,7 +10,7 @@
 #include <type_traits>
 #include <vector>
 
-// #include "../../debug/debug.hpp"
+#include "../../debug/debug.hpp"
 
 namespace vhdl {
 
@@ -22,7 +22,6 @@ namespace vhdl {
   
   template<class RANGE, class SUBTYPE>
   class Array {
-    //    Debug<true> a_debug;
   public:
     RANGE a_left;
     RANGE a_right;
@@ -91,13 +90,17 @@ namespace vhdl {
     }
     
     SUBTYPE& get(int index) {
+      Debug<true> a_debug = Debug<true>("Array::get");
+      a_debug.functionStart("get(index = " + std::to_string(index) + ")");
       int i = ConvertIndex(index);
+      a_debug.debug("i = " + std::to_string(i));
       assert(IndexCheck(i));
       assert(i >= 0 && i < a_value.size());
+      a_debug.functionEnd("get");
       return a_value[i];
     }
     
-    Array() { // : a_debug("Array") {
+    Array() {
     }
 
     bool equals(const std::string& other) {
@@ -110,7 +113,7 @@ namespace vhdl {
       return true;
     }
 
-    Array(RANGE left, RANGE right) { // : a_debug("Array") {
+    Array(RANGE left, RANGE right) {
       construct(left, right);
     }
     /*
@@ -182,7 +185,12 @@ namespace vhdl {
     }
 
     SUBTYPE& operator[](RANGE index) {
-      return get(index.POS());
+      Debug<true> a_debug = Debug<true>("operator[](RANGE index)operator[](RANGE index)");
+      a_debug.functionStart("operator[]");
+      int i = index.POS();
+      a_debug.debug("i = " + std::to_string(i));
+      a_debug.functionEnd("operator[]");
+      return get(i);
     }
     
     bool ASCENDING() {

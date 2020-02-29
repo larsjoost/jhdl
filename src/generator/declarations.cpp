@@ -126,7 +126,7 @@ namespace generator {
           ast::ObjectValueContainer t;
           a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
           type = t.GetValue();
-          range = "Range<int>";
+          range = "vhdl::Range<int>";
           arguments.push_back(t);
         } else {
           assert(false);

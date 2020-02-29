@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 #include "systemc.hpp"
 
 namespace generator {
@@ -19,7 +29,9 @@ namespace generator {
                              bool init_enable) {
     debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")");
     openHierarchy(parm, name, type, class_description, base_name);
+    parm.process_contains_wait = false;
     ParentInfo parent_info;
+    
     parm.getParent(parent_info);
     if (!topHierarchy) {
       parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.");

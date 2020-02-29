@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "../../debug/debug.hpp"
+
 namespace vhdl {
 
 
@@ -161,7 +163,11 @@ namespace vhdl {
     }
 
     int POS() {
-      return a_value;
+      Debug<true> a_debug = Debug<true>("Enumeration::POS");
+      a_debug.functionStart("POS");
+      int i = a_value;
+      a_debug.functionEnd("POS: " + std::to_string(i));
+      return i;
     }
 
     int getValue() {

@@ -193,6 +193,18 @@ namespace generator {
 	for (int i = 0; i < compare_level; i++) { 
 	  std::string s1 = NameConverter::toUpper(*lst1++);
 	  std::string s2 = NameConverter::toUpper(*lst2++);
+
+
+
+
+
+
+
+
+
+
+
+
 	  std::string s3 = NameConverter::toUpper(*lst3++);
 	  debug.debug("s1 = " + s1 + ", s2 = " + s2 + ", s3 = " + s3);
 	  if (s1 != s2 && s1 != s3) {

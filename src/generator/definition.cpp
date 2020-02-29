@@ -48,7 +48,12 @@ namespace generator {
     parm.addClassContents("void run();");
     std::string prefix = parm.hierarchyToString("::", true);
     parm.addImplementationContents("void " + prefix + "::run() {");
+    parm.addImplementationContents("do {");
+    parm.addImplementationContents("if (m_static_sensitivity_exists && !m_spawn_method) {");
+    parm.addImplementationContents(NameConverter::getTopLevelPrefix(parm) + "wait();");
+    parm.addImplementationContents("}");
     func(parm);
+    parm.addImplementationContents("} while(!m_spawn_method);");
     parm.addImplementationContents("}");
   }
   

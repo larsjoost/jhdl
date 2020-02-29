@@ -111,8 +111,9 @@ namespace generator {
     if (p) {
       debug.functionStart("waitStatement");
       assert(p->waitText);
+      parm.process_contains_wait = true;
       parm.addImplementationContents(getSourceLine(p->waitText));
-      parm.addImplementationContents("vhdl::wait(" + a_expression.physicalToString(parm, p->physical) + ");"); 
+      parm.addImplementationContents(NameConverter::getTopLevelPrefix(parm) + "wait(vhdl::convert(" + a_expression.physicalToString(parm, p->physical) + "));"); 
       debug.functionEnd("waitStatement");
     }
   }

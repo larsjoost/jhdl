@@ -6,7 +6,7 @@
 
 namespace vhdl {
   
-  sc_time convert(STD::STANDARD::TIME& t) {
+  sc_time convert(STD::STANDARD::TIME t) {
     double value = (double)t.getValue();
     switch (t.getUnit()) {
     case STD::STANDARD::TIME_enum::FS:
@@ -29,10 +29,6 @@ namespace vhdl {
     assert(false);
   }
   
-  void wait(STD::STANDARD::TIME t) {
-    wait(convert(t));
-  };
-
   void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity) {
     std::ostream* o = &std::cout;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::ERROR ||

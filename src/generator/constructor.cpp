@@ -13,12 +13,15 @@ namespace generator {
     std::string i = n + "_INST";
     std::string o = n + "_OPTIONS";
     parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
-    parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this);");
+    bool spawn_method = !parm.process_contains_wait;
+    std::string sensitivity_exists_argument = std::string((sensitivity_list) && !sensitivity_list->empty() ? "true" : "false");
+    std::string spawn_method_argument = std::string(spawn_method ? "true" : "false");
+    parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this, " + sensitivity_exists_argument + ", " + spawn_method_argument + ");");
     parm.addClassConstructorContents("sc_spawn_options " + o + ";");
-    if (sensitivity_list) {
-      if (!sensitivity_list->empty()) {
+    if (spawn_method) {
 	parm.addClassConstructorContents(o + ".spawn_method();");
-      }
+    }
+    if (sensitivity_list) {
       for (auto& i : *sensitivity_list) {
 	parm.addClassConstructorContents(o + ".set_sensitivity(" + i + ".getInterfacePointer());");
       }
@@ -122,8 +125,12 @@ namespace generator {
       ParentInfo parent_info;
       parm.getParent(parent_info);
       if (parent_info.name.size() > 0) {
-	std::string constructor_description = ObjectName(parent_info) +"* parent";
+	std::string constructor_description = ObjectName(parent_info) +"* parent, bool static_sensitivity_exists = false, bool spawn_method = false";
 	parm.addClassConstructorInitializer("p(parent)");
+	parm.addClassContents("bool m_static_sensitivity_exists;");
+	parm.addClassContents("bool m_spawn_method;");
+	parm.addClassConstructorContents("m_static_sensitivity_exists = static_sensitivity_exists;");
+	parm.addClassConstructorContents("m_spawn_method = spawn_method;");
 	if (argument) {
 	  constructor_description += ", auto " + *argument;
 	  parm.addClassConstructorInitializer(*argument + "(" + *argument + ")");

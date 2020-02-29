@@ -124,6 +124,7 @@ namespace generator {
     };
     bool package_contains_function;
     bool parse_declarations_only = false;
+    bool process_contains_wait;
     ast::ObjectValueContainer returnType;
 
     void addInclude(std::string text);

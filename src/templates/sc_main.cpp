@@ -63,6 +63,8 @@ int sc_main(int argc, char* argv[]) {
   }
 
   sc_start(1, SC_US);
+
+  SC_REPORT_FATAL("Termination", "Test not teminated with finish(0)");
   
   return 0;
 }

@@ -33,6 +33,23 @@ namespace generator {
     */
   }
 
+  std::string NameConverter::getTopLevelPrefix(parameters& parm) {
+    return getParentPrefix(parm, -2);
+  }
+  
+  std::string NameConverter::getParentPrefix(parameters& parm, int hierarchy_offset) {
+    Debug<true> a_debug("NameConverter::getParentPrefix");
+    a_debug.functionStart("getParentPrefix(hierarchy_offset = " + std::to_string(hierarchy_offset) + ")");
+    int hierarchyLevel = parm.getHierarchyLevel();
+    a_debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel));
+    std::string prefix;
+    for (int i=0; i < (hierarchyLevel + hierarchy_offset); i++) {
+      prefix = "p->" + prefix;
+    }
+    a_debug.functionEnd("getParentPrefix: " + prefix);
+    return prefix;
+  }
+  
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension, bool global_scope, int hierarchy_offset) {
     Debug<true> a_debug("NameConverter::globalPrefix");
     a_debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) +
@@ -48,14 +65,10 @@ namespace generator {
     } else {
       if (local) {
         if (factory_extension || object.object->id != ast::ObjectType::TYPE) {
-	  int hierarchyLevel = parm.getHierarchyLevel();
-	  a_debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel) +
-			", current hierarchy = " + parm.hierarchyToString() +
+	  a_debug.debug("current hierarchy = " + parm.hierarchyToString() +
 			", object hierarchy size = " + std::to_string(object.hierarchySize()));
-          for (int i=object.hierarchySize(); i < (hierarchyLevel + hierarchy_offset); i++) {
-            prefix = "p->" + prefix;
-          }
-        }
+	  prefix = getParentPrefix(parm, hierarchy_offset - object.hierarchySize()) + prefix;
+	}
       } else {
         if (!factory_extension && object.object->id == ast::ObjectType::TYPE) {
           prefix = getPrefix(parm, object, "::", "::");
