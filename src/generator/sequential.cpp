@@ -99,10 +99,19 @@ namespace generator {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
       debug.functionStart("forLoopStatement(name = " + name + ")");
-      auto callback = [&](parameters& parm) {
-	sequentialStatements(parm, f->sequentialStatements);
+      auto callback =
+	[&](parameters& parm,
+	    std::string& forloop_execution,
+	    std::string& variable_instance,
+	    std::string& variable_creation)
+	{
+	  parm.addClassContents(variable_instance);
+	  parm.addClassConstructorContents(variable_creation);
+	  parm.addImplementationContents(forloop_execution);
+	  sequentialStatements(parm, f->sequentialStatements);
+	  parm.addImplementationContents("}");
       };
-      forLoop(parm, name, f->iteration, callback, false);
+      forLoop(parm, name, f->iteration, callback);
       debug.functionEnd("forLoopStatement");
     }
   }

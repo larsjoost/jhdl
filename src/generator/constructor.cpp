@@ -7,26 +7,33 @@ namespace generator {
 
   void SystemC::instantiateType(parameters& parm, std::string name,
                                 ast::ObjectType object_type,
-				std::list<std::string>* sensitivity_list) {
+				std::list<std::string>* sensitivity_list,
+				std::string description_append) {
     debug.functionStart("instantiateType");
-    std::string n = NameConverter::objectName(object_type, name);
-    std::string i = n + "_INST";
-    std::string o = n + "_OPTIONS";
-    parm.addClassBottom("std::unique_ptr<" + n + "> " + i + ";");
+    std::string object_name = NameConverter::objectName(object_type, name);
+    std::string instance_name = object_name + "_INST";
+    std::string options_name = "opts";
     bool spawn_method = !parm.process_contains_wait;
     std::string sensitivity_exists_argument = std::string((sensitivity_list) && !sensitivity_list->empty() ? "true" : "false");
-    std::string spawn_method_argument = std::string(spawn_method ? "true" : "false");
-    parm.addClassConstructorContents(i + " = std::make_unique<" + n + ">(this, " + sensitivity_exists_argument + ", " + spawn_method_argument + ");");
-    parm.addClassConstructorContents("sc_spawn_options " + o + ";");
+    parm.addClassConstructorContents("{");
+    parm.addClassConstructorContents("sc_spawn_options " + options_name + ";");
     if (spawn_method) {
-	parm.addClassConstructorContents(o + ".spawn_method();");
+	parm.addClassConstructorContents(options_name + ".spawn_method();");
     }
     if (sensitivity_list) {
       for (auto& i : *sensitivity_list) {
-	parm.addClassConstructorContents(o + ".set_sensitivity(" + i + ".getInterfacePointer());");
+	parm.addClassConstructorContents(options_name + ".set_sensitivity(" + i + ".getInterfacePointer());");
       }
     }
-    parm.addClassConstructorContents("sc_spawn([&]() {" + i + "->run();}, \"" + n + "\", &" + o +");");
+    std::string spawn_method_argument = std::string(spawn_method ? "true" : "false");
+    parm.addClassConstructorContents(NameConverter::getTopLevelPrefix(parm) +
+				     "sc_spawn([&]() {");
+    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this, " +
+				     sensitivity_exists_argument + ", " + spawn_method_argument + ");");
+    parm.addClassConstructorContents("x->run();");
+    parm.addClassConstructorContents("}, \"" + object_name + "\"" +
+				     description_append + ", &" + options_name +");");
+    parm.addClassConstructorContents("}");
     debug.functionEnd("instantiateType");
   }
 

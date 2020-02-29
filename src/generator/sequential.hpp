@@ -4,18 +4,20 @@
 namespace generator {
 
   template<typename Func>
-  void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback, bool constructor) {
-    debug.functionStart("forLoop");
+  void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
+    debug.functionStart("forLoop(name = " + name + ")");
     std::string typeName;
     ast::ObjectValueContainer type;
+    std::string variable_instance;
+    std::string variable_creation;
     if (iteration->range) {
       ast::RangeType* r = iteration->range;
       typeName = name + "_type";
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
-      parm.addClassContents(typeName + " " + name + ";");
+      variable_instance = typeName + " " + name + ";"; 
       std::string factory_name = "factory_" + typeName + ".create()";
-      parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
+      variable_creation = name + ".construct(" + factory_name + ");"; 
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (parm.findOne(object, iteration->identifier)) {  
@@ -24,7 +26,8 @@ namespace generator {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
             type = object.object->type.GetArgument();
           } else {
-            exceptions.printError(name + " must be array type to use range attribute", &iteration->identifier->text);
+            exceptions.printError(name + " must be array type to use range attribute",
+				  &iteration->identifier->text);
           }
         } else {
           type = object.object->type;
@@ -32,21 +35,11 @@ namespace generator {
       } 
     }
     parm.addObject(ast::ObjectType::VARIABLE, name, type);
-    std::string t = "for (" +
+    std::string forloop_execution = "for (" +
       name + " = " + name + ".LEFT(); " +
       name + " <= " + name + ".RIGHT(); " +
       name + " = " + name + ".RIGHTOF()) {";
-    if (constructor) {
-      parm.addClassConstructorContents(t);
-    } else {
-      parm.addImplementationContents(t);
-    }
-    callback(parm);
-    if (constructor) {
-      parm.addClassConstructorContents("}");
-    } else {
-      parm.addImplementationContents("}");
-    }
+    callback(parm, forloop_execution, variable_instance, variable_creation);
     debug.functionEnd("forLoop");
   }  
 

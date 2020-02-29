@@ -19,8 +19,8 @@ namespace generator {
     header_def = NameConverter::toUpper(header_def);
     header_file << "#ifndef " << header_def << "_INCLUDE" << std::endl;
     header_file << "#define " << header_def << "_INCLUDE" << std::endl;
-    header_file << "#include <memory.h>" << std::endl;
-    header_file << "#include <string.h>" << std::endl;
+    header_file << "#include <memory>" << std::endl;
+    header_file << "#include <string>" << std::endl;
     header_file << "#define SC_INCLUDE_DYNAMIC_PROCESSES" << std::endl;
     header_file << "#include <systemc.h>" << std::endl;
     header_file << "#include <vhdl.h>" << std::endl;

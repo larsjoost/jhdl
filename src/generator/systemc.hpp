@@ -87,7 +87,7 @@ namespace generator {
     void waitStatement(parameters& parm, ast::WaitStatement* p);
     void ifStatement(parameters& parm, ast::IfStatement* p);
     template<typename Func>
-    void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback, bool constructor);
+    void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback);
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
     void reportStatement(parameters& parm, ast::ReportStatement* p);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
@@ -207,7 +207,7 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
 
     // constructor.cpp
-    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL);
+    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL, std::string description_append = "");
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,

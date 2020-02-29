@@ -38,7 +38,7 @@ namespace vhdl {
       a_value = value;
     }
     
-    void construct(const Range<TYPE>& other) {
+    inline void construct(const Range<TYPE>& other) {
       a_left = other.a_left;
       a_right = other.a_right;
     };
@@ -47,8 +47,8 @@ namespace vhdl {
       a_value = value;
     }
     
-    void operator=(const TYPE other) { a_value = other; }
-    void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
+    inline void operator=(const TYPE other) { a_value = other; }
+    inline void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
 
     inline bool operator == (const Range<TYPE> &other) const { return a_value == other.a_value; }
     inline bool operator != (const Range<TYPE> &other) const { return a_value != other.a_value; }
@@ -72,59 +72,59 @@ namespace vhdl {
       sc_trace(tf,v.a_value, NAME + ".value");
     }
     
-    operator bool() const {
+    inline operator bool() const {
       return a_value != TYPE(0);
     }
     
-    operator int() const {
+    inline operator int() const {
       return a_value;
     }
 
-    int ToInt() {
+    inline int ToInt() {
       return a_value;
     }
     
-    const std::string toString() const {
+    inline const std::string toString() const {
       return std::to_string(a_value);
     }
 
-    unsigned int LENGTH() {
+    inline unsigned int LENGTH() {
       return 32;
     }
 
-    TYPE HIGH() {
+    inline TYPE HIGH() {
       return (a_left > a_right ? a_left : a_right);
     }
-    TYPE LOW() {
+    inline TYPE LOW() {
       return (a_left < a_right ? a_left : a_right);
     }
-    TYPE LEFT() {
+    inline TYPE LEFT() {
       return a_left;
     }
-    TYPE RIGHT() {
+    inline TYPE RIGHT() {
       return a_right;
     }
-    TYPE LEFTOF() {
+    inline TYPE LEFTOF() {
       return (a_left < a_right ? getValue() - 1 : getValue() + 1);
     }
-    TYPE RIGHTOF() {
+    inline TYPE RIGHTOF() {
       return (a_left < a_right ? getValue() + 1 : getValue() - 1);
     }
 		       
-    int getValue() {
+    inline int getValue() {
       return a_value;
     }
 
-    std::string STATUS() {
+    inline std::string STATUS() {
       return toString();
     }
     
     template <class T>
-    ::std::string IMAGE(T& r) {
+    std::string IMAGE(T& r) {
       return r.toString();
     }
 
-    ::std::string IMAGE(TYPE r) {
+    inline std::string IMAGE(TYPE r) {
       return std::to_string(r);
     }
 

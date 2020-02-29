@@ -27,18 +27,28 @@ namespace generator {
       parm.addImplementationContents(getSourceLine(forGenerateStatement->name));
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
+      std::string description_append = " + \"(\" + " + identifier + ".toString() + \")\"";
+      parm.addClassConstructorContents("{");
+      auto forloop_callback =
+	[&](parameters& parm,
+	    std::string& forloop_execution,
+	    std::string& variable_instance,
+	    std::string& variable_creation) {
+	  parm.addClassConstructorContents(variable_instance);
+	  parm.addClassConstructorContents(variable_creation);
+	  parm.addClassConstructorContents(forloop_execution);
+	  instantiateType(parm, name, ast::ObjectType::GENERATE, NULL, description_append);
+	  parm.addClassConstructorContents("}");
+	};
+      forLoop(parm, identifier, forGenerateStatement->iteration, forloop_callback);
+      parm.addClassConstructorContents("}");
       auto callback = [&](parameters& parm) {
-      	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
       };
       defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
 		   NULL, &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
 		   callback, false, true);
-      parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
-      forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          instantiateType(parm, name, ast::ObjectType::GENERATE);
-        }, true);
     }
   }
 

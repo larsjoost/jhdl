@@ -32,7 +32,8 @@ namespace generator {
     static std::string getHeaderFileName(std::string& library, std::string& file_name);
     
     static std::string objectName(ast::ObjectType type, const std::string& name);
-  };
+    static std::string objectTypeToString(ast::ObjectType type);
+    };
 
 }
 

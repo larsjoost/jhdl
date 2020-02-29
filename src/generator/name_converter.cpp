@@ -141,14 +141,18 @@ namespace generator {
     return filename.substr(0, lastdot);
   }
   
- std::string NameConverter::getHeaderFileName(std::string& library, std::string& file_name) {
-   return toLower(library) + "_" + replaceFileExtension(toLower(file_name), ".hpp");
- }
+  std::string NameConverter::getHeaderFileName(std::string& library, std::string& file_name) {
+    return toLower(library) + "_" + replaceFileExtension(toLower(file_name), ".hpp");
+  }
 
   std::string NameConverter::objectName(ast::ObjectType type, const std::string& name) {
+    return objectTypeToString(type) + "_" + name;
+  }
+  
+  std::string NameConverter::objectTypeToString(ast::ObjectType type) {
     std::string type_name = ast::toString(type);
     type_name[0] = toupper(type_name[0]);
-    return type_name + "_" + name;
+    return type_name;
   }
   
 
