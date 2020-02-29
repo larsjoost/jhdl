@@ -13,11 +13,10 @@ namespace generator {
       std::string name = blockStatement->name->toString(true);
       std::string class_description = "struct " + name;
       defineObject(parm, false, name, ast::ObjectType::BLOCK, "", 
-		   class_description, NULL, 
+		   &class_description, NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},
-		   [&](parameters& parm){},
 		   false, true);
     }
   }
@@ -28,18 +27,18 @@ namespace generator {
       parm.addImplementationContents(getSourceLine(forGenerateStatement->name));
       std::string name = forGenerateStatement->name->toString(true);
       std::string identifier = forGenerateStatement->identifier->toString(true);
-      auto createDeclaration = [&](parameters& parm) {
-        parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
-      };
-      auto createBody = [&](parameters& parm) {
+      auto callback = [&](parameters& parm) {
       	parm.addImplementationContents("STD::STANDARD::INTEGER " + identifier + ";");
       };
-      std::string class_description = "struct " + name;
       defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
-		   class_description, &identifier,
+		   NULL, &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
-		   createBody, createDeclaration, false, true);
+		   callback, false, true);
+      parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
+      forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
+          instantiateType(parm, name, ast::ObjectType::GENERATE);
+        }, true);
     }
   }
 
@@ -78,7 +77,7 @@ namespace generator {
       }
       ast::ObjectType type = ast::ObjectType::PROCESS;
       std::string class_name = NameConverter::objectName(type, processName);
-      auto createDefinition =
+      auto callback =
 	[&](parameters& parm) {
 	  createProcess(parm,
 			[&](parameters& parm) {
@@ -86,12 +85,10 @@ namespace generator {
 			},
 			class_name);
 	};
-      auto createBody = [&](parameters& parm) {
-      };
       std::string class_description = "struct " + class_name;
       defineObject(parm, false, processName, type, "",
-		   class_description, NULL,
-                   &process->declarations, NULL, createBody, createDefinition, true, true);
+		   &class_description, NULL,
+                   &process->declarations, NULL, callback, true, true);
       instantiateType(parm, processName, ast::ObjectType::PROCESS, &sensitivity_list);
     }
     debug.functionEnd("processDefinition");
@@ -113,17 +110,16 @@ namespace generator {
 	  sensitivity_list.push_back(parm.getName(object, -1));
 	  name_extension = ".read()";
 	};
-      auto createBody = [&](parameters& parm) {
-			  createProcess(parm,
-					[&](parameters& parm) {
-					  signalAssignment(parm, s, sensitivityListGenerator);
-					},
-					name);
-			};
-      std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::PROCESS, name);
+      auto callback =
+	[&](parameters& parm) {
+	  createProcess(parm,
+			[&](parameters& parm) {
+			  signalAssignment(parm, s, sensitivityListGenerator);
+			},
+			name);
+	};
       defineObject(parm, false, name, ast::ObjectType::PROCESS, "", 
-		   class_description, NULL, NULL, NULL, createBody,
-		   [&](parameters& parm) {}, true, true);
+		   NULL, NULL, NULL, NULL, callback, true, true);
       instantiateType(parm, name, ast::ObjectType::PROCESS, &sensitivity_list);
       debug.functionEnd("concurrentSignalAssignment");
     }

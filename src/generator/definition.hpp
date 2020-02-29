@@ -1,34 +1,25 @@
 
-
-
-
-
-
-
-
-
-
 #include "systemc.hpp"
 
 namespace generator {
 
 
-  template <typename BodyFunc, typename DeclFunc>
+  template <typename Func>
   void SystemC::defineObject(parameters& parm,
                              bool topHierarchy,
                              std::string name,
                              ast::ObjectType type,
 			     std::string base_name,
-			     std::string class_description,
+			     std::string* class_description,
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                             BodyFunc bodyCallback,
-			     DeclFunc declarationCallback,
-                             bool wait_statements,
+                             Func callback,
+			     bool wait_statements,
                              bool init_enable) {
     debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")");
-    openHierarchy(parm, name, type, class_description, base_name);
+    std::string c = (class_description ? *class_description : "struct " + NameConverter::objectName(type, name));
+    openHierarchy(parm, name, type, c, base_name);
     parm.process_contains_wait = false;
     ParentInfo parent_info;
     
@@ -40,12 +31,11 @@ namespace generator {
     if (declarationList) {
       declarations(parm, *declarationList);
     }
-    declarationCallback(parm);
+    callback(parm);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
-    bodyCallback(parm);
     if (init_enable) {
       debug.debug("Constructor");
       if (concurrentStatements) {

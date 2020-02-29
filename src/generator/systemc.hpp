@@ -176,18 +176,17 @@ namespace generator {
                       Func body);  
     bool getObjectName(parameters& parm, std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
     bool getObjectName(parameters& parm, std::string& name, ast::ObjectType id, ast::Text* text = NULL);
-    template <typename BodyFunc, typename DeclFunc>
+    template <typename Func>
     void defineObject(parameters& parm,
                       bool topHierarchy,
                       std::string name,
 		      ast::ObjectType type,
 		      std::string base_name,
-		      std::string class_description,
+		      std::string* class_description,
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                      BodyFunc bodyCallback,
-		      DeclFunc declarationCallback,
+                      Func callback,
                       bool wait_statements,
                       bool init_enable);
     void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
@@ -210,7 +209,6 @@ namespace generator {
     // constructor.cpp
     void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL);
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
-    void forGenerateStatementInstantiation(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                               std::string& entityName, std::string& library);

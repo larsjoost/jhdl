@@ -39,22 +39,6 @@ namespace generator {
     }
   }
 
-  void SystemC::forGenerateStatementInstantiation(parameters& parm,
-                                                  ast::ForGenerateStatement* forGenerateStatement) {
-    
-    if (forGenerateStatement) {
-      debug.functionStart("forGenerateStatementInstantiation");
-      assert(forGenerateStatement->identifier);
-      std::string identifier = forGenerateStatement->identifier->toString(true);
-      std::string name = forGenerateStatement->name->toString(true);
-      parm.addObject(ast::ObjectType::VARIABLE, identifier, ast::ObjectValue::INTEGER);
-      forLoop(parm, identifier, forGenerateStatement->iteration, [&](parameters& parm) {
-          instantiateType(parm, name, ast::ObjectType::GENERATE);
-        }, true);
-      debug.functionEnd("forGenerateStatementInstantiation");
-    }
-  }
-
   void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                                      std::string& entityName, std::string& library) {
     if (l) {
@@ -103,11 +87,7 @@ namespace generator {
                                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     debug.functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
-      forGenerateStatementInstantiation(parm, c.forGenerateStatement);
       blockStatementInstantiation(parm, c.blockStatement);
-
-
-
       componentInstantiation(parm, c.componentInstance);
     }
     debug.functionEnd("concurrentStatementsInstantiation");

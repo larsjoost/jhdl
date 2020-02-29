@@ -49,9 +49,8 @@ namespace generator {
   template<typename Func>
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
     debug.functionStart("PrintTypeObject(name = " + name + ")");
-    std::string class_description = "struct " + NameConverter::objectName(ast::ObjectType::FACTORY, name);
-    defineObject(parm, false, name, ast::ObjectType::FACTORY, "", class_description, NULL, NULL, NULL, func,
-                 [](parameters& parm) {}, false, false);
+    defineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, NULL, func,
+                 false, false);
 
     debug.functionEnd("PrintTypeObject");
   }

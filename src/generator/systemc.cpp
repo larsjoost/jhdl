@@ -206,7 +206,7 @@ namespace generator {
       parm.package_contains_function = false;
       // bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
       std::string class_name = NameConverter::objectName(type, name);
-      auto createDefinition =
+      auto callback =
 	[&](parameters& parm)
 	{
 	  parm.setClassConstructorDescription(class_name + "()");
@@ -217,11 +217,9 @@ namespace generator {
 	    parm.addClassTrailer("using " + name + " = " + class_name + ";");
       	  }
 	};
-      auto createBody = [&](parameters& parm) {
-			};
       std::string class_description = "struct " + class_name;
-      defineObject(parm, true, name, type, "", class_description, NULL,
-                   &package->declarations, NULL, createBody, createDefinition, false, true);
+      defineObject(parm, true, name, type, "", &class_description, NULL,
+                   &package->declarations, NULL, callback, false, true);
       if (type == ast::ObjectType::PACKAGE_BODY) {
 	std::string l = NameConverter::toUpper(library);
 	std::string declaration = l + "::" + class_name + " " + l + "_" + name + ";";
@@ -239,7 +237,7 @@ namespace generator {
     const ast::ObjectType type = ast::ObjectType::ENTITY;
     std::string class_name = NameConverter::objectName(type, name);
     topHierarchyStart(parm, library, name, type, a_filename);
-    auto declaration_callback =
+    auto callback =
       [&](parameters& parm) {
 	if (interface->generics) {
 	  assert(false);
@@ -266,11 +264,10 @@ namespace generator {
 	parm.addClassContents("SC_HAS_PROCESS(" + class_name + ");");
       };
     std::string class_description = "SC_MODULE(" + class_name + ")";
-    defineObject(parm, true, name, type, "", class_description, NULL,
+    defineObject(parm, true, name, type, "", &class_description, NULL,
 		 NULL,
 		 NULL,
-		 [&](parameters& parm){},
-		 declaration_callback,
+		 callback,
 		 false, true);
     topHierarchyEnd(parm, &interface->name->text, true);
     debug.functionEnd("interfaceDeclaration");
@@ -292,7 +289,7 @@ namespace generator {
         }
       }
       std::string class_name = NameConverter::objectName(type, architecture_name);
-      auto declaration_callback =
+      auto callback =
 	[&](parameters& parm) {
 	  std::string derived_class = NameConverter::objectName(ast::ObjectType::ENTITY, entity_name);
 	  parm.addDerivedClass(derived_class);
@@ -300,11 +297,10 @@ namespace generator {
 	  parm.addClassConstructorInitializer(derived_class + "(name)");
 	};
       std::string class_description = "struct " + class_name;
-      defineObject(parm, true, architecture_name, type, entity_name, class_description, NULL,
+      defineObject(parm, true, architecture_name, type, entity_name, &class_description, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
-                   [&](parameters& parm){},
-                   declaration_callback,
+                   callback,
                    false, true);
       topHierarchyEnd(parm, &implementation->architecture_name->text);
       debug.functionEnd("implementationDeclaration");
