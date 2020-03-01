@@ -26,24 +26,35 @@ namespace generator {
     if (forGenerateStatement) {
       parm.addImplementationContents(getSourceLine(forGenerateStatement->name), __FILE__, __LINE__);
       std::string name = forGenerateStatement->name->toString(true);
+      std::string instance_placeholder_name = name + "_placeholder";
+      std::string object_name = NameConverter::objectName(ast::ObjectType::GENERATE, name);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string description_append = " + \"(\" + " + identifier + ".toString() + \")\"";
       parm.addClassConstructorContents("{");
+      std::string forloop_variable_instance;
+      ast::ObjectValueContainer forloop_variable_type;
       auto forloop_callback =
 	[&](parameters& parm,
 	    std::string& forloop_execution,
 	    std::string& variable_instance,
-	    std::string& variable_creation) {
+	    std::string& variable_creation,
+	    ast::ObjectValueContainer variable_type) {
+	  forloop_variable_instance = variable_instance;
+	  forloop_variable_type = variable_type;
 	  parm.addClassConstructorContents(variable_instance);
 	  parm.addClassConstructorContents(variable_creation);
 	  parm.addClassConstructorContents(forloop_execution);
-	  instantiateType(parm, name, ast::ObjectType::GENERATE, NULL, description_append);
+	  parm.addClassConstructorContents(instance_placeholder_name + ".push_back(std::make_unique<" + object_name + ">(this, " + identifier + "));");
+	  parm.addClassBottom("std::vector<std::unique_ptr<" + object_name + ">> " + instance_placeholder_name + ";");
 	  parm.addClassConstructorContents("}");
 	};
       forLoop(parm, identifier, forGenerateStatement->iteration, forloop_callback);
       parm.addClassConstructorContents("}");
-      auto callback = [&](parameters& parm) {
-      };
+      auto callback =
+	[&](parameters& parm) {
+	  parm.addClassContents(forloop_variable_instance);
+	  parm.addObject(ast::ObjectType::VARIABLE, identifier, forloop_variable_type);
+    	};
       defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
 		   NULL, &identifier,
                    &forGenerateStatement->declarations,

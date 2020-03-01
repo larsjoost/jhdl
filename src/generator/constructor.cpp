@@ -8,7 +8,8 @@ namespace generator {
   void SystemC::instantiateType(parameters& parm, std::string name,
                                 ast::ObjectType object_type,
 				std::list<std::string>* sensitivity_list,
-				std::string description_append) {
+				std::string description_append,
+				std::string instance_argument) {
     debug.functionStart("instantiateType");
     std::string object_name = NameConverter::objectName(object_type, name);
     std::string instance_name = object_name + "_INST";
@@ -24,12 +25,12 @@ namespace generator {
 	parm.addClassConstructorContents(options_name + ".set_sensitivity(" + i + ".getInterfacePointer());");
       }
     }
-    parm.addClassConstructorContents(NameConverter::getTopLevelPrefix(parm) +
-				     "sc_spawn([&]() {");
-    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this);");
+    parm.addClassConstructorContents("std::string name = std::string(\"" + object_name + "\")" + description_append + ";");
+    parm.addClassConstructorContents("sc_spawn([&]() {");
+    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this" +
+				     std::string(!instance_argument.empty() ? ", " + instance_argument : "") + ");");
     parm.addClassConstructorContents("x->run();");
-    parm.addClassConstructorContents("}, \"" + object_name + "\"" +
-				     description_append + ", &" + options_name +");");
+    parm.addClassConstructorContents("}, name.c_str(), &" + options_name +");");
     parm.addClassConstructorContents("}");
     debug.functionEnd("instantiateType");
   }

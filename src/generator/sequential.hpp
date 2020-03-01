@@ -39,7 +39,7 @@ namespace generator {
       name + " = " + name + ".LEFT(); " +
       name + " <= " + name + ".RIGHT(); " +
       name + " = " + name + ".RIGHTOF()) {";
-    callback(parm, forloop_execution, variable_instance, variable_creation);
+    callback(parm, forloop_execution, variable_instance, variable_creation, type);
     debug.functionEnd("forLoop");
   }  
 
@@ -129,7 +129,8 @@ namespace generator {
 	[&](parameters& parm,
 	    std::string& forloop_execution,
 	    std::string& variable_instance,
-	    std::string& variable_creation)
+	    std::string& variable_creation,
+	    ast::ObjectValueContainer variable_type)
 	{
 	  parm.addClassContents(variable_instance);
 	  parm.addClassConstructorContents(variable_creation);

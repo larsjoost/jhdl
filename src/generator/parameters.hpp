@@ -229,14 +229,17 @@ namespace generator {
       if (valid(i.object)) {
 	if (found == 0) {
 	  bestMatch = i;
-	} else  {
+	  found++;
+	} else if (i.hierarchySize() > bestMatch.hierarchySize()) {
+	  bestMatch = i;
+	} else if (i.hierarchySize() == bestMatch.hierarchySize()) {
 	  if (found == 1) {
 	    exceptions.printError("More than one match of " + bestMatch.toString());
 	    exceptions.printError("match #1: " + bestMatch.toString(), bestMatch.object->text); 
 	  }
 	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString(), bestMatch.object->text); 
-	}
-	found++;
+	  found++;
+	} 
       }
     }
     debug.functionEnd("findBestMatch: " + std::to_string(found));

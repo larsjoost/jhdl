@@ -213,7 +213,7 @@ namespace generator {
     void concurrentStatementsDefinition(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
 
     // constructor.cpp
-    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL, std::string description_append = "");
+    void instantiateType(parameters& parm, std::string name, ast::ObjectType object_type, std::list<std::string>* sensitivity_list = NULL, std::string description_append = "", std::string instance_argument = "");
     void blockStatementInstantiation(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentStatementsInstantiation(parameters& parm, ast::List<ast::ConcurrentStatement>& concurrentStatements);
     void componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,

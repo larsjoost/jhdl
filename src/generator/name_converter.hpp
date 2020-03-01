@@ -1,9 +1,4 @@
 
-
-
-
-
-
 #ifndef GENERATOR_NAME_CONVERTER_HPP_
 #define GENERATOR_NAME_CONVERTER_HPP_
 
