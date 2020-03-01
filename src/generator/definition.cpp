@@ -11,9 +11,12 @@ namespace generator {
     debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
       std::string name = blockStatement->name->toString(true);
-      std::string class_description = "struct " + name;
+      std::string object_name = NameConverter::objectName(ast::ObjectType::BLOCK, name);
+      std::string instance_placeholder_name = name + "_placeholder";
+      parm.addClassConstructorContents(instance_placeholder_name + " = std::make_unique<" + object_name + ">(this);");
+      parm.addClassBottom("std::unique_ptr<" + object_name + "> " + instance_placeholder_name + ";");
       defineObject(parm, false, name, ast::ObjectType::BLOCK, "", 
-		   &class_description, NULL, 
+		   NULL, NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
                    [&](parameters& parm){},

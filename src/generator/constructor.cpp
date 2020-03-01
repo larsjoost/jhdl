@@ -35,15 +35,6 @@ namespace generator {
     debug.functionEnd("instantiateType");
   }
 
-  void SystemC::blockStatementInstantiation(parameters& parm,
-                                            ast::BlockStatement* blockStatement) {
-    if (blockStatement) {
-      debug.functionStart("blockStatementInstantiation");
-      instantiateType(parm, blockStatement->name->toString(true), ast::ObjectType::BLOCK);
-      debug.functionEnd("blockStatementInstantiation");
-    }
-  }
-
   void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
                                      std::string& entityName, std::string& library) {
     if (l) {
@@ -92,7 +83,6 @@ namespace generator {
                                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
     debug.functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
-      blockStatementInstantiation(parm, c.blockStatement);
       componentInstantiation(parm, c.componentInstance);
     }
     debug.functionEnd("concurrentStatementsInstantiation");
