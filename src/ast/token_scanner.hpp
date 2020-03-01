@@ -169,7 +169,7 @@ namespace ast {
   }
 
   template <class ApplicationSpecificScanner>
-  bool TokenScanner<ApplicationSpecificScanner>::optional(Text& t, const char* c) {
+  inline bool TokenScanner<ApplicationSpecificScanner>::optional(Text& t, const char* c) {
     debug.debug("optional " + std::string(c));
     bool result; 
     if (result = match(t, c)) {
@@ -179,7 +179,7 @@ namespace ast {
   }
    
   template <class ApplicationSpecificScanner>
-  bool TokenScanner<ApplicationSpecificScanner>::accept(const char* c) {
+  inline bool TokenScanner<ApplicationSpecificScanner>::accept(const char* c) {
      debug.debug("accept" + std::string(c));
      Text t;
      if (!optional(t, c)) {

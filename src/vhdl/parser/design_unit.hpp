@@ -12,11 +12,11 @@ namespace vhdl {
     
     class DesignUnit : public ::ast::DesignUnit {
 
-      Debug<false> debug;
+      Debug<false> m_debug;
       
     public:
 
-      DesignUnit() : debug("vhdl::parser::DesignUnit") {};
+      DesignUnit() : m_debug("vhdl::parser::DesignUnit") {};
       
       void parse(::ast::Scanner<scanner::Scanner>* scanner);
 

@@ -1,3 +1,7 @@
+
+
+
+
 #include "../../ast/scanner.hpp"
 #include "../scanner/scanner.hpp"
 #include "../scanner/defines.hpp"
@@ -15,8 +19,10 @@ namespace vhdl {
       scanner->expect(".");
       package = scanner->expect<SimpleIdentifier, UseClause>();
       scanner->expect(".");
-      if (!(string_identifier = scanner->optional<String>())) {
+      if (!(all = scanner->optional(scanner::Scanner::VHDL_ALL))) {
+	if (!(string_identifier = scanner->optional<String>())) {
           identifier = scanner->expect<SimpleIdentifier, UseClause>();
+	}
       }
       scanner->expect(";");
       return this;

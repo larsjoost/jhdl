@@ -14,7 +14,6 @@ namespace generator {
     std::string instance_name = object_name + "_INST";
     std::string options_name = "opts";
     bool spawn_method = !parm.process_contains_wait;
-    std::string sensitivity_exists_argument = std::string((sensitivity_list) && !sensitivity_list->empty() ? "true" : "false");
     parm.addClassConstructorContents("{");
     parm.addClassConstructorContents("sc_spawn_options " + options_name + ";");
     if (spawn_method) {
@@ -25,11 +24,9 @@ namespace generator {
 	parm.addClassConstructorContents(options_name + ".set_sensitivity(" + i + ".getInterfacePointer());");
       }
     }
-    std::string spawn_method_argument = std::string(spawn_method ? "true" : "false");
     parm.addClassConstructorContents(NameConverter::getTopLevelPrefix(parm) +
 				     "sc_spawn([&]() {");
-    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this, " +
-				     sensitivity_exists_argument + ", " + spawn_method_argument + ");");
+    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this);");
     parm.addClassConstructorContents("x->run();");
     parm.addClassConstructorContents("}, \"" + object_name + "\"" +
 				     description_append + ", &" + options_name +");");
@@ -112,12 +109,8 @@ namespace generator {
       ParentInfo parent_info;
       parm.getParent(parent_info);
       if (parent_info.name.size() > 0) {
-	std::string constructor_description = ObjectName(parent_info) +"* parent, bool static_sensitivity_exists = false, bool spawn_method = false";
+	std::string constructor_description = ObjectName(parent_info) +"* parent";
 	parm.addClassConstructorInitializer("p(parent)");
-	parm.addClassContents("bool m_static_sensitivity_exists;");
-	parm.addClassContents("bool m_spawn_method;");
-	parm.addClassConstructorContents("m_static_sensitivity_exists = static_sensitivity_exists;");
-	parm.addClassConstructorContents("m_spawn_method = spawn_method;");
 	if (argument) {
 	  constructor_description += ", auto " + *argument;
 	  parm.addClassConstructorInitializer(*argument + "(" + *argument + ")");

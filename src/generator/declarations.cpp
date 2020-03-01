@@ -4,6 +4,7 @@
 #include "declarations.hpp"
 #include "database/database.hpp"
 #include "definition.hpp"
+#include "sequential.hpp"
 
 namespace generator {
 
@@ -499,7 +500,7 @@ namespace generator {
       generateObjectArguments(parm, function_declaration->interface, arguments);
       std::string localReturnTypeName = FunctionReturn(parm, function_declaration, false);
       std::string globalReturnTypeName = FunctionReturn(parm, function_declaration, true);
-      parm.addImplementationContents(getSourceLine(text));
+      parm.addImplementationContents(getSourceLine(text), __FILE__, __LINE__);
       std::string argumentNames = getArgumentNames(parm, function_declaration->interface);
       parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration, &text);
       if (!parm.parse_declarations_only) {
@@ -517,13 +518,18 @@ namespace generator {
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
               parm.addClassContents(localReturnTypeName + " " + "run" + interface + ";");
 	      std::string global_prefix = parm.hierarchyToString("::", true) + "::";
-	      parm.addImplementationContents(globalReturnTypeName + " " + global_prefix + "run" + interface_without_initialization + "{");
+	      parm.addImplementationContents(globalReturnTypeName + " " + global_prefix + "run" + interface_without_initialization + "{", __FILE__, __LINE__);
               if (!foreignFunctionName.empty()) {
-                parm.addImplementationContents("// Foreign function call");
-                parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");");
+                parm.addImplementationContents("// Foreign function call", __FILE__, __LINE__);
+                parm.addImplementationContents("return p->" + foreignFunctionName + "(" + argumentNames + ");", __FILE__, __LINE__);
               }
-              sequentialStatements(parm, function_declaration->body->sequentialStatements);
-              parm.addImplementationContents("}");
+	      std::list<std::string> sequential_list;
+	      auto sensitivity_list_callback = 
+		[&](DatabaseResult& object, std::string& name_extension) {};
+	      sequentialStatements(parm, function_declaration->body->sequentialStatements, sequential_list, 
+				   sensitivity_list_callback);
+	      parm.addImplementationContents(sequential_list);
+              parm.addImplementationContents("}", __FILE__, __LINE__);
             } else {
               parm.addClassContents(localReturnTypeName + " run" + interface_with_initialization + ";");
             }
@@ -540,16 +546,16 @@ namespace generator {
           std::string global_prefix = parm.hierarchyToString("::", true) + "::";
 	  parm.addImplementationContents((operatorName ? "friend " : "") +
 					 globalReturnTypeName + " " +
-					 global_prefix + translatedName + interface_without_initialization + " {");
-          parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);");
+					 global_prefix + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
+          parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);", __FILE__, __LINE__);
           std::string s,d;
           for (auto& i : arguments.list) {
             s += d + i.name;
             d = ", ";
           }
           std::string r = localReturnTypeName == "void" ? "" : "return ";
-          parm.addImplementationContents(r + "inst.run(" + s + ");");
-          parm.addImplementationContents("}");
+          parm.addImplementationContents(r + "inst.run(" + s + ");", __FILE__, __LINE__);
+          parm.addImplementationContents("}", __FILE__, __LINE__);
         } else {
 	  parm.addClassContents("virtual " + std::string(operatorName ? "friend " : "") + localReturnTypeName + " " +
 				translatedName + interface + " = 0;");

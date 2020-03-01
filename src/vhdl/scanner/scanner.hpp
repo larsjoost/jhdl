@@ -1,4 +1,8 @@
 
+
+
+
+
 #ifndef VHDL_SCANNER_SCANNER_H_
 #define VHDL_SCANNER_SCANNER_H_
 
@@ -106,6 +110,7 @@ namespace vhdl {
         VHDL_ROR,
         VHDL_ALIAS,
         VHDL_OTHERS,
+        VHDL_ALL,
         NUMBER_OF_KEYWORDS
       };
       
@@ -191,7 +196,8 @@ namespace vhdl {
           {VHDL_ROL, (char *)"rol", 1993},
           {VHDL_ROR, (char *)"ror", 1993},
           {VHDL_ALIAS, (char *)"alias", 1993},
-          {VHDL_OTHERS, (char *)"others", 1993}
+          {VHDL_OTHERS, (char *)"others", 1993},
+          {VHDL_ALL, (char *)"all", 1993}
         };
         return a;
       }

@@ -18,10 +18,13 @@ namespace vhdl {
         label = scanner->accept<SimpleIdentifier>();
         scanner->accept(":");
       }
-      scanner->accept(scanner::Scanner::VHDL_PROCESS);
+      process = scanner->accept(scanner::Scanner::VHDL_PROCESS);
       if (scanner->optional("(")) {
-        sensitivity = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Process>();
-        scanner->expect(")");
+	sensitivity_all = scanner->optional(scanner::Scanner::VHDL_ALL);
+	if (!sensitivity_all) {
+	  sensitivity_list = scanner->expect<List<SimpleIdentifier, ::ast::SimpleIdentifier, ','>, Process>();
+	}
+	scanner->expect(")");
       }
       scanner->optional(scanner::Scanner::VHDL_IS);
       while (declarations.add(scanner->optional<Declaration>())) {};

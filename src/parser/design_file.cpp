@@ -7,6 +7,7 @@
 namespace parser {
 
   void DesignFile::parse(std::string& filename) {
+    m_debug.functionStart("parse");
     this->filename = filename;
     try {
       std::string s = filename;
@@ -15,7 +16,7 @@ namespace parser {
         verilogScanner.loadFile(filename);
         while (true) {
           ast::DesignUnit* design_unit = verilogScanner.expect<verilog::parser::DesignUnit, ast::DesignUnit>();
-          debug.debug("Design unit " + std::string(design_unit ? "added" : "not found"));
+          m_debug.debug("Design unit " + std::string(design_unit ? "added" : "not found"));
           designUnits.add(design_unit);
         }
       } else {
@@ -26,8 +27,9 @@ namespace parser {
         }
       }
     } catch (ast::TokenEof e) {
-      debug.debug("Caught TokenEof");
+      m_debug.debug("Caught TokenEof");
     }
+    m_debug.functionEnd("parse");
   }
 
 }

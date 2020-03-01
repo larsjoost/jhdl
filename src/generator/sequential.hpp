@@ -44,7 +44,8 @@ namespace generator {
   }  
 
   template<typename Func>
-  void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, Func callback) {
+  void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type,
+			   std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     debug.functionStart("assignment");
     std::string command = "if";
     std::string noConditionCommand = "";
@@ -52,7 +53,7 @@ namespace generator {
 
     try {
       std::string name = a_expression.basicIdentifierToString(parm, target);
-      parm.addImplementationContents(getSourceLine(target));
+      parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
       ast::ReturnTypes return_types;
       a_expression.basicIdentifierReturnTypes(parm, target, return_types);
       ast::ObjectValueContainer expectedType;
@@ -60,18 +61,18 @@ namespace generator {
 	for (ast::AssignmentCondition s : p->assignment_conditions.list) {
 	  if (s.condition) {
 	    static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-	    parm.addImplementationContents(command + " (" + a_expression.toString(parm, s.condition, expectedValue, callback) + ") {");
+	    parm.addTextToList(sequential_list, command + " (" + a_expression.toString(parm, s.condition, expectedValue, sensitivity_list_callback) + ") {", __FILE__, __LINE__);
 	    command = "else if";
 	    noConditionCommand = "else {";
 	    noConditionDelimiter = "}";
 	  } else {
-	    parm.addImplementationContents(noConditionCommand);
+	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
-	  parm.addImplementationContents(name + " = " + a_expression.toString(parm, s.expression, expectedType, callback) + ";");
+	  parm.addTextToList(sequential_list, name + " = " + a_expression.toString(parm, s.expression, expectedType, sensitivity_list_callback) + ";", __FILE__, __LINE__);
 	  if (s.condition) {
-	    parm.addImplementationContents("}");
+	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
 	  } else {
-	    parm.addImplementationContents(noConditionDelimiter);
+	    parm.addTextToList(sequential_list, noConditionDelimiter, __FILE__, __LINE__);
 	  }
 	}
       } else {
@@ -85,11 +86,79 @@ namespace generator {
   }
   
   template <typename Func>
-  void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback) {
+  void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
       debug.functionStart("signalAssignment");
-      assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, callback);
+      assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, sequential_list, sensitivity_list_callback);
       debug.functionEnd("signalAssignment");
     }
   }
+
+  template <typename Func>
+  void SystemC::ifStatement(parameters& parm, ast::IfStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
+    if (p) {
+      debug.functionStart("ifStatement");
+      std::string command = "if ";
+      for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
+	if (c.condition) {
+          static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
+          try {
+            std::string condition = a_expression.toString(parm, c.condition, expectedType);
+            parm.addTextToList(sequential_list, command + " (" + condition + ") {", __FILE__, __LINE__);
+          } catch (ExpressionParser::ObjectNotFound e) {
+            e.print();
+          }
+	} else {
+	  parm.addTextToList(sequential_list, "} else {", __FILE__, __LINE__);
+	}
+	command = "} elsif";
+        sequentialStatements(parm, c.sequentialStatements, sequential_list, sensitivity_list_callback);
+      }
+      parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
+      debug.functionEnd("ifStatement");
+    }
+  }
+
+  template <typename Func>
+  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
+    if (f) {
+      assert(f->identifier);
+      std::string name = f->identifier->toString(true);
+      debug.functionStart("forLoopStatement(name = " + name + ")");
+      auto callback =
+	[&](parameters& parm,
+	    std::string& forloop_execution,
+	    std::string& variable_instance,
+	    std::string& variable_creation)
+	{
+	  parm.addClassContents(variable_instance);
+	  parm.addClassConstructorContents(variable_creation);
+	  parm.addTextToList(sequential_list, forloop_execution, __FILE__, __LINE__);
+	  sequentialStatements(parm, f->sequentialStatements, sequential_list, sensitivity_list_callback);
+	  parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
+      };
+      forLoop(parm, name, f->iteration, callback);
+      debug.functionEnd("forLoopStatement");
+    }
+  }
+  
+
+  template <typename Func>
+  void SystemC::sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l,
+				     std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
+    debug.functionStart("sequentialStatements");
+    for (ast::SequentialStatement s : l.list) {
+      procedureCallStatement(parm, s.procedureCallStatement, sequential_list);
+      variableAssignment(parm, s.variableAssignment, sequential_list);
+      signalAssignment(parm, s.signalAssignment, sequential_list, sensitivity_list_callback);
+      reportStatement(parm, s.reportStatement, sequential_list);
+      ifStatement(parm, s.ifStatement, sequential_list, sensitivity_list_callback);
+      forLoopStatement(parm, s.forLoopStatement, sequential_list, sensitivity_list_callback);
+      waitStatement(parm, s.waitStatement, sequential_list);
+      returnStatement(parm, s.returnStatement, sequential_list);
+    }
+    debug.functionEnd("sequentialStatements");
+  }
+
+
 }

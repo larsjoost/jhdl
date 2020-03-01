@@ -4,10 +4,10 @@
 
 namespace generator {
 
-  void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p) {
+  void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
       debug.functionStart("procedureCallStatement");
-      parm.addImplementationContents(a_expression.procedureCallStatementToString(parm, p) + ";");
+      parm.addTextToList(sequential_list, a_expression.procedureCallStatementToString(parm, p) + ";", __FILE__, __LINE__);
       debug.functionEnd("procedureCallStatement");
     }
   }
@@ -33,23 +33,16 @@ namespace generator {
     return getObjectName(parm, name, o, id, text);
   }
   
-  void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p) {
+  void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p, std::list<std::string>& sequential_list) {
     if (p) {
       debug.functionStart("variableAssignment");
-      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
+      assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, sequential_list,
+		 [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
       debug.functionEnd("variableAssignment");
     }
   }
 
-  void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p) {
-    if (p) {
-      debug.functionStart("signalAssignment");
-      signalAssignment(parm, p, [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
-      debug.functionEnd("signalAssignment");
-    }
-  }
-
-  void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p) {
+  void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
       debug.functionStart("reportStatement");
       static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
@@ -59,9 +52,9 @@ namespace generator {
       DatabaseResult object;
       if (parm.findOne(object, severity, ast::ObjectType::ENUM)) {
         std::string name = NameConverter::getName(parm, object);
-        parm.addImplementationContents("vhdl::report(" +
-				       a_expression.toString(parm, p->message, expected_type, true) + ", " +
-				       name + ");");
+        parm.addTextToList(sequential_list, "vhdl::report(" +
+			   a_expression.toString(parm, p->message, expected_type, true) + ", " +
+			   name + ");", __FILE__, __LINE__);
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
         parm.printAllObjects(severity);
@@ -70,88 +63,27 @@ namespace generator {
     }
   }
 
-  void SystemC::ifStatement(parameters& parm, ast::IfStatement* p) {
-    if (p) {
-      debug.functionStart("ifStatement");
-      std::string command = "if ";
-      for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
-	if (c.condition) {
-          static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
-          try {
-            std::string condition = a_expression.toString(parm, c.condition, expectedType);
-            parm.addImplementationContents(command + " (" + condition + ") {");
-          } catch (ExpressionParser::ObjectNotFound e) {
-            e.print();
-          }
-	} else {
-	  parm.addImplementationContents("} else {");
-	}
-	command = "} elsif";
-        sequentialStatements(parm, c.sequentialStatements);
-      }
-      parm.addImplementationContents("}");
-      debug.functionEnd("ifStatement");
-    }
-  }
-
-  void SystemC::forLoopStatement(parameters& parm, ast::ForLoopStatement* f) {
-    if (f) {
-      assert(f->identifier);
-      std::string name = f->identifier->toString(true);
-      debug.functionStart("forLoopStatement(name = " + name + ")");
-      auto callback =
-	[&](parameters& parm,
-	    std::string& forloop_execution,
-	    std::string& variable_instance,
-	    std::string& variable_creation)
-	{
-	  parm.addClassContents(variable_instance);
-	  parm.addClassConstructorContents(variable_creation);
-	  parm.addImplementationContents(forloop_execution);
-	  sequentialStatements(parm, f->sequentialStatements);
-	  parm.addImplementationContents("}");
-      };
-      forLoop(parm, name, f->iteration, callback);
-      debug.functionEnd("forLoopStatement");
-    }
-  }
-  
-  void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p) {
+  void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
       debug.functionStart("waitStatement");
       assert(p->waitText);
       parm.process_contains_wait = true;
-      parm.addImplementationContents(getSourceLine(p->waitText));
-      parm.addImplementationContents(NameConverter::getTopLevelPrefix(parm) + "wait(vhdl::convert(" + a_expression.physicalToString(parm, p->physical) + "));"); 
+      parm.addTextToList(sequential_list, getSourceLine(p->waitText), __FILE__, __LINE__);
+      parm.addTextToList(sequential_list, NameConverter::getTopLevelPrefix(parm) + "wait(vhdl::convert(" + a_expression.physicalToString(parm, p->physical) + "));", __FILE__, __LINE__); 
       debug.functionEnd("waitStatement");
     }
   }
 
-  void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r) {
+  void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r, std::list<std::string>& sequential_list) {
     if (r) {
        debug.functionStart("returnStatement");
        try {
-         parm.addImplementationContents("return " + a_expression.toString(parm, r->value, parm.returnType) + ";");
+         parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, parm.returnType) + ";", __FILE__, __LINE__);
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }
        debug.functionEnd("returnStatement");
     }
-  }
-
-  void SystemC::sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l) {
-    debug.functionStart("sequentialStatements");
-    for (ast::SequentialStatement s : l.list) {
-      procedureCallStatement(parm, s.procedureCallStatement);
-      variableAssignment(parm, s.variableAssignment);
-      signalAssignment(parm, s.signalAssignment);
-      reportStatement(parm, s.reportStatement);
-      ifStatement(parm, s.ifStatement);
-      forLoopStatement(parm, s.forLoopStatement);
-      waitStatement(parm, s.waitStatement);
-      returnStatement(parm, s.returnStatement);
-    }
-    debug.functionEnd("sequentialStatements");
   }
 
 }

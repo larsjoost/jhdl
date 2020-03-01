@@ -79,22 +79,25 @@ namespace generator {
 
     // sequential.cpp
     template<typename Func>
-    void assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, Func callback);
-    void signalAssignment(parameters& parm, ast::SignalAssignment* p);
+    void assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, std::list<std::string>& sequential_list,
+		    Func sensitivity_list_sensitivity_list_callback);
     template<typename Func>
-    void signalAssignment(parameters& parm, ast::SignalAssignment* p, Func callback);
-    void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l);
-    void waitStatement(parameters& parm, ast::WaitStatement* p);
-    void ifStatement(parameters& parm, ast::IfStatement* p);
+    void signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
+    template<typename Func>
+    void sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
+    void waitStatement(parameters& parm, ast::WaitStatement* p, std::list<std::string>& sequential_list);
+    template<typename Func>
+    void ifStatement(parameters& parm, ast::IfStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
     template<typename Func>
     void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback);
-    void forLoopStatement(parameters& parm, ast::ForLoopStatement* p);
-    void reportStatement(parameters& parm, ast::ReportStatement* p);
+    template<typename Func>
+    void forLoopStatement(parameters& parm, ast::ForLoopStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
+    void reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
     std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);
-    void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p);
-    void returnStatement(parameters& parm, ast::ReturnStatement* r);
-    void variableAssignment(parameters& parm, ast::VariableAssignment* p);
+    void procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p, std::list<std::string>& sequential_list);
+    void returnStatement(parameters& parm, ast::ReturnStatement* r, std::list<std::string>& sequential_list);
+    void variableAssignment(parameters& parm, ast::VariableAssignment* p, std::list<std::string>& sequential_list);
 
     // includes.cpp
     void loadPackage(parameters& parm, std::string package, std::string library,
@@ -168,8 +171,11 @@ namespace generator {
     void declarations(parameters& parm, ast::List<ast::Declaration>& d);
 
     // definition.cpp
-    template <typename Func>
-    void createProcess(parameters& parm, Func func, std::string name);
+    void createProcess(parameters& parm, ast::SimpleIdentifier* label, ast::Text* line,
+		       std::list<std::string>* sensitivity_list,
+		       bool sensitivity_all,
+		       ast::List<ast::Declaration>* declarations,
+		       ast::List<ast::SequentialStatement>& sequential_statements);
     template <class T, typename Func>
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,

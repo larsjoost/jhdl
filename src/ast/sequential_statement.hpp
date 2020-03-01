@@ -29,19 +29,19 @@ namespace ast {
     
   public:
 
-    ProcedureCallStatement* procedureCallStatement;
-    VariableAssignment* variableAssignment;
-    SignalAssignment* signalAssignment;
-    ReportStatement* reportStatement;
-    IfStatement* ifStatement;
-    ForLoopStatement* forLoopStatement;
-    LoopStatement* loopStatement;
-    ExitStatement* exitStatement;
-    NextStatement* nextStatement;
-    WhileLoopStatement* whileLoopStatement;
-    WaitStatement* waitStatement;
-    ReturnStatement* returnStatement;
-    CaseStatement* caseStatement;
+    ProcedureCallStatement* procedureCallStatement = NULL;
+    VariableAssignment* variableAssignment = NULL;
+    SignalAssignment* signalAssignment = NULL;
+    ReportStatement* reportStatement = NULL;
+    IfStatement* ifStatement = NULL;
+    ForLoopStatement* forLoopStatement = NULL;
+    LoopStatement* loopStatement = NULL;
+    ExitStatement* exitStatement = NULL;
+    NextStatement* nextStatement = NULL;
+    WhileLoopStatement* whileLoopStatement = NULL;
+    WaitStatement* waitStatement = NULL;
+    ReturnStatement* returnStatement = NULL;
+    CaseStatement* caseStatement = NULL;
     
   };
 

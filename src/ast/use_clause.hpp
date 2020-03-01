@@ -9,10 +9,11 @@ namespace ast {
   class UseClause {
 
   public:
-    SimpleIdentifier* library;
-    SimpleIdentifier* package;
-    SimpleIdentifier* identifier;
-    String* string_identifier;
+    SimpleIdentifier* library = NULL;
+    SimpleIdentifier* package = NULL;
+    SimpleIdentifier* identifier = NULL;
+    Text* all = NULL;
+    String* string_identifier = NULL;
     
   };
 }

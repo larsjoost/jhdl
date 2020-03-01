@@ -9,6 +9,7 @@
 #include "generator/systemc.hpp"
 #include "ast/scanner.hpp"
 #include "version/version.h"
+#include "debug/debug.hpp"
 
 void usage() {
   version::Version v;
@@ -24,6 +25,7 @@ void usage() {
 int
 main (int argc, char **argv)
 {
+  Debug<false> debug = Debug<false>("main");
   std::string filename = "";
   int c;
   bool verbose = false;
@@ -72,8 +74,10 @@ main (int argc, char **argv)
   
   try {
     parser::DesignFile parserDesignFile;
+    debug.debug("Parsing " + filename);
     parserDesignFile.parse(filename);
     generator::SystemC systemC(verbose);
+    debug.debug("Generating SystemC files");
     systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
     if (saveLibraryInfo) {
       systemC.saveLibraryInfo();

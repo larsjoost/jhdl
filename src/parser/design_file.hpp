@@ -11,14 +11,14 @@ namespace parser {
   
   class DesignFile : public ::ast::DesignFile {
 
-    Debug<false> debug;
+    Debug<false> m_debug;
     
     ::ast::Scanner<verilog::scanner::Scanner> verilogScanner;
     ::ast::Scanner<vhdl::scanner::Scanner> vhdlScanner;
 
   public:
 
-    DesignFile() : debug("parser::DesignFile") {};
+    DesignFile() : m_debug("parser::DesignFile") {};
 
     void parse(std::string& filename);
 

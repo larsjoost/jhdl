@@ -224,7 +224,7 @@ namespace generator {
 	std::string l = NameConverter::toUpper(library);
 	std::string declaration = l + "::" + class_name + " " + l + "_" + name + ";";
 	parm.addBottom("extern " + declaration);
-	parm.addImplementationContents(declaration);
+	parm.addImplementationContents(declaration, __FILE__, __LINE__);
       }
       topHierarchyEnd(parm, &package->name->text, (type == ast::ObjectType::PACKAGE));
       debug.functionEnd("packageDeclaration");

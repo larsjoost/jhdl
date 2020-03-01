@@ -11,12 +11,12 @@ namespace vhdl {
   namespace parser {
 
     void DesignUnit::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      debug.functionStart("parse");
+      m_debug.functionStart("parse");
       ((module.contextClause = scanner->optional<ContextClause>()) ||
        (module.interface = scanner->optional<Entity>()) ||
        (module.implementation = scanner->optional<Architecture>()) ||
        (module.package = scanner->optional<Package>()));
-      debug.functionEnd("parse");
+      m_debug.functionEnd("parse");
     }
     
   }

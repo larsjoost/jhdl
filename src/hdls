@@ -47,6 +47,7 @@ do
             ;;
         v)
             VERBOSE="-v"
+	    set -x
             ;;
         x)
             DEBUG="gdb --args"
@@ -103,7 +104,11 @@ for i in $templatefiles; do
     if [ ! -e $target ]; then
         cp $i $target
         MODULE_NAME=$($SCRIPTPATH/hdlf -f $FILENAME)
-        sed -i "s/%module%/${MODULE_NAME}/g" $target
+	if [ -z "$MODULE_NAME" ]; then
+	   error "Did not find module name in $FILENAME" 
+	   exit 1
+	fi
+	sed -i "s/%module%/${MODULE_NAME}/g" $target
         sed -i "s/%include%/$headerfile/g" $target
     fi
 done

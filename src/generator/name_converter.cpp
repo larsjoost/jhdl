@@ -33,8 +33,8 @@ namespace generator {
     */
   }
 
-  std::string NameConverter::getTopLevelPrefix(parameters& parm) {
-    return getParentPrefix(parm, -2);
+  std::string NameConverter::getTopLevelPrefix(parameters& parm, int hierarchy_offset) {
+    return getParentPrefix(parm, hierarchy_offset - 2);
   }
   
   std::string NameConverter::getParentPrefix(parameters& parm, int hierarchy_offset) {

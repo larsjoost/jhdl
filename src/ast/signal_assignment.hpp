@@ -14,7 +14,6 @@ namespace ast {
     
   public:
 
-    std::string name = "";
     SimpleIdentifier* label;
     BasicIdentifier* target;
     Assignment* assignment;

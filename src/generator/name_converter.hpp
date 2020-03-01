@@ -1,3 +1,9 @@
+
+
+
+
+
+
 #ifndef GENERATOR_NAME_CONVERTER_HPP_
 #define GENERATOR_NAME_CONVERTER_HPP_
 
@@ -15,7 +21,7 @@ namespace generator {
     static std::string toLower(std::string s);
     static std::string toUpper(std::string s);
 
-    static std::string getTopLevelPrefix(parameters& parm);
+    static std::string getTopLevelPrefix(parameters& parm, int hierarchy_offset = 0);
     static std::string getParentPrefix(parameters& parm, int hierarchy_offset = 0);
     static std::string globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension = false, bool global_scope = false, int hierarchy_offset = 0);
     static std::string getPrefix(parameters& parm, DatabaseResult& object, std::string first_separator, std::string last_separator);

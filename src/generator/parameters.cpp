@@ -116,8 +116,20 @@ namespace generator {
     file_container.content.implementation_top.push_back(text);
   }
   
-  void parameters::addImplementationContents(std::string text) {
-    file_container.content.implementation_contents.push_back(text);
+  void parameters::addImplementationContents(std::string text, const char* file_name, int line_number) {
+    addTextToList(file_container.content.implementation_contents, text, file_name, line_number);
+  }
+  
+  void parameters::addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number) {
+    if (debug.isVerbose()) {
+      text += "// " + std::string(file_name) + ":" + std::to_string(line_number);
+    }
+    list.push_back(text);
+  }
+
+  void parameters::addImplementationContents(std::list<std::string>& text) {
+    std::list<std::string>& a = file_container.content.implementation_contents;
+    a.splice(a.end(), text);
   }
 
   parameters::ClassContainer* parameters::getCurrentClassContainer() {

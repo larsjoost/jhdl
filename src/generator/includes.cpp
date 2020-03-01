@@ -35,7 +35,7 @@ namespace generator {
         std::string library = useClause.library->toString(true);
 	std::string package = useClause.package->toString(true);
 	if (!load) {
-	  std::string identifier = useClause.identifier->toString(true);
+	  std::string identifier = (useClause.all ? "ALL" : useClause.identifier->toString(true));
 	  loadPackage(parm, package, library, identifier, &useClause.package->text);
 	} 
       }
