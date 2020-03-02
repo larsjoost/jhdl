@@ -9,9 +9,9 @@ namespace vhdl {
   
     RangeDirection* RangeDirection::parse(::ast::Scanner<scanner::Scanner>* scanner) {
       if (scanner->optional(scanner::Scanner::VHDL_TO)) {
-	direction = TO;
+	direction = Direction::TO;
       } else if (scanner->optional(scanner::Scanner::VHDL_DOWNTO)) {
-	direction = DOWNTO;
+	direction = Direction::DOWNTO;
       }
       return this;
     }

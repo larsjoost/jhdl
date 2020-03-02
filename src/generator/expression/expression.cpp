@@ -82,7 +82,7 @@ namespace generator {
 	  name_extension = ".read()";
 	}
       };
-    std::string s = toString(parm, e, expectedType, sensitivityListCallback);
+    std::string s = assignmentString(parm, e, expectedType, sensitivityListCallback);
     debug.functionEnd("toString: s = " + s);
     return s;
   }
@@ -447,6 +447,7 @@ namespace generator {
     static std::unordered_map<std::string, ast::ObjectValueContainer> fixedAttributeTypes =
       {{"IMAGE", string_type},
        {"LENGTH", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)},
+       {"POS", ast::ObjectValueContainer(ast::ObjectValue::INTEGER)},
        {"EVENT", ast::ObjectValueContainer(ast::ObjectValue::BOOLEAN)}};
     bool found = false;
     auto i = fixedAttributeTypes.find(attributeName);
@@ -470,10 +471,10 @@ namespace generator {
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
         case ast::ObjectValue::ARRAY: result = type.GetArgument(); break;
-        default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString()); 
+        default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString(), __FILE__, __LINE__); 
         };
       } else {
-        exceptions.printError("Could not resolve type of attribute " + attributeName);
+        exceptions.printError("Could not resolve type of attribute " + attributeName + " with type " + type.toString(), __FILE__, __LINE__);
       }
     }
     debug.functionEnd("getAttributeType = " + result.toString());

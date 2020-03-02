@@ -55,7 +55,7 @@ namespace generator {
       parm.addClassConstructorContents("}");
       auto callback =
 	[&](parameters& parm) {
-	  parm.addClassContents(forloop_variable_instance);
+	  parm.addClassContents(forloop_variable_instance, __FILE__, __LINE__);
 	  parm.addObject(ast::ObjectType::VARIABLE, identifier, forloop_variable_type);
     	};
       defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
@@ -89,7 +89,7 @@ namespace generator {
       };
     auto callback =
       [&](parameters& parm) {
-	parm.addClassContents("void run();");
+	parm.addClassContents("void run();", __FILE__, __LINE__);
 	std::string prefix = parm.hierarchyToString("::", true);
 	parm.addImplementationContents("void " + prefix + "::run() {", __FILE__, __LINE__);
     	sequentialStatements(parm, sequential_statements, sequential_list, signal_list_generator);

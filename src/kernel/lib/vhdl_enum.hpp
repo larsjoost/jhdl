@@ -154,16 +154,20 @@ namespace vhdl {
     }
 
     const std::string toString(bool with_quotes = true) const {
+      Debug<true> debug = Debug<true>("Enumeration");
+      debug.functionStart("toString");
       const static E valueArray;
       if (valueArray.array[a_value].c == 0) {
         return valueArray.array[a_value].s;
       }
       std::string s = with_quotes ? "'" : "";
-      return s + std::string(1, valueArray.array[a_value].c) + s;
+      std::string result = s + std::string(1, valueArray.array[a_value].c) + s;
+      debug.functionEnd("toString: " + result);
+      return result;
     }
 
-    int POS() {
-      Debug<true> a_debug = Debug<true>("Enumeration::POS");
+    inline int POS() {
+      Debug<true> a_debug = Debug<true>("Enumeration");
       a_debug.functionStart("POS");
       int i = a_value;
       a_debug.functionEnd("POS: " + std::to_string(i));
@@ -174,35 +178,39 @@ namespace vhdl {
       return a_value;
     }
     
-    ::std::string IMAGE(T r) {
+    std::string IMAGE(T r) {
       const static E valueArray;
       int index = enum_position(r);
       return valueArray.array[index].s;
     }
 
-    ::std::string IMAGE(Enumeration<T, E>& r) {
-      return r.toString();
-    }
-
-    template<class X>
-    ::std::string IMAGE(X& other) {
-      return other.toString();
-    }
-    
-    int LENGTH() { return 1; }
-    Enumeration<T, E> LEFT() { Enumeration<T, E> e; e.a_value = a_left; return e; }
-    Enumeration<T, E> RIGHT() { Enumeration<T, E> e; e.a_value = a_right; return e; }
-    
-    bool operator==(T e) const {Enumeration<T, E> other; other.set(e); return a_value == other.a_value;}
-    bool operator!=(T e) const {Enumeration<T, E> other; other.set(e); return a_value != other.a_value;}
-    bool operator==(char c) const {Enumeration<T, E> other; other.set(c); return a_value == other.a_value;}
-    bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return a_value != other.a_value;}
-    bool operator ==(const Enumeration<T, E> &other) const { return a_value == other.a_value; }
-    bool operator !=(const Enumeration<T, E> &other) const { return a_value != other.a_value; }
-
     int ToInt() {
       return a_value;
     }
+
+    /*
+      Emulation of VHDL functions
+     */
+    
+    inline int POS(Enumeration<T, E>& r) {return r.POS();}
+    
+    inline std::string IMAGE(Enumeration<T, E>& r) {return r.toString();}
+
+    template<class X>
+    inline std::string IMAGE(X& other) {
+      return other.toString();
+    }
+    
+    inline int LENGTH() { return 1; }
+    inline Enumeration<T, E> LEFT() { Enumeration<T, E> e; e.a_value = a_left; return e; }
+    inline Enumeration<T, E> RIGHT() { Enumeration<T, E> e; e.a_value = a_right; return e; }
+    
+    inline bool operator==(T e) const {Enumeration<T, E> other; other.set(e); return a_value == other.a_value;}
+    inline bool operator!=(T e) const {Enumeration<T, E> other; other.set(e); return a_value != other.a_value;}
+    inline bool operator==(char c) const {Enumeration<T, E> other; other.set(c); return a_value == other.a_value;}
+    inline bool operator!=(char c) const {Enumeration<T, E> other; other.set(c); return a_value != other.a_value;}
+    inline bool operator ==(const Enumeration<T, E> &other) const { return a_value == other.a_value; }
+    inline bool operator !=(const Enumeration<T, E> &other) const { return a_value != other.a_value; }
 
   };
 

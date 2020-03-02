@@ -25,7 +25,7 @@ namespace generator {
     
     parm.getParent(parent_info);
     if (!topHierarchy) {
-      parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.");
+      parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.", __FILE__, __LINE__);
      }
     debug.debug("Declaration");
     if (declarationList) {

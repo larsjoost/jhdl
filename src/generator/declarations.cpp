@@ -72,14 +72,14 @@ namespace generator {
     */
     std::string valueName = name + "_value";
     std::string s = std::to_string(total_size);
-    parm.addClassContents("enum class " + enumName + " {" + enumList + "};");
-    parm.addClassContents("struct " + valueName + " {");
-    parm.addClassContents("const static int size = " + s + ";");
-    parm.addClassContents("const static int enum_size = " + std::to_string(enum_size) + ";");
-    parm.addClassContents("vhdl::EnumerationElement<" + enumName + "> array[size] {" + structList + "};");
-    parm.addClassContents("};");
-    parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;");
-    auto f = [&](parameters& parm, std::string& left, std::string& right) {
+    parm.addClassContents("enum class " + enumName + " {" + enumList + "};", __FILE__, __LINE__);
+    parm.addClassContents("struct " + valueName + " {", __FILE__, __LINE__);
+    parm.addClassContents("const static int size = " + s + ";", __FILE__, __LINE__);
+    parm.addClassContents("const static int enum_size = " + std::to_string(enum_size) + ";", __FILE__, __LINE__);
+    parm.addClassContents("vhdl::EnumerationElement<" + enumName + "> array[size] {" + structList + "};", __FILE__, __LINE__);
+    parm.addClassContents("};", __FILE__, __LINE__);
+    parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;", __FILE__, __LINE__);
+    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
     };
     PrintFactory(parm, name, f);
     debug.functionEnd("enumerationType");
@@ -91,10 +91,10 @@ namespace generator {
                              ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
     debug.functionStart("PrintFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")");
-    auto f = [&](parameters& parm, std::string& left, std::string& right) {
+    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
-        rangeToString(parm, range, left, right, type);
+        rangeToString(parm, range, left, right, ascending, type);
       } else if (identifier || subtype) {
         ast::SimpleIdentifier* id = (identifier ? identifier : subtype->identifier);
 	assert(id);
@@ -153,14 +153,14 @@ namespace generator {
       array_template_start = "vhdl::Array<" + range + ", " + array_template_start;
       array_template_end += ">";
     }
-    parm.addClassContents("using " + name + " = " + array_template_start + subtype + array_template_end + ";");
-    auto f = [&](parameters& parm, std::string& left, std::string& right) {
+    parm.addClassContents("using " + name + " = " + array_template_start + subtype + array_template_end + ";", __FILE__, __LINE__);
+    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       for (auto& r : definition.list) { 
         if (r.range) {
           if (r.range->range_direction_type) {
             ast::ObjectValueContainer t;
             a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
-            rangeToString(parm, r.range, left, right, t);
+            rangeToString(parm, r.range, left, right, ascending, t);
           } else {
             assert(false);
           }
@@ -216,8 +216,8 @@ namespace generator {
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = NameConverter::getName(parm, database_result);
-      parm.addClassContents("using " + name + " = " + definition + "<" + n + ">;"); 
-      auto f = [&](parameters& parm, std::string& left, std::string& right) {
+      parm.addClassContents("using " + name + " = " + definition + "<" + n + ">;", __FILE__, __LINE__); 
+      auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       };
       PrintFactory(parm, name, f);
     } else {
@@ -281,9 +281,9 @@ namespace generator {
       if (parm.findOne(result, direction)) {
         direction = NameConverter::getName(parm, result);
       }
-      parm.addClassContents(getSourceLine(file->handle));
+      parm.addClassContents(getSourceLine(file->handle), __FILE__, __LINE__);
       parm.addClassContents(type + " " + name + " = " + type + "(" +
-			    direction + ", " + file->filename->toString() + ");"); 
+			    direction + ", " + file->filename->toString() + ");", __FILE__, __LINE__); 
       debug.functionEnd("FileDeclaration");
     }
   }
@@ -299,8 +299,8 @@ namespace generator {
         type = NameConverter::getName(parm, result);
         parm.addObject(result.object->id, designator, result.object->type);
       }
-      parm.addClassContents(getSourceLine(alias->designator));
-      parm.addClassContents("using " + designator + " = " + type + ";"); 
+      parm.addClassContents(getSourceLine(alias->designator), __FILE__, __LINE__);
+      parm.addClassContents("using " + designator + " = " + type + ";", __FILE__, __LINE__); 
       debug.functionEnd("AliasDeclaration");
     }
   }
@@ -516,7 +516,7 @@ namespace generator {
             if (function_declaration->body) {
               std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
-              parm.addClassContents(localReturnTypeName + " " + "run" + interface + ";");
+              parm.addClassContents(localReturnTypeName + " " + "run" + interface + ";", __FILE__, __LINE__);
 	      std::string global_prefix = parm.hierarchyToString("::", true) + "::";
 	      parm.addImplementationContents(globalReturnTypeName + " " + global_prefix + "run" + interface_without_initialization + "{", __FILE__, __LINE__);
               if (!foreignFunctionName.empty()) {
@@ -531,7 +531,7 @@ namespace generator {
 	      parm.addImplementationContents(sequential_list);
               parm.addImplementationContents("}", __FILE__, __LINE__);
             } else {
-              parm.addClassContents(localReturnTypeName + " run" + interface_with_initialization + ";");
+              parm.addClassContents(localReturnTypeName + " run" + interface_with_initialization + ";", __FILE__, __LINE__);
             }
           };
 	  defineObject(parm, false, class_name, type, "", NULL, NULL,
@@ -542,7 +542,7 @@ namespace generator {
 	  debug.debug("Function declaration body");
 	  parm.addClassContents((operatorName ? "friend " : "") +
 				localReturnTypeName + " " +
-				translatedName + interface + ";");
+				translatedName + interface + ";", __FILE__, __LINE__);
           std::string global_prefix = parm.hierarchyToString("::", true) + "::";
 	  parm.addImplementationContents((operatorName ? "friend " : "") +
 					 globalReturnTypeName + " " +
@@ -558,7 +558,7 @@ namespace generator {
           parm.addImplementationContents("}", __FILE__, __LINE__);
         } else {
 	  parm.addClassContents("virtual " + std::string(operatorName ? "friend " : "") + localReturnTypeName + " " +
-				translatedName + interface + " = 0;");
+				translatedName + interface + " = 0;", __FILE__, __LINE__);
 	}
       }
       debug.functionEnd("function_declarations");
@@ -597,12 +597,12 @@ namespace generator {
 	  debug.debug("Could not find function return type");
 	}
       }
-      parm.addClassContents("/*");
-      parm.addClassContents(" * This is the definition of the foreign function set as an attribute.");
-      parm.addClassContents(" * The implementation must be defined in a .cpp file in this directory.");
-      parm.addClassContents("*/");
+      parm.addClassContents("/*", __FILE__, __LINE__);
+      parm.addClassContents(" * This is the definition of the foreign function set as an attribute.", __FILE__, __LINE__);
+      parm.addClassContents(" * The implementation must be defined in a .cpp file in this directory.", __FILE__, __LINE__);
+      parm.addClassContents("*/", __FILE__, __LINE__);
       std::string foreignName = AttributeName(a);
-      parm.addClassContents(returnName + " " + foreignName + interface + ";");
+      parm.addClassContents(returnName + " " + foreignName + interface + ";", __FILE__, __LINE__);
     } else {
       exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
       parm.printAllObjects(name);
@@ -647,8 +647,8 @@ namespace generator {
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       std::string type_name = NameConverter::getName(parm, database_result, false);
       parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
-      parm.addClassContents(getSourceLine(t->identifier));
-      parm.addClassContents("using " + name + " = " + type_name + ";");
+      parm.addClassContents(getSourceLine(t->identifier), __FILE__, __LINE__);
+      parm.addClassContents("using " + name + " = " + type_name + ";", __FILE__, __LINE__);
       PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
@@ -667,11 +667,11 @@ namespace generator {
           type = "vhdl::interface<sc_signal<" + type + ">, " + type + ">";
         }
         std::string s = type + " " + name;
-	parm.addClassContents(getSourceLine(v->text));
-      	parm.addClassContents(s + ";");
+	parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
+      	parm.addClassContents(s + ";", __FILE__, __LINE__);
         parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
         if (init.size() > 0) {
-          parm.addClassConstructorContents(name + ".init(" + init + ");");
+          parm.addClassConstructorContents(name + " = " + init + ";");
         }
       };
       ObjectDeclaration(parm, v, func);

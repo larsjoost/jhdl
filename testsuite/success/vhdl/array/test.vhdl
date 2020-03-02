@@ -23,15 +23,8 @@ architecture rtl of test is
 
   type d_t is array(enum_t, enum_t) of integer;
 
-  constant C_D : d_t := (
-    (1, 2),
-    (3, 4)
-    );
-
   type e_t is array (natural range <>) of bit;
 
-  type f_t is array (0 to SIZE - 1) of natural;
-  
 begin
 
 
@@ -39,7 +32,6 @@ begin
 --    variable a : bit_vector(0 to 5);
     variable a : a_t;
     variable c : c_t;
-    variable f : f_t;
     variable e : e_t(0 to SIZE - 1);
   begin  -- process
     a := "00001";
@@ -52,11 +44,6 @@ begin
     else
       report "e'length success" severity note;
     end if;   
-    if (C_D(FIRST, SECOND) /= 2) then
-      report "C_D(FIRST, SECOND) = " & integer'image(C_D(FIRST, SECOND)) & ", but expected 2" severity failure;
-    else
-      report "C_D(FIRST, SECOND) success" severity note;
-    end if;   
     if (a(4) /= '1') then
       report "a = " & bit'image(a(4)) & ", but expected = '1'" severity failure;
     else
@@ -64,18 +51,20 @@ begin
     end if;
     if (a(0) /= '0') then
       report "a failed" severity failure;
+    else
+      report "a(0) success" severity note;
     end if;
-    f := (1 => 1, 2 | 3 => 2, others => 3);
-    if (f(3) /= 2) then
-      report "f(3) = " & natural'image(f(3)) & ", but expected = 2" severity failure;
-    end if;   
     if (C_B(FIRST) /= 1) then
       report "b(" & enum_t'image(FIRST) & ") = " & integer'image(C_B(FIRST)) &
         ", but expected 1" severity failure;
+    else
+      report "C_B(FIRST) success" severity note;
     end if;   
     if (C_B(SECOND) /= 2) then
       report "b(" & enum_t'image(SECOND) & ") = " & integer'image(C_B(SECOND)) &
         ", but expected 2" severity failure;
+    else
+      report "C_B(SECOND) success" severity note;
     end if;   
     --for i in a'range loop
     --  report "a = " & bit'image(i) severity note;

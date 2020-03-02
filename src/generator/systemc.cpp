@@ -104,13 +104,17 @@ namespace generator {
   
 
 
-  void SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& expectedType) {
+  void SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
+			      std::string& ascending, ast::ObjectValueContainer& expectedType) {
     debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")");
     assert(r);
     if (r->range_direction_type) {
       a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
       left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
       right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
+      if (r->range_direction_type->range_direction) {
+	ascending = (r->range_direction_type->range_direction->direction == ast::RangeDirection::Direction::TO ? "true" : "false");
+      }
     } else if (r->range_attribute_type) {
       
     } else {
@@ -121,10 +125,10 @@ namespace generator {
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     debug.functionStart("printRangeType");
-    std::string left, right;
+    std::string left, right, ascending;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
-    rangeToString(parm, r, left, right, type);
-    parm.addClassContents("using " + name + " = vhdl::Range<decltype(" + left + ")>;");
+    rangeToString(parm, r, left, right, ascending, type);
+    parm.addClassContents("using " + name + " = vhdl::Range<decltype(" + left + ")>;", __FILE__, __LINE__);
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }
@@ -136,10 +140,10 @@ namespace generator {
     assert(r);
     ast::PhysicalType* p = n->physical;
     assert(p);
-    std::string left, right;
+    std::string left, right, ascending;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer physical_type(ast::ObjectValue::PHYSICAL, name);
-    rangeToString(parm, r, left, right, type);
+    rangeToString(parm, r, left, right, ascending, type);
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
@@ -147,7 +151,7 @@ namespace generator {
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
-    parm.addClassContents("enum " + enumName + " {" + enumList + "};");
+    parm.addClassContents("enum " + enumName + " {" + enumList + "};", __FILE__, __LINE__);
     int size = 0;
     std::string baseUnitName;
     std::string upperUnitName;
@@ -168,27 +172,27 @@ namespace generator {
 					    [&](ast::PhysicalElement& e){
 					      return "\"" + e.unit->toString() + "\""; 
 					    });
-    parm.addClassContents("struct " + unitName + " {");
+    parm.addClassContents("struct " + unitName + " {", __FILE__, __LINE__);
     {
-      parm.addClassContents("std::string toString(" + enumName + " e) {");
-      parm.addClassContents("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};");
-      parm.addClassContents("return translate[e];");
-      parm.addClassContents("}");
+      parm.addClassContents("std::string toString(" + enumName + " e) {", __FILE__, __LINE__);
+      parm.addClassContents("static std::string translate[" + std::to_string(size) + "] = {" + unitNameList + "};", __FILE__, __LINE__);
+      parm.addClassContents("return translate[e];", __FILE__, __LINE__);
+      parm.addClassContents("}", __FILE__, __LINE__);
     }
-    parm.addClassContents("};");
+    parm.addClassContents("};", __FILE__, __LINE__);
     std::string valueName = name + "_value";
-    parm.addClassContents("struct " + valueName + " {");
+    parm.addClassContents("struct " + valueName + " {", __FILE__, __LINE__);
     {
       std::string x = std::to_string(size);
-      parm.addClassContents("const int size = " + x + ";");
-      parm.addClassContents("const vhdl::PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};");
+      parm.addClassContents("const int size = " + x + ";", __FILE__, __LINE__);
+      parm.addClassContents("const vhdl::PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};", __FILE__, __LINE__);
     }
-    parm.addClassContents("};");
+    parm.addClassContents("};", __FILE__, __LINE__);
     std::string typeName = name + "_type";
     std::string declType = "decltype(" + left + ")";
-    parm.addClassContents("using " + typeName + " = vhdl::Physical<" + declType + ", " + enumName + ">;"); 
-    parm.addClassContents("using " + name + " = vhdl::PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;");
-    auto f = [&](parameters& parm, std::string& l, std::string& r) {
+    parm.addClassContents("using " + typeName + " = vhdl::Physical<" + declType + ", " + enumName + ">;", __FILE__, __LINE__); 
+    parm.addClassContents("using " + name + " = vhdl::PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;", __FILE__, __LINE__);
+    auto f = [&](parameters& parm, std::string& l, std::string& r, std::string& a) {
       l = "{" + left + ", " + baseUnitName + "}";
       r = "{" + right + ", " + upperUnitName + "}";
     };
@@ -256,12 +260,12 @@ namespace generator {
 			}
 			return type;
 		      };
-	  parm.addClassContents("// Ports");
-	  parm.addClassContents(interfaceListToString(parm, interface->ports, "; ", false, func) + ";");
+	  parm.addClassContents("// Ports", __FILE__, __LINE__);
+	  parm.addClassContents(interfaceListToString(parm, interface->ports, "; ", false, func) + ";", __FILE__, __LINE__);
 	}
 	parm.setClassConstructorDescription(class_name + "(const sc_module_name& name)");
 	parm.addClassConstructorInitializer("sc_module(name)");
-	parm.addClassContents("SC_HAS_PROCESS(" + class_name + ");");
+	parm.addClassContents("SC_HAS_PROCESS(" + class_name + ");", __FILE__, __LINE__);
       };
     std::string class_description = "SC_MODULE(" + class_name + ")";
     defineObject(parm, true, name, type, "", &class_description, NULL,

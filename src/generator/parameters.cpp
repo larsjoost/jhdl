@@ -86,8 +86,8 @@ namespace generator {
     getActiveClassContainer()->constructor_contents.push_back(text);
   }
 
-  void parameters::addClassContents(std::string text) {
-    getActiveClassContainer()->class_contents.push_back(text);
+  void parameters::addClassContents(std::string text, const char* file_name, int line_number) {
+    addTextToList(getActiveClassContainer()->class_contents, text, file_name, line_number);
   }
 
   void parameters::addClassBottom(std::string text) {

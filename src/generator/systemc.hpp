@@ -121,7 +121,6 @@ namespace generator {
                       ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype,
                         ast::ObjectValueContainer::Array& arguments);
-    void rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, ast::ObjectValueContainer& type);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
@@ -223,6 +222,8 @@ namespace generator {
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     // systemc.cpp
+    void rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, std::string& ascending,
+		       ast::ObjectValueContainer& type);
     std::string ObjectName(const ParentInfo& info);
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);

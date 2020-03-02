@@ -94,13 +94,23 @@ namespace generator {
 				   ast::Expression* e,
 				   ast::ObjectValueContainer& expectedType,
 				   Func sensitivityListCallback,
-				   bool double_brackets);
+				   bool double_brackets,
+				   std::string assignment_name = "");
+    template <typename Func>
+    std::string parenthisExpressionTermToString(parameters& parm,
+						ast::List<ast::ElementAssociation>& parenthis_expression,
+						ast::ObjectValueContainer& expectedType,
+						Func sensitivityListCallback,
+						bool double_brackets,
+						ast::Text* text,
+						std::string& assignment_name);
     template <typename Func>
     std::string expressionTermToString(parameters& parm,
 				       ast::ExpressionTerm* e,
 				       ast::ObjectValueContainer& expectedType,
 				       Func sensitivityListCallback,
-				       bool double_brackets);
+				       bool double_brackets,
+				       std::string assignment_name = "");
   public:
     template <typename Func>
     std::string basicIdentifierToString(parameters& parm,
@@ -177,10 +187,11 @@ namespace generator {
 				 ast::Physical* physical);
 
     template <typename Func>
-    std::string toString(parameters& parm,
-			 ast::Expression* e,
-			 ast::ObjectValueContainer& expectedType,
-			 Func sensitivityListCallback);
+    std::string assignmentString(parameters& parm,
+				 ast::Expression* e,
+				 ast::ObjectValueContainer& expectedType,
+				 Func sensitivityListCallback,
+				 std::string assignment_name = "");
     std::string toString(parameters& parm,
 			 ast::Expression* e,
 			 ast::ObjectValueContainer& expectedType,
@@ -216,15 +227,16 @@ namespace generator {
   };
 
   template <typename Func>
-  std::string ExpressionParser::toString(parameters& parm,
-					 ast::Expression* e,
-                                         ast::ObjectValueContainer& expectedType,
-                                         Func sensitivityListCallback) {
-    debug.functionStart("toString");
+  std::string ExpressionParser::assignmentString(parameters& parm,
+						 ast::Expression* e,
+						 ast::ObjectValueContainer& expectedType,
+						 Func sensitivityListCallback,
+						 std::string assignment_name) {
+    debug.functionStart("assignmentString(assignment_name = " + assignment_name + ")");
     collectAllReturnTypes(parm, e, expectedType);
     bool double_brackets = !expectedType.IsArrayWithDimension(1);
-    std::string s = expressionToString(parm, e, expectedType, sensitivityListCallback, double_brackets);
-    debug.functionEnd("toString");
+    std::string s = expressionToString(parm, e, expectedType, sensitivityListCallback, double_brackets, assignment_name);
+    debug.functionEnd("assignmentString: " + s);
     return s;
   }
 
@@ -410,7 +422,8 @@ namespace generator {
 						   ast::Expression* e,
                                                    ast::ObjectValueContainer& expectedType,
                                                    Func sensitivityListCallback,
-                                                   bool double_brackets) {
+                                                   bool double_brackets,
+						   std::string assignment_name) {
     debug.functionStart("expressionToString");
     assert(e);
     std::string result;
@@ -426,40 +439,89 @@ namespace generator {
     } else if (e->op) {
       result = operationToString(parm, e, expectedType, sensitivityListCallback);
     } else {
-      result = expressionTermToString(parm, e->term, expectedType, sensitivityListCallback, double_brackets);
+      result = expressionTermToString(parm, e->term, expectedType, sensitivityListCallback, double_brackets, assignment_name);
     }
     debug.functionEnd("expressionToString = " + result);
     return result;
   }
 
   template <typename Func>
+  std::string ExpressionParser::parenthisExpressionTermToString(parameters& parm,
+								ast::List<ast::ElementAssociation>& parenthis_expression,
+								ast::ObjectValueContainer& expectedType,
+								Func sensitivityListCallback,
+								bool double_brackets,
+								ast::Text* text,
+								std::string& assignment_name) {
+    debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expectedType.toString() + ")");
+    bool expect_array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
+    std::string result = (!assignment_name.empty() && expect_array_type ? assignment_name : "");
+    for (ast::ElementAssociation& i : parenthis_expression.list) {
+      if (i.choises) {
+	for (ast::Choise& j : i.choises->choises.list) {
+	  if (j.others) {
+	    result += ".setOthers(" + expressionToString(parm, i.expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	  }
+	}
+      }
+    }
+    int index = 0;
+    for (ast::ElementAssociation& i : parenthis_expression.list) {
+      ast::Expression* expression = i.expression;
+      if (!expression) {
+	assert(i.choises);
+	if (i.choises->choises.list.size() == 1) {
+	  expression = i.choises->choises.list.back().expression;
+	  std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets);
+	  if (expect_array_type) {
+	    result += ".setIndex(" + std::to_string(index) + ", " + x + ")";
+	  } else {
+	    result = x;
+	  }
+	} else {
+	  exceptions.printInternal("Could not resolve type of more than one choise", text);
+	}
+      } else {
+	for (ast::Choise& j : i.choises->choises.list) {
+	  if (j.expression) {
+	    std::string element = expressionToString(parm, j.expression, expectedType, sensitivityListCallback, double_brackets);
+	    result += ".setElement(" + element + ", " + expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	  } else if (j.discrete_range) {
+	    std::string left = expressionToString(parm, j.discrete_range->left, expectedType, sensitivityListCallback, double_brackets);
+	    std::string right = expressionToString(parm, j.discrete_range->right, expectedType, sensitivityListCallback, double_brackets);
+	    result += ".setRange(" + left + ", " + right + ", " + expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	  }
+	}
+      }
+      index++;
+    }
+    /*
+      std::string left = array_type ? (double_brackets ? "{{" : "{") : "(";
+      std::string right = array_type ? (double_brackets ? "}}" : "}") : ")";
+      result = left + result + right;
+    */    
+    debug.functionEnd("parenthisExpressionTermToString: " + result);
+    return result;
+  }
+  
+  template <typename Func>
   std::string ExpressionParser::expressionTermToString(parameters& parm,
 						       ast::ExpressionTerm* e,
                                                        ast::ObjectValueContainer& expectedType,
                                                        Func sensitivityListCallback,
-                                                       bool double_brackets) {
+                                                       bool double_brackets,
+						       std::string assignment_name) {
     std::string result = "";
     if (e) {
       debug.functionStart("expressionTermToString");
       if (!e->parenthis.list.empty()) {
-        bool array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
-        std::string d;
-        for (ast::ElementAssociation& i : e->parenthis.list) {
-          ast::Expression* expression = i.expression;
-          if (expression == NULL) {
-            assert(i.choises);
-            if (i.choises->choises.list.size() == 1) {
-              expression = i.choises->choises.list.back().expression;
-            } else {
-              exceptions.printInternal("Could not resolve type of more than one choise", e->text);
-            }
-          }
-          result += d + expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets);
-          d = ", ";
-        }
-        std::string left = array_type ? (double_brackets ? "{{" : "{") : "(";
-        std::string right = array_type ? (double_brackets ? "}}" : "}") : ")";
-        result = left + result + right;
+	result = parenthisExpressionTermToString(parm,
+						 e->parenthis,
+						 expectedType,
+						 sensitivityListCallback,
+						 double_brackets,
+						 e->text,
+						 assignment_name);
       } else if (e->physical) {
         debug.debug("Physical");
         result = physicalToString(parm, e->physical);

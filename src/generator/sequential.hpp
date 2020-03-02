@@ -46,13 +46,13 @@ namespace generator {
   template<typename Func>
   void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type,
 			   std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
-    debug.functionStart("assignment");
+    std::string name = a_expression.basicIdentifierToString(parm, target);
+    debug.functionStart("assignment(name = " + name + ")");
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
     try {
-      std::string name = a_expression.basicIdentifierToString(parm, target);
       parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
       ast::ReturnTypes return_types;
       a_expression.basicIdentifierReturnTypes(parm, target, return_types);
@@ -61,14 +61,14 @@ namespace generator {
 	for (ast::AssignmentCondition s : p->assignment_conditions.list) {
 	  if (s.condition) {
 	    static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-	    parm.addTextToList(sequential_list, command + " (" + a_expression.toString(parm, s.condition, expectedValue, sensitivity_list_callback) + ") {", __FILE__, __LINE__);
+	    parm.addTextToList(sequential_list, command + " (" + a_expression.assignmentString(parm, s.condition, expectedValue, sensitivity_list_callback) + ") {", __FILE__, __LINE__);
 	    command = "else if";
 	    noConditionCommand = "else {";
 	    noConditionDelimiter = "}";
 	  } else {
 	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
-	  parm.addTextToList(sequential_list, name + " = " + a_expression.toString(parm, s.expression, expectedType, sensitivity_list_callback) + ";", __FILE__, __LINE__);
+	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expectedType, sensitivity_list_callback, name) + ";", __FILE__, __LINE__);
 	  if (s.condition) {
 	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
 	  } else {
@@ -132,7 +132,7 @@ namespace generator {
 	    std::string& variable_creation,
 	    ast::ObjectValueContainer variable_type)
 	{
-	  parm.addClassContents(variable_instance);
+	  parm.addClassContents(variable_instance, __FILE__, __LINE__);
 	  parm.addClassConstructorContents(variable_creation);
 	  parm.addTextToList(sequential_list, forloop_execution, __FILE__, __LINE__);
 	  sequentialStatements(parm, f->sequentialStatements, sequential_list, sensitivity_list_callback);

@@ -127,6 +127,7 @@ namespace generator {
     bool process_contains_wait;
     ast::ObjectValueContainer returnType;
 
+    // parameters.cpp
     void addInclude(std::string text);
     void addTop(std::string text);
     void newClass(std::string description, std::string name, ast::ObjectType type, std::string base_name);
@@ -134,7 +135,7 @@ namespace generator {
     void setClassConstructorDescription(std::string text);
     void addClassConstructorInitializer(std::string text);
     void addClassConstructorContents(std::string text);
-    void addClassContents(std::string text);
+    void addClassContents(std::string text, const char* file_name, int line_number);
     void addClassBottom(std::string text);
     void addClassTrailer(std::string text);
     void endClass();

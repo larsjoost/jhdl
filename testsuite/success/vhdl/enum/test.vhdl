@@ -22,6 +22,10 @@ begin
       report "a = " & type_t'image(a) & ", but expected = START"
         severity failure;
     end if;
+    if type_t'pos(a) /= 1 then
+      report "type_t'pos(a) = " & integer'image(type_t'pos(a)) & ", but expected = 1"
+        severity failure;
+    end if;
     finish(0);
   end process;
 

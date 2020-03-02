@@ -8,7 +8,7 @@ namespace ast {
 
   public:
 
-    enum Direction {
+    enum class Direction {
       DOWNTO,
       TO};
 

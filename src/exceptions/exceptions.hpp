@@ -26,7 +26,8 @@ public:
   
   void printInternal(std::string message, ast::Text* text = NULL);
   void printNote(std::string message, ast::Text* text = NULL);
-  void printError(std::string message, ast::Text* text = NULL);
+  void printError(std::string message, ast::Text* text = NULL, const char* file_name = NULL, int line_number = -1);
+  void printError(std::string message, const char* file_name, int line_number);
   void printWarning(std::string message, ast::Text* text = NULL);
 
 };
