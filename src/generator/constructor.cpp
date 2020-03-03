@@ -26,10 +26,11 @@ namespace generator {
       }
     }
     parm.addClassConstructorContents("std::string name = std::string(\"" + object_name + "\")" + description_append + ";");
-    parm.addClassConstructorContents("sc_spawn([&]() {");
-    parm.addClassConstructorContents("std::unique_ptr<" + object_name + "> x = std::make_unique<" + object_name + ">(this" +
+    parm.addClassBottom("std::unique_ptr<" + object_name + "> " + instance_name + ";");
+    parm.addClassConstructorContents(instance_name + " = std::make_unique<" + object_name + ">(this" +
 				     std::string(!instance_argument.empty() ? ", " + instance_argument : "") + ");");
-    parm.addClassConstructorContents("x->run();");
+    parm.addClassConstructorContents("sc_spawn([&]() {");
+    parm.addClassConstructorContents(instance_name + "->run();");
     parm.addClassConstructorContents("}, name.c_str(), &" + options_name +");");
     parm.addClassConstructorContents("}");
     debug.functionEnd("instantiateType");

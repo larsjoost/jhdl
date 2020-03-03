@@ -28,11 +28,13 @@ namespace vhdl {
     TYPE a_value;
     TYPE a_left;
     TYPE a_right;
+    bool m_ascending;
     
     Range<TYPE>() {}
-    Range<TYPE>(TYPE left, TYPE right) {
+    Range<TYPE>(TYPE left, TYPE right, bool ascending = true) {
       a_left = left;
       a_right = right;
+      m_ascending = ascending;
     }
     Range<TYPE>(TYPE value) {
       a_value = value;
@@ -41,6 +43,7 @@ namespace vhdl {
     inline void construct(const Range<TYPE>& other) {
       a_left = other.a_left;
       a_right = other.a_right;
+      m_ascending = other.m_ascending;
     };
 
     void init(TYPE value) {
@@ -110,7 +113,11 @@ namespace vhdl {
     inline TYPE RIGHTOF() {
       return (a_left < a_right ? getValue() + 1 : getValue() - 1);
     }
-		       
+
+    inline TYPE POS() {
+      return a_value;
+    }
+    
     inline int getValue() {
       return a_value;
     }

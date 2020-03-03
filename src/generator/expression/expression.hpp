@@ -454,13 +454,14 @@ namespace generator {
 								ast::Text* text,
 								std::string& assignment_name) {
     debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expectedType.toString() + ")");
+    std::string assignment_name_next_hierarchy = (assignment_name.empty() ? "" : assignment_name + ".ELEMENT()");
     bool expect_array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
     std::string result = (!assignment_name.empty() && expect_array_type ? assignment_name : "");
     for (ast::ElementAssociation& i : parenthis_expression.list) {
       if (i.choises) {
 	for (ast::Choise& j : i.choises->choises.list) {
 	  if (j.others) {
-	    result += ".setOthers(" + expressionToString(parm, i.expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	    result += ".setOthers(" + expressionToString(parm, i.expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy) + ")";
 	  }
 	}
       }
@@ -472,7 +473,7 @@ namespace generator {
 	assert(i.choises);
 	if (i.choises->choises.list.size() == 1) {
 	  expression = i.choises->choises.list.back().expression;
-	  std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets);
+	  std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy);
 	  if (expect_array_type) {
 	    result += ".setIndex(" + std::to_string(index) + ", " + x + ")";
 	  } else {
@@ -484,12 +485,14 @@ namespace generator {
       } else {
 	for (ast::Choise& j : i.choises->choises.list) {
 	  if (j.expression) {
-	    std::string element = expressionToString(parm, j.expression, expectedType, sensitivityListCallback, double_brackets);
-	    result += ".setElement(" + element + ", " + expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	    std::string element = expressionToString(parm, j.expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy);
+	    std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy);
+	    result += ".setElement(" + element + ", " + x + ")";
 	  } else if (j.discrete_range) {
 	    std::string left = expressionToString(parm, j.discrete_range->left, expectedType, sensitivityListCallback, double_brackets);
 	    std::string right = expressionToString(parm, j.discrete_range->right, expectedType, sensitivityListCallback, double_brackets);
-	    result += ".setRange(" + left + ", " + right + ", " + expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets) + ")";
+	    std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy);
+	    result += ".setRange(" + left + ", " + right + ", " + x + ")";
 	  }
 	}
       }

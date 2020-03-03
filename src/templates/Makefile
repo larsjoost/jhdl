@@ -8,7 +8,7 @@ endif
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O0 # -Wall -ansi
+CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O3 # -Wall -ansi
 INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/src/output -I${JHDL}/src/debug -I${JHDL}/std -I. 
 LIBS := -lsystemc
 INC := -L$(SYSTEMC)/lib-linux64

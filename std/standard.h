@@ -9,7 +9,7 @@ namespace vhdl {
 
   sc_time convert(STD::STANDARD::TIME t);
 
-  void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity);
+  void report(::std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity, const char* file_name, int line_number);
 
 }
 

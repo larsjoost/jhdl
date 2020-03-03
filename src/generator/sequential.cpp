@@ -54,7 +54,7 @@ namespace generator {
         std::string name = NameConverter::getName(parm, object);
         parm.addTextToList(sequential_list, "vhdl::report(" +
 			   a_expression.toString(parm, p->message, expected_type, true) + ", " +
-			   name + ");", __FILE__, __LINE__);
+			   name + ", __FILE__, __LINE__);", __FILE__, __LINE__);
       } else {
         exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
         parm.printAllObjects(severity);
