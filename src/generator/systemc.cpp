@@ -104,12 +104,13 @@ namespace generator {
   
 
 
-  void SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
-			      std::string& ascending, ast::ObjectValueContainer& expectedType) {
+  ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
+						   std::string& ascending, ast::ObjectValueContainer& expectedType) {
     debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")");
+    ast::ObjectValueContainer result;
     assert(r);
     if (r->range_direction_type) {
-      a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
+      result = a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
       left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
       right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
       if (r->range_direction_type->range_direction) {
@@ -120,15 +121,18 @@ namespace generator {
     } else {
       assert(false);
     }
-    debug.functionEnd("rangeToString");
+    debug.functionEnd("rangeToString: " + result.toString());
+    return result;
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     debug.functionStart("printRangeType");
     std::string left, right, ascending;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
-    rangeToString(parm, r, left, right, ascending, type);
-    parm.addClassContents("using " + name + " = vhdl::Range<decltype(" + left + ")>;", __FILE__, __LINE__);
+    ast::ObjectValueContainer found_type = rangeToString(parm, r, left, right, ascending, type);
+    bool integer_type = found_type.IsValue(ast::ObjectValue::INTEGER);
+    std::string t = integer_type ? "int" : "double";
+    parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
     PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
     debug.functionEnd("printRangeType");
   }

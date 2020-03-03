@@ -24,45 +24,49 @@ namespace vhdl {
   
   template<class TYPE>
   class Range {
-  public:
-    TYPE a_value;
-    TYPE a_left;
-    TYPE a_right;
+
+  protected:
+
+    TYPE m_value;
+    TYPE m_left;
+    TYPE m_right;
     bool m_ascending;
+
+  public:
     
     Range<TYPE>() {}
     Range<TYPE>(TYPE left, TYPE right, bool ascending = true) {
-      a_left = left;
-      a_right = right;
+      m_left = left;
+      m_right = right;
       m_ascending = ascending;
     }
     Range<TYPE>(TYPE value) {
-      a_value = value;
+      m_value = value;
     }
     
     inline void construct(const Range<TYPE>& other) {
-      a_left = other.a_left;
-      a_right = other.a_right;
+      m_left = other.m_left;
+      m_right = other.m_right;
       m_ascending = other.m_ascending;
     };
 
     void init(TYPE value) {
-      a_value = value;
+      m_value = value;
     }
     
-    inline void operator=(const TYPE other) { a_value = other; }
-    inline void operator=(const Range<TYPE>& other) { a_value = other.a_value; }
+    inline void operator=(const TYPE other) { m_value = other; }
+    inline void operator=(const Range<TYPE>& other) { m_value = other.m_value; }
 
-    inline bool operator == (const Range<TYPE> &other) const { return a_value == other.a_value; }
-    inline bool operator != (const Range<TYPE> &other) const { return a_value != other.a_value; }
-    inline bool operator == (const TYPE other) const { return a_value == other; }
-    inline bool operator <= (const TYPE other) const { return a_value <= other; }
-    inline bool operator >= (const TYPE other) const { return a_value >= other; }
-    inline bool operator != (const TYPE other) const { return a_value != other; }
-    inline TYPE operator +  (const TYPE other) const { return a_value + other; }
-    inline TYPE operator -  (const TYPE other) const { return a_value - other; }
-    inline TYPE operator +  (const Range<TYPE>& other) const { return a_value + other.a_value; }
-    inline TYPE operator -  (const Range<TYPE>& other) const { return a_value - other.a_value; }
+    inline bool operator == (const Range<TYPE> &other) const { return m_value == other.m_value; }
+    inline bool operator != (const Range<TYPE> &other) const { return m_value != other.m_value; }
+    inline bool operator == (const TYPE other) const { return m_value == other; }
+    inline bool operator <= (const TYPE other) const { return m_value <= other; }
+    inline bool operator >= (const TYPE other) const { return m_value >= other; }
+    inline bool operator != (const TYPE other) const { return m_value != other; }
+    inline TYPE operator +  (const TYPE other) const { return m_value + other; }
+    inline TYPE operator -  (const TYPE other) const { return m_value - other; }
+    inline TYPE operator +  (const Range<TYPE>& other) const { return m_value + other.m_value; }
+    inline TYPE operator -  (const Range<TYPE>& other) const { return m_value - other.m_value; }
 
     /* Required by sc_signals */
     inline friend std::ostream& operator << ( std::ostream& os,  Range<TYPE> const &other) {
@@ -72,23 +76,23 @@ namespace vhdl {
 
     inline friend void sc_trace(sc_trace_file *tf, const Range<TYPE> & v,
     const std::string & NAME ) {
-      sc_trace(tf,v.a_value, NAME + ".value");
+      sc_trace(tf,v.m_value, NAME + ".value");
     }
     
     inline operator bool() const {
-      return a_value != TYPE(0);
+      return m_value != TYPE(0);
     }
     
     inline operator int() const {
-      return a_value;
+      return m_value;
     }
 
     inline int ToInt() {
-      return a_value;
+      return m_value;
     }
     
     inline const std::string toString() const {
-      return std::to_string(a_value);
+      return std::to_string(m_value);
     }
 
     inline unsigned int LENGTH() {
@@ -96,30 +100,30 @@ namespace vhdl {
     }
 
     inline TYPE HIGH() {
-      return (a_left > a_right ? a_left : a_right);
+      return (m_left > m_right ? m_left : m_right);
     }
     inline TYPE LOW() {
-      return (a_left < a_right ? a_left : a_right);
+      return (m_left < m_right ? m_left : m_right);
     }
     inline TYPE LEFT() {
-      return a_left;
+      return m_left;
     }
     inline TYPE RIGHT() {
-      return a_right;
+      return m_right;
     }
     inline TYPE LEFTOF() {
-      return (a_left < a_right ? getValue() - 1 : getValue() + 1);
+      return (m_left < m_right ? getValue() - 1 : getValue() + 1);
     }
     inline TYPE RIGHTOF() {
-      return (a_left < a_right ? getValue() + 1 : getValue() - 1);
+      return (m_left < m_right ? getValue() + 1 : getValue() - 1);
     }
 
     inline TYPE POS() {
-      return a_value;
+      return m_value;
     }
     
     inline int getValue() {
-      return a_value;
+      return m_value;
     }
 
     inline std::string STATUS() {
@@ -134,7 +138,7 @@ namespace vhdl {
     inline std::string IMAGE(TYPE r) {
       return std::to_string(r);
     }
-
+    
   };
 
   /*
@@ -167,43 +171,43 @@ namespace vhdl {
       return scale(v * e.array[u].number, e.array[u+1].base, l);
     }
   public:
-    VALUE a_value;
+    VALUE m_value;
     UNIT a_unit;
-    Physical<VALUE, UNIT> a_left;
-    Physical<VALUE, UNIT> a_right;
+    Physical<VALUE, UNIT> m_left;
+    Physical<VALUE, UNIT> m_right;
     
     PhysicalType() {
-      a_value = 0;
+      m_value = 0;
       a_unit = PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
     };  
-    PhysicalType(VALUE value, UNIT unit) {a_value = value; a_unit = unit;};
+    PhysicalType(VALUE value, UNIT unit) {m_value = value; a_unit = unit;};
     PhysicalType(UNIT unit) {a_unit = unit;}
     PhysicalType(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
-      a_left = left;
-      a_right = right;
+      m_left = left;
+      m_right = right;
     }
     
     void construct(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
-      a_left = other.a_left;
-      a_right = other.a_right;
+      m_left = other.m_left;
+      m_right = other.m_right;
     };
 
     PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
     operator +(PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> other) {
       PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER> p;
       UNIT lowest_unit = a_unit < other.a_unit ? a_unit : other.a_unit;
-      p.a_value = scale(a_value, a_unit, lowest_unit) + scale(other.a_value, other.a_unit, lowest_unit);
+      p.m_value = scale(m_value, a_unit, lowest_unit) + scale(other.m_value, other.a_unit, lowest_unit);
       p.a_unit = lowest_unit;
       return p;
     }
 
     void operator=(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
-      a_value = other.a_value;
+      m_value = other.m_value;
       a_unit = other.a_unit;
     }
 
     bool operator==(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
-      return (a_value == other.a_value && a_unit == other.a_unit);
+      return (m_value == other.m_value && a_unit == other.a_unit);
     }
 
     static UNIT getBaseUnit() {
@@ -216,7 +220,7 @@ namespace vhdl {
     }
 
     VALUE getValue() {
-      return a_value;
+      return m_value;
     }
     
     static UNIT getHighUnit() {
@@ -225,7 +229,7 @@ namespace vhdl {
     }
     
     Physical<VALUE, UNIT> HIGH() {
-      VALUE max = (a_left.value > a_right.value) ? a_left.value : a_right.value;
+      VALUE max = (m_left.value > m_right.value) ? m_left.value : m_right.value;
       return {max, getHighUnit()};
     }
     Physical<VALUE, UNIT> LOW() {return {1, getBaseUnit()};}
@@ -233,7 +237,7 @@ namespace vhdl {
     template <class X>
     static ::std::string IMAGE(X r) {
       UNIT_STRING_CONVERTER u;
-      return ::std::to_string(r.a_value) + " " + u.toString(r.a_unit);
+      return ::std::to_string(r.m_value) + " " + u.toString(r.a_unit);
     }
 
   };
@@ -241,7 +245,7 @@ namespace vhdl {
   template<class T>
   class vhdl_access {
 
-    T a_value;
+    T m_value;
 
     bool a_null = true;
   
@@ -249,16 +253,16 @@ namespace vhdl {
 
     T& ALL() {
       assert(!a_null);
-      return a_value;
+      return m_value;
     }
 
     void set(T& s) {
       a_null = false;
-      a_value.set(s);
+      m_value.set(s);
     }
 
     void construct(vhdl_access<T> s) {
-      a_value.construct(s.a_value);
+      m_value.construct(s.m_value);
     }
   
     bool isNull() {
@@ -272,6 +276,8 @@ namespace vhdl {
   };
 
 
+  
+  
 }
 
 #endif

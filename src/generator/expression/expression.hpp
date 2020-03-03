@@ -208,9 +208,9 @@ namespace generator {
     std::string procedureCallStatementToString(parameters& parm,
 					       ast::ProcedureCallStatement* p);
 
-    bool collectAllReturnTypes(parameters& parm,
-			       ast::Expression* e,
-			       ast::ObjectValueContainer& expectedType);
+    ast::ObjectValueContainer collectAllReturnTypes(parameters& parm,
+						    ast::Expression* e,
+						    ast::ObjectValueContainer& expectedType);
 
     bool collectUniqueReturnType(parameters& parm,
 				 ast::Expression* e,

@@ -34,7 +34,9 @@ namespace generator {
     
     static std::string objectName(ast::ObjectType type, const std::string& name);
     static std::string objectTypeToString(ast::ObjectType type);
-    };
+
+    static bool isRealNumber(std::string& s);
+  };
 
 }
 

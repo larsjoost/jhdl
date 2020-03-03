@@ -45,22 +45,23 @@ namespace generator {
     return result;
   }
   
-  bool ExpressionParser::collectAllReturnTypes(parameters& parm,
-					       ast::Expression* e,
-                                               ast::ObjectValueContainer& expectedType) {
+  ast::ObjectValueContainer ExpressionParser::collectAllReturnTypes(parameters& parm,
+								    ast::Expression* e,
+								    ast::ObjectValueContainer& expectedType) {
     debug.functionStart("CollectAllReturnTypes");
-    bool ok = false;
+    ast::ObjectValueContainer result;
     ast::ReturnTypes o;
     expressionReturnTypes(parm, e, o);
-    if (o.find(expectedType) != o.end()) {
-      ok = true;
+    auto found_type = o.find(expectedType);
+    if (found_type != o.end()) {
+      result = *found_type;
     } else {
       std::string found = returnTypesToString(parm, o);
       exceptions.printError("Could not resolve expected type " + expectedType.toString() +
                             ". Found the following types: " + found, e->text);
     }
     debug.functionEnd("CollectAllReturnTypes");
-    return ok;
+    return result;
   }
 
   bool ExpressionParser::collectUniqueReturnType(parameters& parm,

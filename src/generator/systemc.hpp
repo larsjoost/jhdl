@@ -222,8 +222,8 @@ namespace generator {
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     // systemc.cpp
-    void rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, std::string& ascending,
-		       ast::ObjectValueContainer& type);
+    ast::ObjectValueContainer  rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, std::string& ascending,
+					     ast::ObjectValueContainer& type);
     std::string ObjectName(const ParentInfo& info);
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);
     void interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library);

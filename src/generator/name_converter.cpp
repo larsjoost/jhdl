@@ -155,5 +155,9 @@ namespace generator {
     return type_name;
   }
   
+  bool NameConverter::isRealNumber(std::string& s) {
+    return (s.find(".") != std::string::npos);
+  }
+  
 
 }
