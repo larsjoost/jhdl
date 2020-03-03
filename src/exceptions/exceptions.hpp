@@ -13,10 +13,10 @@ class Exceptions {
 
   bool verbose = false;
 
-  Output a_output = Output(std::cerr);
+  Output m_output = Output(std::cerr);
   
-  static int a_number_of_errors;
-  static int a_number_of_warnings;
+  static int m_number_of_errors;
+  static int m_number_of_warnings;
 
   const static bool a_display_warnings = true;
   
@@ -29,7 +29,8 @@ public:
   void printError(std::string message, ast::Text* text = NULL, const char* file_name = NULL, int line_number = -1);
   void printError(std::string message, const char* file_name, int line_number);
   void printWarning(std::string message, ast::Text* text = NULL);
-
+  bool errorsExists() {return m_number_of_errors > 0;};
+  
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "exceptions.hpp"
 
-int Exceptions::a_number_of_errors = 0;
-int Exceptions::a_number_of_warnings = 0;
+int Exceptions::m_number_of_errors = 0;
+int Exceptions::m_number_of_warnings = 0;
 
 void Exceptions::print(std::string severity, Output::Color color, std::string& message, ast::Text* text) {
   auto func = [&](std::ostream* out) {
@@ -14,7 +14,7 @@ void Exceptions::print(std::string severity, Output::Color color, std::string& m
       *out << text->getCurrentLinePositionMarker() << std::endl;
     }
   };
-  a_output.print(color, func);
+  m_output.print(color, func);
 }
 
 void Exceptions::printInternal(std::string message, ast::Text* text) {
@@ -28,7 +28,7 @@ void Exceptions::printNote(std::string message, ast::Text* text) {
 }
 
 void Exceptions::printError(std::string message, ast::Text* text, const char* file_name, int line_number) {
-  a_number_of_errors++;
+  m_number_of_errors++;
   if (verbose && file_name) {
     message += " " + std::string(file_name) + ":" + std::to_string(line_number);
   }
@@ -39,7 +39,7 @@ void Exceptions::printError(std::string message, const char* file_name, int line
   printError(message, NULL, file_name, line_number);
 }
 void Exceptions::printWarning(std::string message, ast::Text* text) {
-  a_number_of_warnings++;
+  m_number_of_warnings++;
   if (a_display_warnings) {
     print("Warning", Output::Color::YELLOW, message, text);
   }

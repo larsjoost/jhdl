@@ -37,8 +37,11 @@ namespace ast {
     bool numberEquals(ObjectValue l, ObjectValue r) const;
     bool equals(const Array& l, const Array& r) const;
     bool equals(const ObjectValueContainer& other) const;
-    bool operator==(const ObjectValueContainer& other) const {
+    inline bool operator==(const ObjectValueContainer& other) const {
       return equals(other);
+    }
+    inline bool operator!=(const ObjectValueContainer& other) const {
+      return !equals(other);
     }
     void set(const ObjectValueContainer& other) {
       a_value = other.a_value;

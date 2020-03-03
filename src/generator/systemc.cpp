@@ -107,10 +107,17 @@ namespace generator {
   ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
 						   std::string& ascending, ast::ObjectValueContainer& expectedType) {
     debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")");
-    ast::ObjectValueContainer result;
+    ast::ObjectValueContainer left_type;
+    ast::ObjectValueContainer right_type;
     assert(r);
     if (r->range_direction_type) {
-      result = a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
+      left_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
+      right_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->right, expectedType);
+      debug.debug("Left type = " + left_type.toString() + ", right type = " + right_type.toString());
+      if (left_type != right_type) {
+	exceptions.printError("Left range type " + left_type.toString() + " is not the same as right type " +
+			      right_type.toString(), r->range_direction_type->left->text);
+      }
       left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
       right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
       if (r->range_direction_type->range_direction) {
@@ -121,8 +128,8 @@ namespace generator {
     } else {
       assert(false);
     }
-    debug.functionEnd("rangeToString: " + result.toString());
-    return result;
+    debug.functionEnd("rangeToString: " + left_type.toString());
+    return left_type;
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {

@@ -10,6 +10,7 @@
 #include "ast/scanner.hpp"
 #include "version/version.h"
 #include "debug/debug.hpp"
+#include "exceptions/exceptions.hpp"
 
 void usage() {
   version::Version v;
@@ -82,7 +83,8 @@ main (int argc, char **argv)
     if (saveLibraryInfo) {
       systemC.saveLibraryInfo();
     }
-    return 0;
+    Exceptions exceptions;
+    return exceptions.errorsExists();
   } catch (const ast::SyntaxError &e) {
     if (verbose) {
       std::cerr << "Syntax error" << std::endl;
@@ -92,6 +94,5 @@ main (int argc, char **argv)
       std::cerr << e.what();
     }
   }
-
   return 1;
 }
