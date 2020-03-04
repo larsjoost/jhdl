@@ -24,75 +24,78 @@ namespace vhdl {
   
   template<class RANGE, class SUBTYPE>
   class Array {
-    bool m_constructed = false;
-    bool m_ascending = true;
-    
+
     inline void setAll(SUBTYPE& value) {
       for (int i = 0; i < LENGTH() - 1; i++) {
-        a_value[i] = value;
+        m_content[i] = value;
       }
     }
 
+  protected:
+
+    RANGE m_range;
+    std::vector<SUBTYPE> m_content;
+    SUBTYPE m_subtype;
+
   public:
-    RANGE a_left;
-    RANGE a_right;
-    std::vector<SUBTYPE> a_value;
-    SUBTYPE a_subtype;
-    
-    void construct(RANGE left, RANGE right, bool ascending = true) {
-      m_constructed = true;
-      m_ascending = ascending;
-      a_left = left;
-      a_right = right;
-      a_value.resize(LENGTH());
-      setAll(a_subtype);
-    }
 
+    Array() {};
+    Array(RANGE& range, SUBTYPE& subtype) : m_range(range), m_subtype(subtype) {};
+    
     void construct(const Array<RANGE, SUBTYPE>& other) {
-      construct(other.a_left, other.a_right);
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("construct(other = " + other.info() + ")");
+      m_range.construct(other.m_range);
+      m_subtype.construct(other.m_subtype);
+      m_content.resize(LENGTH());
+      debug.functionEnd("construct");
     }
 
-    void SubtypeConstruct(const SUBTYPE& other) {
-      a_subtype.construct(other);
-    }
-    
-    void SubtypeInit(const SUBTYPE& other) {
-      a_subtype.init(other);
+    void construct(int left, int right, bool ascending = true) {
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("construct(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
+			  ", ascending = " + std::to_string(ascending) + ")");
+      m_range.construct(left, right, ascending);
+      m_content.resize(LENGTH());
+      debug.functionEnd("construct");
     }
 
     void set(const std::string& s) {
-      //      a_debug.functionStart("set");
-      // std::cout << "a_left = " << a_left.IMAGE(a_left) << ", a_right = " << a_right.IMAGE(a_right) << std::endl;
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("set");
       if (s.size() != LENGTH()) {
         construct(1, s.size());
       }
       int i = 0;
       for (auto c : s) {
-        a_subtype = c;
-        a_value[i++] = a_subtype;
+        m_content[i++] = c;
       }
-      //      a_debug.functionEnd("set");
+      debug.functionEnd("set");
     }
 
     void set(Array<RANGE, SUBTYPE>& other) {
-      //      a_debug.functionStart("set(other = " + other.toString() + ")");
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("set(other = " + other.toString() + ")");
       if (LENGTH() != other.LENGTH()) {
         construct(1, other.LENGTH());
       }
       for (int i = 0; i < LENGTH(); i++) {
-        // std::cout << "set[" << i << "] = " << other.a_value[i].IMAGE(other.a_value[i]) << std::endl;
-        a_value[i] = other.a_value[i];
+        // std::cout << "set[" << i << "] = " << other.m_content[i].IMAGE(other.m_content[i]) << std::endl;
+        m_content[i] = other.m_content[i];
       }
-      //      a_debug.functionEnd("set");
+      debug.functionEnd("set");
     }
 
     int ConvertIndex(int index) {
       Debug<true> debug = Debug<true>("Array");
       debug.functionStart("ConvertIndex(index = " + std::to_string(index) + ")");
+      debug.debug("m_range: " + m_range.info());
       int x = ASCENDING() ? 1 : -1;
-      int left_pos = POS(a_left);
-      debug.debug("x = " + std::to_string(x) + ", a_left = " + std::to_string(left_pos));
-      int result = x * index - a_left;
+      RANGE left = m_range.LEFT();
+      debug.debug("left: " + left.info());
+      int left_pos = m_range.POS(left);
+      debug.debug("x = " + std::to_string(x) + ", left_pos = " + std::to_string(left_pos));
+      int result = x * index - left_pos;
       debug.functionEnd("ConvertIndex: " + std::to_string(result) + ")");
       return result;
     }
@@ -116,19 +119,16 @@ namespace vhdl {
       int i = ConvertIndex(index);
       debug.debug("i = " + std::to_string(i));
       assert(IndexCheck(i));
-      assert(i >= 0 && i < a_value.size());
-      SUBTYPE& result = a_value[i];
+      assert(i >= 0 && i < m_content.size());
+      SUBTYPE& result = m_content[i];
       debug.functionEnd("get");
       return result;
     }
     
-    Array() {
-    }
-
     bool equals(const std::string& other) {
       assert(LENGTH() == other.size());
       for (int i = 0; i < LENGTH(); i++) {
-        if (a_value[i] != other[i]) {
+        if (m_content[i] != other[i]) {
           return false;
         }
       }
@@ -152,7 +152,7 @@ namespace vhdl {
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "Array: vec[" << i << "] = " << vec[i] << std::endl;
-        a_value[i] = vec[i];
+        m_content[i] = vec[i];
       }
     }
     */
@@ -179,18 +179,18 @@ namespace vhdl {
       }
       for (int i = 0; i < LENGTH(); i++) {
          // std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
-        a_value[i] = vec[i];
+        m_content[i] = vec[i];
       }
       //      a_debug.functionEnd("init");
     }
 
-    void operator=(const SUBTYPE other) { a_value = other; }
+    void operator=(const SUBTYPE other) { m_content = other; }
     void operator=(const char* other) {std::string s(other); set(s);}
     void operator=(const std::string other) {set(other);}
     bool operator!=(const Array<RANGE, SUBTYPE>& other) {
       assert(this->LENGTH() != other.LENGTH());
-      for (int i = 0; i < a_value.size(); i++) {
-        if (a_value[i] != other.a_value[i]) {
+      for (int i = 0; i < m_content.size(); i++) {
+        if (m_content[i] != other.m_content[i]) {
           return false;
         }
       }
@@ -220,29 +220,35 @@ namespace vhdl {
     }
     
     inline bool ASCENDING() {
-      return m_ascending;
+      return m_range.ASCENDING();
     }
     
     inline unsigned int LENGTH() {
       Debug<true> debug = Debug<true>("Array");
       debug.functionStart("LENGTH");
-      int result = abs(POS(a_left) - POS(a_right)) + 1;
+      int result = m_range.LENGTH();
       debug.functionEnd("LENGTH: " + std::to_string(result));
       return result;
     }
     
-    inline SUBTYPE& HIGH() { return (a_left > a_right ? LEFT() : RIGHT()); }
-    inline SUBTYPE& LOW() { return (a_left < a_right ? LEFT() : RIGHT()); }
-    inline SUBTYPE& ELEMENT() { return a_value[0]; }
-    inline SUBTYPE& LEFT() { return a_value[0]; }
-    inline SUBTYPE& RIGHT() { return a_value[LENGTH() - 1]; }
-
+    inline SUBTYPE& HIGH() { return VAL(m_range.HIGH()); };
+    inline SUBTYPE& LOW() { return VAL(m_range.LOW()); }
+    inline SUBTYPE& ELEMENT() { return LOW(); }
+    inline SUBTYPE& LEFT() { return VAL(m_range.LEFT()); }
+    inline SUBTYPE& RIGHT() { return VAL(m_range.RIGHT()); }
+    inline SUBTYPE& VAL(RANGE index) { return get(index.POS()); }
+    inline RANGE& POS(RANGE value) { return value.POS(); }  
+    
     std::string toString() {
       std::string s;
-      for (int i = a_left; WithinRange(i); ASCENDING() ? i++ : i--) {
+      for (int i = m_range.LEFT(); WithinRange(i); i += (m_range.ASCENDING() ? 1 : -1)) {
         s += this->get(i).toString(false);
       }
       return s;
+    }
+
+    std::string info() const {
+      return "Array: m_range = (" + m_range.info() + "), m_subtype = (" + m_subtype.info() + ")";
     }
     
     std::string STATUS() {
@@ -259,30 +265,29 @@ namespace vhdl {
     }
 
     inline Array<RANGE, SUBTYPE>& setOthers(SUBTYPE value) {
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("setOthers(value = " + value.toString() + ")");
       setAll(value);
+      debug.functionEnd("setOthers");
       return *this;
     }
 
     inline Array<RANGE, SUBTYPE>& setIndex(int index, SUBTYPE value) {
-      a_value[index] = value;
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("setIndex(index = " + std::to_string(index) + ")");
+      m_content[index] = value;
+      debug.functionEnd("setIndex");
       return *this;
     }
 
-    inline int POS(int index) {
-      return index;
-    }
-
-    inline int POS(auto& index) {
-      Debug<true> debug = Debug<true>("Array");
-      debug.functionStart("POS[" + index.toString() + "]");
-      int i =  index.POS();
-      debug.functionEnd("POS: " + std::to_string(i));
-      return i;
-    }
-    
     inline Array<RANGE, SUBTYPE>& setElement(RANGE element, SUBTYPE value) {
-      int i = POS(element);
-      a_value[i] = value;
+      Debug<true> debug = Debug<true>("Array");
+      debug.functionStart("setElement(element = " + element.toString() + ")");
+      debug.debug("1");
+      int i = element.POS(element);
+      debug.debug("2");
+      m_content[i] = value;
+      debug.functionEnd("setElement");
       return *this;
     }
   

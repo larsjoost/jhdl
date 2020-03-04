@@ -133,7 +133,7 @@ namespace generator {
 	    ast::ObjectValueContainer variable_type)
 	{
 	  parm.addClassContents(variable_instance, __FILE__, __LINE__);
-	  parm.addClassConstructorContents(variable_creation);
+	  parm.addClassConstructorContents(variable_creation, __FILE__, __LINE__);
 	  parm.addTextToList(sequential_list, forloop_execution, __FILE__, __LINE__);
 	  sequentialStatements(parm, f->sequentialStatements, sequential_list, sensitivity_list_callback);
 	  parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);

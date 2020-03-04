@@ -13,7 +13,8 @@ namespace generator {
       std::string name = blockStatement->name->toString(true);
       std::string object_name = NameConverter::objectName(ast::ObjectType::BLOCK, name);
       std::string instance_placeholder_name = name + "_placeholder";
-      parm.addClassConstructorContents(instance_placeholder_name + " = std::make_unique<" + object_name + ">(this);");
+      parm.addClassConstructorContents(instance_placeholder_name + " = std::make_unique<" + object_name + ">(this);",
+				       __FILE__, __LINE__);
       parm.addClassBottom("std::unique_ptr<" + object_name + "> " + instance_placeholder_name + ";");
       defineObject(parm, false, name, ast::ObjectType::BLOCK, "", 
 		   NULL, NULL, 
@@ -33,7 +34,7 @@ namespace generator {
       std::string object_name = NameConverter::objectName(ast::ObjectType::GENERATE, name);
       std::string identifier = forGenerateStatement->identifier->toString(true);
       std::string description_append = " + \"(\" + " + identifier + ".toString() + \")\"";
-      parm.addClassConstructorContents("{");
+      parm.addClassConstructorContents("{", __FILE__, __LINE__);
       std::string forloop_variable_instance;
       ast::ObjectValueContainer forloop_variable_type;
       auto forloop_callback =
@@ -44,15 +45,15 @@ namespace generator {
 	    ast::ObjectValueContainer variable_type) {
 	  forloop_variable_instance = variable_instance;
 	  forloop_variable_type = variable_type;
-	  parm.addClassConstructorContents(variable_instance);
-	  parm.addClassConstructorContents(variable_creation);
-	  parm.addClassConstructorContents(forloop_execution);
-	  parm.addClassConstructorContents(instance_placeholder_name + ".push_back(std::make_unique<" + object_name + ">(this, " + identifier + "));");
+	  parm.addClassConstructorContents(variable_instance, __FILE__, __LINE__);
+	  parm.addClassConstructorContents(variable_creation, __FILE__, __LINE__);
+	  parm.addClassConstructorContents(forloop_execution, __FILE__, __LINE__);
+	  parm.addClassConstructorContents(instance_placeholder_name + ".push_back(std::make_unique<" + object_name + ">(this, " + identifier + "));", __FILE__, __LINE__);
 	  parm.addClassBottom("std::vector<std::unique_ptr<" + object_name + ">> " + instance_placeholder_name + ";");
-	  parm.addClassConstructorContents("}");
+	  parm.addClassConstructorContents("}", __FILE__, __LINE__);
 	};
       forLoop(parm, identifier, forGenerateStatement->iteration, forloop_callback);
-      parm.addClassConstructorContents("}");
+      parm.addClassConstructorContents("}", __FILE__, __LINE__);
       auto callback =
 	[&](parameters& parm) {
 	  parm.addClassContents(forloop_variable_instance, __FILE__, __LINE__);

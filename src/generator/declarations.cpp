@@ -669,9 +669,10 @@ namespace generator {
         std::string s = type + " " + name;
 	parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
       	parm.addClassContents(s + ";", __FILE__, __LINE__);
-        parm.addClassConstructorContents(name + ".construct(" + factory_name + ");");
+        parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);
+      	parm.addClassConstructorContents(name + ".construct(" + factory_name + ");", __FILE__, __LINE__);
         if (init.size() > 0) {
-          parm.addClassConstructorContents(name + " = " + init + ";");
+          parm.addClassConstructorContents(name + " = " + init + ";", __FILE__, __LINE__);
         }
       };
       ObjectDeclaration(parm, v, func);

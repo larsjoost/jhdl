@@ -82,8 +82,8 @@ namespace generator {
     getActiveClassContainer()->constructor_initializer.push_back(text);
   }
 
-  void parameters::addClassConstructorContents(std::string text) {
-    getActiveClassContainer()->constructor_contents.push_back(text);
+  void parameters::addClassConstructorContents(std::string text, const char* file_name, int line_number) {
+    addTextToList(getActiveClassContainer()->constructor_contents, text, file_name, line_number);
   }
 
   void parameters::addClassContents(std::string text, const char* file_name, int line_number) {
@@ -122,7 +122,7 @@ namespace generator {
   
   void parameters::addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number) {
     if (debug.isVerbose()) {
-      text += "// " + std::string(file_name) + ":" + std::to_string(line_number);
+      text += " // " + std::string(file_name) + ":" + std::to_string(line_number);
     }
     list.push_back(text);
   }

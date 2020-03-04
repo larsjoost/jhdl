@@ -134,7 +134,7 @@ namespace generator {
     void addDerivedClass(std::string text);
     void setClassConstructorDescription(std::string text);
     void addClassConstructorInitializer(std::string text);
-    void addClassConstructorContents(std::string text);
+    void addClassConstructorContents(std::string text, const char* file_name, int line_number);
     void addClassContents(std::string text, const char* file_name, int line_number);
     void addClassBottom(std::string text);
     void addClassTrailer(std::string text);

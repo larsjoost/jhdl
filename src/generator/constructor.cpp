@@ -15,24 +15,27 @@ namespace generator {
     std::string instance_name = object_name + "_INST";
     std::string options_name = "opts";
     bool spawn_method = !parm.process_contains_wait;
-    parm.addClassConstructorContents("{");
-    parm.addClassConstructorContents("sc_spawn_options " + options_name + ";");
+    parm.addClassConstructorContents("{", __FILE__, __LINE__);
+    parm.addClassConstructorContents("sc_spawn_options " + options_name + ";", __FILE__, __LINE__);
     if (spawn_method) {
-	parm.addClassConstructorContents(options_name + ".spawn_method();");
+	parm.addClassConstructorContents(options_name + ".spawn_method();", __FILE__, __LINE__);
     }
     if (sensitivity_list) {
       for (auto& i : *sensitivity_list) {
-	parm.addClassConstructorContents(options_name + ".set_sensitivity(" + i + ".getInterfacePointer());");
+	parm.addClassConstructorContents(options_name + ".set_sensitivity(" + i + ".getInterfacePointer());",
+					 __FILE__, __LINE__);
       }
     }
-    parm.addClassConstructorContents("std::string name = std::string(\"" + object_name + "\")" + description_append + ";");
+    parm.addClassConstructorContents("std::string name = std::string(\"" + object_name + "\")" + description_append + ";",
+				     __FILE__, __LINE__);
     parm.addClassBottom("std::unique_ptr<" + object_name + "> " + instance_name + ";");
     parm.addClassConstructorContents(instance_name + " = std::make_unique<" + object_name + ">(this" +
-				     std::string(!instance_argument.empty() ? ", " + instance_argument : "") + ");");
-    parm.addClassConstructorContents("sc_spawn([&]() {");
-    parm.addClassConstructorContents(instance_name + "->run();");
-    parm.addClassConstructorContents("}, name.c_str(), &" + options_name +");");
-    parm.addClassConstructorContents("}");
+				     std::string(!instance_argument.empty() ? ", " + instance_argument : "") + ");",
+				     __FILE__, __LINE__);
+    parm.addClassConstructorContents("sc_spawn([&]() {", __FILE__, __LINE__);
+    parm.addClassConstructorContents(instance_name + "->run();", __FILE__, __LINE__);
+    parm.addClassConstructorContents("}, name.c_str(), &" + options_name +");", __FILE__, __LINE__);
+    parm.addClassConstructorContents("}", __FILE__, __LINE__);
     debug.functionEnd("instantiateType");
   }
 
@@ -53,7 +56,8 @@ namespace generator {
         }
         return std::string();
       };
-      parm.addClassConstructorContents(listToString(parm, l->associationElements.list, "; ", func) + ";");
+      parm.addClassConstructorContents(listToString(parm, l->associationElements.list, "; ", func) + ";",
+				       __FILE__, __LINE__);
     }
   }
   
@@ -72,8 +76,9 @@ namespace generator {
         }
       }
       std::string object_name = NameConverter::objectName(ast::ObjectType::ARCHITECTURE, s);
-      parm.addClassConstructorContents(getSourceLine(c->instanceName->text));
-      parm.addClassConstructorContents("auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");");
+      parm.addClassConstructorContents(getSourceLine(c->instanceName->text), __FILE__, __LINE__);
+      parm.addClassConstructorContents("auto " + instanceName + " = new " + object_name + "(\"" + instanceName + "\");",
+				       __FILE__, __LINE__);
       componentAssociation(parm, instanceName, c->generics, componentName, libraryName);
       componentAssociation(parm, instanceName, c->ports, componentName, libraryName);
     }
