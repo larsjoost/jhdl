@@ -11,6 +11,7 @@
 #include <vector>
 #include <unistd.h>
 #include <exception>
+#include <memory>
 
 namespace vhdl {
   
@@ -21,85 +22,93 @@ namespace vhdl {
 
   template<class T1, class T2>
   class interface {
-    T1 data;
-    T2 type;
+
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+ 
+    T1 m_data;
+    T2 m_type;
   public:
-    std::string name;
-  
+
+    interface<T1, T2>() {};
+    
+    interface<T1, T2>(const char* name, const char* file_name, int line_number) : m_data(name), m_name(name), m_file_name(file_name), m_line_number(line_number) {};
+
     void construct(T2 other) {
-      type.construct(other);
+      m_type.construct(other);
     }
   
     T1& getInterfaceReference() {
-      return data;
+      return m_data;
     }
     
     T1* getInterfacePointer() {
-      return &data;
+      return &m_data;
     }
 
     void operator () (auto& other) {
-      data(other);
+      m_data(other);
     }
     
     interface<T1, T2>& operator=(const interface<T1, T2>& s) {
-      data = s.data;
+      m_data = s.m_data;
       return *this;
     }
 
     interface<T1, T2>& operator=(auto other) {
       T2 d;
       d = other;
-      data = d;
+      m_data = d;
       return *this;
     }
 
     bool operator!=(interface<T1, T2>& other) {
-      return data != other.data;
+      return m_data != other.m_data;
     }
 
     bool operator!=(auto other) {
       T2 x;
       x = other;
-      return (data.read() != x);
+      return (m_data.read() != x);
     }
 
     bool operator==(interface<T1, T2>& other) {
-      return data == other.data;
+      return m_data == other.m_data;
     }
 
     bool operator==(auto other) {
-      return data == other;
+      return m_data == other.get();
     }
 
     interface<T1, T2> operator!() {
       interface<T1, T2> x;
-      x.data = !data;
+      x.m_data = !m_data;
       return x;
     }
 
     operator bool() const {
-      return bool(data.read());
+      return bool(m_data.read());
     }
   
     template<typename TYPE>
     interface<T1, T2> operator+(TYPE other) {
       interface<T1, T2> r;
-      r.data = data + other;
+      r.m_data = m_data + other;
       return r;
     }
 
     unsigned int LENGTH() {
-      return type.LENGTH();
+      return m_type.LENGTH();
     }
     
 
     const std::string toString() const {
-      return data.read().toString();
+      return m_data.read().toString();
     }
 
     const T2& read() const {
-      return data.read();
+      return m_data.read();
     }
     
   };

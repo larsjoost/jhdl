@@ -62,9 +62,15 @@ int sc_main(int argc, char* argv[]) {
     */
   }
 
-  sc_start(1, SC_US);
+  sc_time simulation_execution_time(1, SC_US);
+  
+  sc_start(simulation_execution_time);
 
-  SC_REPORT_FATAL("Termination", "Test not teminated with finish(0)");
+  sc_time current_time = sc_time_stamp();
+
+  if (current_time >= simulation_execution_time) {
+    SC_REPORT_FATAL("Termination", "Test not teminated with finish(0)");
+  }
   
   return 0;
 }

@@ -75,8 +75,8 @@ namespace vhdl {
       m_value = value;
     }
     
-    inline void operator=(const TYPE other) { m_value = other; }
-    inline void operator=(const Range<TYPE>& other) { m_value = other.m_value; }
+    inline void operator=(TYPE other) { m_value = other; }
+    inline void operator=(Range<TYPE>& other) { m_value = other.m_value; }
 
     inline bool operator == (const Range<TYPE> &other) const { return m_value == other.m_value; }
     inline bool operator != (const Range<TYPE> &other) const { return m_value != other.m_value; }

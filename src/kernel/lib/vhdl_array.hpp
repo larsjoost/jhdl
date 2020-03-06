@@ -42,52 +42,24 @@ namespace vhdl {
     
     RANGE m_range;
     bool m_constrained = false;
-    std::vector<SUBTYPE*> m_content;
+    std::vector<SUBTYPE> m_content;
     SUBTYPE m_subtype;
 
   public:
 
     Array(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
     Array() {};
-    ~Array() {
-      Debug<true> debug = Debug<true>(this);
-      debug.functionStart("~Array");
-      debug.debug("name = " + m_name);
-      delete_contents();
-      debug.functionEnd("~Array");
-    }
 
-    void delete_contents(int from_index = 0) {
-      Debug<true> debug = Debug<true>(this);
-      debug.functionStart("delete_content(from_index = " + std::to_string(from_index) + ")");
-      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
-      for (int i = from_index; i < m_content.size(); i++) {
-	debug.debug("delete m_content[" + std::to_string(i) + ")");
-	delete m_content[i];
-      }
-      debug.functionEnd("delete_content");
-    }
-    
     void resize(int length) {
       Debug<true> debug = Debug<true>(this);
       debug.functionStart("resize(length = " + std::to_string(length) + ")");
-      int old_size = m_content.size();
-      debug.debug("old_size = " + std::to_string(old_size));
-      delete_contents(length);
+      m_content = std::vector<SUBTYPE>(length);
       debug.debug("m_content.size() = " + std::to_string(m_content.size()));
-      m_content.resize(length);
-      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
-      for (int i = old_size; i < length; i++) {
+      for (int i = 0; i < length; i++) {
 	debug.debug("allocate m_content[" + std::to_string(i) + ")");
-	m_content.push_back(new SUBTYPE());
+	m_content.push_back(SUBTYPE());
       }
-      /*
-	m_content.resize(length);
-      for (auto i = m_content.begin(); i != m_content.end(); i++) {
-	SUBTYPE a = SUBTYPE();
-	m_content.emplace(i, a);
-      }
-      */
+      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
       debug.functionEnd("resize");
     }
 
@@ -125,12 +97,11 @@ namespace vhdl {
       debug.debug("m_content size = " + std::to_string(m_content.size()));
       int i = 0;
       for (auto c : s) {
-	SUBTYPE* a = m_content.at(i);
-	assert(a);
-	debug.debug("Before: a.info[" + std::to_string(i) + "] = " + a->info());
-	*a = c;
-	debug.debug("After: a.info[" + std::to_string(i) + "] = " + a->info());
-	debug.debug("m_content[" + std::to_string(i) + "] = " + a->toString());
+	SUBTYPE& a = m_content.at(i);
+	debug.debug("Before: a.info[" + std::to_string(i) + "] = " + a.info());
+	a = c;
+	debug.debug("After: a.info[" + std::to_string(i) + "] = " + a.info());
+	debug.debug("m_content[" + std::to_string(i) + "] = " + a.toString());
 	i++;
       }
       debug.functionEnd("setString: " + toString());
@@ -144,7 +115,7 @@ namespace vhdl {
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "set[" << i << "] = " << other.m_content[i].IMAGE(other.m_content[i]) << std::endl;
-       * m_content[i] = *other.m_content[i];
+	m_content[i] = other.m_content[i];
       }
       debug.functionEnd("set");
     }
@@ -183,15 +154,15 @@ namespace vhdl {
       debug.debug("i = " + std::to_string(i));
       assert(IndexCheck(i));
       assert(i >= 0 && i < m_content.size());
-      SUBTYPE* result = m_content[i];
+      SUBTYPE& result = m_content.at(i);
       debug.functionEnd("get");
-      return *result;
+      return result;
     }
     
     bool equals(const std::string& other) {
       assert(LENGTH() == other.size());
       for (int i = 0; i < LENGTH(); i++) {
-        if (*m_content[i] != other[i]) {
+        if (m_content[i] != other[i]) {
           return false;
         }
       }
