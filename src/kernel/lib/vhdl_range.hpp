@@ -30,8 +30,6 @@ namespace vhdl {
   protected:
     
     std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
  
     TYPE m_value;
     TYPE m_left;
@@ -40,7 +38,7 @@ namespace vhdl {
 
   public:
     
-    Range<TYPE>(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+    Range<TYPE>(const char* name) : m_name(name) {};
     Range<TYPE>() {}
     Range<TYPE>(TYPE left, TYPE right, bool ascending = true) {
       m_left = left;
@@ -51,15 +49,15 @@ namespace vhdl {
       m_value = value;
     }
     
-    inline void construct(const Range<TYPE>& other) {
+    inline void constrain(const Range<TYPE>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
       m_ascending = other.m_ascending;
     };
 
-    inline void construct(TYPE left, TYPE right, bool ascending = true) {
+    inline void constrain(TYPE left, TYPE right, bool ascending = true) {
       Debug<true> debug = Debug<true>(this);
-      debug.functionStart("construct(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
+      debug.functionStart("constrain(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
 			  ", ascending = " + std::to_string(ascending) + ")");
       m_left = left;
       m_right = right;
@@ -67,7 +65,7 @@ namespace vhdl {
       debug.functionEnd("construct");
     };
     
-    void construct() {
+    void constrain() {
       // TODO: Implement
     }
 

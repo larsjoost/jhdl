@@ -17,7 +17,7 @@ namespace generator {
       printRangeType(parm, typeName, r);
       variable_instance = typeName + " " + name + ";"; 
       std::string factory_name = "factory_" + typeName + ".create()";
-      variable_creation = name + ".construct(" + factory_name + ");"; 
+      variable_creation = name + ".constrain(" + factory_name + ");"; 
     } else if (iteration->identifier) {
       DatabaseResult object;
       if (parm.findOne(object, iteration->identifier)) {  

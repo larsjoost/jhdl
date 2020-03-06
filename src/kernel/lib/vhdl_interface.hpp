@@ -24,7 +24,6 @@ namespace vhdl {
   class interface {
 
     std::string m_name;
-    std::string m_file_name;
     int m_line_number;
  
     T1 m_data;
@@ -33,10 +32,10 @@ namespace vhdl {
 
     interface<T1, T2>() {};
     
-    interface<T1, T2>(const char* name, const char* file_name, int line_number) : m_data(name), m_name(name), m_file_name(file_name), m_line_number(line_number) {};
+    interface<T1, T2>(const char* name) : m_data(name), m_name(name) {};
 
-    void construct(T2 other) {
-      m_type.construct(other);
+    void constrain(T2 other) {
+      m_type.constrain(other);
     }
   
     T1& getInterfaceReference() {
@@ -132,8 +131,8 @@ namespace vhdl {
       a_value.set(s);
     }
 
-    void construct(access<T> s) {
-      a_value.construct(s.a_value);
+    void constrain(access<T> s) {
+      a_value.constrain(s.a_value);
     }
   
     bool isNull() {

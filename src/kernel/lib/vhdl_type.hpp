@@ -38,9 +38,7 @@ namespace vhdl {
   class PhysicalType {
 
     std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
-
+    
     VALUE scale(VALUE v, UNIT u, UNIT l) {
       ELEMENTS e;
       assert(l >= u);
@@ -56,7 +54,7 @@ namespace vhdl {
     Physical<VALUE, UNIT> m_left;
     Physical<VALUE, UNIT> m_right;
 
-    PhysicalType(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+    PhysicalType(const char* name) : m_name(name) {};
 
     PhysicalType() {
       m_value = 0;
@@ -69,12 +67,12 @@ namespace vhdl {
       m_right = right;
     }
     
-    void construct(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
+    void constrain(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
     };
 
-    void construct(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
+    void constrain(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
       m_left = left;
       m_right = right;
     };
@@ -133,16 +131,14 @@ namespace vhdl {
   class vhdl_access {
 
     std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
-
+    
     T m_value;
 
     bool a_null = true;
   
   public:
 
-    vhdl_access(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+    vhdl_access(const char* name) : m_name(name) {};
 
     T& ALL() {
       assert(!a_null);
@@ -154,12 +150,12 @@ namespace vhdl {
       m_value.set(s);
     }
 
-    void construct() {
+    void constrain() {
       // TODO: Implement
     }
     
-    void construct(vhdl_access<T> s) {
-      m_value.construct(s.m_value);
+    void constrain(vhdl_access<T> s) {
+      m_value.constrain(s.m_value);
     }
   
     bool isNull() {

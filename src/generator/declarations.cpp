@@ -668,9 +668,9 @@ namespace generator {
         }
 	parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
         parm.addClassContents(type + " " + name + ";", __FILE__, __LINE__);
-        parm.addClassConstructorInitializer(name + "(\"" + name + "\", __FILE__, __LINE__)");
+        parm.addClassConstructorInitializer(name + "(\"" + name + "\")");
         parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);
-      	parm.addClassConstructorContents(name + ".construct(" + factory_name + ");", __FILE__, __LINE__);
+      	parm.addClassConstructorContents(name + ".constrain(" + factory_name + ");", __FILE__, __LINE__);
         if (init.size() > 0) {
           parm.addClassConstructorContents(name + " = " + init + ";", __FILE__, __LINE__);
         }

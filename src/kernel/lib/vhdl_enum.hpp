@@ -46,9 +46,7 @@ namespace vhdl {
   class Enumeration {
 
     std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
- 
+    
     int* char_position_lookup() {
       const static E valueArray;
       const static int SIZE =  256;
@@ -132,7 +130,7 @@ namespace vhdl {
     int m_left = 0;
     int m_right = 0;
 
-    Enumeration(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+    Enumeration(const char* name) : m_name(name) {};
  
     Enumeration() {
       m_left = 0;
@@ -157,12 +155,12 @@ namespace vhdl {
       debug.functionEnd("Enumeration");
     }
     
-    void construct(const Enumeration<T, E>& other) {
+    void constrain(const Enumeration<T, E>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
     };
 
-    void construct() {
+    void constrain() {
       m_left = 0;
       const static E valueArray;
       m_right = valueArray.size - 1;

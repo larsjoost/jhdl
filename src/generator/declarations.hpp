@@ -72,8 +72,8 @@ namespace generator {
 	bool arguments_exists = !left.empty();
 	std::string arguments = arguments_exists ? left+ ", " + right : "";
 	parm.addClassContents(name + " create() {", __FILE__, __LINE__);
-	parm.addClassContents(name + " x(\"" + instance_name + "\", __FILE__, __LINE__);", __FILE__, __LINE__);
-	parm.addClassContents("x.construct(" + arguments + ");", __FILE__, __LINE__);
+	parm.addClassContents(name + " x(\"" + instance_name + "\");", __FILE__, __LINE__);
+	parm.addClassContents("x.constrain(" + arguments + ");", __FILE__, __LINE__);
 	parm.addClassContents("return x;", __FILE__, __LINE__);
 	parm.addClassContents("}", __FILE__, __LINE__);
 	parm.addClassContents("template <typename T>", __FILE__, __LINE__);

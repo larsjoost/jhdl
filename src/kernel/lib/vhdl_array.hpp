@@ -37,8 +37,6 @@ namespace vhdl {
   protected:
     
     std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
     
     RANGE m_range;
     bool m_constrained = false;
@@ -47,7 +45,7 @@ namespace vhdl {
 
   public:
 
-    Array(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+    Array(const char* name) : m_name(name) {};
     Array() {};
 
     void resize(int length) {
@@ -63,24 +61,24 @@ namespace vhdl {
       debug.functionEnd("resize");
     }
 
-    void construct() {
+    void constrain() {
       // TODO: Implement
     }
     
-    void construct(const Array<RANGE, SUBTYPE>& other) {
+    void constrain(const Array<RANGE, SUBTYPE>& other) {
       Debug<true> debug = Debug<true>(this);
-      debug.functionStart("construct(other = " + other.info() + ")");
-      m_range.construct(other.m_range);
-      m_subtype.construct(other.m_subtype);
+      debug.functionStart("constrain(other = " + other.info() + ")");
+      m_range.constrain(other.m_range);
+      m_subtype.constrain(other.m_subtype);
       resize(LENGTH());
       debug.functionEnd("construct");
     }
 
-    void construct(int left, int right, bool ascending = true) {
+    void constrain(int left, int right, bool ascending = true) {
       Debug<true> debug = Debug<true>(this);
-      debug.functionStart("construct(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
+      debug.functionStart("constrain(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
 			  ", ascending = " + std::to_string(ascending) + ")");
-      m_range.construct(left, right, ascending);
+      m_range.constrain(left, right, ascending);
       int resize_length = LENGTH();
       debug.debug("Resize length = " + std::to_string(resize_length));
       resize(resize_length);
@@ -92,7 +90,7 @@ namespace vhdl {
       debug.functionStart("setString(s = " + s + ")");
       if (s.size() != LENGTH()) {
 	throw Exceptions::RuntimeError("Length of left size " + std::to_string(s.size()) + " does not match length of right side = " + std::to_string(LENGTH()),
-				       m_name, m_file_name, m_line_number);
+				       m_name);
       }
       debug.debug("m_content size = " + std::to_string(m_content.size()));
       int i = 0;
@@ -111,7 +109,7 @@ namespace vhdl {
       Debug<true> debug = Debug<true>(this);
       debug.functionStart("set(other = " + other.toString() + ")");
       if (LENGTH() != other.LENGTH()) {
-        construct(1, other.LENGTH());
+        constrain(1, other.LENGTH());
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "set[" << i << "] = " << other.m_content[i].IMAGE(other.m_content[i]) << std::endl;
@@ -170,7 +168,7 @@ namespace vhdl {
     }
 
     Array(RANGE left, RANGE right, bool ascending = true) {
-      construct(left, right, ascending);
+      constrain(left, right, ascending);
     }
     /*
     Array(std::vector<int> vec) { // : a_debug(this) {
@@ -182,7 +180,7 @@ namespace vhdl {
         RANGE right;
         left = l;
         right = r;
-        construct(left, right);
+        constrain(left, right);
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "Array: vec[" << i << "] = " << vec[i] << std::endl;
@@ -195,7 +193,7 @@ namespace vhdl {
     }
 
     void init_string(const std::string& s) {
-      construct(0, s.size() - 1);
+      constrain(0, s.size() - 1);
       set(s);
     }
 
@@ -209,7 +207,7 @@ namespace vhdl {
         RANGE right;
         left = l;
         right = r;
-        construct(left, right);
+        constrain(left, right);
       }
       for (int i = 0; i < LENGTH(); i++) {
          // std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
