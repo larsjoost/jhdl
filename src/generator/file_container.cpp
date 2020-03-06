@@ -1,3 +1,5 @@
+
+
 #include <cassert>
 #include <algorithm>
 #include <string>
@@ -21,6 +23,7 @@ namespace generator {
     header_file << "#define " << header_def << "_INCLUDE" << std::endl;
     header_file << "#include <memory>" << std::endl;
     header_file << "#include <string>" << std::endl;
+    header_file << "#include <csignal>" << std::endl;
     header_file << "#define SC_INCLUDE_DYNAMIC_PROCESSES" << std::endl;
     header_file << "#include <systemc.h>" << std::endl;
     header_file << "#include <vhdl.h>" << std::endl;

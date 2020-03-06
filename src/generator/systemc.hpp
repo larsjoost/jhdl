@@ -51,6 +51,8 @@ namespace generator {
   
   class SystemC { 
 
+    bool m_convert_to_systemc = false;
+    
     Debug<true> debug;
 
     Exceptions exceptions;
@@ -92,6 +94,7 @@ namespace generator {
     void forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback);
     template<typename Func>
     void forLoopStatement(parameters& parm, ast::ForLoopStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
+    bool lookupSeverity(parameters& parm, ast::ReportStatement* p, std::string& severity, std::list<std::string>& sequential_list);
     void reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list);
     std::string getArgumentNames(parameters& parm, ast::AssociationList* arguments);
     std::string associateArgument(parameters& parm, std::string& name, std::string& init, int argumentNumber, ast::AssociationList* l);

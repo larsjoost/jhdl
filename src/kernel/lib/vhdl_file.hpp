@@ -17,11 +17,18 @@ namespace vhdl {
 
   template<class T>
   class vhdl_file {
+
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+
     STD::STANDARD::FILE_OPEN_KIND_enum a_direction;
     std::string a_filename;
     std::ofstream* fout = NULL;
     bool file = false;
   public:
+
+    vhdl_file(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
 
     vhdl_file() { }
   
@@ -47,6 +54,10 @@ namespace vhdl {
       }
     }
   
+    void construct() {
+      // TODO: Implement
+    }
+
     void write(std::string& s) {
       // std::cout << "Write = " + s << std::endl;
       if (file) {

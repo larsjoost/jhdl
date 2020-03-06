@@ -45,7 +45,10 @@ namespace vhdl {
   template <typename T, class E>
   class Enumeration {
 
-
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+ 
     int* char_position_lookup() {
       const static E valueArray;
       const static int SIZE =  256;
@@ -110,12 +113,16 @@ namespace vhdl {
   protected:
 
     void set(char c) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("set(char c = " + std::string(1, c) + ")");
       if (char_position(c) < 0) {
         std::cerr << "Assigned char value " << c << " not allowed" << std::endl;
       } else {
         m_value = char_position(c);
       }
+      debug.functionEnd("set");
     }
+    
     void set(T e) {
       m_value = enum_position(e);
     }
@@ -124,7 +131,9 @@ namespace vhdl {
     int m_value = 0;
     int m_left = 0;
     int m_right = 0;
-    
+
+    Enumeration(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+ 
     Enumeration() {
       m_left = 0;
       m_right = size() - 1;
@@ -140,10 +149,23 @@ namespace vhdl {
       m_left = left.m_value;
       m_right = right.m_value;
     }
+
+    Enumeration(char c) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("Enumeration(char c = " + std::string(1, c) + ")");
+      set(c);
+      debug.functionEnd("Enumeration");
+    }
     
     void construct(const Enumeration<T, E>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
+    };
+
+    void construct() {
+      m_left = 0;
+      const static E valueArray;
+      m_right = valueArray.size - 1;
     };
 
     void operator=(T v) {
@@ -155,7 +177,10 @@ namespace vhdl {
     }
     
     void operator=(char c) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("operator=(char c = " + std::string(1, c) + ")");
       set(c);
+      debug.functionEnd("operator=");
     }
 
     void operator=(bool v) {
@@ -171,20 +196,23 @@ namespace vhdl {
     }
 
     const std::string toString(bool with_quotes = true) const {
-      Debug<true> debug = Debug<true>("Enumeration");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("toString");
+      debug.debug("m_value = " + std::to_string(m_value));
+      std::string result;
       const static E valueArray;
       if (valueArray.array[m_value].c == 0) {
-        return valueArray.array[m_value].s;
+        result = valueArray.array[m_value].s;
+      } else {
+	std::string s = with_quotes ? "'" : "";
+	result = s + std::string(1, valueArray.array[m_value].c) + s;
       }
-      std::string s = with_quotes ? "'" : "";
-      std::string result = s + std::string(1, valueArray.array[m_value].c) + s;
       debug.functionEnd("toString: " + result);
       return result;
     }
 
     inline int POS() {
-      Debug<true> debug = Debug<true>("Enumeration");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("POS");
       int i = m_value;
       debug.functionEnd("POS: " + std::to_string(i));
@@ -219,7 +247,7 @@ namespace vhdl {
     
     inline int LENGTH() { return m_right - m_left + 1; }
     inline Enumeration<T, E> LEFT() {
-      Debug<true> debug = Debug<true>("Enumeration");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("LENGTH");
       Enumeration<T, E> e;
       e.m_value = m_left;
@@ -231,10 +259,10 @@ namespace vhdl {
     inline int POS(char a) { return char_position(a); };
     inline int POS(T e) { return enum_position(e); };
     inline int POS(Enumeration<T, E>& r) {
-      Debug<true> debug = Debug<true>("Enumeration");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("POS");
       int pos = r.POS();
-      debug.functionStart("POS: " + std::to_string(pos));
+      debug.functionEnd("POS: " + std::to_string(pos));
       return pos;
     }
     inline Enumeration<T, E> VAL(int index) { Enumeration<T, E> e; e.m_value = index; return e; };

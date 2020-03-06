@@ -51,7 +51,7 @@ namespace generator {
 
   template<typename Func>
   void SystemC::PrintTypeObject(parameters& parm, const std::string& name, Func func) {
-    debug.functionStart("PrintTypeObject(name = " + name + ")");
+    debug.functionStart("PrintTypeObject(name = " + name + ")", false,  __FILE__, __LINE__);
     defineObject(parm, false, name, ast::ObjectType::FACTORY, "", NULL, NULL, NULL, NULL, func,
                  false, false);
 
@@ -60,17 +60,20 @@ namespace generator {
 
   template<typename Func>
   void SystemC::PrintFactory(parameters& parm, const std::string& name, Func func) {
-    debug.functionStart("PrintFactory(name = " + name + ")");
+    debug.functionStart("PrintFactory(name = " + name + ")", false,  __FILE__, __LINE__);
     std::string left;
     std::string right;
     std::string ascending;
+    std::string instance_name = "factory_" + name;
+    std::string factory_name = NameConverter::objectName(ast::ObjectType::FACTORY, name);
     auto f =
       [&](parameters& parm) {
 	func(parm, left, right, ascending);
 	bool arguments_exists = !left.empty();
-	std::string arguments = arguments_exists ? "(" + left+ ", " + right+ ")" : "";
+	std::string arguments = arguments_exists ? left+ ", " + right : "";
 	parm.addClassContents(name + " create() {", __FILE__, __LINE__);
-	parm.addClassContents(name + " x" + arguments + ";", __FILE__, __LINE__);
+	parm.addClassContents(name + " x(\"" + instance_name + "\", __FILE__, __LINE__);", __FILE__, __LINE__);
+	parm.addClassContents("x.construct(" + arguments + ");", __FILE__, __LINE__);
 	parm.addClassContents("return x;", __FILE__, __LINE__);
 	parm.addClassContents("}", __FILE__, __LINE__);
 	parm.addClassContents("template <typename T>", __FILE__, __LINE__);
@@ -78,10 +81,9 @@ namespace generator {
 	parm.addClassContents(name + " x(left, right, ascending);", __FILE__, __LINE__);
 	parm.addClassContents("return x;", __FILE__, __LINE__);
 	parm.addClassContents("}", __FILE__, __LINE__);
-	std::string factory_name = NameConverter::objectName(ast::ObjectType::FACTORY, name);
-	parm.addClassTrailer(factory_name + " factory_" + name + " = " + factory_name + "(this);");
       };
     PrintTypeObject(parm, name, f);
+    parm.addClassBottom(factory_name + " " + instance_name + " = " + factory_name + "(this);");
     debug.functionEnd("PrintFactory");
   }
 

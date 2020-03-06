@@ -17,7 +17,7 @@ namespace generator {
                              Func callback,
 			     bool wait_statements,
                              bool init_enable) {
-    debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")");
+    debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")", false,  __FILE__, __LINE__);
     std::string c = (class_description ? *class_description : "struct " + NameConverter::objectName(type, name));
     openHierarchy(parm, name, type, c, base_name);
     parm.process_contains_wait = false;

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "../../debug/debug.hpp"
+#include "../../exceptions/exceptions.hpp"
 
 #include "vhdl_enum.hpp"
 
@@ -25,6 +26,8 @@ namespace vhdl {
   template<class RANGE, class SUBTYPE>
   class Array {
 
+    Exceptions m_exceptions;
+    
     inline void setAll(SUBTYPE& value) {
       for (int i = 0; i < LENGTH() - 1; i++) {
         m_content[i] = value;
@@ -32,62 +35,122 @@ namespace vhdl {
     }
 
   protected:
-
+    
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+    
     RANGE m_range;
-    std::vector<SUBTYPE> m_content;
+    bool m_constrained = false;
+    std::vector<SUBTYPE*> m_content;
     SUBTYPE m_subtype;
 
   public:
 
+    Array(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
     Array() {};
-    Array(RANGE& range, SUBTYPE& subtype) : m_range(range), m_subtype(subtype) {};
+    ~Array() {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("~Array");
+      debug.debug("name = " + m_name);
+      delete_contents();
+      debug.functionEnd("~Array");
+    }
+
+    void delete_contents(int from_index = 0) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("delete_content(from_index = " + std::to_string(from_index) + ")");
+      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
+      for (int i = from_index; i < m_content.size(); i++) {
+	debug.debug("delete m_content[" + std::to_string(i) + ")");
+	delete m_content[i];
+      }
+      debug.functionEnd("delete_content");
+    }
+    
+    void resize(int length) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("resize(length = " + std::to_string(length) + ")");
+      int old_size = m_content.size();
+      debug.debug("old_size = " + std::to_string(old_size));
+      delete_contents(length);
+      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
+      m_content.resize(length);
+      debug.debug("m_content.size() = " + std::to_string(m_content.size()));
+      for (int i = old_size; i < length; i++) {
+	debug.debug("allocate m_content[" + std::to_string(i) + ")");
+	m_content.push_back(new SUBTYPE());
+      }
+      /*
+	m_content.resize(length);
+      for (auto i = m_content.begin(); i != m_content.end(); i++) {
+	SUBTYPE a = SUBTYPE();
+	m_content.emplace(i, a);
+      }
+      */
+      debug.functionEnd("resize");
+    }
+
+    void construct() {
+      // TODO: Implement
+    }
     
     void construct(const Array<RANGE, SUBTYPE>& other) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("construct(other = " + other.info() + ")");
       m_range.construct(other.m_range);
       m_subtype.construct(other.m_subtype);
-      m_content.resize(LENGTH());
+      resize(LENGTH());
       debug.functionEnd("construct");
     }
 
     void construct(int left, int right, bool ascending = true) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("construct(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
 			  ", ascending = " + std::to_string(ascending) + ")");
       m_range.construct(left, right, ascending);
-      m_content.resize(LENGTH());
+      int resize_length = LENGTH();
+      debug.debug("Resize length = " + std::to_string(resize_length));
+      resize(resize_length);
       debug.functionEnd("construct");
     }
 
-    void set(const std::string& s) {
-      Debug<true> debug = Debug<true>("Array");
-      debug.functionStart("set");
+    void setString(const std::string& s) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("setString(s = " + s + ")");
       if (s.size() != LENGTH()) {
-        construct(1, s.size());
+	throw Exceptions::RuntimeError("Length of left size " + std::to_string(s.size()) + " does not match length of right side = " + std::to_string(LENGTH()),
+				       m_name, m_file_name, m_line_number);
       }
+      debug.debug("m_content size = " + std::to_string(m_content.size()));
       int i = 0;
       for (auto c : s) {
-        m_content[i++] = c;
+	SUBTYPE* a = m_content.at(i);
+	assert(a);
+	debug.debug("Before: a.info[" + std::to_string(i) + "] = " + a->info());
+	*a = c;
+	debug.debug("After: a.info[" + std::to_string(i) + "] = " + a->info());
+	debug.debug("m_content[" + std::to_string(i) + "] = " + a->toString());
+	i++;
       }
-      debug.functionEnd("set");
+      debug.functionEnd("setString: " + toString());
     }
 
     void set(Array<RANGE, SUBTYPE>& other) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("set(other = " + other.toString() + ")");
       if (LENGTH() != other.LENGTH()) {
         construct(1, other.LENGTH());
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "set[" << i << "] = " << other.m_content[i].IMAGE(other.m_content[i]) << std::endl;
-        m_content[i] = other.m_content[i];
+       * m_content[i] = *other.m_content[i];
       }
       debug.functionEnd("set");
     }
 
     int ConvertIndex(int index) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("ConvertIndex(index = " + std::to_string(index) + ")");
       debug.debug("m_range: " + m_range.info());
       int x = ASCENDING() ? 1 : -1;
@@ -101,7 +164,7 @@ namespace vhdl {
     }
 
     inline bool IndexCheck(int index) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("IndexCheck(index = " + std::to_string(index) + ")");
       bool result = (index >= 0 && index < LENGTH());
       debug.functionEnd("IndexCheck: " + std::string(result ? "true" : "false"));
@@ -120,15 +183,15 @@ namespace vhdl {
       debug.debug("i = " + std::to_string(i));
       assert(IndexCheck(i));
       assert(i >= 0 && i < m_content.size());
-      SUBTYPE& result = m_content[i];
+      SUBTYPE* result = m_content[i];
       debug.functionEnd("get");
-      return result;
+      return *result;
     }
     
     bool equals(const std::string& other) {
       assert(LENGTH() == other.size());
       for (int i = 0; i < LENGTH(); i++) {
-        if (m_content[i] != other[i]) {
+        if (*m_content[i] != other[i]) {
           return false;
         }
       }
@@ -139,7 +202,7 @@ namespace vhdl {
       construct(left, right, ascending);
     }
     /*
-    Array(std::vector<int> vec) { // : a_debug("Array") {
+    Array(std::vector<int> vec) { // : a_debug(this) {
       if (LENGTH() != vec.size()) {
         std::cout << "Warning: Array of length " << LENGTH() << " assigned to integer array of length " << vec.size() << std::endl;
         int l = 0;
@@ -184,9 +247,25 @@ namespace vhdl {
       //      a_debug.functionEnd("init");
     }
 
-    void operator=(const SUBTYPE other) { m_content = other; }
-    void operator=(const char* other) {std::string s(other); set(s);}
-    void operator=(const std::string other) {set(other);}
+    void operator=(const SUBTYPE other) {
+      Debug<true> debug = Debug<true>("Array::operator=(const SUBTYPE other)");
+      debug.functionStart("operator=(other = " + other.toString() + ")");
+      m_content = other;
+      debug.functionEnd("operator=");
+    }
+    void operator=(const char* other) {
+      Debug<true> debug = Debug<true>("Array::operator=(const char* other)");
+      debug.functionStart("operator=(other = " + std::string(other) + ")");
+      std::string s(other);
+      setString(s);
+      debug.functionEnd("operator=");
+    }
+    void operator=(const std::string other) {
+      Debug<true> debug = Debug<true>("Array::operator=(const std::string other)");
+      debug.functionStart("operator=(other = " + other + ")");
+      setString(other);
+      debug.functionEnd("operator=");
+    }
     bool operator!=(const Array<RANGE, SUBTYPE>& other) {
       assert(this->LENGTH() != other.LENGTH());
       for (int i = 0; i < m_content.size(); i++) {
@@ -215,7 +294,7 @@ namespace vhdl {
       int i = index.POS();
       a_debug.debug("i = " + std::to_string(i));
       SUBTYPE& result = get(i); 
-      a_debug.functionEnd("operator[]");
+      a_debug.functionEnd("operator[]: " + result.info());
       return result;
     }
     
@@ -224,7 +303,7 @@ namespace vhdl {
     }
     
     inline unsigned int LENGTH() {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("LENGTH");
       int result = m_range.LENGTH();
       debug.functionEnd("LENGTH: " + std::to_string(result));
@@ -240,10 +319,13 @@ namespace vhdl {
     inline RANGE& POS(RANGE value) { return value.POS(); }  
     
     std::string toString() {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("toString");
       std::string s;
       for (int i = m_range.LEFT(); WithinRange(i); i += (m_range.ASCENDING() ? 1 : -1)) {
         s += this->get(i).toString(false);
       }
+      debug.functionStart("toString:" +s);
       return s;
     }
 
@@ -265,7 +347,7 @@ namespace vhdl {
     }
 
     inline Array<RANGE, SUBTYPE>& setOthers(SUBTYPE value) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("setOthers(value = " + value.toString() + ")");
       setAll(value);
       debug.functionEnd("setOthers");
@@ -273,7 +355,7 @@ namespace vhdl {
     }
 
     inline Array<RANGE, SUBTYPE>& setIndex(int index, SUBTYPE value) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("setIndex(index = " + std::to_string(index) + ")");
       m_content[index] = value;
       debug.functionEnd("setIndex");
@@ -281,7 +363,7 @@ namespace vhdl {
     }
 
     inline Array<RANGE, SUBTYPE>& setElement(RANGE element, SUBTYPE value) {
-      Debug<true> debug = Debug<true>("Array");
+      Debug<true> debug = Debug<true>(this);
       debug.functionStart("setElement(element = " + element.toString() + ")");
       debug.debug("1");
       int i = element.POS(element);

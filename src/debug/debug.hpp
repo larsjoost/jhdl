@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cassert>
 
+#include <boost/core/demangle.hpp>
+
 #include "../output/output.hpp"
 
 template<bool enable>
@@ -21,16 +23,19 @@ protected:
   
   Output m_output = Output(std::cout);
   
-  void print(std::string name, const std::string type, bool highlight, bool indent_increase) {
+  void print(std::string name, const std::string type, bool highlight, bool indent_increase,
+	     const char* file_name = NULL, int line_number = -1) {
     if (!indent_increase) {m_indent -= INDENT_SIZE;}
-    print(name, type, highlight);
+    print(name, type, highlight, DEFAULT_HIGHLIGHT_COLOR, file_name, line_number);
     if (indent_increase) {m_indent += INDENT_SIZE;}
   }
   
-  void print(std::string name, const std::string type, bool highlight, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR) {
+  void print(std::string name, const std::string type, bool highlight, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR,
+	     const char* file_name = NULL, int line_number = -1) {
     std::string indent = std::string(m_indent, ' ');
     auto func = [&](std::ostream* out) {
-      *out << indent << "[" + type + "] " << m_name << "::" << name << std::endl;
+		  *out << indent << (file_name ? std::string(file_name) + "(" + std::to_string(line_number) + "): " : "") <<
+		    "[" + type + "] " << m_name << "::" << name << std::endl;
     };
     if (highlight) {
       m_output.print(highlight_color, func);
@@ -45,9 +50,14 @@ public:
     m_verbose = enable;
   }
 
-  inline void functionStart(std::string name, bool highlight = false) {
+  template <class T>
+  Debug(T* instance) : m_name(boost::core::demangle(typeid(instance).name())) {
+    m_verbose = enable;
+  }
+
+  inline void functionStart(std::string name, bool highlight = false, const char* file_name = NULL, int line_number = -1) {
     if (isVerbose()) {
-      print(name, "FUNCTION START", highlight, true);
+      print(name, "FUNCTION START", highlight, true, file_name, line_number);
     }
   }
 

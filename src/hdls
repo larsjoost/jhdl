@@ -50,7 +50,7 @@ do
 	    set -x
             ;;
         x)
-            DEBUG="gdb --args"
+            DEBUG="gdb -tui --args"
 	    HDLC_DEBUG="-x"
             ;;
         y)
@@ -119,7 +119,7 @@ INCLUDES=""
 for i in $INCLUDE_PATHS; do
     INCLUDES+=" -I$i"
 done
-g++ -std=c++14 -O3 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$KERNEL_SRC -I$SCRIPTPATH/debug -I$SCRIPTPATH/output -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $SCRIPTPATH/../std/*.o $OUTPUT_SRC/*.o  $DEBUG_SRC/*.o
+g++ -std=c++14 -O0 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$KERNEL_SRC -I$SCRIPTPATH/debug -I$SCRIPTPATH/output -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $SCRIPTPATH/../std/*.o $OUTPUT_SRC/*.o  $DEBUG_SRC/*.o
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

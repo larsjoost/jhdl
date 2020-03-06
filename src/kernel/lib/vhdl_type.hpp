@@ -36,6 +36,11 @@ namespace vhdl {
 
   template<typename VALUE, typename UNIT, class ELEMENTS, class UNIT_STRING_CONVERTER>
   class PhysicalType {
+
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+
     VALUE scale(VALUE v, UNIT u, UNIT l) {
       ELEMENTS e;
       assert(l >= u);
@@ -44,12 +49,15 @@ namespace vhdl {
       } 
       return scale(v * e.array[u].number, e.array[u+1].base, l);
     }
+    
   public:
     VALUE m_value;
     UNIT a_unit;
     Physical<VALUE, UNIT> m_left;
     Physical<VALUE, UNIT> m_right;
-    
+
+    PhysicalType(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
+
     PhysicalType() {
       m_value = 0;
       a_unit = PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>::getBaseUnit();
@@ -64,6 +72,11 @@ namespace vhdl {
     void construct(const PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
+    };
+
+    void construct(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
+      m_left = left;
+      m_right = right;
     };
 
     PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>
@@ -119,11 +132,17 @@ namespace vhdl {
   template<class T>
   class vhdl_access {
 
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+
     T m_value;
 
     bool a_null = true;
   
   public:
+
+    vhdl_access(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
 
     T& ALL() {
       assert(!a_null);
@@ -135,6 +154,10 @@ namespace vhdl {
       m_value.set(s);
     }
 
+    void construct() {
+      // TODO: Implement
+    }
+    
     void construct(vhdl_access<T> s) {
       m_value.construct(s.m_value);
     }

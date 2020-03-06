@@ -666,7 +666,7 @@ namespace generator {
         if (id == ast::ObjectType::SIGNAL) {
           type = "vhdl::interface<sc_signal<" + type + ">, " + type + ">";
         }
-        std::string s = type + " " + name;
+        std::string s = type + " " + name + " = " + type + "(\"" + name + "\", __FILE__, __LINE__)";
 	parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
       	parm.addClassContents(s + ";", __FILE__, __LINE__);
         parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);

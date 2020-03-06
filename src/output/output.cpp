@@ -20,10 +20,10 @@ bool Output::isColorsSupported() {
 int Output::ConvertColor(Color color) {
   switch (color) {
   case Color::RESET: return RESET;
-  case Color::RED: return RED;
+  case Color::RED: return (m_bright_mode ? BRIGHT_RED : RED);
   case Color::GREEN: return GREEN;
   case Color::YELLOW: return YELLOW;
-  case Color::BLUE: return BLUE;
+  case Color::BLUE: return (m_bright_mode ? BRIGHT_BLUE : BLUE);
   }
   assert(false);
 }

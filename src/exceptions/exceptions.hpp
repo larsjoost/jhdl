@@ -5,6 +5,7 @@
 #include <string>
 #include <unistd.h>
 #include <cstring>
+#include <exception>
 
 #include "../ast/text.hpp"
 #include "../output/output.hpp"
@@ -23,6 +24,18 @@ class Exceptions {
   void print(std::string severity, Output::Color color, std::string& message, ast::Text* text);
 
 public:
+
+  class RuntimeError : public std::exception {
+    std::string m_message;
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+  public:
+    RuntimeError(std::string message, std::string name, std::string file_name, int line_number) : m_message(message), m_name(name), m_file_name(file_name), m_line_number(line_number) {};
+    virtual const char* what() const noexcept override {
+      return m_message.c_str();
+    }
+  };
   
   void printInternal(std::string message, ast::Text* text = NULL);
   void printNote(std::string message, ast::Text* text = NULL);

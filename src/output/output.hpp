@@ -5,6 +5,7 @@
 #include <string>
 #include <unistd.h>
 #include <cstring>
+#include <ostream>
 
 class Output {
 
@@ -13,7 +14,11 @@ class Output {
   const static int GREEN = 32; 
   const static int YELLOW = 33; 
   const static int BLUE = 34; 
+  const static int BRIGHT_RED = 91;
+  const static int BRIGHT_BLUE = 94;
 
+  bool m_bright_mode = true;
+  
 public:
 
   enum class Color {RESET, RED, GREEN, YELLOW, BLUE};
@@ -45,6 +50,14 @@ public:
     *a_out << colorCode(Color::RESET);
   }
 
+  void print(Color color, std::string text) {
+    *a_out << colorCode(color) << text  << colorCode(Color::RESET);
+  }
+
+  void println(Color color, std::string text) {
+    print(color, text);
+    *a_out << std::endl;
+  }
 };
 
 #endif

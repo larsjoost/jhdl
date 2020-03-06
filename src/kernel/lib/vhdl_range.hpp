@@ -13,6 +13,8 @@
 
 #include <systemc.h>
 
+#include "../../debug/debug.hpp"
+
 namespace vhdl {
 
   /*
@@ -26,7 +28,11 @@ namespace vhdl {
   class Range {
 
   protected:
-
+    
+    std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
+ 
     TYPE m_value;
     TYPE m_left;
     TYPE m_right;
@@ -34,6 +40,7 @@ namespace vhdl {
 
   public:
     
+    Range<TYPE>(const char* name, const char* file_name, int line_number) : m_name(name), m_file_name(file_name), m_line_number(line_number){};
     Range<TYPE>() {}
     Range<TYPE>(TYPE left, TYPE right, bool ascending = true) {
       m_left = left;
@@ -50,11 +57,19 @@ namespace vhdl {
       m_ascending = other.m_ascending;
     };
 
-    inline void construct(TYPE left, TYPE right, bool ascending) {
+    inline void construct(TYPE left, TYPE right, bool ascending = true) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("construct(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
+			  ", ascending = " + std::to_string(ascending) + ")");
       m_left = left;
       m_right = right;
       m_ascending = ascending;
+      debug.functionEnd("construct");
     };
+    
+    void construct() {
+      // TODO: Implement
+    }
 
     void init(TYPE value) {
       m_value = value;
@@ -102,7 +117,7 @@ namespace vhdl {
     }
 
     inline unsigned int LENGTH() {
-      return 32;
+      return HIGH() - LOW() + 1;
     }
 
     inline TYPE HIGH() {

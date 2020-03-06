@@ -42,21 +42,38 @@ namespace generator {
     }
   }
 
+  bool SystemC::lookupSeverity(parameters& parm, ast::ReportStatement* p, std::string& severity, std::list<std::string>& sequential_list) {
+    bool found;
+    static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
+    static ast::ObjectValueContainer expected_type =
+      ast::ObjectValueContainer(ast::ObjectValue::ARRAY, ast::ObjectValueContainer(ast::ObjectValue::INTEGER), enum_type); 
+    std::string message = a_expression.toString(parm, p->message, expected_type, true);
+    if (m_convert_to_systemc) {
+      static std::unordered_map<std::string, std::string> severity_lookup({{"NOTE", "INFO"}, {"WARNING", "WARNING"}, {"ERROR", "ERROR"}, {"FAILURE", "FATAL"}});
+      auto lookup = severity_lookup.find(severity);
+      found = (lookup != severity_lookup.end());
+      if (found) {
+        parm.addTextToList(sequential_list, "SC_REPORT_" + lookup->second + "(\"VHDL report\", std::string(" +
+			   message + ").c_str());", __FILE__, __LINE__);
+      }
+    } else {
+      DatabaseResult object;
+      found = parm.findOne(object, severity, ast::ObjectType::ENUM);
+      if (found) {
+        std::string name = NameConverter::getName(parm, object);
+        parm.addTextToList(sequential_list, "vhdl::report(" + message + ", " +
+			   name + ", __FILE__, __LINE__);", __FILE__, __LINE__);
+      }
+    }
+    return found;
+  }
+  
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
       debug.functionStart("reportStatement");
-      static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
-      static ast::ObjectValueContainer expected_type =
-        ast::ObjectValueContainer(ast::ObjectValue::ARRAY, ast::ObjectValueContainer(ast::ObjectValue::INTEGER), enum_type); 
       std::string severity = p->severity->toString(true);
-      DatabaseResult object;
-      if (parm.findOne(object, severity, ast::ObjectType::ENUM)) {
-        std::string name = NameConverter::getName(parm, object);
-        parm.addTextToList(sequential_list, "vhdl::report(" +
-			   a_expression.toString(parm, p->message, expected_type, true) + ", " +
-			   name + ", __FILE__, __LINE__);", __FILE__, __LINE__);
-      } else {
-        exceptions.printError("Cound to find severity level " + severity, &p->severity->text);
+      if (!lookupSeverity(parm, p, severity, sequential_list)) {
+        exceptions.printError("Cound to find severity level " + severity + ". Must be one of NOTE, WARNING, ERROR or FAILURE", &p->severity->text);
         parm.printAllObjects(severity);
       }
       debug.functionEnd("reportStatement");
