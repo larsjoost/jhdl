@@ -14,13 +14,13 @@
 
 namespace generator {
 
-  SystemC::SystemC(bool verbose) : debug("SystemC") {
+  SystemC::SystemC(bool verbose) : m_debug(this) {
     a_verbose |= verbose; 
   }
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                          bool standardPackage) {
-    debug.functionStart("generate(library = " + library + ")");
+    m_debug.functionStart("generate(library = " + library + ")", false, __FILE__, __LINE__);
     a_filename = designFile.filename;
     parameters parm(library, a_verbose);
     parm.open(a_filename); 
@@ -39,7 +39,7 @@ namespace generator {
     if (!standardPackage) {parm.addInclude("#include <standard.h>");}
     parse(parm, designFile, library);
     parm.close();
-    debug.functionEnd("generate");
+    m_debug.functionEnd("generate");
   }
 
   void SystemC::saveLibraryInfo() {
@@ -47,14 +47,15 @@ namespace generator {
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
-    debug.functionStart("parse(designFile = " + designFile.filename + ", library = " + library + ")");
+    m_debug.functionStart("parse(designFile = " + designFile.filename + ", library = " + library + ")",
+			  false, __FILE__, __LINE__);
     if (!designFile.designUnits.list.empty()) {
       for (ast::DesignUnit& it : designFile.designUnits.list) {
         includes(parm, it.module.contextClause, true);
       }
       bool unit_found = false;
       for (ast::DesignUnit& it : designFile.designUnits.list) {
-        debug.debug("Parsing design unit");
+        m_debug.debug("Parsing design unit");
         includes(parm, it.module.contextClause, false);
         if (it.module.package) {packageDeclaration(parm, it.module.package, library); unit_found = true;}
         if (it.module.interface) {interfaceDeclaration(parm, it.module.interface, library); unit_found = true;}
@@ -66,11 +67,12 @@ namespace generator {
     } else {
       exceptions.printWarning("Did not find anything in file " + designFile.filename); 
     }
-    debug.functionEnd("parse");
+    m_debug.functionEnd("parse");
   }
 
   void SystemC::parsePackage(parameters& parm, std::string name, std::string library) {
-    debug.functionStart("parsePackage(library = " + library + ", name = " + name + ")");
+    m_debug.functionStart("parsePackage(library = " + library + ", name = " + name + ")",
+			  false, __FILE__, __LINE__);
     std::string stdPath = (library == "WORK") ? "." : config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
@@ -99,21 +101,22 @@ namespace generator {
     } else {
       exceptions.printError("Could not find library \"" + library + "\" is [hdl] section of config file");
     }
-    debug.functionEnd("parsePackage(name = " + name + ")");
+    m_debug.functionEnd("parsePackage(name = " + name + ")");
   }
   
 
 
   ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
 						   std::string& ascending, ast::ObjectValueContainer& expectedType) {
-    debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")");
+    m_debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")",
+			  false, __FILE__, __LINE__);
     ast::ObjectValueContainer left_type;
     ast::ObjectValueContainer right_type;
     assert(r);
     if (r->range_direction_type) {
       left_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
       right_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->right, expectedType);
-      debug.debug("Left type = " + left_type.toString() + ", right type = " + right_type.toString());
+      m_debug.debug("Left type = " + left_type.toString() + ", right type = " + right_type.toString());
       if (left_type != right_type) {
 	exceptions.printError("Left range type " + left_type.toString() + " is not the same as right type " +
 			      right_type.toString(), r->range_direction_type->left->text);
@@ -128,24 +131,24 @@ namespace generator {
     } else {
       assert(false);
     }
-    debug.functionEnd("rangeToString: " + left_type.toString());
+    m_debug.functionEnd("rangeToString: " + left_type.toString());
     return left_type;
   }
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    debug.functionStart("printRangeType");
+    m_debug.functionStart("printRangeType", false, __FILE__, __LINE__);
     std::string left, right, ascending;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer found_type = rangeToString(parm, r, left, right, ascending, type);
     bool integer_type = found_type.IsValue(ast::ObjectValue::INTEGER);
     std::string t = integer_type ? "int" : "double";
     parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
-    PrintFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
-    debug.functionEnd("printRangeType");
+    printFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
+    m_debug.functionEnd("printRangeType");
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {
-    debug.functionStart("printPhysicalType");
+    m_debug.functionStart("printPhysicalType", false, __FILE__, __LINE__);
     assert(n);
     ast::RangeType* r = n->range;
     assert(r);
@@ -158,7 +161,7 @@ namespace generator {
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
-                                   parm.addObject(ast::ObjectType::ENUM, unit, physical_type);
+                                   parm.addObjectValueContainer(ast::ObjectType::ENUM, unit, physical_type);
                                    return unit;
                                  });
     std::string enumName = name + "_enum";
@@ -207,16 +210,17 @@ namespace generator {
       l = "{" + left + ", " + baseUnitName + "}";
       r = "{" + right + ", " + upperUnitName + "}";
     };
-    PrintFactory(parm, name, f);
-    debug.functionEnd("printPhysicalType");
+    printFactoryDefinition(parm, name, f);
+    m_debug.functionEnd("printPhysicalType");
   }
 
   void SystemC::packageDeclaration(parameters& parm, ast::Package* package, std::string& library) {
     ast::ObjectType type = package->body ? ast::ObjectType::PACKAGE_BODY : ast::ObjectType::PACKAGE;
     if (!parm.parse_declarations_only || type == ast::ObjectType::PACKAGE) { 
       std::string name = package->name->toString(true);
-      debug.functionStart("packageDeclaration(library = " + library +
-                          ", packet = " + name + ", type = " + toString(type) + ")");
+      m_debug.functionStart("packageDeclaration(library = " + library +
+                          ", packet = " + name + ", type = " + toString(type) + ")",
+			    false, __FILE__, __LINE__);
       topHierarchyStart(parm, library, name, type, a_filename);
       parm.package_contains_function = false;
       // bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
@@ -242,12 +246,12 @@ namespace generator {
 	parm.addImplementationContents(declaration, __FILE__, __LINE__);
       }
       topHierarchyEnd(parm, &package->name->text, (type == ast::ObjectType::PACKAGE));
-      debug.functionEnd("packageDeclaration");
+      m_debug.functionEnd("packageDeclaration");
     }
   }
 
   void SystemC::interfaceDeclaration(parameters& parm, ast::Interface* interface, std::string& library) {
-    debug.functionStart("interfaceDeclaration");
+    m_debug.functionStart("interfaceDeclaration", false, __FILE__, __LINE__);
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
     std::string class_name = NameConverter::objectName(type, name);
@@ -285,12 +289,12 @@ namespace generator {
 		 callback,
 		 false, true);
     topHierarchyEnd(parm, &interface->name->text, true);
-    debug.functionEnd("interfaceDeclaration");
+    m_debug.functionEnd("interfaceDeclaration");
   }
   
   void SystemC::implementationDeclaration(parameters& parm, ast::Implementation* implementation, std::string& library) {
     if (implementation) {
-      debug.functionStart("implementationDeclaration");
+      m_debug.functionStart("implementationDeclaration", false, __FILE__, __LINE__);
       std::string entity_name = implementation->entity_name->toString(true);
       std::string architecture_name = entity_name + "_" + implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
@@ -318,7 +322,7 @@ namespace generator {
                    callback,
                    false, true);
       topHierarchyEnd(parm, &implementation->architecture_name->text);
-      debug.functionEnd("implementationDeclaration");
+      m_debug.functionEnd("implementationDeclaration");
     }
   }
 

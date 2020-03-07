@@ -6,34 +6,34 @@
 namespace generator {
 
   void parameters::findAllLocal(DatabaseResults& objects, std::string& name, std::string& package, std::string& library) {
-    debug.functionStart("findAllLocal(name = " + name + ")");
+    m_debug.functionStart("findAllLocal(name = " + name + ")", false, __FILE__, __LINE__);
     std::list<std::string> current_hierarchy = {file_container.library};
     std::shared_ptr<std::list<std::string>> hierarchy_ptr;
     auto action_callback =
       [&](DatabaseResult& r) {
 	r.hierarchy = hierarchy_ptr;
-	debug.debug("Match = " + r.toString());
+	m_debug.debug("Match = " + r.toString());
       };
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
 	current_hierarchy.push_back(class_container.name);
-	debug.debug("Hierarchy name = " + class_container.name);
+	m_debug.debug("Hierarchy name = " + class_container.name);
 	hierarchy_ptr = std::make_shared<std::list<std::string>>();
 	*hierarchy_ptr = current_hierarchy;
 	class_container.database.findAll(objects, name, action_callback);
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
-    debug.functionEnd("findAllLocal: " + std::to_string(objects.size()));
+    m_debug.functionEnd("findAllLocal: " + std::to_string(objects.size()));
   }
 
   bool parameters::findOne(DatabaseResult& object, std::string& name, ast::ObjectType type, std::string package, std::string library) {
-    debug.functionStart("findOne");
+    m_debug.functionStart("findOne", false, __FILE__, __LINE__);
     auto valid =
       [&](DatabaseElement* e) {
 	return e->id == type;
       };
     bool found = findOneBase(object, name, valid, package, library);
-    debug.functionEnd("findOne");
+    m_debug.functionEnd("findOne");
     return found;
   }
   
@@ -119,26 +119,17 @@ namespace generator {
 						    text);
   }
   
-  void parameters::addObject(ast::ObjectType id, std::string& name,
+  void parameters::addObjectValueContainer(ast::ObjectType id, std::string& name,
 			     ast::ObjectValueContainer type,
 			     ast::ObjectArguments arguments,
 			     ast::Text* text) {
-    debug.functionStart("addObject(name = " + name + ")");
-    getActiveClassContainer()->database.add(id, name,  type,
-					    arguments, text);
-    debug.functionEnd("addObject");
+    m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString() +
+			  ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
+    getActiveClassContainer()->database.add(id, name,  type, arguments, text);
+    m_debug.functionEnd("addObjectValueContainer");
   }
   
-  void parameters::addObject(ast::ObjectType id, std::string& name,
-			     ast::ObjectValue type,
-			     ast::Text* text) {
-    debug.functionStart("addObject(name = " + name + ")");
-    getActiveClassContainer()->database.add(id, name,  type,
-					    text);
-    debug.functionEnd("addObject");
-  }
-
-    bool parameters::findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type) {
+  bool parameters::findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type) {
     bool found = false;
     found = a_global_database.findObject(object, library, name, type);
     if (library == "WORK" and !found) {
@@ -164,16 +155,16 @@ namespace generator {
   }
 
   void parameters::globalizeClass(ast::Text* text) {
-    debug.functionStart("globalizeClass");
+    m_debug.functionStart("globalizeClass", false, __FILE__, __LINE__);
     assert(!file_container.content.children.empty());
     ClassContainer& current_top_class = file_container.content.children.back();
     a_global_database.append(current_top_class.database.local_database, file_container.library,
 			     current_top_class.name, current_top_class.type, text);
-    debug.functionEnd("globalizeClass");
+    m_debug.functionEnd("globalizeClass");
   }
 
   bool parameters::isLocal(DatabaseResult& object) {
-    debug.functionStart("isLocal(object  = " + object.toString() + ")");
+    m_debug.functionStart("isLocal(object  = " + object.toString() + ")", false, __FILE__, __LINE__);
 
     bool local = false;
     if (object.local) {
@@ -206,7 +197,7 @@ namespace generator {
 
 
 	  std::string s3 = NameConverter::toUpper(*lst3++);
-	  debug.debug("s1 = " + s1 + ", s2 = " + s2 + ", s3 = " + s3);
+	  m_debug.debug("s1 = " + s1 + ", s2 = " + s2 + ", s3 = " + s3);
 	  if (s1 != s2 && s1 != s3) {
 	    local = false;
 	    break;
@@ -214,7 +205,7 @@ namespace generator {
 	}
       }
     }
-    debug.functionEnd("isLocal: " + std::to_string(local));
+    m_debug.functionEnd("isLocal: " + std::to_string(local));
     return local;
   }
 

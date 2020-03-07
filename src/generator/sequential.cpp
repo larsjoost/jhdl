@@ -6,14 +6,14 @@ namespace generator {
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
-      debug.functionStart("procedureCallStatement");
+      m_debug.functionStart("procedureCallStatement");
       parm.addTextToList(sequential_list, a_expression.procedureCallStatementToString(parm, p) + ";", __FILE__, __LINE__);
-      debug.functionEnd("procedureCallStatement");
+      m_debug.functionEnd("procedureCallStatement");
     }
   }
 
   bool SystemC::getObjectName(parameters& parm, std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text) {
-    debug.functionStart("getObjectName(name = " + name + ", type = " + type.toString() + ", id = " + ast::toString(id));
+    m_debug.functionStart("getObjectName(name = " + name + ", type = " + type.toString() + ", id = " + ast::toString(id));
     bool result = false;
     DatabaseResult object;
     if (parm.findOne(object, name, id)) {
@@ -24,7 +24,7 @@ namespace generator {
       exceptions.printError("Cound to find definition of " + ast::toString(id) + " with name " + name, text);
       parm.printAllObjects(name);
     }
-    debug.functionEnd("getObjectName");
+    m_debug.functionEnd("getObjectName");
     return result;
   }
   
@@ -35,10 +35,10 @@ namespace generator {
   
   void SystemC::variableAssignment(parameters& parm, ast::VariableAssignment* p, std::list<std::string>& sequential_list) {
     if (p) {
-      debug.functionStart("variableAssignment");
+      m_debug.functionStart("variableAssignment");
       assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, sequential_list,
 		 [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
-      debug.functionEnd("variableAssignment");
+      m_debug.functionEnd("variableAssignment");
     }
   }
 
@@ -70,36 +70,36 @@ namespace generator {
   
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
-      debug.functionStart("reportStatement");
+      m_debug.functionStart("reportStatement");
       std::string severity = p->severity->toString(true);
       if (!lookupSeverity(parm, p, severity, sequential_list)) {
         exceptions.printError("Cound to find severity level " + severity + ". Must be one of NOTE, WARNING, ERROR or FAILURE", &p->severity->text);
         parm.printAllObjects(severity);
       }
-      debug.functionEnd("reportStatement");
+      m_debug.functionEnd("reportStatement");
     }
   }
 
   void SystemC::waitStatement(parameters& parm, ast::WaitStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
-      debug.functionStart("waitStatement");
+      m_debug.functionStart("waitStatement");
       assert(p->waitText);
       parm.process_contains_wait = true;
       parm.addTextToList(sequential_list, getSourceLine(p->waitText), __FILE__, __LINE__);
       parm.addTextToList(sequential_list, NameConverter::getTopLevelPrefix(parm) + "wait(vhdl::convert(" + a_expression.physicalToString(parm, p->physical) + "));", __FILE__, __LINE__); 
-      debug.functionEnd("waitStatement");
+      m_debug.functionEnd("waitStatement");
     }
   }
 
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r, std::list<std::string>& sequential_list) {
     if (r) {
-       debug.functionStart("returnStatement");
+       m_debug.functionStart("returnStatement");
        try {
          parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, parm.returnType) + ";", __FILE__, __LINE__);
        } catch (ExpressionParser::ObjectNotFound e) {
          e.print();
        }
-       debug.functionEnd("returnStatement");
+       m_debug.functionEnd("returnStatement");
     }
   }
 

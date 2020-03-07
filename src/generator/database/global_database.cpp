@@ -6,7 +6,7 @@
 namespace generator {
   
   void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& database, std::string& library, std::string& object_name, ast::ObjectType type, ast::Text* source_text) {
-    debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")");
+    m_debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")");
     Object object;
     object.type = type;
     object.database = database;
@@ -27,7 +27,7 @@ namespace generator {
       x[object_name] = object;
       a_map[library] = x;
     }
-    debug.functionEnd("append");
+    m_debug.functionEnd("append");
   }
 
   bool GlobalDatabase::findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, const std::string& name, ast::ObjectType type) {
@@ -48,7 +48,7 @@ namespace generator {
 
   bool GlobalDatabase::findAll(DatabaseResults& results, const std::string& name,
 			       std::string& package, std::string& library) {
-    debug.functionStart("findAll(name = " + name + ", library = " + library + ", package = " + package + ")");
+    m_debug.functionStart("findAll(name = " + name + ", library = " + library + ", package = " + package + ")");
     auto func =
       [&](std::shared_ptr<LocalDatabase>& l, std::string& library, std::string package) {
 	std::shared_ptr<std::list<std::string>> hierarchy = std::make_shared<std::list<std::string>>();
@@ -62,7 +62,7 @@ namespace generator {
 	l->findAll(results, name, action_callback);
     };
     bool found = traverseAll(library, package, func);
-    debug.functionEnd("findAll: found = " + std::to_string(found) + ", size = " + std::to_string(results.size()));
+    m_debug.functionEnd("findAll: found = " + std::to_string(found) + ", size = " + std::to_string(results.size()));
     return found;
   }
 

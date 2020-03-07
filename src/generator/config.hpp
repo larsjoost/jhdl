@@ -8,7 +8,7 @@
 
 class Config {
 
-  Debug<false> debug;
+  Debug<false> m_debug;
 
   Exceptions exceptions;
   
@@ -17,7 +17,7 @@ class Config {
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> map;
   
 public:
-  Config() : debug("Config") {};
+  Config() : m_debug(this) {};
     
   void toLower(std::string& s);
   void toUpper(std::string& s);

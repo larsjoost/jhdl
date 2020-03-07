@@ -14,7 +14,7 @@ namespace generator {
 
   class Database {
 
-    Debug<false> debug;
+    Debug<false> m_debug;
 
   public:
     std::shared_ptr<LocalDatabase> local_database;
@@ -26,7 +26,7 @@ namespace generator {
     
   public:
 
-    Database() : debug("Database") {
+    Database() : m_debug(this) {
       local_database = std::make_shared<LocalDatabase>();
     };
     
@@ -65,9 +65,9 @@ namespace generator {
   
   template <typename Func>
   void Database::findAll(DatabaseResults& objects, const std::string& name, Func action) {
-    debug.functionStart("findAll");
+    m_debug.functionStart("findAll");
     local_database.get()->findAll(objects, name, action);
-    debug.functionEnd("findAll");
+    m_debug.functionEnd("findAll");
   }
 }
 

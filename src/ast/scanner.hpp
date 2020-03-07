@@ -65,7 +65,7 @@ namespace ast {
     
   public:
 
-    Scanner() : m_debug("ast::Scanner") {}
+    Scanner() : m_debug(this) {}
     
     int accept(const char *text);
     int optional(const char* text);

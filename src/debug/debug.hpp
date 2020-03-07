@@ -34,8 +34,9 @@ protected:
 	     const char* file_name = NULL, int line_number = -1) {
     std::string indent = std::string(m_indent, ' ');
     auto func = [&](std::ostream* out) {
-		  *out << indent << (file_name ? std::string(file_name) + "(" + std::to_string(line_number) + "): " : "") <<
-		    "[" + type + "] " << m_name << "::" << name << std::endl;
+		  *out << indent << "[" + type + "] " <<
+		    (file_name ? std::string(file_name) + "(" + std::to_string(line_number) + "): " : "") <<
+		    m_name << "::" << name << std::endl;
     };
     if (highlight) {
       m_output.print(highlight_color, func);
@@ -45,13 +46,11 @@ protected:
   }
 
 public:
-  
-  Debug(std::string name) : m_name(name) {
-    m_verbose = enable;
-  }
 
+  Debug(const char* name) : m_name(name) {};
+  
   template <class T>
-  Debug(T* instance) : m_name(boost::core::demangle(typeid(instance).name())) {
+  Debug(T* instance) : m_name(boost::core::demangle(typeid(*instance).name())) {
     m_verbose = enable;
   }
 
@@ -67,10 +66,15 @@ public:
     }
   }
 
-  inline void debug(std::string name, bool highlight = false, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR) {
+  inline void debug(std::string name, bool highlight = false, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR,
+		    const char* file_name = NULL, int line_number = 0) {
     if (isVerbose()) {
-      print(name, "DEBUG", highlight, highlight_color);
+      print(name, "DEBUG", highlight, highlight_color, file_name, line_number);
     }
+  }
+
+  inline void debug(std::string name, const char* file_name, int line_number) {
+    debug(name, false, DEFAULT_HIGHLIGHT_COLOR, file_name, line_number);
   }
 
   inline bool isVerbose() {

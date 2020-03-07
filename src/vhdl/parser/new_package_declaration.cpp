@@ -9,7 +9,7 @@ namespace vhdl {
   namespace parser {
   
     NewPackageDeclaration* NewPackageDeclaration::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      debug.functionStart("parse");
+      m_debug.functionStart("parse");
       library = scanner->expect<SimpleIdentifier, NewPackageDeclaration>();
       scanner->expect(".");
       package = scanner->expect<SimpleIdentifier, NewPackageDeclaration>();
@@ -19,7 +19,7 @@ namespace vhdl {
       generics = scanner->expect<AssociationList, NewPackageDeclaration>();
       scanner->expect(")");
       scanner->expect(";");
-      debug.functionEnd("parse");
+      m_debug.functionEnd("parse");
       return this;
     }
     

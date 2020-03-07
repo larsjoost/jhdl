@@ -5,7 +5,7 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
-    debug.functionStart("forLoop(name = " + name + ")");
+    m_debug.functionStart("forLoop(name = " + name + ")");
     std::string typeName;
     ast::ObjectValueContainer type;
     std::string variable_instance;
@@ -34,20 +34,20 @@ namespace generator {
         }
       } 
     }
-    parm.addObject(ast::ObjectType::VARIABLE, name, type);
+    parm.addObjectValueContainer(ast::ObjectType::VARIABLE, name, type);
     std::string forloop_execution = "for (" +
       name + " = " + name + ".LEFT(); " +
       name + " <= " + name + ".RIGHT(); " +
       name + " = " + name + ".RIGHTOF()) {";
     callback(parm, forloop_execution, variable_instance, variable_creation, type);
-    debug.functionEnd("forLoop");
+    m_debug.functionEnd("forLoop");
   }  
 
   template<typename Func>
   void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type,
 			   std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     std::string name = a_expression.basicIdentifierToString(parm, target);
-    debug.functionStart("assignment(name = " + name + ")");
+    m_debug.functionStart("assignment(name = " + name + ")");
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
@@ -82,22 +82,22 @@ namespace generator {
     } catch (ExpressionParser::ObjectNotFound e) {
       e.print();
     }
-    debug.functionEnd("assignment");
+    m_debug.functionEnd("assignment");
   }
   
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
-      debug.functionStart("signalAssignment");
+      m_debug.functionStart("signalAssignment");
       assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, sequential_list, sensitivity_list_callback);
-      debug.functionEnd("signalAssignment");
+      m_debug.functionEnd("signalAssignment");
     }
   }
 
   template <typename Func>
   void SystemC::ifStatement(parameters& parm, ast::IfStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
-      debug.functionStart("ifStatement");
+      m_debug.functionStart("ifStatement");
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
@@ -115,7 +115,7 @@ namespace generator {
         sequentialStatements(parm, c.sequentialStatements, sequential_list, sensitivity_list_callback);
       }
       parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
-      debug.functionEnd("ifStatement");
+      m_debug.functionEnd("ifStatement");
     }
   }
 
@@ -124,7 +124,7 @@ namespace generator {
     if (f) {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
-      debug.functionStart("forLoopStatement(name = " + name + ")");
+      m_debug.functionStart("forLoopStatement(name = " + name + ")");
       auto callback =
 	[&](parameters& parm,
 	    std::string& forloop_execution,
@@ -139,7 +139,7 @@ namespace generator {
 	  parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
       };
       forLoop(parm, name, f->iteration, callback);
-      debug.functionEnd("forLoopStatement");
+      m_debug.functionEnd("forLoopStatement");
     }
   }
   
@@ -147,7 +147,7 @@ namespace generator {
   template <typename Func>
   void SystemC::sequentialStatements(parameters& parm, ast::List<ast::SequentialStatement>& l,
 				     std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
-    debug.functionStart("sequentialStatements");
+    m_debug.functionStart("sequentialStatements");
     for (ast::SequentialStatement s : l.list) {
       procedureCallStatement(parm, s.procedureCallStatement, sequential_list);
       variableAssignment(parm, s.variableAssignment, sequential_list);
@@ -158,7 +158,7 @@ namespace generator {
       waitStatement(parm, s.waitStatement, sequential_list);
       returnStatement(parm, s.returnStatement, sequential_list);
     }
-    debug.functionEnd("sequentialStatements");
+    m_debug.functionEnd("sequentialStatements");
   }
 
 

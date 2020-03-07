@@ -12,7 +12,7 @@ namespace generator {
 
   class LocalDatabase {
 
-    Debug<false> debug;
+    Debug<false> m_debug;
 
     NameMap a_content;
 
@@ -25,7 +25,7 @@ namespace generator {
     void printAllObjects(std::string& name);
 
   public:
-    LocalDatabase() : debug("LocalDatabase") {};
+    LocalDatabase() : m_debug(this) {};
 
     template <typename Func>
     void findAll(DatabaseResults& results, const std::string& name, Func action);
@@ -54,7 +54,7 @@ namespace generator {
   template <typename Func>
   void LocalDatabase::findAll(DatabaseResults& results, const std::string& name,
 			      Func action) {
-    debug.functionStart("findAll(name = " + name + ")");
+    m_debug.functionStart("findAll(name = " + name + ")");
     std::list<DatabaseElement>* e = a_content.find(name);
     int result_size = 0;
     if (e) {
@@ -66,7 +66,7 @@ namespace generator {
 	result_size++;
       }
     }
-    debug.functionEnd("findAll: " + std::to_string(result_size));
+    m_debug.functionEnd("findAll: " + std::to_string(result_size));
   }
 
 

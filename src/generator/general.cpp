@@ -33,21 +33,21 @@ namespace generator {
   }
 
   void SystemC::openHierarchy(parameters& parm, std::string name, ast::ObjectType type, std::string class_description, std::string base_name) {
-    debug.functionStart("openHierarchy");
+    m_debug.functionStart("openHierarchy");
     parm.newClass(class_description, name, type, base_name);
     if (a_verbose) {
       parm.addTop("// Hierarchy start");
     }
-    debug.functionEnd("openHierarchy");
+    m_debug.functionEnd("openHierarchy");
   }
 
   void SystemC::closeHierarchy(parameters& parm) {
-    debug.functionStart("closeHierarchy");
+    m_debug.functionStart("closeHierarchy");
     if (a_verbose) {
       parm.addBottom("// Hierarchy end");
     }
     parm.endClass();
-    debug.functionEnd("closeHierarchy");
+    m_debug.functionEnd("closeHierarchy");
   }
 
   std::string SystemC::getSourceLine(ast::Text* t) {

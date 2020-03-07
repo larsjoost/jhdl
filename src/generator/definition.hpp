@@ -17,7 +17,7 @@ namespace generator {
                              Func callback,
 			     bool wait_statements,
                              bool init_enable) {
-    debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")", false,  __FILE__, __LINE__);
+    m_debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")", false,  __FILE__, __LINE__);
     std::string c = (class_description ? *class_description : "struct " + NameConverter::objectName(type, name));
     openHierarchy(parm, name, type, c, base_name);
     parm.process_contains_wait = false;
@@ -27,7 +27,7 @@ namespace generator {
     if (!topHierarchy) {
       parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.", __FILE__, __LINE__);
      }
-    debug.debug("Declaration");
+    m_debug.debug("Declaration");
     if (declarationList) {
       declarations(parm, *declarationList);
     }
@@ -37,13 +37,13 @@ namespace generator {
       concurrentStatementsDefinition(parm, *concurrentStatements);
     }
     if (init_enable) {
-      debug.debug("Constructor");
+      m_debug.debug("Constructor");
       if (concurrentStatements) {
         concurrentStatementsInstantiation(parm, *concurrentStatements);
       }
     }
     closeHierarchy(parm);
-    debug.functionEnd("defineObject");
+    m_debug.functionEnd("defineObject");
   }
 
 }

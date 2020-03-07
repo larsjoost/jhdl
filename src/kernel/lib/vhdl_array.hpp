@@ -90,7 +90,7 @@ namespace vhdl {
       debug.functionStart("setString(s = " + s + ")");
       if (s.size() != LENGTH()) {
 	throw Exceptions::RuntimeError("Length of left size " + std::to_string(s.size()) + " does not match length of right side = " + std::to_string(LENGTH()),
-				       m_name);
+				       m_name, __FILE__, __LINE__);
       }
       debug.debug("m_content size = " + std::to_string(m_content.size()));
       int i = 0;

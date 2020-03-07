@@ -15,7 +15,7 @@ namespace generator {
   ast::ObjectValueContainer SystemC::numberType(parameters& parm, ast::SimpleIdentifier* identifier,
 						ast::NumberType* t) {
     std::string name = identifier->toString(true);
-    debug.functionStart("numberType(name = " + name + ")");
+    m_debug.functionStart("numberType(name = " + name + ")", false, __FILE__, __LINE__);
     assert(t);
     ast::ObjectValue value;
     if (t->physical) {
@@ -26,12 +26,12 @@ namespace generator {
       value = ast::ObjectValue::INTEGER;
     }
     ast::ObjectValueContainer type(value, name);
-    debug.functionEnd("numberType: " + type.toString());
+    m_debug.functionEnd("numberType: " + type.toString());
     return type;
   }
   
   ast::ObjectValueContainer SystemC::enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t) {
-    debug.functionStart("enumerationType");
+    m_debug.functionStart("enumerationType", false, __FILE__, __LINE__);
     assert(t); 
     std::string name = identifier->toString(true);
     ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
@@ -43,10 +43,10 @@ namespace generator {
                      if (e.identifier) {
                        enum_size++;
                        s = e.identifier->toString(true);
-                       parm.addObject(ast::ObjectType::ENUM, s, type);
+                       parm.addObjectValueContainer(ast::ObjectType::ENUM, s, type);
                      } else if (e.character) {
                        std::string name = e.character->toString();
-                       parm.addObject(ast::ObjectType::ENUM, name, type); 
+                       parm.addObjectValueContainer(ast::ObjectType::ENUM, name, type); 
                      }
                      return s;
                    });
@@ -81,16 +81,17 @@ namespace generator {
     parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;", __FILE__, __LINE__);
     auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
     };
-    PrintFactory(parm, name, f);
-    debug.functionEnd("enumerationType");
+    printFactoryDefinition(parm, name, f);
+    m_debug.functionEnd("enumerationType");
     return ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION, name);
   }
 
-  void SystemC::PrintFactory(parameters& parm, const std::string& name, 
+  void SystemC::printFactory(parameters& parm, const std::string& name, 
                              ast::RangeType* range, ast::SimpleIdentifier* identifier,
                              ast::ObjectValue expected_value,
                              ast::ArraySubtypeDefinition* subtype) {
-    debug.functionStart("PrintFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")");
+    m_debug.functionStart("printFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")",
+			  false, __FILE__, __LINE__);
     auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
@@ -110,28 +111,26 @@ namespace generator {
 	}
       }
     };
-    PrintFactory(parm, name, f);
-    debug.functionEnd("PrintFactory");
+    printFactoryDefinition(parm, name, f);
+    m_debug.functionEnd("printFactory");
   }
   
   void SystemC::printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition,
-                               std::string& subtype, ast::ObjectValueContainer::Array& arguments) {
-    debug.functionStart("printArrayType");
+                               std::string& subtype_name, ast::RangeType* subtype_range,
+			       ast::ObjectValueContainer::Array& arguments) {
+    m_debug.functionStart("printArrayType(name = " + name + ")", false, __FILE__, __LINE__);
     std::string array_template_start;
     std::string array_template_end;
     for (auto& r : definition.list) { 
       ast::ObjectValue type;
       std::string range;
       if (r.range) {
-        if (r.range->range_direction_type) {
-          ast::ObjectValueContainer t;
-          a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
-          type = t.GetValue();
-          range = "vhdl::Range<int>";
-          arguments.push_back(t);
-        } else {
-          assert(false);
-        }
+	assert(r.range->range_direction_type);
+	ast::ObjectValueContainer t;
+	a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
+	type = t.GetValue();
+	range = "vhdl::Range<int>";
+	arguments.push_back(t);
       } else if (r.identifier) {
         DatabaseResult database_result;
         type = ast::ObjectValue::ENUMERATION;
@@ -153,22 +152,19 @@ namespace generator {
       array_template_start = "vhdl::Array<" + range + ", " + array_template_start;
       array_template_end += ">";
     }
-    parm.addClassContents("using " + name + " = " + array_template_start + subtype + array_template_end + ";", __FILE__, __LINE__);
+    parm.addClassContents("using " + name + " = " + array_template_start + subtype_name + array_template_end + ";", __FILE__, __LINE__);
     auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       for (auto& r : definition.list) { 
         if (r.range) {
-          if (r.range->range_direction_type) {
-            ast::ObjectValueContainer t;
-            a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
-            rangeToString(parm, r.range, left, right, ascending, t);
-          } else {
-            assert(false);
-          }
-        }
+	  assert(r.range->range_direction_type);
+	  ast::ObjectValueContainer t;
+	  a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
+	  rangeToString(parm, r.range, left, right, ascending, t);
+	}
       }
     };
-    PrintFactory(parm, name, f);
-    debug.functionEnd("printArrayType");
+    printFactoryDefinition(parm, name, f);
+    m_debug.functionEnd("printArrayType");
   }
   
 
@@ -187,28 +183,29 @@ namespace generator {
     type b_t is array (3 downto -4) of bit;
   */
   ast::ObjectValueContainer SystemC::arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t) {
-    debug.functionStart("arrayType");
     assert(t); 
     std::string name = identifier->toString(true);
-    std::string type_name = t->type->name->toString(true);
+    m_debug.functionStart("arrayType(name = " + name + ")", false, __FILE__, __LINE__);
+    std::string subtype_name = t->subtype->name->toString(true);
+    m_debug.debug("subtype_name = " + subtype_name, __FILE__, __LINE__);
     DatabaseResult database_result;
     ast::ObjectValueContainer value;
-    if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-      std::string subtypeName = NameConverter::getName(parm, database_result);
+    if (parm.findOne(database_result, subtype_name, ast::ObjectType::TYPE)) { 
+      std::string subtype_name = NameConverter::getName(parm, database_result);
       ast::ObjectValueContainer::Array arguments;
-      printArrayType(parm, name, t->definition, subtypeName, arguments);
+      printArrayType(parm, name, t->array_definition, subtype_name, t->subtype->range, arguments);
       value = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, arguments, database_result.object->type);
     } else {
-      exceptions.printError("Could not find type \"" + type_name + "\"", &identifier->text);
+      exceptions.printError("Could not find type \"" + subtype_name + "\"", &identifier->text);
       if (a_verbose) {parm.printDatabase();}
     }
-    debug.functionEnd("arrayType");
+    m_debug.functionEnd("arrayType: " + value.toString());
     return value;
   }
 
   ast::ObjectValueContainer SystemC::SimpleType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type,
                                                 ast::ObjectValue object_value, std::string definition) {
-    debug.functionStart("SimpleType");
+    m_debug.functionStart("SimpleType", false, __FILE__, __LINE__);
     std::string name = identifier->toString(true);
     std::string type_name = type->toString(true);
     DatabaseResult database_result;
@@ -219,32 +216,32 @@ namespace generator {
       parm.addClassContents("using " + name + " = " + definition + "<" + n + ">;", __FILE__, __LINE__); 
       auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
       };
-      PrintFactory(parm, name, f);
+      printFactoryDefinition(parm, name, f);
     } else {
       exceptions.printError("Could not find type " + type_name, &type->text);
       if (a_verbose) {parm.printDatabase();}
     }
-    debug.functionEnd("SimpleType");
+    m_debug.functionEnd("SimpleType");
     return value;
   }
 
   ast::ObjectValueContainer SystemC::AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
-    debug.functionStart("AccessType");
+    m_debug.functionStart("AccessType", false, __FILE__, __LINE__);
     ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::ACCESS, "vhdl::vhdl_access");
-    debug.functionEnd("AccessType");
+    m_debug.functionEnd("AccessType");
     return value;
   }
 
   ast::ObjectValueContainer SystemC::FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type) {
-    debug.functionStart("FileType");
+    m_debug.functionStart("FileType", false, __FILE__, __LINE__);
     ast::ObjectValueContainer value = SimpleType(parm, identifier, type, ast::ObjectValue::FILE, "vhdl::vhdl_file");
-    debug.functionEnd("FileType");
+    m_debug.functionEnd("FileType");
     return value;
   }
 
   void SystemC::type_declarations(parameters& parm, ast::TypeDeclaration* t) {
     std::string name = t->identifier->toString(true);
-    debug.functionStart("type_declarations(name = " + name + ")");
+    m_debug.functionStart("type_declarations(name = " + name + ")", false, __FILE__, __LINE__);
     ast::ObjectValueContainer value;
     if (t->accessType) {
       value = AccessType(parm, t->identifier, t->accessType);
@@ -262,9 +259,9 @@ namespace generator {
 	assert(false);
       }
     }
-    debug.debug("Hierarchy: " + parm.file_container.getClassContainerHierarchy());
-    parm.addObject(ast::ObjectType::TYPE, name, value);
-    debug.functionEnd("type_declarations");
+    m_debug.debug("Hierarchy: " + parm.file_container.getClassContainerHierarchy(), __FILE__, __LINE__);
+    parm.addObjectValueContainer(ast::ObjectType::TYPE, name, value);
+    m_debug.functionEnd("type_declarations");
   }
 
   void SystemC::FileDeclaration(parameters& parm, ast::FileDeclaration* file) {
@@ -272,11 +269,12 @@ namespace generator {
       std::string name = file->handle->toString(true);
       std::string type = file->type->toString(true);
       std::string direction = file->direction->toString(true);
-      debug.functionStart("FileDeclaration(name = " + name + ", type = " + type + ", direction = " + direction + ")");
+      m_debug.functionStart("FileDeclaration(name = " + name + ", type = " + type + ", direction = " + direction + ")",
+			    false, __FILE__, __LINE__);
       DatabaseResult result;
       if (parm.findOne(result, type, ast::ObjectType::TYPE)) {
         type = NameConverter::getName(parm, result);
-        parm.addObject(ast::ObjectType::FILE, name, result.object->type);
+        parm.addObjectValueContainer(ast::ObjectType::FILE, name, result.object->type);
       }
       if (parm.findOne(result, direction)) {
         direction = NameConverter::getName(parm, result);
@@ -284,24 +282,24 @@ namespace generator {
       parm.addClassContents(getSourceLine(file->handle), __FILE__, __LINE__);
       parm.addClassContents(type + " " + name + " = " + type + "(" +
 			    direction + ", " + file->filename->toString() + ");", __FILE__, __LINE__); 
-      debug.functionEnd("FileDeclaration");
+      m_debug.functionEnd("FileDeclaration");
     }
   }
   
   void SystemC::AliasDeclaration(parameters& parm, ast::AliasDeclaration* alias) {
     if (alias) {
-      debug.functionStart("AliasDeclaration");
+      m_debug.functionStart("AliasDeclaration", false, __FILE__, __LINE__);
       std::string designator = alias->designator->toString(true);
       std::string name = alias->name->toString(true);
       std::string type;
       DatabaseResult result;
       if (parm.findOne(result, alias->name)) {
         type = NameConverter::getName(parm, result);
-        parm.addObject(result.object->id, designator, result.object->type);
+        parm.addObjectValueContainer(result.object->id, designator, result.object->type);
       }
       parm.addClassContents(getSourceLine(alias->designator), __FILE__, __LINE__);
       parm.addClassContents("using " + designator + " = " + type + ";", __FILE__, __LINE__); 
-      debug.functionEnd("AliasDeclaration");
+      m_debug.functionEnd("AliasDeclaration");
     }
   }
   
@@ -335,7 +333,7 @@ namespace generator {
 	  a.default_value = NULL;
 	  arguments.push_back(a);
 	} else {
-	  debug.debug("Did not find object argument type " + a.type_name);
+	  m_debug.debug("Did not find object argument type " + a.type_name);
 	}
       }
     }
@@ -395,7 +393,7 @@ namespace generator {
   
   std::string SystemC::GetInterface(parameters& parm, ast::InterfaceList* interface, bool initialization,
                                     std::string local_prefix) {
-    debug.functionStart("GetInterface");
+    m_debug.functionStart("GetInterface", false, __FILE__, __LINE__);
     std::string result;
     if (interface) {
       bool quiet = parm.setQuiet(true);
@@ -406,22 +404,22 @@ namespace generator {
       result = interfaceListToString(parm, interface, ", ", initialization, type_converter, local_prefix, false);
       parm.setQuiet(quiet);
     }
-    debug.functionEnd("GetInterface");
+    m_debug.functionEnd("GetInterface");
     return result;
   }
 
   void SystemC::StoreInterfaceInDatabase(parameters& parm, ast::InterfaceList* interface) {
-    debug.functionStart("StoreInterfaceInDatabase");
+    m_debug.functionStart("StoreInterfaceInDatabase", false, __FILE__, __LINE__);
     if (interface) {
       bool quiet = parm.setQuiet(true);
       interfaceListToString(parm, interface, ", ", false, "", true);
       parm.setQuiet(quiet);
     }
-    debug.functionEnd("StoreInterfaceInDatabase");
+    m_debug.functionEnd("StoreInterfaceInDatabase");
   }
 
   void SystemC::PrintInterface(parameters& parm, ast::InterfaceList* interface) {
-    debug.functionStart("PrintInterface");
+    m_debug.functionStart("PrintInterface", false, __FILE__, __LINE__);
     std::string result;
     if (interface) {
       auto type_converter = [&](std::string& type, ast::ObjectType id,
@@ -430,7 +428,7 @@ namespace generator {
       };
       result = interfaceListToString(parm, interface, ", ", true, type_converter, "", true);
     }
-    debug.functionEnd("PrintInterface");
+    m_debug.functionEnd("PrintInterface");
   }
 
   std::string SystemC::AttributeName(ast::Attribute* a) {
@@ -442,11 +440,11 @@ namespace generator {
                                          ast::ObjectType type,
                                          ast::ObjectArguments& arguments,
                                          ast::Text* text) {
-    debug.functionStart("FunctionAttribute, name = " + name + ", arguments = " + arguments.toString());
+    m_debug.functionStart("FunctionAttribute(name = " + name + ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
     std::string foreignName = "";
     auto valid = [&](DatabaseElement* e) {
       bool match = (e->id == type) && e->attribute && e->arguments.ExactMatch(arguments);
-      debug.debug((match ? "Match = " : "Different = ") + e->toString(), true,
+      m_debug.debug((match ? "Match = " : "Different = ") + e->toString(), true,
                   match ? Output::Color::GREEN : Output::Color::RED);
       return match;
     };
@@ -458,15 +456,15 @@ namespace generator {
         foreignName = AttributeName(e->attribute);
       }
     } else {
-      debug.debug("Did not find attribute of function " + name);
+      m_debug.debug("Did not find attribute of function " + name);
     }
-    debug.debug("Foreign name = " + foreignName);
-    debug.functionEnd("FunctionAttribute");
+    m_debug.debug("Foreign name = " + foreignName);
+    m_debug.functionEnd("FunctionAttribute");
     return foreignName;
   };
 
   std::string SystemC::FunctionReturn(parameters& parm, ast::FunctionDeclaration* f, bool global_scope) {
-    debug.functionStart("FunctionReturn");
+    m_debug.functionStart("FunctionReturn", false, __FILE__, __LINE__);
     std::string returnTypeName = "void";
     parm.returnType = ast::ObjectValueContainer(ast::ObjectValue::NONE);
     if (f->returnType) {
@@ -476,7 +474,7 @@ namespace generator {
         parm.returnType = returnType.object->type;
       }
     }
-    debug.functionEnd("FunctionReturn: name = " + returnTypeName);
+    m_debug.functionEnd("FunctionReturn: name = " + returnTypeName);
     return returnTypeName;
   }
   
@@ -485,7 +483,7 @@ namespace generator {
       bool operatorName = (function_declaration->name == NULL);
       std::string origin_name = operatorName ? function_declaration->string->toString(true) :
 	function_declaration->name->toString(true);
-      debug.functionStart("function_declarations(name = " + origin_name + ")");
+      m_debug.functionStart("function_declarations(name = " + origin_name + ")", false, __FILE__, __LINE__);
       parm.package_contains_function = true;
       ast::Text& text = operatorName ? function_declaration->string->text : function_declaration->name->text;
       
@@ -539,7 +537,7 @@ namespace generator {
         } 
         std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
         if (function_declaration->body) {
-	  debug.debug("Function declaration body");
+	  m_debug.debug("Function declaration body");
 	  parm.addClassContents((operatorName ? "friend " : "") +
 				localReturnTypeName + " " +
 				translatedName + interface + ";", __FILE__, __LINE__);
@@ -561,24 +559,24 @@ namespace generator {
 				translatedName + interface + " = 0;", __FILE__, __LINE__);
 	}
       }
-      debug.functionEnd("function_declarations");
+      m_debug.functionEnd("function_declarations");
     }
   }
 
   void SystemC::ForeignAttribute(parameters& parm, ast::Attribute* a) {
-    debug.functionStart("ForeignAttribute");
+    m_debug.functionStart("ForeignAttribute", false, __FILE__, __LINE__);
     ast::Text* text = a->item ? &a->item->text : &a->string->text;
     std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
     ast::ObjectArguments arguments(false);
     generateObjectArguments(parm, a->arguments, arguments);
     ast::ObjectType id = a->objectType;
-    debug.debug("id = " + ast::toString(id) + ", name = " + name + ", arguments = " + arguments.toString());
+    m_debug.debug("id = " + ast::toString(id) + ", name = " + name + ", arguments = " + arguments.toString());
     parm.addAttribute(name, arguments, id, a, text);
     auto valid = [&](DatabaseElement* e) {
       bool arguments_match = arguments.empty() || e->arguments.ExactMatch(arguments);
       bool match = (e->id == id) && arguments_match;
       std::string s = (match ? "Match" : "Different"); 
-      debug.debug(s + ": " + e->toString());
+      m_debug.debug(s + ": " + e->toString());
       return match;
     };
     DatabaseResult object;
@@ -594,7 +592,7 @@ namespace generator {
         if (parm.findOne(result, e->function->returnType, ast::ObjectType::TYPE)) {
 	  returnName = NameConverter::getName(parm, result);
 	} else {
-	  debug.debug("Could not find function return type");
+	  m_debug.debug("Could not find function return type");
 	}
       }
       parm.addClassContents("/*", __FILE__, __LINE__);
@@ -607,12 +605,12 @@ namespace generator {
       exceptions.printError("Did not find declaration of " + ast::toString(id) + " \"" + name + "\"", text); 
       parm.printAllObjects(name);
     }
-    debug.functionEnd("ForeignAttribute");
+    m_debug.functionEnd("ForeignAttribute");
   }
   
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
-      debug.functionStart("attribute_declarations");
+      m_debug.functionStart("attribute_declarations", false, __FILE__, __LINE__);
       if (a->item || a->string) {
         static std::unordered_map<std::string, bool> ignored_attributes =
           {{"SYNTHESIS_RETURN", false}};
@@ -621,12 +619,12 @@ namespace generator {
         if (identifier == "FOREIGN") {
           ForeignAttribute(parm, a);
         } else if (ignored_attributes.find(identifier) != ignored_attributes.end()) {
-          debug.debug("Ignoring " + identifier + " attribute");
+          m_debug.debug("Ignoring " + identifier + " attribute");
         } else {
           exceptions.printWarning("Unknown attribute " + identifier, &a->identifier->text);
         }
       }
-      debug.functionEnd("attribute_declarations");
+      m_debug.functionEnd("attribute_declarations");
     }
   }
 
@@ -641,25 +639,25 @@ namespace generator {
   */
   void SystemC::subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t) {
     std::string name = t->identifier->toString(true);
-    debug.functionStart("subtype_declarations(name = " + name + ")");
+    m_debug.functionStart("subtype_declarations(name = " + name + ")", false, __FILE__, __LINE__);
     std::string type_name = t->type->name->toString(true);
     DatabaseResult database_result;
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       std::string type_name = NameConverter::getName(parm, database_result, false);
-      parm.addObject(ast::ObjectType::TYPE, name, database_result.object->type);
+      parm.addObjectValueContainer(ast::ObjectType::TYPE, name, database_result.object->type);
       parm.addClassContents(getSourceLine(t->identifier), __FILE__, __LINE__);
       parm.addClassContents("using " + name + " = " + type_name + ";", __FILE__, __LINE__);
-      PrintFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
+      printFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
       if (a_verbose) {parm.printDatabase();}
     }
-    debug.functionEnd("subtype_declarations");
+    m_debug.functionEnd("subtype_declarations");
   }
 
   void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
-      debug.functionStart("ObjectDeclarations");
+      m_debug.functionStart("ObjectDeclarations", false, __FILE__, __LINE__);
       auto func = [&](std::string& name, std::string& type, std::string& init,
 		      std::string& factory_name, ast::ObjectType id,
                       ast::ObjectDeclaration::Direction direction) {
@@ -676,12 +674,12 @@ namespace generator {
         }
       };
       ObjectDeclaration(parm, v, func);
-      debug.functionEnd("ObjectDeclarations");
+      m_debug.functionEnd("ObjectDeclarations");
     }
   }
 
   void SystemC::declarations(parameters& parm, ast::List<ast::Declaration>& d) {
-    debug.functionStart("declarations");
+    m_debug.functionStart("declarations", false, __FILE__, __LINE__);
     for (ast::Declaration i : d.list) {
       if (i.type) {type_declarations(parm, i.type);}
       if (i.subtype) {subtype_declarations(parm, i.subtype);}
@@ -693,7 +691,7 @@ namespace generator {
       FileDeclaration(parm, i.file);
       AliasDeclaration(parm, i.alias);
     }
-    debug.functionEnd("declarations");
+    m_debug.functionEnd("declarations");
   }
 
 }

@@ -8,7 +8,7 @@ namespace generator {
   void SystemC::loadPackage(parameters& parm, std::string package,
                             std::string library, std::string identifier,
                             ast::Text* text) {
-    debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")");
+    m_debug.functionStart("loadPackage(library = " + library + ", name = " + package + ")", false, __FILE__, __LINE__);
     std::shared_ptr<LocalDatabase> object;
     bool packageExists = parm.findObject(object, library, package, ast::ObjectType::PACKAGE);
     if (!packageExists) {
@@ -23,12 +23,12 @@ namespace generator {
     } else {
       exceptions.printError("Did not find package " + package + " in library " + library, text);
     }
-    debug.functionEnd("loadPackage");
+    m_debug.functionEnd("loadPackage");
   }
   
   void SystemC::includes(parameters& parm, ast::ContextClause* contextClause, bool load) {
     if (contextClause) {
-      debug.functionStart("includes");
+      m_debug.functionStart("includes", false, __FILE__, __LINE__);
       for (ast::UseClause& useClause : contextClause->useClauses.list) {
         assert (useClause.package);
         assert (useClause.library);
@@ -39,7 +39,7 @@ namespace generator {
 	  loadPackage(parm, package, library, identifier, &useClause.package->text);
 	} 
       }
-      debug.functionEnd("includes");
+      m_debug.functionEnd("includes");
     }    
   }
 

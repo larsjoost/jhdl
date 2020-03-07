@@ -18,7 +18,7 @@ namespace parser {
 
   public:
 
-    DesignFile() : m_debug("parser::DesignFile") {};
+    DesignFile() : m_debug(this) {};
 
     void parse(std::string& filename);
 

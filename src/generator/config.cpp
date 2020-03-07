@@ -71,7 +71,7 @@ void Config::save() {
 }
 
 std::string Config::expandEnvironmentVariables(const std::string& text)  {
-  debug.functionStart("expandEnvironmentVariables(text = " + text + ")");
+  m_debug.functionStart("expandEnvironmentVariables(text = " + text + ")");
   size_t start;
   size_t end;
   size_t size;
@@ -99,12 +99,12 @@ std::string Config::expandEnvironmentVariables(const std::string& text)  {
       exceptions.printError("Environment variable " + envName + " is not defined");
     }
   }
-  debug.functionEnd("expandEnvironmentVariables: " + text);
+  m_debug.functionEnd("expandEnvironmentVariables: " + text);
   return text;
 }
 
 std::string Config::find(std::string section, std::string key, bool expand) {
-  debug.functionStart("find(section = " + section + ", key = " + key + ", expand = " + std::to_string(expand) + ")");
+  m_debug.functionStart("find(section = " + section + ", key = " + key + ", expand = " + std::to_string(expand) + ")");
   std::string s = section.empty() ? "unnamed" : section;
   toUpper(s);
   toUpper(key);
@@ -122,7 +122,7 @@ std::string Config::find(std::string section, std::string key, bool expand) {
   if (result.empty()) {
     exceptions.printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + filename);
   }
-  debug.functionEnd("find: " + result);
+  m_debug.functionEnd("find: " + result);
   return result;
 }
 

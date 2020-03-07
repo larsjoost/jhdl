@@ -18,7 +18,7 @@ namespace generator {
 
   class parameters {
 
-    Debug<true> debug;
+    Debug<true> m_debug;
     Exceptions exceptions;
     bool a_verbose = false;
 
@@ -93,12 +93,12 @@ namespace generator {
     };
     
     struct FileContainer {
-      Debug<false> debug;
+      Debug<false> m_debug;
       std::string library;
       std::string file_name;
       int line_number = 1;
       AreaContainer content;
-      FileContainer() : debug("FileContainer") {};
+      FileContainer() : m_debug(this) {};
       template<typename Func>
       void traverseClassContainerHierarchy(Func callback);
       ClassContainer* getCurrentClassContainer();
@@ -118,7 +118,7 @@ namespace generator {
     ClassContainer* getActiveClassContainer();
     
   public:
-    parameters(std::string& library, bool verbose = false) : debug("parameters") {
+    parameters(std::string& library, bool verbose = false) : m_debug(this) {
       file_container.library = library;
       a_verbose = verbose;
     };
@@ -176,11 +176,9 @@ namespace generator {
     void addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
                      ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
                      ast::Text* text = NULL);
-    void addObject(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
-		     ast::ObjectArguments arguments = ast::ObjectArguments(false),
-		     ast::Text* text = NULL);
-    void addObject(ast::ObjectType id, std::string& name, ast::ObjectValue type = ast::ObjectValue::NONE,
-		     ast::Text* text = NULL);
+    void addObjectValueContainer(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
+				 ast::ObjectArguments arguments = ast::ObjectArguments(false),
+				 ast::Text* text = NULL);
     bool findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type = ast::ObjectType::UNKNOWN);
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
     void printDatabase(std::string name = "");
@@ -204,7 +202,7 @@ namespace generator {
 
   template<typename Func>
   void parameters::FileContainer::traverseClassContainerHierarchy(Func callback) {
-    debug.functionStart("traverseClassContainerHierarchy");
+    m_debug.functionStart("traverseClassContainerHierarchy");
     std::list<ClassContainer>* c = &content.children;
     int hierarchy_level = 0;
     bool done = false;
@@ -217,14 +215,14 @@ namespace generator {
 	c = &x.children;
       }
     } while (!done);
-    debug.functionEnd("traverseClassContainerHierarchy");
+    m_debug.functionEnd("traverseClassContainerHierarchy");
   }
 
   template<typename Func>
   int parameters::findBestMatch(DatabaseResults& matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    debug.functionStart("findBestMatch)");
+    m_debug.functionStart("findBestMatch)");
     int found = 0;
     for (auto& i : matches) {
       if (valid(i.object)) {
@@ -243,7 +241,7 @@ namespace generator {
 	} 
       }
     }
-    debug.functionEnd("findBestMatch: " + std::to_string(found));
+    m_debug.functionEnd("findBestMatch: " + std::to_string(found));
     return found;
   }
 
@@ -252,24 +250,24 @@ namespace generator {
 				 DatabaseResults& local_matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    debug.functionStart("findBestMatch)");
+    m_debug.functionStart("findBestMatch)");
     int found = findBestMatch(global_matches, bestMatch, valid);
     bestMatch.local = false;
     if (found == 0) {
       found = findBestMatch(local_matches, bestMatch, valid);
       bestMatch.local = true;
     }
-    debug.functionEnd("findBestMatch: " + std::to_string(found));
+    m_debug.functionEnd("findBestMatch: " + std::to_string(found));
     return (found == 1);
   }
 
   template<typename Func>
   bool parameters::findOneBase(DatabaseResult& object, std::string& name, Func valid, std::string package, std::string library) {
-    debug.functionStart("findOneBase(name = " + name + ", package = " + package + ", library = " + library + ")");
+    m_debug.functionStart("findOneBase(name = " + name + ", package = " + package + ", library = " + library + ")");
     library = (library == "WORK") ? "" : library;
     DatabaseResults global_results;
     a_global_database.findAll(global_results, name, package, library);
-    if (debug.isVerbose()) {
+    if (m_debug.isVerbose()) {
       std::cout << "Global database:" << std::endl;
       for (auto& i : global_results) {
 	std::cout << i.toString() << std::endl;
@@ -277,7 +275,7 @@ namespace generator {
     }
     DatabaseResults local_results;
     findAllLocal(local_results, name, package, library);
-    if (debug.isVerbose()) {
+    if (m_debug.isVerbose()) {
       std::cout << "Local database:" << std::endl;
       for (auto& i : local_results) {
 	std::cout << i.toString() << std::endl;
@@ -292,10 +290,10 @@ namespace generator {
       for (auto& i : local_results) {
 	std::cout << "Found local: " << i.toString() << std::endl;
       }
-    } else if (debug.isVerbose()) {
+    } else if (m_debug.isVerbose()) {
       std::cout << "Found: " << object.toString() << std::endl;
     }
-    debug.functionEnd("findOneBase: " + std::to_string(found));
+    m_debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;
   }
 

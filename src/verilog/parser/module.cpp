@@ -9,7 +9,7 @@ namespace verilog {
   namespace parser {
   
     Module* Module::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      debug.functionStart("parse");
+      m_debug.functionStart("parse");
       scanner->accept(scanner::Scanner::VERILOG_MODULE);
       interface = new ::ast::Interface();
       implementation = new ::ast::Implementation();
@@ -22,7 +22,7 @@ namespace verilog {
       }
       scanner->expect(";");
       scanner->expect(scanner::Scanner::VERILOG_ENDMODULE);
-      debug.functionEnd("parse");
+      m_debug.functionEnd("parse");
       return this;
     }
 

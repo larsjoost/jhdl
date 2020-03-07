@@ -8,9 +8,9 @@ namespace verilog {
   namespace parser {
 
     void DesignUnit::parse(::ast::Scanner<scanner::Scanner>* scanner) {
-      debug.functionStart("parse");
+      m_debug.functionStart("parse");
       module = *(scanner->optional<Module>());
-      debug.functionEnd("parse");
+      m_debug.functionEnd("parse");
     }
     
   }

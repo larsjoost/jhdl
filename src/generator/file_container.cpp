@@ -43,14 +43,14 @@ namespace generator {
   }
 
   parameters::ClassContainer* parameters::FileContainer::getCurrentClassContainer() {
-    debug.functionStart("getCurrentClassContainer");
+    m_debug.functionStart("getCurrentClassContainer");
     ClassContainer* a = NULL;
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
 	a = &class_container;
       };
     traverseClassContainerHierarchy(class_container_callback);
-    debug.functionEnd("getCurrentClassContainer");
+    m_debug.functionEnd("getCurrentClassContainer");
     return a;
   }
 

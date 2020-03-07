@@ -12,11 +12,11 @@ namespace vhdl {
   
     class Package : public ::ast::Package {
 
-      Debug<false> debug;
+      Debug<false> m_debug;
       
     public:
 
-      Package() : debug("vhdl::parser::Package") {};
+      Package() : m_debug(this) {};
       
       Package* parse(::ast::Scanner<scanner::Scanner>* scanner);
 

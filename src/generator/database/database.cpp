@@ -5,16 +5,16 @@ namespace generator {
 
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                      ast::ObjectArguments arguments, ast::Text* text) {
-    debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + type.toString() + ")", true);
+    m_debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + type.toString() + ")", true);
     local_database.get()->add(id, name, type, arguments, text);
-    debug.functionEnd("add");
+    m_debug.functionEnd("add");
   }
 
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type, ast::Text* text) {
-    debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + ast::toString(type) + ")", true);
+    m_debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + ast::toString(type) + ")", true);
     ast::ObjectValueContainer t = ast::ObjectValueContainer(type);
     local_database.get()->add(id, name, type, text); 
-    debug.functionEnd("add");
+    m_debug.functionEnd("add");
   }
 
   void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,

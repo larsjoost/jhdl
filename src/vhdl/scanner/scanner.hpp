@@ -18,11 +18,11 @@ namespace vhdl {
     
     class Scanner {
 
-      Debug<false> debug;
+      Debug<false> m_debug;
       
     public:
 
-      Scanner() : debug("vhdl::Scanner") {}
+      Scanner() : m_debug(this) {}
       
       static const int NUMBER_OF_SPECIAL_CHARACTERS = 18;
 

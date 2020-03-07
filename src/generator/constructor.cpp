@@ -10,7 +10,7 @@ namespace generator {
 				std::list<std::string>* sensitivity_list,
 				std::string description_append,
 				std::string instance_argument) {
-    debug.functionStart("instantiateType");
+    m_debug.functionStart("instantiateType");
     std::string object_name = NameConverter::objectName(object_type, name);
     std::string instance_name = object_name + "_INST";
     std::string options_name = "opts";
@@ -36,7 +36,7 @@ namespace generator {
     parm.addClassConstructorContents(instance_name + "->run();", __FILE__, __LINE__);
     parm.addClassConstructorContents("}, name.c_str(), &" + options_name +");", __FILE__, __LINE__);
     parm.addClassConstructorContents("}", __FILE__, __LINE__);
-    debug.functionEnd("instantiateType");
+    m_debug.functionEnd("instantiateType");
   }
 
   void SystemC::componentAssociation(parameters& parm, std::string& instanceName, ast::AssociationList* l,
@@ -87,11 +87,11 @@ namespace generator {
   /* TODO: Move to concurrentStatementsDefinition */ 
   void SystemC::concurrentStatementsInstantiation(parameters& parm,
                                                  ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    debug.functionStart("concurrentStatementsInstantiation");
+    m_debug.functionStart("concurrentStatementsInstantiation");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       componentInstantiation(parm, c.componentInstance);
     }
-    debug.functionEnd("concurrentStatementsInstantiation");
+    m_debug.functionEnd("concurrentStatementsInstantiation");
   }
 
   std::string SystemC::ObjectName(const ParentInfo& info) {

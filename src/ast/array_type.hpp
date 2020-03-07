@@ -12,8 +12,8 @@ namespace ast {
     
   public:
 
-    List<ArrayDefinition> definition;
-    SubtypeIndication* type;
+    List<ArrayDefinition> array_definition;
+    SubtypeIndication* subtype;
     
   };
 

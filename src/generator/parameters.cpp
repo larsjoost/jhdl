@@ -8,17 +8,17 @@ namespace generator {
   GlobalDatabase parameters::a_global_database;
   
   void parameters::open(std::string filename) {
-    debug.functionStart("open(filename = " + filename + ")");
+    m_debug.functionStart("open(filename = " + filename + ")", false, __FILE__, __LINE__);
     info_writer.Open(NameConverter::replaceFileExtension(filename, ".i"));
     file_container.file_name = filename;
-    debug.functionEnd("open");
+    m_debug.functionEnd("open");
   }
   
   void parameters::close() {
-    debug.functionStart("close");
+    m_debug.functionStart("close", false, __FILE__, __LINE__);
     file_container.flush(true);
     info_writer.Close();
-    debug.functionEnd("close");
+    m_debug.functionEnd("close");
   }
   
   void parameters::println(std::ostream& handle, std::string text) {
@@ -54,7 +54,7 @@ namespace generator {
 
   void parameters::newClass(std::string description, std::string name, ast::ObjectType type,
 			    std::string base_name) {
-    debug.functionStart("newClass(" + description + ")");
+    m_debug.functionStart("newClass(" + description + ")", false, __FILE__, __LINE__);
     ClassContainer a;
     a.active = true;
     a.class_description = description;
@@ -67,7 +67,7 @@ namespace generator {
     } else {
       c->children.push_back(a);
     }
-    debug.functionEnd("newClass");
+    m_debug.functionEnd("newClass");
   }
 
   void parameters::addDerivedClass(std::string text) {
@@ -99,9 +99,9 @@ namespace generator {
   }
 
   void parameters::endClass() {
-    debug.functionStart("endClass");
+    m_debug.functionStart("endClass", false, __FILE__, __LINE__);
     getActiveClassContainer()->active = false;
-    debug.functionEnd("endClass");
+    m_debug.functionEnd("endClass");
   }
   
   void parameters::addBottom(std::string text) {
@@ -124,7 +124,7 @@ namespace generator {
     if (breakpoint) {
       list.push_back("std::raise(SIGINT);");
     }
-    if (debug.isVerbose()) {
+    if (m_debug.isVerbose()) {
       text += " // " + std::string(file_name) + ":" + std::to_string(line_number);
     }
     list.push_back(text);
@@ -136,27 +136,27 @@ namespace generator {
   }
 
   parameters::ClassContainer* parameters::getCurrentClassContainer() {
-    debug.functionStart("getCurrentClassContainer");
+    m_debug.functionStart("getCurrentClassContainer", false, __FILE__, __LINE__);
     ClassContainer* a = file_container.getCurrentClassContainer();
-    debug.functionEnd("getCurrentClassContainer");
+    m_debug.functionEnd("getCurrentClassContainer");
     return a;
   }
 
  parameters::ClassContainer* parameters::getParentClassContainer() {
-    debug.functionStart("getParentClassContainer");
+    m_debug.functionStart("getParentClassContainer", false, __FILE__, __LINE__);
     ClassContainer* a = file_container.getParentClassContainer();
-    debug.functionEnd("getParentClassContainer");
+    m_debug.functionEnd("getParentClassContainer");
     return a;
   }
   
   parameters::ClassContainer* parameters::getActiveClassContainer() {
-    debug.functionStart("getActiveClassContainer");
+    m_debug.functionStart("getActiveClassContainer", false, __FILE__, __LINE__);
     ClassContainer* a = getCurrentClassContainer();
     if (a == NULL) {
       printHierarchy();
       assert(false);
     }
-    debug.functionEnd("getActiveClassContainer");
+    m_debug.functionEnd("getActiveClassContainer");
     return a;
   }
 
@@ -193,16 +193,16 @@ namespace generator {
   }
   
   int parameters::getHierarchyLevel() {
-    debug.functionStart("getHierarchyLevel");
+    m_debug.functionStart("getHierarchyLevel", false, __FILE__, __LINE__);
     const int library_level = 1;
     int h = 0;
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	debug.debug("Hierarchy = " + std::to_string(hierarchy));
+	m_debug.debug("Hierarchy = " + std::to_string(hierarchy));
 	h = hierarchy + library_level; 
       };
     file_container.traverseClassContainerHierarchy(class_container_callback);
-    debug.functionEnd("getHierarchyLevel: " + std::to_string(h));
+    m_debug.functionEnd("getHierarchyLevel: " + std::to_string(h));
     return h;
   }
 

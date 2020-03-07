@@ -16,7 +16,7 @@ namespace vhdl {
       
     public:
 
-      DesignUnit() : m_debug("vhdl::parser::DesignUnit") {};
+      DesignUnit() : m_debug(this) {};
       
       void parse(::ast::Scanner<scanner::Scanner>* scanner);
 

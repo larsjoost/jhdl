@@ -8,7 +8,7 @@ namespace generator {
 
   void SystemC::blockStatementDefinition(parameters& parm,
                                          ast::BlockStatement* blockStatement) {
-    debug.functionStart("blockStatementDefinition");
+    m_debug.functionStart("blockStatementDefinition");
     if (blockStatement) {
       std::string name = blockStatement->name->toString(true);
       std::string object_name = NameConverter::objectName(ast::ObjectType::BLOCK, name);
@@ -57,7 +57,7 @@ namespace generator {
       auto callback =
 	[&](parameters& parm) {
 	  parm.addClassContents(forloop_variable_instance, __FILE__, __LINE__);
-	  parm.addObject(ast::ObjectType::VARIABLE, identifier, forloop_variable_type);
+	  parm.addObjectValueContainer(ast::ObjectType::VARIABLE, identifier, forloop_variable_type);
     	};
       defineObject(parm, false, name, ast::ObjectType::GENERATE, "",
 		   NULL, &identifier,
@@ -72,7 +72,7 @@ namespace generator {
 			      bool sensitivity_all,
 			      ast::List<ast::Declaration>* declarations,
 			      ast::List<ast::SequentialStatement>& sequential_statements) {
-    debug.functionStart("createProcess");
+    m_debug.functionStart("createProcess");
     std::string name;
     if (label) {
       name = label->toString(true);
@@ -115,11 +115,11 @@ namespace generator {
       parm.addImplementationContents("} while(true);", __FILE__, __LINE__);
     }
     parm.addImplementationContents("}", __FILE__, __LINE__);
-    debug.functionStart("createProcess");
+    m_debug.functionStart("createProcess");
   }
   
   void SystemC::processDefinition(parameters& parm, ast::Process* process) {
-    debug.functionStart("processDefinition");
+    m_debug.functionStart("processDefinition");
     if (process) {
       std::list<std::string> sensitivity_list;
       if (process->sensitivity_list) {
@@ -134,12 +134,12 @@ namespace generator {
 		    process->sensitivity_all, &process->declarations,
 		    process->sequentialStatements);
     }
-    debug.functionEnd("processDefinition");
+    m_debug.functionEnd("processDefinition");
   }
 
   void SystemC::concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s) {
     if (s) {
-      debug.functionStart("concurrentSignalAssignment");
+      m_debug.functionStart("concurrentSignalAssignment");
       ast::List<ast::SequentialStatement> sequentialStatements;
       ast::SequentialStatement statement;
       statement.signalAssignment = s;
@@ -152,20 +152,20 @@ namespace generator {
       }
       createProcess(parm, s->label, &s->target->identifier->text, NULL,
 		    true, NULL, sequentialStatements);
-      debug.functionEnd("concurrentSignalAssignment");
+      m_debug.functionEnd("concurrentSignalAssignment");
     }
   }
   
   void SystemC::concurrentStatementsDefinition(parameters& parm,
                                                ast::List<ast::ConcurrentStatement>& concurrentStatements) {
-    debug.functionStart("concurrentStatementsDefinition");
+    m_debug.functionStart("concurrentStatementsDefinition");
     for (ast::ConcurrentStatement& c : concurrentStatements.list) {
       processDefinition(parm, c.process);
       forGenerateStatementDefinition(parm, c.forGenerateStatement);
       blockStatementDefinition(parm, c.blockStatement);
       concurrentSignalAssignment(parm, c.signalAssignment);
     }
-    debug.functionEnd("concurrentStatementsDefinition");
+    m_debug.functionEnd("concurrentStatementsDefinition");
   }
 
 

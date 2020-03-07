@@ -12,11 +12,11 @@ namespace verilog {
   
     class Module : public ::ast::Module {
 
-      Debug<false> debug;
+      Debug<false> m_debug;
       
     public:
 
-      Module() : debug("verilog::parser::Module") {};
+      Module() : m_debug(this) {};
       
       Module* parse(::ast::Scanner<scanner::Scanner>* scanner);
 

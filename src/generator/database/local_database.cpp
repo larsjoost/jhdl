@@ -30,16 +30,16 @@ namespace generator {
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    Debug<false> debug("LocalDatabase");
-    debug.functionStart("addAttribute(name = " + name + ")");
-    if (debug.isVerbose()) {
+    Debug<false> debug(this);
+    m_debug.functionStart("addAttribute(name = " + name + ")");
+    if (m_debug.isVerbose()) {
       print();
     }
     bool found = false;
     DatabaseResults results;
     findAll(results, name);
     for (auto& i : results) {
-      debug.debug("i = " + i.toString());
+      m_debug.debug("i = " + i.toString());
       if (id == i.object->id && (arguments.empty() || i.object->arguments.ExactMatch(arguments))) {
 	assert(!i.object->attribute);
 	i.object->attribute = attribute;
@@ -56,10 +56,10 @@ namespace generator {
 	print();
       }
     }
-    if (debug.isVerbose()) {
+    if (m_debug.isVerbose()) {
       print();
     }
-    debug.functionEnd("addAttribute");
+    m_debug.functionEnd("addAttribute");
   };
 
   void LocalDatabase::printAllObjects(std::string& name) {

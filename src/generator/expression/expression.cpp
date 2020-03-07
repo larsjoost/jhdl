@@ -6,15 +6,15 @@ namespace generator {
 
   std::string ExpressionParser::returnTypesToString(parameters& parm,
 						    ast::ReturnTypes& return_types) {
-    debug.functionStart("ReturnTypesToString");
+    m_debug.functionStart("ReturnTypesToString");
     std::string found = "";
     std::string delimiter;
     for (auto& i : return_types) {
       found += delimiter + i.toString();
       delimiter = ", ";
     }
-    debug.debug("Result = " + found, true);
-    debug.functionEnd("ReturnTypesToString");
+    m_debug.debug("Result = " + found, true);
+    m_debug.functionEnd("ReturnTypesToString");
     return found;
   }
 
@@ -48,7 +48,7 @@ namespace generator {
   ast::ObjectValueContainer ExpressionParser::collectAllReturnTypes(parameters& parm,
 								    ast::Expression* e,
 								    ast::ObjectValueContainer& expectedType) {
-    debug.functionStart("CollectAllReturnTypes");
+    m_debug.functionStart("CollectAllReturnTypes");
     ast::ObjectValueContainer result;
     ast::ReturnTypes o;
     expressionReturnTypes(parm, e, o);
@@ -60,7 +60,7 @@ namespace generator {
       exceptions.printError("Could not resolve expected type " + expectedType.toString() +
                             ". Found the following types: " + found, e->text);
     }
-    debug.functionEnd("CollectAllReturnTypes");
+    m_debug.functionEnd("CollectAllReturnTypes");
     return result;
   }
 
@@ -76,7 +76,7 @@ namespace generator {
 					 ast::Expression* e,
 					 ast::ObjectValueContainer& expectedType,
 					 bool add_read_function) {
-    debug.functionStart("toString");
+    m_debug.functionStart("toString");
     auto sensitivityListCallback =
       [&](DatabaseResult& object, std::string& name_extension) {
 	if (add_read_function) {
@@ -84,17 +84,17 @@ namespace generator {
 	}
       };
     std::string s = assignmentString(parm, e, expectedType, sensitivityListCallback);
-    debug.functionEnd("toString: s = " + s);
+    m_debug.functionEnd("toString: s = " + s);
     return s;
   }
 
   std::string ExpressionParser::toString(parameters& parm,
 					 ast::Expression* expr,
 					 ast::ObjectValue expectedType) {
-    debug.functionStart("toString");
+    m_debug.functionStart("toString");
     ast::ObjectValueContainer e(expectedType);
     std::string s = toString(parm, expr, e);
-    debug.functionEnd("toString");
+    m_debug.functionEnd("toString");
     return s;
   }
 
@@ -103,12 +103,12 @@ namespace generator {
 							       ast::ProcedureCallStatement* p) {
     assert(p);
     std::string name = p->name->toString(true);
-    debug.functionStart("procedureCallStatementToString(name = " + name + ")");
+    m_debug.functionStart("procedureCallStatementToString(name = " + name + ")");
     ast::ObjectArguments arguments = toObjectArguments(parm, p->arguments);
     auto valid = [&](DatabaseElement* e) {
       bool result = ((e->id == ast::ObjectType::PROCEDURE) &&
-                     e->arguments.equals(arguments, debug.isVerbose()));
-      debug.debug(e->toString() + (result ? " == " : " != ") + name + "(" + arguments.toString() + ")",
+                     e->arguments.equals(arguments, m_debug.isVerbose()));
+      m_debug.debug(e->toString() + (result ? " == " : " != ") + name + "(" + arguments.toString() + ")",
                   true, (result ? Output::Color::GREEN : Output::Color::RED));
       return result;
     };
@@ -120,7 +120,7 @@ namespace generator {
       exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
       parm.printAllObjects(name);
     }
-    debug.functionEnd("procedureCallStatementToString");
+    m_debug.functionEnd("procedureCallStatementToString");
     return name;
   }
 
@@ -128,14 +128,14 @@ namespace generator {
 					     DatabaseElement* e,
 					     ast::ObjectArguments& arguments,
                                              ast::ObjectValueContainer* expectedReturnType) {
-    debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")");
+    m_debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")");
     bool result;
     bool cast_operation = (e->id == ast::ObjectType::TYPE);
-    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, false, debug.isVerbose())) {
+    if (e->id == ast::ObjectType::FUNCTION && !e->arguments.equals(arguments, false, m_debug.isVerbose())) {
       result = false;
     } else if (cast_operation) {
-      result = arguments.equals(e->type, debug.isVerbose());
-    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, debug.isVerbose())) {
+      result = arguments.equals(e->type, m_debug.isVerbose());
+    } else if (e->type.GetValue() == ast::ObjectValue::ARRAY && !arguments.equals(e->type.GetArguments(), true, m_debug.isVerbose())) {
       result = false;
     } else {
       if (expectedReturnType) {
@@ -148,20 +148,20 @@ namespace generator {
           type = &e->type; 
         }
         result = type->equals(*expectedReturnType); 
-        debug.debug("Return type " + type->toString() + (result ? " == " : " != ") +
+        m_debug.debug("Return type " + type->toString() + (result ? " == " : " != ") +
                     expectedReturnType->toString());
       } else {
         result = true;
       }
     }
-    debug.functionEnd("objectWithArguments = " + std::string(result ? "true" : "false"));
+    m_debug.functionEnd("objectWithArguments = " + std::string(result ? "true" : "false"));
     return result;
   }
   
   void ExpressionParser::functionReturnTypes(parameters& parm, std::string& name,
                                              ast::AssociationList* associationList,
                                              ast::ReturnTypes& return_types) {
-    debug.functionStart("functionReturnTypes(name = " + name + ")");
+    m_debug.functionStart("functionReturnTypes(name = " + name + ")");
     assert(associationList);
     ast::ObjectArguments arguments = toObjectArguments(parm, associationList);
     /* auto valid =
@@ -171,7 +171,7 @@ namespace generator {
     DatabaseResults objects;
     parm.findAll(objects, name);
     for (auto& i : objects) {
-      debug.debug("Found object: " + i.toString());
+      m_debug.debug("Found object: " + i.toString());
       bool cast_operation = (i.object->id == ast::ObjectType::TYPE);
       if (cast_operation) {
         return_types.insert(i.object->type);
@@ -185,7 +185,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("FunctionReturnTypes = " + returnTypesToString(parm, return_types));
+    m_debug.functionEnd("FunctionReturnTypes = " + returnTypesToString(parm, return_types));
   }
 
   std::string ExpressionParser::translateOperator(parameters& parm,
@@ -207,7 +207,7 @@ namespace generator {
                                                         const ast::ObjectValueContainer& l,
                                                         const ast::ObjectValueContainer& r,
                                                         ast::ReturnTypes& return_types) {
-    debug.functionStart("GetStandardOperatorReturnTypes(name = " + name + ", l = " + l.toString() + ", r = " + r.toString() + ")");
+    m_debug.functionStart("GetStandardOperatorReturnTypes(name = " + name + ", l = " + l.toString() + ", r = " + r.toString() + ")");
     struct OperatorReturnMap {
       ast::ObjectValue l;
       ast::ObjectValue r;
@@ -246,7 +246,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("GetStandardOperatorReturnTypes = " + returnTypesToString(parm, return_types));
+    m_debug.functionEnd("GetStandardOperatorReturnTypes = " + returnTypesToString(parm, return_types));
   }
   
   void ExpressionParser::operatorReturnTypes(parameters& parm,
@@ -254,7 +254,7 @@ namespace generator {
                                              const ast::ObjectValueContainer& l,
                                              const ast::ObjectValueContainer& r,
                                              ast::ReturnTypes& return_types) {
-    debug.functionStart("OperatorReturnTypes");
+    m_debug.functionStart("OperatorReturnTypes");
     std::list<ast::ObjectArgument> a = {ast::ObjectArgument(l), ast::ObjectArgument(r)};
     auto x = ast::ObjectArguments(false, a);
     auto valid = [&](DatabaseElement* e) {
@@ -262,11 +262,11 @@ namespace generator {
     };
     getReturnTypes(parm, name, valid, return_types);
     getStandardOperatorReturnTypes(parm, name, l, r, return_types);
-    debug.functionEnd("OperatorReturnTypes");
+    m_debug.functionEnd("OperatorReturnTypes");
   }
 
   void ExpressionParser::expressionReturnTypes(parameters& parm, ast::Expression* e, ast::ReturnTypes& return_types) {
-    debug.functionStart("ExpressionReturnTypes");
+    m_debug.functionStart("ExpressionReturnTypes");
     assert(e);
     if (e->unaryOperator) {
       expressionReturnTypes(parm, e->expression, e->returnTypes);
@@ -292,22 +292,22 @@ namespace generator {
       exceptions.printError("Could not resolve type of expression", e->text);
     }
     return_types.insert(e->returnTypes.begin(), e->returnTypes.end());
-    debug.functionEnd("expressionReturnTypes = " + returnTypesToString(parm, return_types));
+    m_debug.functionEnd("expressionReturnTypes = " + returnTypesToString(parm, return_types));
   }
 
   std::string ExpressionParser::physicalToString(parameters& parm,
 						 ast::Physical* physical) {
-    debug.functionStart("physicalToString");
+    m_debug.functionStart("physicalToString");
     std::string enumName = parm.getName(physical->unit, ast::ObjectType::ENUM);
     std::string result = "{" + physical->number->toString() + ", " + enumName + "}";
-    debug.functionEnd("physicalToString");
+    m_debug.functionEnd("physicalToString");
     return result;
   }
 
   void ExpressionParser::parenthesisReturnTypes(parameters& parm,
 						ast::ExpressionTerm* e) {
-    debug.functionStart("ParenthesisReturnTypes");
-    debug.debug("parenthis size = " + std::to_string(e->parenthis.list.size()));
+    m_debug.functionStart("ParenthesisReturnTypes");
+    m_debug.debug("parenthis size = " + std::to_string(e->parenthis.list.size()));
     ast::ElementAssociation& x = e->parenthis.list.back();
     ast::Expression* expression = x.expression;
     if (expression == NULL) {
@@ -339,11 +339,11 @@ namespace generator {
     } else {
       expressionReturnTypes(parm, expression, e->returnTypes);
     }
-    debug.functionEnd("ParenthesisReturnTypes");
+    m_debug.functionEnd("ParenthesisReturnTypes");
   }
   
   void ExpressionParser::expressionTermReturnTypes(parameters& parm, ast::ExpressionTerm* e, ast::ReturnTypes& return_types) {
-    debug.functionStart("ExpressionTermReturnTypes");
+    m_debug.functionStart("ExpressionTermReturnTypes");
     assert(e);
     if (!e->parenthis.list.empty()) {
       parenthesisReturnTypes(parm, e);
@@ -370,12 +370,12 @@ namespace generator {
       exceptions.printError("Could not resolve type of expression term", e->text);
     }
     return_types.insert(e->returnTypes.begin(), e->returnTypes.end());
-    debug.functionEnd("ExpressionTermReturnTypes");
+    m_debug.functionEnd("ExpressionTermReturnTypes");
   }
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(parameters& parm,
 							   ast::AssociationList* associationList) {
-    debug.functionStart("toObjectArguments");
+    m_debug.functionStart("toObjectArguments");
     ast::ObjectArguments result(false);
     if (associationList) {
       for (auto& i : associationList->associationElements.list) {
@@ -397,7 +397,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("toObjectArguments = " + result.toString());
+    m_debug.functionEnd("toObjectArguments = " + result.toString());
     return result;
   }
  
@@ -405,7 +405,7 @@ namespace generator {
   void ExpressionParser::attributeReturnTypes(parameters& parm, std::string& name, std::string& attribute,
                                               ast::AssociationList* associationList,
                                               ast::ReturnTypes& return_types) {
-    debug.functionStart("AttributeReturnTypes");
+    m_debug.functionStart("AttributeReturnTypes");
     // ast::ObjectArguments arguments = toObjectArguments(associationList);
     DatabaseResult object;
     if (parm.findOne(object, name)) {
@@ -414,14 +414,14 @@ namespace generator {
     } else {
       exceptions.printError("Could not resolve type of attribute \"" + attribute + "\" of \"" + name + "\"");
     }
-    debug.functionEnd("AttributeReturnTypes");
+    m_debug.functionEnd("AttributeReturnTypes");
   }
 
   void ExpressionParser::basicIdentifierReturnTypes(parameters& parm,
 						    ast::BasicIdentifier* b,
                                                     ast::ReturnTypes& return_types) {
     std::string name = b->toString(true);
-    debug.functionStart("BasicIdentifierReturnTypes(name = " + name + ")", true);
+    m_debug.functionStart("BasicIdentifierReturnTypes(name = " + name + ")", true);
     if (b->attribute) {
       std::string attribute = b->attribute->toString(true);
       attributeReturnTypes(parm, name, attribute, b->arguments, b->returnTypes);
@@ -437,7 +437,7 @@ namespace generator {
       exceptions.printError("Could not resolve type of " + name, &b->getText());
     }
     return_types.insert(b->returnTypes.begin(), b->returnTypes.end());
-    debug.functionEnd("BasicIdentifierReturnTypes = " + returnTypesToString(parm, return_types));
+    m_debug.functionEnd("BasicIdentifierReturnTypes = " + returnTypesToString(parm, return_types));
   }
 
   bool ExpressionParser::getStaticAttributeType(parameters& parm,
@@ -462,7 +462,7 @@ namespace generator {
   ast::ObjectValueContainer ExpressionParser::getAttributeType(parameters& parm,
 							       ast::ObjectValueContainer& type,
                                                                std::string attributeName) {
-    debug.functionStart("getAttributeType(attributeName = " + attributeName + ")");
+    m_debug.functionStart("getAttributeType(attributeName = " + attributeName + ")");
     ast::ObjectValueContainer result(ast::ObjectValue::UNKNOWN);
     if (!getStaticAttributeType(parm, attributeName, result)) {
       if (attributeName == "HIGH" || attributeName == "LOW" || attributeName == "LEFT" ||
@@ -478,7 +478,7 @@ namespace generator {
         exceptions.printError("Could not resolve type of attribute " + attributeName + " with type " + type.toString(), __FILE__, __LINE__);
       }
     }
-    debug.functionEnd("getAttributeType = " + result.toString());
+    m_debug.functionEnd("getAttributeType = " + result.toString());
     return result;
   }
   
@@ -487,9 +487,9 @@ namespace generator {
                                             DatabaseResult& match,
                                             ast::ObjectValueContainer& expectedType,
                                             std::string& name) {
-    debug.functionStart("findAttributeMatch(name = " + name + ")");
+    m_debug.functionStart("findAttributeMatch(name = " + name + ")");
     bool foundMatch = false;;
-    debug.debug("objects.empty() = " + std::to_string(objects.empty()));
+    m_debug.debug("objects.empty() = " + std::to_string(objects.empty()));
     for (auto& i : objects) {
       ast::ObjectValueContainer a = getAttributeType(parm, i.object->type, name);
       if (expectedType.equals(a)) {
@@ -503,7 +503,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("findAttributeMatch : " + std::to_string(foundMatch));
+    m_debug.functionEnd("findAttributeMatch : " + std::to_string(foundMatch));
     return foundMatch;
   }
   

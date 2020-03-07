@@ -53,7 +53,7 @@ namespace generator {
 
     bool m_convert_to_systemc = false;
     
-    Debug<true> debug;
+    Debug<true> m_debug;
 
     Exceptions exceptions;
     
@@ -113,16 +113,15 @@ namespace generator {
     ast::ObjectValueContainer AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
     ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
-    ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     template<typename Func>
     void PrintTypeObject(parameters& parm, const std::string& name, Func func);
     template<typename Func>
-    void PrintFactory(parameters& parm, const std::string& name, Func func);
-    void PrintFactory(parameters& parm, const std::string& name, 
+    void printFactoryDefinition(parameters& parm, const std::string& name, Func func);
+    void printFactory(parameters& parm, const std::string& name, 
                       ast::RangeType* range, ast::SimpleIdentifier* identifier,
                       ast::ObjectValue expected_value,
                       ast::ArraySubtypeDefinition* subtype = NULL);
-    void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype,
+    void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype_name, ast::RangeType* subtype_range,
                         ast::ObjectValueContainer::Array& arguments);
     void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
@@ -147,6 +146,7 @@ namespace generator {
                                       bool database_enable = true);
     
     // declarations.cpp
+    ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void FileDeclaration(parameters& parm, ast::FileDeclaration* file);
@@ -304,7 +304,7 @@ namespace generator {
   std::string SystemC::interfaceListToString(parameters& parm, ast::InterfaceList* l, std::string delimiter,
                                              bool initialization, Func typeConverter, std::string local_prefix,
                                              bool database_enable) {
-    debug.functionStart("interfaceListToString");
+    m_debug.functionStart("interfaceListToString");
     std::string s;
     if (l) {
       std::string x = "";
@@ -318,7 +318,7 @@ namespace generator {
       };
       traverseInterfaceList(parm, l, func, local_prefix, database_enable);
     }
-    debug.functionEnd("interfaceListToString");
+    m_debug.functionEnd("interfaceListToString");
     return s;
   }
 
@@ -326,7 +326,7 @@ namespace generator {
   void SystemC::traverseInterfaceList(parameters& parm, ast::InterfaceList* l, Func callback,
                                       std::string local_prefix,
                                       bool database_enable) {
-    debug.functionStart("traverseInterfaceList");
+    m_debug.functionStart("traverseInterfaceList");
     if (l) {
       for (ast::InterfaceElement i : l->interfaceElements.list) {
         if (i.object) {
@@ -334,7 +334,7 @@ namespace generator {
         }
       }
     }
-    debug.functionEnd("traverseInterfaceList");
+    m_debug.functionEnd("traverseInterfaceList");
   }
 
 

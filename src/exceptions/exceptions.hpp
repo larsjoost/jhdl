@@ -28,10 +28,14 @@ public:
   class RuntimeError : public std::exception {
     std::string m_message;
     std::string m_name;
+    std::string m_file_name;
+    int m_line_number;
   public:
-    RuntimeError(std::string message, std::string name) : m_message(message), m_name(name) {};
+    RuntimeError(std::string message, std::string name, const char* file_name, int line_number) :
+      m_message(message), m_name(name), m_file_name(file_name), m_line_number(line_number) {};
     virtual const char* what() const noexcept override {
-      return m_message.c_str();
+      std::string s = m_file_name + std::to_string(m_line_number) + ": " + m_message;
+      return s.c_str();
     }
   };
   
