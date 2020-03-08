@@ -14,6 +14,7 @@
 #include "../../exceptions/exceptions.hpp"
 
 #include "vhdl_enum.hpp"
+#include "vhdl_exception.hpp"
 
 namespace vhdl {
 
@@ -45,24 +46,35 @@ namespace vhdl {
 
   public:
 
-    Array(const char* name) : m_name(name) {};
-    Array() {};
+    Array(const char* name) : m_name(name), m_subtype(name) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("Array(name = " + std::string(name) + ")");
+      debug.functionEnd("Array");
+    };
+    Array() {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("Array");
+      debug.functionEnd("Array");
+    };
 
     void resize(int length) {
       Debug<true> debug = Debug<true>(this);
       debug.functionStart("resize(length = " + std::to_string(length) + ")");
-      m_content = std::vector<SUBTYPE>(length);
+      debug.debug("LENGTH() = " + std::to_string(LENGTH()));
+      m_content = std::vector<SUBTYPE>(length, SUBTYPE());
       debug.debug("m_content.size() = " + std::to_string(m_content.size()));
       for (int i = 0; i < length; i++) {
-	debug.debug("allocate m_content[" + std::to_string(i) + ")");
-	m_content.push_back(SUBTYPE());
+	SUBTYPE& a = m_content.at(i);
+	a.constrain(m_subtype);
+	debug.debug("Constraining a[" + std::to_string(i) + "] = " + a.info());
       }
       debug.debug("m_content.size() = " + std::to_string(m_content.size()));
       debug.functionEnd("resize");
     }
 
     void constrain() {
-      // TODO: Implement
+      m_range.constrain();
+      m_subtype.constrain();
     }
     
     void constrain(const Array<RANGE, SUBTYPE>& other) {
@@ -75,22 +87,43 @@ namespace vhdl {
     }
 
     void constrain(int left, int right, bool ascending = true) {
-      Debug<true> debug = Debug<true>(this);
+      Debug<true> debug = Debug<true>(this, m_name);
       debug.functionStart("constrain(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
 			  ", ascending = " + std::to_string(ascending) + ")");
+      debug.debug("m_name = " + m_name);
       m_range.constrain(left, right, ascending);
+      m_subtype.constrain();
       int resize_length = LENGTH();
       debug.debug("Resize length = " + std::to_string(resize_length));
       resize(resize_length);
       debug.functionEnd("construct");
     }
 
+    void constrain(SUBTYPE& subtype) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("constrain(subtype = " + subtype.toString() + ")");
+      m_range.constrain();
+      m_subtype.constrain(subtype);
+      debug.functionEnd("construct");
+    }
+
+    void constrain(int left, int right, bool ascending, SUBTYPE& subtype) {
+      Debug<true> debug = Debug<true>(this);
+      debug.functionStart("constrain(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
+			  ", ascending = " + std::to_string(ascending) + ", subtype = " + subtype.toString() + ")");
+      m_range.constrain(left, right, ascending);
+      m_subtype.constrain();
+      debug.functionEnd("construct");
+    }
+
     void setString(const std::string& s) {
       Debug<true> debug = Debug<true>(this);
       debug.functionStart("setString(s = " + s + ")");
-      if (s.size() != LENGTH()) {
-	throw Exceptions::RuntimeError("Length of left size " + std::to_string(s.size()) + " does not match length of right side = " + std::to_string(LENGTH()),
-				       m_name, __FILE__, __LINE__);
+      if (LENGTH() != s.size()) {
+	m_exceptions.printError("Length of left size " + std::to_string(LENGTH()) + " ( " + m_name +
+				 ") does not match length of right side = " + std::to_string(s.size()) + " (\"" + s + "\")",
+				 __FILE__, __LINE__);
+	throw RuntimeError();
       }
       debug.debug("m_content size = " + std::to_string(m_content.size()));
       int i = 0;

@@ -36,6 +36,13 @@ namespace generator {
     static std::string objectTypeToString(ast::ObjectType type);
 
     static bool isRealNumber(std::string& s);
+
+    static std::string getFactoryInstanceName(std::string s);
+
+    static std::string listAppend(std::string& e);
+
+    static std::string makeStringPrintable(std::string s);
+    
   };
 
 }

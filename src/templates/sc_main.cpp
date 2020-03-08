@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <exception>
 
 #define SC_INCLUDE_DYNAMIC_PROCESSES
 #include <systemc.h>
@@ -44,6 +45,10 @@ int sc_main(int argc, char* argv[]) {
       }
   }
 
+  if (verbose) {
+    std::cout << "Simulation starting..." << std::endl;
+  }
+  
   auto* dut = new WORK::Architecture_TEST_RTL("DUT"); 
 
   if (vcdFilename) {
@@ -63,7 +68,7 @@ int sc_main(int argc, char* argv[]) {
   }
 
   sc_time simulation_execution_time(1, SC_US);
-  
+
   sc_start(simulation_execution_time);
 
   sc_time current_time = sc_time_stamp();

@@ -68,8 +68,12 @@ namespace generator {
     Config config;
     Config libraryInfo;
 
-    int processId = 0;
-
+    struct RangeDefinition {
+      std::string left;
+      std::string right;
+      std::string ascending;
+    };
+    
     // general.cpp
     void topHierarchyStart(parameters& parm, std::string& library, std::string& name, ast::ObjectType type, std::string& filename);
     void topHierarchyEnd(parameters& parm, ast::Text* text, bool globalize = false);
@@ -116,7 +120,8 @@ namespace generator {
     template<typename Func>
     void PrintTypeObject(parameters& parm, const std::string& name, Func func);
     template<typename Func>
-    void printFactoryDefinition(parameters& parm, const std::string& name, Func func);
+    void printFactoryDefinition(parameters& parm, const std::string& name, Func func,
+				const std::string subtype_name = "");
     void printFactory(parameters& parm, const std::string& name, 
                       ast::RangeType* range, ast::SimpleIdentifier* identifier,
                       ast::ObjectValue expected_value,
@@ -225,7 +230,7 @@ namespace generator {
                            ast::List<ast::ConcurrentStatement>* concurrentStatements);
 
     // systemc.cpp
-    ast::ObjectValueContainer  rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right, std::string& ascending,
+    ast::ObjectValueContainer  rangeToString(parameters& parm, ast::RangeType* r, RangeDefinition& range_definition,
 					     ast::ObjectValueContainer& type);
     std::string ObjectName(const ParentInfo& info);
     void packageDeclaration(parameters& parm, ast::Package* package, std::string& library);

@@ -16,7 +16,7 @@ namespace generator {
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
       variable_instance = typeName + " " + name + ";"; 
-      std::string factory_name = "factory_" + typeName + ".create()";
+      std::string factory_name = NameConverter::getFactoryInstanceName(typeName) + ".create()";
       variable_creation = name + ".constrain(" + factory_name + ");"; 
     } else if (iteration->identifier) {
       DatabaseResult object;
@@ -68,7 +68,7 @@ namespace generator {
 	  } else {
 	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
-	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expectedType, sensitivity_list_callback, name) + ";", __FILE__, __LINE__);
+	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expectedType, sensitivity_list_callback, name) + ";", __FILE__, __LINE__, false, &target->getText());
 	  if (s.condition) {
 	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
 	  } else {

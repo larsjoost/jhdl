@@ -142,9 +142,10 @@ namespace generator {
     void addNamespaceBottom(std::string text);
     void addBottom(std::string text);
     void addImplementationTop(std::string text);
-    void addImplementationContents(std::string text, const char* file_name, int line_number);
+    void addImplementationContents(std::string text, const char* file_name, int line_number, ast::Text* source_line = NULL);
     void addImplementationContents(std::list<std::string>& text);
-    void addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number, bool breakpoint = false);
+    void addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number,
+		       bool breakpoint = false, ast::Text* source_line = NULL);
     
     void open(std::string filename);
     void close();

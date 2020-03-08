@@ -25,20 +25,6 @@ class Exceptions {
 
 public:
 
-  class RuntimeError : public std::exception {
-    std::string m_message;
-    std::string m_name;
-    std::string m_file_name;
-    int m_line_number;
-  public:
-    RuntimeError(std::string message, std::string name, const char* file_name, int line_number) :
-      m_message(message), m_name(name), m_file_name(file_name), m_line_number(line_number) {};
-    virtual const char* what() const noexcept override {
-      std::string s = m_file_name + std::to_string(m_line_number) + ": " + m_message;
-      return s.c_str();
-    }
-  };
-  
   void printInternal(std::string message, ast::Text* text = NULL);
   void printNote(std::string message, ast::Text* text = NULL);
   void printError(std::string message, ast::Text* text = NULL, const char* file_name = NULL, int line_number = -1);

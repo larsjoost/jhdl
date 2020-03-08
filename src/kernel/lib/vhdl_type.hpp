@@ -53,7 +53,8 @@ namespace vhdl {
     UNIT a_unit;
     Physical<VALUE, UNIT> m_left;
     Physical<VALUE, UNIT> m_right;
-
+    bool m_ascending = true;
+    
     PhysicalType(const char* name) : m_name(name) {};
 
     PhysicalType() {
@@ -72,9 +73,10 @@ namespace vhdl {
       m_right = other.m_right;
     };
 
-    void constrain(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right) {
+    void constrain(const Physical<VALUE, UNIT>& left, const Physical<VALUE, UNIT>& right, bool ascending = true) {
       m_left = left;
       m_right = right;
+      m_ascending = ascending;
     };
 
     PhysicalType<VALUE, UNIT, ELEMENTS, UNIT_STRING_CONVERTER>

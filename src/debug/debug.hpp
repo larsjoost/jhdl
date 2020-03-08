@@ -17,6 +17,7 @@ protected:
   const static Output::Color DEFAULT_HIGHLIGHT_COLOR = Output::Color::GREEN;
 
   std::string m_name;
+  std::string m_subname;
   bool m_verbose;
   static int m_indent;
   const int INDENT_SIZE = 2;
@@ -36,7 +37,7 @@ protected:
     auto func = [&](std::ostream* out) {
 		  *out << indent << "[" + type + "] " <<
 		    (file_name ? std::string(file_name) + "(" + std::to_string(line_number) + "): " : "") <<
-		    m_name << "::" << name << std::endl;
+		    m_name << (m_subname.empty() ? "" : "(" + m_subname + ")") << "::" << name << std::endl;
     };
     if (highlight) {
       m_output.print(highlight_color, func);
@@ -50,7 +51,7 @@ public:
   Debug(const char* name) : m_name(name) {};
   
   template <class T>
-  Debug(T* instance) : m_name(boost::core::demangle(typeid(*instance).name())) {
+  Debug(T* instance, std::string subname = "") : m_name(boost::core::demangle(typeid(*instance).name())), m_subname(subname) {
     m_verbose = enable;
   }
 

@@ -116,13 +116,19 @@ namespace generator {
     file_container.content.implementation_top.push_back(text);
   }
   
-  void parameters::addImplementationContents(std::string text, const char* file_name, int line_number) {
-    addTextToList(file_container.content.implementation_contents, text, file_name, line_number);
+  void parameters::addImplementationContents(std::string text, const char* file_name, int line_number, ast::Text* source_line) {
+    addTextToList(file_container.content.implementation_contents, text, file_name, line_number, false, source_line);
   }
   
-  void parameters::addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number, bool breakpoint) {
+  void parameters::addTextToList(std::list<std::string>& list, std::string text,
+				 const char* file_name, int line_number, bool breakpoint,
+				 ast::Text* source_line) {
     if (breakpoint) {
       list.push_back("std::raise(SIGINT);");
+    }
+    if (source_line) {
+      text = "try { " + text + " } catch (const vhdl::RuntimeError& e) { SC_REPORT_FATAL(\"VHDL code:\", \"" +
+	source_line->getFilename() + "(" + std::to_string(source_line->getLine()) + "): " + NameConverter::makeStringPrintable(source_line->getCurrentLine()) + "\"); };"; 
     }
     if (m_debug.isVerbose()) {
       text += " // " + std::string(file_name) + ":" + std::to_string(line_number);

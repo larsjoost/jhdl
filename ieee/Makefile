@@ -3,6 +3,8 @@ VHDL_SOURCE := std_logic_1164.vhd
 VHDL_HPP := $(VHDL_SOURCE:.vhd=.hpp)
 VHDL_CPP := $(VHDL_SOURCE:.vhd=.cpp)
 VHDL_INC := $(VHDL_SOURCE:.vhd=.i)
+VHDL_INCLUDE_FILES := $(shell cat $(VHDL_INC))
+VHDL_INCLUDES := $(addprefix -I, $(VHDL_INCLUDE_FILES))
 OBJS := $(SOURCE:.cpp=.o) 
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5

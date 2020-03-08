@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <boost/algorithm/string/replace.hpp>
 
 #include "name_converter.hpp"
 
@@ -92,7 +93,7 @@ namespace generator {
     debug.debug("Object = " + object.toString());
     name = globalPrefix(parm, object, factory_extension, global_scope) + name;
     if (factory_extension && object.object->id == ast::ObjectType::TYPE) {
-      name += ".create(" + factory_arguments + ")";
+      name += "->create(" + factory_arguments + ")";
     } 
     debug.functionEnd("getName: " + name);
     return name;
@@ -158,6 +159,18 @@ namespace generator {
   bool NameConverter::isRealNumber(std::string& s) {
     return (s.find(".") != std::string::npos);
   }
-  
 
+  std::string NameConverter::getFactoryInstanceName(std::string s) {
+    return "factory_" + s;
+  }
+
+  std::string NameConverter::listAppend(std::string& e) {
+    return (e.empty() ? "" : ", " + e);
+  }
+
+  std::string NameConverter::makeStringPrintable(std::string s) {
+    boost::replace_all(s, "\"", "\\\"");
+    return s;
+  }
+  
 }

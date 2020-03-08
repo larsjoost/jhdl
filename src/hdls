@@ -81,15 +81,24 @@ fi
 
 source $SCRIPTPATH/setup.sh
 
-KERNEL_SRC=$SCRIPTPATH/kernel/lib
+LINK=""
+INCLUDES=""
 
-OUTPUT_SRC=$SCRIPTPATH/output
+set -x
 
-make -C $OUTPUT_SRC > /dev/null
+INCLUDE_DIRS=( kernel/lib output debug exceptions ast ../std )
 
-DEBUG_SRC=$SCRIPTPATH/debug
+for i in ${INCLUDE_DIRS[@]}; do
+    SRC=$SCRIPTPATH/$i
+    INCLUDES+=" -I${SRC}"
+done
 
-make -C $DEBUG_SRC > /dev/null
+OBJECT_DIRS=( output debug exceptions ast ../std )
+
+for i in ${OBJECT_DIRS[@]}; do
+    SRC=$SCRIPTPATH/$i
+    OBJECTS+=" ${SRC}/*.o"
+done
 
 library="work"
 
@@ -115,11 +124,10 @@ done
 cp $SCRIPTPATH/templates/Makefile $targetdir
 make -C $targetdir
 INCLUDE_PATHS=$(cat $targetdir/$filebase.i)
-INCLUDES=""
 for i in $INCLUDE_PATHS; do
     INCLUDES+=" -I$i"
 done
-g++ -std=c++14 -O0 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$KERNEL_SRC -I$SCRIPTPATH/debug -I$SCRIPTPATH/output -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $SCRIPTPATH/../std/*.o $OUTPUT_SRC/*.o  $DEBUG_SRC/*.o
+g++ -std=c++14 -O0 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $OBJECTS
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

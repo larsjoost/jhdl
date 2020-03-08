@@ -79,7 +79,7 @@ namespace generator {
     parm.addClassContents("vhdl::EnumerationElement<" + enumName + "> array[size] {" + structList + "};", __FILE__, __LINE__);
     parm.addClassContents("};", __FILE__, __LINE__);
     parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;", __FILE__, __LINE__);
-    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
+    auto f = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
     };
     printFactoryDefinition(parm, name, f);
     m_debug.functionEnd("enumerationType");
@@ -92,10 +92,10 @@ namespace generator {
                              ast::ArraySubtypeDefinition* subtype) {
     m_debug.functionStart("printFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")",
 			  false, __FILE__, __LINE__);
-    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
+    auto f = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
       if (range) {
         ast::ObjectValueContainer type(expected_value);
-        rangeToString(parm, range, left, right, ascending, type);
+        rangeToString(parm, range, range_definition, type);
       } else if (identifier || subtype) {
         ast::SimpleIdentifier* id = (identifier ? identifier : subtype->identifier);
 	assert(id);
@@ -103,8 +103,8 @@ namespace generator {
         DatabaseResult database_result;
         if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
           std::string id = NameConverter::getName(parm, database_result, true);
-          left = id + ".LEFT()";
-          right = id + ".RIGHT()";
+          range_definition.left = id + ".LEFT()";
+          range_definition.right = id + ".RIGHT()";
         } else {
           exceptions.printError("Could not find type " + type_name, &id->text);
 	  if (a_verbose) {parm.printDatabase();}
@@ -153,17 +153,22 @@ namespace generator {
       array_template_end += ">";
     }
     parm.addClassContents("using " + name + " = " + array_template_start + subtype_name + array_template_end + ";", __FILE__, __LINE__);
-    auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
+    auto callback = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
+      ast::ObjectValueContainer t;
       for (auto& r : definition.list) { 
-        if (r.range) {
+	if (r.range) {
 	  assert(r.range->range_direction_type);
-	  ast::ObjectValueContainer t;
 	  a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
-	  rangeToString(parm, r.range, left, right, ascending, t);
+	  rangeToString(parm, r.range, range_definition, t);
 	}
       }
+      if (subtype_range) {
+	  assert(subtype_range->range_direction_type);
+	  a_expression.collectUniqueReturnType(parm, subtype_range->range_direction_type->left, t);
+	  rangeToString(parm, subtype_range, subtype_range_definition, t);
+      }
     };
-    printFactoryDefinition(parm, name, f);
+    printFactoryDefinition(parm, name, callback, subtype_name);
     m_debug.functionEnd("printArrayType");
   }
   
@@ -214,7 +219,7 @@ namespace generator {
       value = ast::ObjectValueContainer(object_value, database_result.object->type);
       std::string n = NameConverter::getName(parm, database_result);
       parm.addClassContents("using " + name + " = " + definition + "<" + n + ">;", __FILE__, __LINE__); 
-      auto f = [&](parameters& parm, std::string& left, std::string& right, std::string& ascending) {
+      auto f = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
       };
       printFactoryDefinition(parm, name, f);
     } else {

@@ -19,13 +19,14 @@ namespace generator {
         type_name = NameConverter::getName(parm, database_result, false);
         std::string factory_arguments;
         if (v->type->range) {
-          std::string left, right, ascending;
+          RangeDefinition range_definition;
           ast::ObjectValueContainer i = database_result.object->type;
           try {
             i = database_result.object->type.GetArgument();
           } catch (ast::ObjectValueContainer::IndexOutOfRange e) {}
-          rangeToString(parm, v->type->range, left, right, ascending, i);
-          factory_arguments = left + ", " + right + ", " + ascending;
+          rangeToString(parm, v->type->range, range_definition, i);
+          factory_arguments = range_definition.left + ", " + range_definition.right +
+	    ", " + range_definition.ascending;
         }
         std::string factory_name = NameConverter::getName(parm, database_result, true, factory_arguments);
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
@@ -60,21 +61,31 @@ namespace generator {
   }
 
   template<typename Func>
-  void SystemC::printFactoryDefinition(parameters& parm, const std::string& name, Func func) {
-    m_debug.functionStart("printFactoryDefinition(name = " + name + ")", false,  __FILE__, __LINE__);
-    std::string left;
-    std::string right;
-    std::string ascending;
-    std::string instance_name = "factory_" + name;
+  void SystemC::printFactoryDefinition(parameters& parm, const std::string& name,
+				       Func func, const std::string subtype_name) {
+    m_debug.functionStart("printFactoryDefinition(name = " + name +
+			  ", subtype_name = " + subtype_name + ")", false,  __FILE__, __LINE__);
+    RangeDefinition range_definition;
+    RangeDefinition subtype_range_definition;
+    std::string instance_name = NameConverter::getFactoryInstanceName(name);
     std::string factory_name = NameConverter::objectName(ast::ObjectType::FACTORY, name);
     auto f =
       [&](parameters& parm) {
-	func(parm, left, right, ascending);
-	bool arguments_exists = !left.empty();
-	std::string arguments = arguments_exists ? left + ", " + right : "";
+	func(parm, range_definition, subtype_range_definition);
+	bool arguments_exists = !range_definition.left.empty();
+	bool subtype_arguments_exists = !subtype_range_definition.left.empty();
+	std::string arguments = arguments_exists ? range_definition.left + ", " +
+	  range_definition.right + NameConverter::listAppend(range_definition.ascending) : "";
+	std::string subtype_arguments = subtype_arguments_exists ? subtype_range_definition.left + ", " +
+	  subtype_range_definition.right + NameConverter::listAppend(subtype_range_definition.ascending) : "";
 	parm.addClassContents(name + " create() {", __FILE__, __LINE__);
+	if (subtype_arguments_exists) {
+	  parm.addClassContents(subtype_name + " subtype(\"subtype\");", __FILE__, __LINE__);
+	  parm.addClassContents("subtype.constrain(" + subtype_arguments + ");", __FILE__, __LINE__);
+	}
 	parm.addClassContents(name + " x(\"" + instance_name + "\");", __FILE__, __LINE__);
-	parm.addClassContents("x.constrain(" + arguments + ");", __FILE__, __LINE__);
+	std::string delimiter = (arguments_exists ? ", " : "");
+	parm.addClassContents("x.constrain(" + arguments + (subtype_arguments_exists ? delimiter + "subtype" : "") +  ");", __FILE__, __LINE__);
 	parm.addClassContents("return x;", __FILE__, __LINE__);
 	parm.addClassContents("}", __FILE__, __LINE__);
 	parm.addClassContents("template <typename T>", __FILE__, __LINE__);
@@ -84,7 +95,8 @@ namespace generator {
 	parm.addClassContents("}", __FILE__, __LINE__);
       };
     PrintTypeObject(parm, name, f);
-    parm.addClassBottom(factory_name + " " + instance_name + " = " + factory_name + "(this);");
+    parm.addClassBottom("std::unique_ptr<" + factory_name + "> " + instance_name + ";");
+    parm.addClassConstructorContents(instance_name + " = std::make_unique<" + factory_name + ">(this);", __FILE__, __LINE__);
     m_debug.functionEnd("printFactoryDefinition");
   }
 

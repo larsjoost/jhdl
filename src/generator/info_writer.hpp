@@ -11,11 +11,9 @@ class InfoWriter {
 
   Debug<false> m_debug;
 
-  std::string a_file_name;
-  std::ofstream a_output_file;
-  bool a_file_is_open = false;
-  std::string a_expression = "VHDL_INCLUDES+=-I%p";
-  std::string a_delimiter = "\n";
+  std::string m_file_name;
+  std::ofstream m_output_file;
+  bool m_file_is_open = false;
   
 public:
 
@@ -23,28 +21,26 @@ public:
   
   void Open(std::string file_name) {
     m_debug.functionStart("Open(file_name = " + file_name + ")");
-    if (!a_file_is_open) {
-      a_file_name = file_name;
-      a_output_file.open(file_name);
-      a_file_is_open = true;
+    if (!m_file_is_open) {
+      m_file_name = file_name;
+      m_output_file.open(file_name);
+      m_file_is_open = true;
     }
     m_debug.functionEnd("Open");
   }
 
   void Close() {
     m_debug.functionStart("Close");
-    if (a_file_is_open) {
-      a_output_file.close();
-      a_file_is_open = false;
+    if (m_file_is_open) {
+      m_output_file.close();
+      m_file_is_open = false;
     }
     m_debug.functionEnd("Close");
   }
   
   void SetPackageName(const std::string& path, const std::string& name) {
     m_debug.functionStart("SetPackageName(path = " + path + ", name = " + name + ")");
-    std::string x = a_expression;
-    std::string o = std::regex_replace(x, std::regex("%p"), path);
-    a_output_file << o << a_delimiter;
+    m_output_file << path << std::endl;
     m_debug.functionEnd("SetPackageName");
   }
   

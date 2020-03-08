@@ -106,8 +106,8 @@ namespace generator {
   
 
 
-  ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, std::string& left, std::string& right,
-						   std::string& ascending, ast::ObjectValueContainer& expectedType) {
+  ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, RangeDefinition& range_definition,
+						   ast::ObjectValueContainer& expectedType) {
     m_debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")",
 			  false, __FILE__, __LINE__);
     ast::ObjectValueContainer left_type;
@@ -121,10 +121,10 @@ namespace generator {
 	exceptions.printError("Left range type " + left_type.toString() + " is not the same as right type " +
 			      right_type.toString(), r->range_direction_type->left->text);
       }
-      left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
-      right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
+      range_definition.left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
+      range_definition.right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
       if (r->range_direction_type->range_direction) {
-	ascending = (r->range_direction_type->range_direction->direction == ast::RangeDirection::Direction::TO ? "true" : "false");
+	range_definition.ascending = (r->range_direction_type->range_direction->direction == ast::RangeDirection::Direction::TO ? "true" : "false");
       }
     } else if (r->range_attribute_type) {
       
@@ -137,9 +137,9 @@ namespace generator {
 
   void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     m_debug.functionStart("printRangeType", false, __FILE__, __LINE__);
-    std::string left, right, ascending;
+    RangeDefinition range_definition;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
-    ast::ObjectValueContainer found_type = rangeToString(parm, r, left, right, ascending, type);
+    ast::ObjectValueContainer found_type = rangeToString(parm, r, range_definition, type);
     bool integer_type = found_type.IsValue(ast::ObjectValue::INTEGER);
     std::string t = integer_type ? "int" : "double";
     parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
@@ -154,10 +154,10 @@ namespace generator {
     assert(r);
     ast::PhysicalType* p = n->physical;
     assert(p);
-    std::string left, right, ascending;
+    RangeDefinition range_definition;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer physical_type(ast::ObjectValue::PHYSICAL, name);
-    rangeToString(parm, r, left, right, ascending, type);
+    rangeToString(parm, r, range_definition, type);
     std::string enumList = listToString(parm, p->elements.list, ", ",
                                  [&](ast::PhysicalElement& e){
                                    std::string unit = e.unit->toString(true); 
@@ -199,16 +199,16 @@ namespace generator {
     {
       std::string x = std::to_string(size);
       parm.addClassContents("const int size = " + x + ";", __FILE__, __LINE__);
-      parm.addClassContents("const vhdl::PhysicalElement<" + enumName + ", decltype(" + left + ")> array[" + x + "] {" + translateList + "};", __FILE__, __LINE__);
+      parm.addClassContents("const vhdl::PhysicalElement<" + enumName + ", decltype(" + range_definition.left + ")> array[" + x + "] {" + translateList + "};", __FILE__, __LINE__);
     }
     parm.addClassContents("};", __FILE__, __LINE__);
     std::string typeName = name + "_type";
-    std::string declType = "decltype(" + left + ")";
+    std::string declType = "decltype(" + range_definition.left + ")";
     parm.addClassContents("using " + typeName + " = vhdl::Physical<" + declType + ", " + enumName + ">;", __FILE__, __LINE__); 
     parm.addClassContents("using " + name + " = vhdl::PhysicalType<" + declType + ", " + enumName + ", " + valueName + ", " + unitName + ">;", __FILE__, __LINE__);
-    auto f = [&](parameters& parm, std::string& l, std::string& r, std::string& a) {
-      l = "{" + left + ", " + baseUnitName + "}";
-      r = "{" + right + ", " + upperUnitName + "}";
+    auto f = [&](parameters& parm, RangeDefinition& r, RangeDefinition& s) {
+      r.left = "{" + range_definition.left + ", " + baseUnitName + "}";
+      r.right = "{" + range_definition.right + ", " + upperUnitName + "}";
     };
     printFactoryDefinition(parm, name, f);
     m_debug.functionEnd("printPhysicalType");
