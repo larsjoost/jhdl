@@ -36,6 +36,7 @@ namespace generator {
     std::string name = identifier->toString(true);
     ast::ObjectValueContainer type(ast::ObjectValue::ENUMERATION, name);
     int enum_size = 0;
+    const int char_size = 256;
     std::string enumList =
       listToString(parm, t->enumerations, ", ",
                    [&](ast::EnumerationElement& e){
@@ -72,13 +73,16 @@ namespace generator {
     */
     std::string valueName = name + "_value";
     std::string s = std::to_string(total_size);
+    std::string x = "vhdl::EnumerationElement<" + enumName + ">";
     parm.addClassContents("enum class " + enumName + " {" + enumList + "};", __FILE__, __LINE__);
     parm.addClassContents("struct " + valueName + " {", __FILE__, __LINE__);
-    parm.addClassContents("const static int size = " + s + ";", __FILE__, __LINE__);
-    parm.addClassContents("const static int enum_size = " + std::to_string(enum_size) + ";", __FILE__, __LINE__);
-    parm.addClassContents("vhdl::EnumerationElement<" + enumName + "> array[size] {" + structList + "};", __FILE__, __LINE__);
+    parm.addClassContents("const " + x + "& get(const int index) const {" , __FILE__, __LINE__);
+    parm.addClassContents("const static " + x + " x[" + s + "] = {" + structList + "};", __FILE__, __LINE__);
+    parm.addClassContents("return x[index];", __FILE__, __LINE__);
     parm.addClassContents("};", __FILE__, __LINE__);
-    parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ">;", __FILE__, __LINE__);
+    parm.addClassContents("};", __FILE__, __LINE__);
+    parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ", " + s + ", " +
+			  std::to_string(enum_size) + ", " + std::to_string(char_size) + ">;", __FILE__, __LINE__);
     auto f = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
     };
     printFactoryDefinition(parm, name, f);

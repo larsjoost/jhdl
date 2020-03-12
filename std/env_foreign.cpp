@@ -9,11 +9,15 @@ namespace STD {
   
   void Package_ENV::vhdl_finish(STANDARD::INTEGER STATUS) {
     // std::cout << "Finish" << std::endl;
+    exit(STATUS);
+    /*
     if (STATUS == 0) {
       sc_stop();
+      exit(0
     } else {
       exit(STATUS);
     }
+    */
   }
 
   STANDARD::DELAY_LENGTH Package_ENV::vhdl_resolution_limit() {

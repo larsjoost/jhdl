@@ -54,7 +54,7 @@ do
 	    HDLC_DEBUG="-x"
             ;;
         y)
-            DEBUG="valgrind --leak-check=yes"
+            DEBUG="valgrind -s --leak-check=yes --track-origins=yes --leak-check=full --show-leak-kinds=all"
             ;;
         ?)
             echo "Unknown option $OPTARG"
@@ -84,19 +84,21 @@ source $SCRIPTPATH/setup.sh
 LINK=""
 INCLUDES=""
 
-set -x
-
-INCLUDE_DIRS=( kernel/lib output debug exceptions ast ../std )
+INCLUDE_DIRS=( kernel/lib output debug exceptions ast ../std ../lib/debug)
 
 for i in ${INCLUDE_DIRS[@]}; do
     SRC=$SCRIPTPATH/$i
     INCLUDES+=" -I${SRC}"
 done
 
-OBJECT_DIRS=( output debug exceptions ast ../std )
+OBJECT_DIRS=( output debug exceptions ast ../std ../lib/debug)
 
 for i in ${OBJECT_DIRS[@]}; do
     SRC=$SCRIPTPATH/$i
+    if [ ! -e $SRC ]; then
+	error "Could not find directory $SRC"
+	exit 1
+    fi
     OBJECTS+=" ${SRC}/*.o"
 done
 
@@ -127,7 +129,7 @@ INCLUDE_PATHS=$(cat $targetdir/$filebase.i)
 for i in $INCLUDE_PATHS; do
     INCLUDES+=" -I$i"
 done
-g++ -std=c++14 -O0 -fconcepts -g -lgomp -fmax-errors=${MAX_ERRORS} -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $OBJECTS
+g++ -std=c++14 -O0 -fconcepts -g -fmax-errors=${MAX_ERRORS} -I$SYSTEMC/include -L$SYSTEMC/lib-linux64 -lsystemc $INCLUDES -o $filebase *.o $OBJECTS
 if [ -n "$VCD_FILENAME" ]; then
     if [ ! -e $VCD_FILENAME ]; then
         mkfifo --mode=666 $VCD_FILENAME

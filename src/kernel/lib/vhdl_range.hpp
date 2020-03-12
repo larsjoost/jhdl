@@ -31,10 +31,10 @@ namespace vhdl {
     
     std::string m_name;
  
-    TYPE m_value;
-    TYPE m_left;
-    TYPE m_right;
-    bool m_ascending;
+    TYPE m_value = (TYPE)0;
+    TYPE m_left = (TYPE)0;
+    TYPE m_right = (TYPE)0;
+    bool m_ascending = true;
 
   public:
     
