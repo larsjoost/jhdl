@@ -130,9 +130,7 @@ namespace generator {
       text = "try { " + text + " } catch (const vhdl::RuntimeError& e) { SC_REPORT_FATAL(\"VHDL code:\", \"" +
 	source_line->getFilename() + "(" + std::to_string(source_line->getLine()) + "): " + NameConverter::makeStringPrintable(source_line->getCurrentLine()) + "\"); };"; 
     }
-    if (m_debug.isVerbose()) {
-      text += " // " + std::string(file_name) + ":" + std::to_string(line_number);
-    }
+    text += " // " + std::string(file_name) + ":" + std::to_string(line_number);
     list.push_back(text);
   }
 

@@ -11,23 +11,23 @@ INC := -L$(SYSTEMC)/lib-linux64
 
 all: $(OBJS)
 
-standard.hpp: standard.vhd ../src/hdlc
+std_standard.hpp: standard.vhd ../src/hdlc
 	../src/hdlc.sh -f standard.vhd -l std -s -p $(VERBOSE) $(GDB)
 
-env.hpp: env.vhd ../src/hdlc
+std_env.hpp: env.vhd ../src/hdlc
 	../src/hdlc.sh -f env.vhd -l std -s $(VERBOSE) $(GDB)
 
-textio.hpp: textio.vhd ../src/hdlc
+std_textio.hpp: textio.vhd ../src/hdlc
 	../src/hdlc.sh -f textio.vhd -l std -s
 
-%.o: %.cpp standard.hpp env.hpp textio.hpp
+%.o: %.cpp std_standard.hpp std_env.hpp std_textio.hpp
 	g++ $(CXXFLAGS) $(INC_DIR) $(INC) $(LIBS) -c $< -o $@ -I../src/kernel/lib 
 
 -include $(DEPS)
 
 clean:
 	find . -name "*.o" -type f -delete
-	rm standard.hpp standard.cpp env.hpp env.cpp textio.hpp textio.cpp
+	rm std_standard.hpp standard.cpp std_env.hpp env.cpp std_textio.hpp textio.cpp
 
 print-%:
 	@echo '$*=$($*)'

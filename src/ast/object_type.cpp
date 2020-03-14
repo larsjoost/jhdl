@@ -135,7 +135,7 @@ namespace ast {
   }
 
   int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.setVerbose(verbose);
     debug.functionStart("match(interface =  " + interface.toString() + ", association = " + association.toString() +
 			", index = " + std::to_string(index) + ")");
@@ -178,7 +178,7 @@ namespace ast {
    */
   
   bool ObjectArguments::equals(ObjectArguments& other, bool array_type, const bool verbose) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.setVerbose(verbose);
     debug.functionStart("equals(this = " + this->toString() + ", other = " + other.toString() +
 			", array_type = " + std::to_string(array_type) + ")");

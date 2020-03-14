@@ -12,11 +12,11 @@ source $SCRIPTPATH/setup.sh
 
 cd $SYSTEMC
 
-mkdir objdir
+mkdir -p objdir
 
 cd objdir 
 
-../configure
+../configure --enable-debug
 
 gmake
 

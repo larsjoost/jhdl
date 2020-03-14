@@ -56,7 +56,7 @@ namespace vhdl {
     };
 
     inline void constrain(TYPE left, TYPE right, bool ascending = true) {
-      Debug<true> debug = Debug<true>(this);
+      Debug<false> debug = Debug<false>(this);
       debug.functionStart("constrain(left = " + std::to_string(left) + ", right = " + std::to_string(right) +
 			  ", ascending = " + std::to_string(ascending) + ")");
       m_left = left;
@@ -76,16 +76,16 @@ namespace vhdl {
     inline void operator=(TYPE other) { m_value = other; }
     inline void operator=(Range<TYPE>& other) { m_value = other.m_value; }
 
-    inline bool operator == (const Range<TYPE> &other) const { return m_value == other.m_value; }
-    inline bool operator != (const Range<TYPE> &other) const { return m_value != other.m_value; }
-    inline bool operator == (const TYPE other) const { return m_value == other; }
-    inline bool operator <= (const TYPE other) const { return m_value <= other; }
-    inline bool operator >= (const TYPE other) const { return m_value >= other; }
-    inline bool operator != (const TYPE other) const { return m_value != other; }
-    inline TYPE operator +  (const TYPE other) const { return m_value + other; }
-    inline TYPE operator -  (const TYPE other) const { return m_value - other; }
-    inline TYPE operator +  (const Range<TYPE>& other) const { return m_value + other.m_value; }
-    inline TYPE operator -  (const Range<TYPE>& other) const { return m_value - other.m_value; }
+    inline bool operator==(const Range<TYPE> &other) const { return m_value == other.m_value; }
+    inline bool operator!=(const Range<TYPE> &other) const { return m_value != other.m_value; }
+    inline bool operator==(const TYPE other) const { return m_value == other; }
+    inline bool operator<=(const TYPE other) const { return m_value <= other; }
+    inline bool operator>=(const TYPE other) const { return m_value >= other; }
+    inline bool operator!=(const TYPE other) const { return m_value != other; }
+    inline TYPE operator+(const TYPE other) const { return m_value + other; }
+    inline TYPE operator-(const TYPE other) const { return m_value - other; }
+    inline TYPE operator+(const Range<TYPE>& other) const { return m_value + other.m_value; }
+    inline TYPE operator-(const Range<TYPE>& other) const { return m_value - other.m_value; }
 
     /* Required by sc_signals */
     inline friend std::ostream& operator << ( std::ostream& os,  Range<TYPE> const &other) {
@@ -167,7 +167,7 @@ namespace vhdl {
     }
     
     std::string info() const {
-      return "Range: m_left = " + std::to_string(m_left) + ", m_right = " + std::to_string(m_right) + ", m_value = " + std::to_string(m_value);
+      return "Range: <" + std::to_string(m_left) + " " + (m_ascending ? "TO" : "DOWNTO") + " " + std::to_string(m_right) + " = " + std::to_string(m_value) + ">";
     }
 
   };

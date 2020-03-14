@@ -20,6 +20,7 @@ begin
   process is
   begin
     for i in 0 to 4 loop
+      report "i = " & integer'image(i) severity note;
       wait for 5 ns;
       a <= false;
       wait for 5 ns;

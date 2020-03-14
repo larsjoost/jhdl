@@ -21,6 +21,7 @@ OPTIONS:
    -h           Show this message
    -f <name>    Filename
    -d <name>    Do filename
+   -l <name>    Library name
    -o <name>    VCD output filename
    -x           Debug
    -v           Verbose 
@@ -29,7 +30,9 @@ EOF
 
 MAX_ERRORS=5
 
-while getopts ":hd:f:o:vxy" OPTION
+library="work"
+
+while getopts ":hd:f:l:o:vxy" OPTION
 do
     case $OPTION in
         h)
@@ -41,6 +44,9 @@ do
             ;;
         d)
             DO_FILENAME="-d $OPTARG"
+            ;;
+        l)
+            library="$OPTARG"
             ;;
         o)
             VCD_FILENAME="$OPTARG"
@@ -102,10 +108,8 @@ for i in ${OBJECT_DIRS[@]}; do
     OBJECTS+=" ${SRC}/*.o"
 done
 
-library="work"
 
 filebase="${FILENAME%.*}"
-$SCRIPTPATH/hdlc.sh -f $FILENAME $VERBOSE $HDLC_DEBUG
 headerfile="${library}_$filebase.hpp"
 sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)

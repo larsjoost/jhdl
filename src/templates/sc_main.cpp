@@ -49,7 +49,7 @@ int sc_main(int argc, char* argv[]) {
     std::cout << "Simulation starting..." << std::endl;
   }
   
-  auto* dut = new WORK::Architecture_TEST_RTL("DUT"); 
+  WORK::Architecture_TEST_RTL dut("DUT"); 
 
   if (vcdFilename) {
 

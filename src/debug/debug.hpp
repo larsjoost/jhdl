@@ -24,14 +24,14 @@ protected:
   
   Output m_output = Output(std::cout);
   
-  void print(std::string name, const std::string type, bool highlight, bool indent_increase,
+  void print(std::string name, std::string type, bool highlight, bool indent_increase,
 	     const char* file_name = NULL, int line_number = -1) {
     if (!indent_increase) {m_indent -= INDENT_SIZE;}
     print(name, type, highlight, DEFAULT_HIGHLIGHT_COLOR, file_name, line_number);
     if (indent_increase) {m_indent += INDENT_SIZE;}
   }
   
-  void print(std::string name, const std::string type, bool highlight, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR,
+  void print(std::string name, std::string type, bool highlight, Output::Color highlight_color = DEFAULT_HIGHLIGHT_COLOR,
 	     const char* file_name = NULL, int line_number = -1) {
     std::string indent = std::string(m_indent, ' ');
     auto func = [&](std::ostream* out) {

@@ -27,12 +27,12 @@ namespace vhdl {
   template<class RANGE, class SUBTYPE>
   class Array {
 
-    Debug<true> m_debug;
+    Debug<false> m_debug;
     Exceptions m_exceptions;
     
     inline void setAll(SUBTYPE& value) {
       for (int i = 0; i < LENGTH() - 1; i++) {
-        m_content[i] = value;
+        m_content.at(i) = value;
       }
     }
 
@@ -76,7 +76,7 @@ namespace vhdl {
     }
     
     void constrain(const Array<RANGE, SUBTYPE>& other) {
-      m_debug.functionStart("constrain(other = " + other.info() + ")");
+      m_debug.functionStart("constrain");
       m_range.constrain(other.m_range);
       m_subtype.constrain(other.m_subtype);
       resize(LENGTH());
@@ -132,13 +132,13 @@ namespace vhdl {
     }
 
     void set(Array<RANGE, SUBTYPE>& other) {
-      m_debug.functionStart("set(other = " + other.toString() + ")");
+      m_debug.functionStart("set(other = " + other.toString() + ")", false, __FILE__, __LINE__);
       if (LENGTH() != other.LENGTH()) {
         constrain(1, other.LENGTH());
       }
       for (int i = 0; i < LENGTH(); i++) {
         // std::cout << "set[" << i << "] = " << other.m_content[i].IMAGE(other.m_content[i]) << std::endl;
-	m_content[i] = other.m_content[i];
+	m_content.at(i) = other.m_content.at(i);
       }
       m_debug.functionEnd("set");
     }
@@ -182,7 +182,7 @@ namespace vhdl {
     bool equals(const std::string& other) {
       assert(LENGTH() == other.size());
       for (int i = 0; i < LENGTH(); i++) {
-        if (m_content[i] != other[i]) {
+        if (m_content.at(i) != other[i]) {
           return false;
         }
       }
@@ -233,11 +233,18 @@ namespace vhdl {
       }
       for (int i = 0; i < LENGTH(); i++) {
 	// std::cout << "init: vec[" << i << "] = " << vec[i].toString() << std::endl;
-        m_content[i] = vec[i];
+        m_content.at(i) = vec.at(i);
       }
       m_debug.functionEnd("init");
     }
 
+    friend const std::string operator+(const char* s, Array<RANGE, SUBTYPE>& r) {
+      std::string s1(s);
+      std::string s2 = r.toString();
+      std::string result = s1 + s2;
+      return result;
+    }
+    
     void operator=(const SUBTYPE other) {
       m_debug.functionStart("operator=(other = " + other.toString() + ")");
       m_content = other;
@@ -254,10 +261,15 @@ namespace vhdl {
       setString(other);
       m_debug.functionEnd("operator=");
     }
+    void operator=(Array<RANGE, SUBTYPE>& other) {
+      m_debug.functionStart("operator=", false, __FILE__, __LINE__);
+      set(other);
+      m_debug.functionEnd("operator=");
+    }
     bool operator!=(const Array<RANGE, SUBTYPE>& other) {
       assert(this->LENGTH() != other.LENGTH());
       for (int i = 0; i < m_content.size(); i++) {
-        if (m_content[i] != other.m_content[i]) {
+        if (m_content.at(i) != other.m_content.at(i)) {
           return false;
         }
       }
@@ -304,17 +316,26 @@ namespace vhdl {
     inline RANGE& POS(RANGE value) { return value.POS(); }  
     
     std::string toString() {
-      m_debug.functionStart("toString");
+      m_debug.functionStart("toString", false, __FILE__, __LINE__);
       std::string s;
       for (int i = m_range.LEFT(); WithinRange(i); i += (m_range.ASCENDING() ? 1 : -1)) {
-        s += this->get(i).toString(false);
+        s += get(i).toString();
       }
       m_debug.functionStart("toString:" +s);
       return s;
     }
 
-    std::string info() const {
-      return "Array: m_range = (" + m_range.info() + "), m_subtype = (" + m_subtype.info() + ")";
+    std::string info() {
+      std::string s = "Array: m_range = (" + m_range.info() + "),\nm_subtype = (" + m_subtype.info() + "[" + std::to_string(m_content.size()) + "]) = {";
+      std::string delimiter;
+      int size = 0;
+      for (auto& i : m_content) {
+	s += delimiter + i.info();
+	delimiter = ", ";
+	size++;
+      }
+      s += "} [" + std::to_string(size) + "]\n";
+      return s;
     }
     
     std::string STATUS() {
@@ -339,7 +360,7 @@ namespace vhdl {
 
     inline Array<RANGE, SUBTYPE>& setIndex(int index, SUBTYPE value) {
       m_debug.functionStart("setIndex(index = " + std::to_string(index) + ")");
-      m_content[index] = value;
+      m_content.at(index) = value;
       m_debug.functionEnd("setIndex");
       return *this;
     }
@@ -349,7 +370,7 @@ namespace vhdl {
       m_debug.debug("1");
       int i = element.POS(element);
       m_debug.debug("2");
-      m_content[i] = value;
+      m_content.at(i) = value;
       m_debug.functionEnd("setElement");
       return *this;
     }

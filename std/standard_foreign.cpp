@@ -32,30 +32,38 @@ namespace vhdl {
   }
   
   void report(std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity, const char* file_name, int line_number) {
-    std::ostream* o = &std::cout;
-    Output::Color color;
+    // std::ostream* o = &std::cout;
+    STD::STANDARD::SEVERITY_LEVEL s = severity;
+    std::string text = "#[" + s.IMAGE(s) + "] " + std::string(file_name) + "(" + std::to_string(line_number) +  "): " + message;
+    // Output::Color color;
     switch (severity) {
     case STD::STANDARD::SEVERITY_LEVEL_enum::NOTE: {
-      color = Output::Color::BLUE;
+      //color = Output::Color::BLUE;
+      SC_REPORT_INFO("vhdl::report", text.c_str());
       break;
     }
     case STD::STANDARD::SEVERITY_LEVEL_enum::WARNING: {
-      color = Output::Color::YELLOW;
+      // color = Output::Color::YELLOW;
+      SC_REPORT_WARNING("vhdl::report", text.c_str());
       break;
     }
     case STD::STANDARD::SEVERITY_LEVEL_enum::ERROR: 
+      SC_REPORT_ERROR("vhdl::report", text.c_str());
+      break;
     case STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE: {
-      color = Output::Color::RED;
-      o = &std::cerr;
+      //color = Output::Color::RED;
+      //o = &std::cerr;
+      SC_REPORT_FATAL("vhdl::report", text.c_str());
     }
     }
-    STD::STANDARD::SEVERITY_LEVEL s = severity;
-    std::string text = "#[" + s.IMAGE(s) + "] " + std::string(file_name) + "(" + std::to_string(line_number) +  "): " + message;
+    /*
     Output output(*o);
-    output.println(color, text);
+     output.println(color, text);
+    *o << std::flush;
     if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
       STD_ENV.FINISH(1);
     } 
+    */
   }
 
 }

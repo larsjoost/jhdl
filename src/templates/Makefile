@@ -5,6 +5,8 @@ endif
 ifndef SYSTEMC
 include $(JHDL)/systemc/include.mak
 endif
+HEADER_FILE := work_test.hpp
+SOURCE_FILE := test.cpp
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
@@ -17,10 +19,11 @@ INC := -L$(SYSTEMC)/lib-linux64
 
 all: $(OBJS)
 
-test.hpp: test.vhdl
+$(HEADER_FILE): test.vhdl
 	${JHDL}/src/hdlc.sh -f test.vhdl
+	g++ $(CXXFLAGS) -c test.cpp -o test.o $(LINK) $(INC_DIR) $(LIBS) $(INC) $(VHDL_INCLUDES)  
 
-%.o: %.cpp test.hpp
+%.o: %.cpp $(HEADER_FILE)
 	g++ $(CXXFLAGS) -c $< -o $@ $(LINK) $(INC_DIR) $(LIBS) $(INC) $(VHDL_INCLUDES)  
 
 simulate: %.o

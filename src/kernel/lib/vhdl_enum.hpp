@@ -25,6 +25,9 @@ namespace vhdl {
     T e;
     char c;
     const char* s;
+    const std::string toString() const {
+      return std::string(1, c) + "(" + std::to_string(c) + ") : " + std::string(s);
+    }
   };
 
   /*
@@ -52,27 +55,59 @@ namespace vhdl {
   template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
   class Enumeration {
 
-    Debug<true> m_debug;
+    Debug<false> m_debug;
     std::string m_name;
-
-    const E valueArray {};
     
     template<int N>
     struct Array {
       int table[N];
     };
-  
-    int underlying_index(T e) {
+
+    static bool lookup_tables_initialized;
+    static EnumerationElement<T> value_array[SIZE];
+    static Array<ENUM_SIZE> enum_position_lookup;
+    static Array<CHAR_SIZE> char_position_lookup;
+
+    int underlying_index(T e) const {
       return static_cast<std::underlying_type_t<T>>(e);
     }
 
-    constexpr Array<CHAR_SIZE> char_position_lookup_initialization() {
-      Array<CHAR_SIZE> lut {};
+    void value_array_initialization() {
+      m_debug.functionStart("value_array_initialization", false, __FILE__, __LINE__);
+      E v;
+      for (int i=0; i<SIZE; i++) {
+	m_debug.debug("v.table[" + std::to_string(i) + "] = " + v.table[i].toString());
+	value_array[i] = v.table[i];
+	m_debug.debug("value_array[" + std::to_string(i) + "] = " + value_array[i].toString());
+      }
+      m_debug.functionEnd("value_array_initialization");
+    }
+    
+    void enum_position_lookup_initialization(Array<ENUM_SIZE>& lut) {
+      m_debug.functionStart("enum_position_lookup_initialization", false, __FILE__, __LINE__);
+      for (int i=0; i<ENUM_SIZE; i++) {
+	lut.table[i] = -1;
+      }
+      for (int i=0; i<SIZE; i++) {
+	EnumerationElement<T>& element = value_array[i];
+	m_debug.debug("Element = " + element.toString());
+	if (element.c == 0) {
+	  int index = underlying_index(element.e);
+	  assert(index < ENUM_SIZE);
+	  m_debug.debug("lut.table[" + std::to_string(index) + "] = " + std::to_string(i));
+	  lut.table[index] = i;
+	}
+      }
+      m_debug.functionEnd("enum_position_lookup_initialization");
+    }
+
+    void char_position_lookup_initialization(Array<CHAR_SIZE>& lut) {
       for (int i=0; i<CHAR_SIZE; i++) {
 	lut.table[i] = -1;
       }
       for (int i=0; i<SIZE; i++) {
-	int index = (int)valueArray.get(i).c;
+	EnumerationElement<T>& element = value_array[i];
+	int index = (int)element.c;
 	if (index >= CHAR_SIZE) {
 	  std::string message = "valueArray[" + std::to_string(i) + "].c = " + std::to_string(index) + " > " + std::to_string(CHAR_SIZE);
 	  assert(false && message.c_str());
@@ -80,47 +115,37 @@ namespace vhdl {
 	  lut.table[index] = i;
 	}
       }
-      return lut;
     }
-  
-    constexpr Array<ENUM_SIZE> enum_position_lookup_initialization() {
-      Array<ENUM_SIZE> lut {};
-      for (int i=0; i<ENUM_SIZE; i++) {
-	lut.table[i] = -1;
-      }
-      for (int i=0; i<SIZE; i++) {
-	if (valueArray.get(i).c == 0) {
-	  int index = underlying_index(valueArray.get(i).e);
-	  if (index >= ENUM_SIZE) {
-	    assert(false);
-	  } else {
-	    lut.table[index] = i;
-	  }
-	}
-      }
-      return lut;
-    }
-    
+   
     int char_position(char c) {
-      static Array<CHAR_SIZE> char_position_lookup = char_position_lookup_initialization();
       return char_position_lookup.table[(int)c];
     }
-
-    int enum_position(T e) {
-      m_debug.functionStart("enum_position", false, __FILE__, __LINE__);
-      static Array<ENUM_SIZE> enum_position_lookup = enum_position_lookup_initialization();
+    
+    int enum_position(T e) const {
+      /* m_debug.functionStart("enum_position", false, __FILE__, __LINE__);
+      if (m_debug.isVerbose()) {
+	std::string s = "{";
+	std::string delimiter; 
+	for (int i=0; i<ENUM_SIZE; i++) {
+	  s += delimiter + std::to_string(enum_position_lookup.table[i]);
+	  delimiter = ", ";
+	}
+	s += "}";
+	m_debug.debug("enum_position_lookup = " + s);
+      }
+      */
       int index = underlying_index(e);
-      m_debug.debug("index = " + std::to_string(index));
+      // m_debug.debug("index = " + std::to_string(index));
       int result = enum_position_lookup.table[index];
-      m_debug.functionEnd("enum_position: " + std::to_string(result));
+      // m_debug.functionEnd("enum_position: " + std::to_string(result));
       return result;
     }
 
     EnumerationElement<T> position(int i) {
-      return valueArray.get(i);
+      return value_array[i];
     }
 
-    int position(const EnumerationElement<T>& e) {
+    int position(EnumerationElement<T>& e) {
       int index;
       if (e.c == 0) {
         index = enum_position(e.e);
@@ -132,6 +157,16 @@ namespace vhdl {
     
     int size() {
       return SIZE;
+    }
+
+    bool initialize() {
+      if (!lookup_tables_initialized) {
+	value_array_initialization();
+	enum_position_lookup_initialization(enum_position_lookup);
+	char_position_lookup_initialization(char_position_lookup);
+	lookup_tables_initialized = true;
+      }
+      return lookup_tables_initialized;
     }
     
   protected:
@@ -195,6 +230,11 @@ namespace vhdl {
       m_right = other.m_right;
     };
 
+    void constrain(int left, int right, int ascending = true) {
+      m_left = left;
+      m_right = right;
+    };
+
     void constrain() {
       m_left = 0;
       m_right = SIZE - 1;
@@ -230,33 +270,38 @@ namespace vhdl {
       return m_value != 0;
     }
 
-    std::string toString(int index, bool with_quotes = true) {
-      m_debug.functionStart("toString(index = " + std::to_string(index) + ")", false, __FILE__, __LINE__);
+    const std::string toString(int index, bool with_quotes = true) const {
+      // m_debug.functionStart("toString(index = " + std::to_string(index) + ")", false, __FILE__, __LINE__);
+      assert(lookup_tables_initialized);
       std::string result;
-      if (valueArray.get(index).c == 0) {
-        result = valueArray.get(index).s;
+      if (index < SIZE) {
+	if (value_array[index].c == 0) {
+	  result = value_array[index].s;
+	} else {
+	  std::string s = with_quotes ? "'" : "";
+	  result = s + std::string(1, value_array[index].c) + s;
+	}
       } else {
-	std::string s = with_quotes ? "'" : "";
-	result = s + std::string(1, valueArray.get(index).c) + s;
+	result = "UNKNOWN";
       }
-      m_debug.functionEnd("toString: " + result);
+      // m_debug.functionEnd("toString: " + result);
       return result;
     }
 
-    std::string toString(T e, bool with_quotes = true) {
-      m_debug.functionStart("toString", false, __FILE__, __LINE__);
+    const std::string toString(T e, bool with_quotes = true) const {
+      // m_debug.functionStart("toString", false, __FILE__, __LINE__);
       int index = enum_position(e);
-      m_debug.debug("index = " + std::to_string(index));
-      std::string result = toString(index, with_quotes);
-      m_debug.functionEnd("toString: " + result);
+      // m_debug.debug("index = " + std::to_string(index));
+      const std::string result = toString(index, with_quotes);
+      // m_debug.functionEnd("toString: " + result);
       return result;
     }
 
-    std::string toString(bool with_quotes = true) {
-      m_debug.functionStart("toString", false, __FILE__, __LINE__);
-      m_debug.debug("m_value = " + std::to_string(m_value));
-      std::string result = toString(m_value, with_quotes);
-      m_debug.functionEnd("toString: " + result);
+    const std::string toString(bool with_quotes = true) const {
+      // m_debug.functionStart("toString", false, __FILE__, __LINE__);
+      // m_debug.debug("m_value = " + std::to_string(m_value));
+      const std::string result = toString(m_value, with_quotes);
+      // m_debug.functionEnd("toString: " + result);
       return result;
     }
 
@@ -273,7 +318,7 @@ namespace vhdl {
     
     std::string IMAGE(T r) {
       int index = enum_position(r);
-      return valueArray.get(index).s;
+      return value_array[index].s;
     }
 
     int ToInt() {
@@ -316,19 +361,30 @@ namespace vhdl {
       return e; };
     
     inline bool operator==(T e) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value == other.m_value;}
-    inline bool operator!=(T e) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value != other.m_value;}
-    inline bool operator==(char c) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value == other.m_value;}
-    inline bool operator!=(char c) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value != other.m_value;}
-    inline bool operator==(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) const { return m_value == other.m_value; }
-    inline bool operator!=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) const { return m_value != other.m_value; }
+    inline bool operator!=(T e) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value != other.m_value;}
+    inline bool operator==(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value == other.m_value;}
+    inline bool operator!=(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value != other.m_value;}
+    inline bool operator==(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value == other.m_value; }
+    inline bool operator!=(Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value != other.m_value; }
 
-    std::string info() const {
-      return "Enum: m_left = " + std::to_string(m_left) + ", m_right = " + std::to_string(m_right) + ", m_value = " + std::to_string(m_value);
+    std::string info() {
+      return "Enum<" + std::to_string(m_left) + "(" + toString(m_left) + ") to " + std::to_string(m_right) + "(" + toString(m_right) + ") = " +
+	std::to_string(m_value) + "(" + toString() + ")>";
     }
     
   };
 
+  template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
+  bool Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::lookup_tables_initialized = Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>().initialize();
 
+  template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
+  EnumerationElement<T> Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::value_array[SIZE];
+
+  template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
+  Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::Array<ENUM_SIZE> Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::enum_position_lookup;
+
+  template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
+  Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::Array<CHAR_SIZE> Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::char_position_lookup;
 }
 
 #endif

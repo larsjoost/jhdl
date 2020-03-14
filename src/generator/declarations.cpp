@@ -76,10 +76,7 @@ namespace generator {
     std::string x = "vhdl::EnumerationElement<" + enumName + ">";
     parm.addClassContents("enum class " + enumName + " {" + enumList + "};", __FILE__, __LINE__);
     parm.addClassContents("struct " + valueName + " {", __FILE__, __LINE__);
-    parm.addClassContents("const " + x + "& get(const int index) const {" , __FILE__, __LINE__);
-    parm.addClassContents("const static " + x + " x[" + s + "] = {" + structList + "};", __FILE__, __LINE__);
-    parm.addClassContents("return x[index];", __FILE__, __LINE__);
-    parm.addClassContents("};", __FILE__, __LINE__);
+    parm.addClassContents(x + " table[" + s + "] = {" + structList + "};", __FILE__, __LINE__);
     parm.addClassContents("};", __FILE__, __LINE__);
     parm.addClassContents("using " + name + " = vhdl::Enumeration<" + enumName + ", " + valueName + ", " + s + ", " +
 			  std::to_string(enum_size) + ", " + std::to_string(char_size) + ">;", __FILE__, __LINE__);

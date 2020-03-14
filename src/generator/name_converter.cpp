@@ -8,7 +8,7 @@ namespace generator {
   std::string NameConverter::getPrefix(parameters& parm, DatabaseResult& object,
 				       std::string first_separator,
 				       std::string last_separator) {
-    Debug<true> debug("NameConverter::getPrefix");
+    Debug<false> debug("NameConverter::getPrefix");
     debug.functionStart("getPrefix");
     std::string name;
     name = object.hierarchyToString("", first_separator) + last_separator;
@@ -39,7 +39,7 @@ namespace generator {
   }
   
   std::string NameConverter::getParentPrefix(parameters& parm, int hierarchy_offset) {
-    Debug<true> debug("NameConverter::getParentPrefix");
+    Debug<false> debug("NameConverter::getParentPrefix");
     debug.functionStart("getParentPrefix(hierarchy_offset = " + std::to_string(hierarchy_offset) + ")");
     int hierarchyLevel = parm.getHierarchyLevel();
     debug.debug("hierarchyLevel = " + std::to_string(hierarchyLevel));
@@ -52,7 +52,7 @@ namespace generator {
   }
   
   std::string NameConverter::globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension, bool global_scope, int hierarchy_offset) {
-    Debug<true> debug("NameConverter::globalPrefix");
+    Debug<false> debug("NameConverter::globalPrefix");
     debug.functionStart("globalPrefix(object = " + object.toString() + ", factory_extension = " + std::to_string(factory_extension) +
 			  ", hierarchy_offset = " + std::to_string(hierarchy_offset) + ")");
     std::string prefix;
@@ -86,7 +86,7 @@ namespace generator {
   }
 
   std::string NameConverter::getName(parameters& parm, DatabaseResult& object, bool factory_extension, std::string factory_arguments, bool global_scope) {
-    Debug<true> debug("NameConverter::getName");
+    Debug<false> debug("NameConverter::getName");
     std::string name = object.object->name;
     debug.functionStart("getName(name = " + name + ")");
     assert(object.object != NULL);
@@ -101,7 +101,7 @@ namespace generator {
 
   std::string NameConverter::getHierarchyOffsetName(parameters& parm, DatabaseResult& object,
 						    int hierarchy_offset) {
-    Debug<true> debug("NameConverter::getHierarchyOffsetName");
+    Debug<false> debug("NameConverter::getHierarchyOffsetName");
     std::string name = object.object->name;
     debug.functionStart("getHierarchyOffsetName(name = " + name + ")");
     assert(object.object != NULL);
