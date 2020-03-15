@@ -1,1 +1,5 @@
-include $(JHDL)/systemc/include.mak
+ifndef SYSTEMC
+SYSTEMC := /opt/systemc
+endif
+
+

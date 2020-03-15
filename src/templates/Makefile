@@ -2,9 +2,7 @@
 ifndef JHDL
 $(error JHDL is not defined)
 endif
-ifndef SYSTEMC
-include $(JHDL)/systemc/include.mak
-endif
+include $(JHDL)/include.mak
 HEADER_FILE := work_test.hpp
 SOURCE_FILE := test.cpp
 SOURCE := $(wildcard *.cpp)
@@ -15,7 +13,7 @@ INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/src/output -I
 VHDL_INCLUDE_FILES := $(shell cat test.i)
 VHDL_INCLUDES := $(addprefix -I, $(VHDL_INCLUDE_FILES))
 LIBS := -lsystemc
-INC := -L$(SYSTEMC)/lib-linux64 
+INC := -L$(SYSTEMC)/lib64 
 
 all: $(OBJS)
 

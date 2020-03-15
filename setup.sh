@@ -15,4 +15,8 @@ if [ -z "$JHDL" ]; then
     exit 1
 fi
 
-source $JHDL/systemc/setup.sh
+if [ -z "$SYSTEMC" ]; then
+    SYSTEMC=/opt/systemc
+fi
+
+export LD_LIBRARY_PATH=$SYSTEMC/lib64

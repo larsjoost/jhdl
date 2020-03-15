@@ -6,8 +6,8 @@ DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
 CXXFLAGS := -std=c++14 -g -MMD -fconcepts -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
 INC_DIR := -I$(SYSTEMC)/include -I. -I$(JHDL)/src/kernel/lib -I$(JHDL)/src/output -I$(JHDL)/src/debug
-LIBS := -lsystemc
-INC := -L$(SYSTEMC)/lib-linux64
+LIBS := -llibsystemc
+INC := -L$(SYSTEMC)/lib64
 
 all: $(OBJS)
 
