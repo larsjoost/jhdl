@@ -13,7 +13,7 @@ begin
   process (a) is
   begin
     report "A event" severity note;
-    wait for 1 ns;
+--    wait for 1 ns;
     finish(0);
   end process;
 

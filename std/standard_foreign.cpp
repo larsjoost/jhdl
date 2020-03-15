@@ -32,40 +32,42 @@ namespace vhdl {
   }
   
   void report(std::string message, STD::STANDARD::SEVERITY_LEVEL_enum severity, const char* file_name, int line_number) {
-    // std::ostream* o = &std::cout;
+    bool use_systemc = false;
+    std::ostream* o = &std::cout;
     STD::STANDARD::SEVERITY_LEVEL s = severity;
     std::string text = "#[" + s.IMAGE(s) + "] " + std::string(file_name) + "(" + std::to_string(line_number) +  "): " + message;
-    // Output::Color color;
+    Output::Color color;
     switch (severity) {
     case STD::STANDARD::SEVERITY_LEVEL_enum::NOTE: {
-      //color = Output::Color::BLUE;
-      SC_REPORT_INFO("vhdl::report", text.c_str());
+      if (use_systemc) {SC_REPORT_INFO("vhdl::report", text.c_str());}
+      color = Output::Color::BLUE;
       break;
     }
     case STD::STANDARD::SEVERITY_LEVEL_enum::WARNING: {
-      // color = Output::Color::YELLOW;
-      SC_REPORT_WARNING("vhdl::report", text.c_str());
+      if (use_systemc) {SC_REPORT_WARNING("vhdl::report", text.c_str());}
+      color = Output::Color::YELLOW;
       break;
     }
     case STD::STANDARD::SEVERITY_LEVEL_enum::ERROR: 
-      SC_REPORT_ERROR("vhdl::report", text.c_str());
+      if (use_systemc) {SC_REPORT_ERROR("vhdl::report", text.c_str());}
+      color = Output::Color::RED;
+      o = &std::cerr;
       break;
     case STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE: {
-      //color = Output::Color::RED;
-      //o = &std::cerr;
-      SC_REPORT_FATAL("vhdl::report", text.c_str());
+      if (use_systemc) {SC_REPORT_FATAL("vhdl::report", text.c_str());}
+      color = Output::Color::RED;
+      o = &std::cerr;
     }
     }
-    /*
-    Output output(*o);
-     output.println(color, text);
-    *o << std::flush;
-    if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
-      STD_ENV.FINISH(1);
-    } 
-    */
+    if (!use_systemc) {
+      Output output(*o);
+      output.println(color, text);
+      *o << std::flush;
+      if (severity == STD::STANDARD::SEVERITY_LEVEL_enum::FAILURE) {
+	STD_ENV.FINISH(1);
+      }
+    }
   }
-
 }
 
 namespace STD {
