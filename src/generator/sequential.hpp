@@ -15,7 +15,6 @@ namespace generator {
       typeName = name + "_type";
       type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
       printRangeType(parm, typeName, r);
-      variable_instance = typeName + " " + name + ";"; 
       std::string factory_name = NameConverter::getFactoryInstanceName(typeName) + "->create()";
       variable_creation = name + ".constrain(" + factory_name + ");"; 
     } else if (iteration->identifier) {
@@ -34,6 +33,7 @@ namespace generator {
         }
       } 
     }
+    variable_instance = typeName + " " + name + ";"; 
     parm.addObjectValueContainer(ast::ObjectType::VARIABLE, name, type);
     std::string forloop_execution = "for (" +
       name + " = " + name + ".LEFT(); " +
@@ -79,7 +79,7 @@ namespace generator {
 	exceptions.printError("Could not find definition of " + ast::toString(object_type) + " \"" + name + "\"", &target->getText());
 	parm.printAllObjects(name);
       }
-    } catch (ExpressionParser::ObjectNotFound e) {
+    } catch (ExpressionParser::ObjectNotFound& e) {
       e.print();
     }
     m_debug.functionEnd("assignment");
@@ -105,7 +105,7 @@ namespace generator {
           try {
             std::string condition = a_expression.toString(parm, c.condition, expectedType);
             parm.addTextToList(sequential_list, command + " (" + condition + ") {", __FILE__, __LINE__);
-          } catch (ExpressionParser::ObjectNotFound e) {
+          } catch (ExpressionParser::ObjectNotFound& e) {
             e.print();
           }
 	} else {
@@ -124,7 +124,7 @@ namespace generator {
     if (f) {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
-      m_debug.functionStart("forLoopStatement(name = " + name + ")");
+      m_debug.functionStart("forLoopStatement(name = " + name + ")", false, __FILE__, __LINE__);
       auto callback =
 	[&](parameters& parm,
 	    std::string& forloop_execution,

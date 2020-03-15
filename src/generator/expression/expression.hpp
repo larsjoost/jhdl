@@ -28,20 +28,32 @@ namespace generator {
   public:
     
     class ObjectNotFound {
-      ExpressionParser* a_parent;
-      std::string a_name;
-      std::string a_message;
-      ast::Text* a_text;
+      ExpressionParser* m_parent;
+      std::string m_name;
+      std::string m_message;
+      ast::Text* m_text;
+      std::string m_file_name;
+      int m_line_number;
     public:
       ObjectNotFound(ExpressionParser* parent, std::string name,
-                     std::string message, ast::Text* text) {
-        a_parent = parent;
-        a_name = name;
-        a_message = message;
-        a_text = text;
+                     std::string message, ast::Text* text,
+		     const char* file_name, int line_number) {
+        m_parent = parent;
+        m_name = name;
+        m_message = message;
+        m_text = text;
+	m_file_name = file_name;
+	m_line_number = line_number;
+      }
+      const std::string getMessage() const {
+	return	"[" + m_file_name + "(" + std::to_string(m_line_number) + ")] : " + m_message;
       }
       void print() {
-        a_parent->exceptions.printError(a_message, a_text);
+        m_parent->exceptions.printError(getMessage(), m_text);
+      }
+      virtual const char* what() const throw() {
+	std::string m = getMessage() + ": " + m_text->getCurrentLine();
+	return m.c_str();
       }
     };
 
@@ -291,8 +303,8 @@ namespace generator {
             argument = actualPart;
             break;
           }
-        } catch (ObjectNotFound e) {
-        }
+        } catch (ObjectNotFound& e) {
+	}
         associationElementNumber++;
       }
     }
@@ -454,20 +466,20 @@ namespace generator {
 								ast::Text* text,
 								std::string& assignment_name) {
     m_debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expectedType.toString() + ")");
-    std::string assignment_name_next_hierarchy = (assignment_name.empty() ? "" : assignment_name + ".ELEMENT()");
     bool expect_array_type = expectedType.IsValue(ast::ObjectValue::ARRAY);
     std::string result = (!assignment_name.empty() && expect_array_type ? assignment_name : "");
     for (ast::ElementAssociation& i : parenthis_expression.list) {
       if (i.choises) {
 	for (ast::Choise& j : i.choises->choises.list) {
 	  if (j.others) {
-	    result += ".setOthers(" + expressionToString(parm, i.expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy) + ")";
+	    result += ".setOthers(" + expressionToString(parm, i.expression, expectedType, sensitivityListCallback, double_brackets, assignment_name) + ")";
 	  }
 	}
       }
     }
     int index = 0;
     for (ast::ElementAssociation& i : parenthis_expression.list) {
+      std::string assignment_name_next_hierarchy = (assignment_name.empty() ? "" : assignment_name + ".VAL(" + std::to_string(index) + ")");
       ast::Expression* expression = i.expression;
       if (!expression) {
 	assert(i.choises);
@@ -475,7 +487,13 @@ namespace generator {
 	  expression = i.choises->choises.list.back().expression;
 	  std::string x = expressionToString(parm, expression, expectedType, sensitivityListCallback, double_brackets, assignment_name_next_hierarchy);
 	  if (expect_array_type) {
-	    result += ".setIndex(" + std::to_string(index) + ", " + x + ")";
+	    ast::ObjectValueContainer return_type;
+	    bool return_type_found = collectUniqueReturnType(parm, expression, return_type);
+	    if (return_type_found && return_type.IsValue(ast::ObjectValue::ARRAY)) {
+	      result += ".setArray(" + x + ")";
+	    } else {
+	      result += ".setIndex(" + std::to_string(index) + ", " + x + ")";
+	    }
 	  } else {
 	    result = x;
 	  }
@@ -577,7 +595,8 @@ namespace generator {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
         throw ObjectNotFound(this, name, "Could not find definition of " + name + args +
-                             " with type " + (expected_type ? expected_type->toString() : "None"), &identifier->getText());
+                             " with type " + (expected_type ? expected_type->toString() : "None"),
+			     &identifier->getText(), __FILE__, __LINE__);
       }
     } 
     m_debug.functionEnd("BasicIdentifierToString = " + name);

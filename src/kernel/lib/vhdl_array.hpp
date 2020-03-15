@@ -27,7 +27,7 @@ namespace vhdl {
   template<class RANGE, class SUBTYPE>
   class Array {
 
-    Debug<false> m_debug;
+    Debug<true> m_debug;
     Exceptions m_exceptions;
     
     inline void setAll(SUBTYPE& value) {
@@ -59,7 +59,10 @@ namespace vhdl {
     void resize(int length) {
       m_debug.functionStart("resize(length = " + std::to_string(length) + ")");
       m_debug.debug("LENGTH() = " + std::to_string(LENGTH()));
-      m_content = std::vector<SUBTYPE>(length, SUBTYPE());
+      m_content = std::vector<SUBTYPE>();
+      for (int i = 0; i < length; i++) {
+	m_content.push_back(SUBTYPE());
+      }
       m_debug.debug("m_content.size() = " + std::to_string(m_content.size()));
       for (int i = 0; i < length; i++) {
 	SUBTYPE& a = m_content.at(i);
@@ -110,6 +113,12 @@ namespace vhdl {
       m_debug.functionEnd("construct");
     }
 
+    Array<RANGE, SUBTYPE> clone() {
+      Array<RANGE, SUBTYPE> x;
+      x.constrain(*this);
+      return x;
+    }
+    
     void setString(const std::string& s) {
       m_debug.functionStart("setString(s = " + s + ")");
       if (LENGTH() != s.size()) {
@@ -132,8 +141,9 @@ namespace vhdl {
     }
 
     void set(Array<RANGE, SUBTYPE>& other) {
-      m_debug.functionStart("set(other = " + other.toString() + ")", false, __FILE__, __LINE__);
+      m_debug.functionStart("set(other = " + other.info() + ")", false, __FILE__, __LINE__);
       if (LENGTH() != other.LENGTH()) {
+	m_debug.debug("LENGTH() = " + std::to_string(LENGTH()) + " != " + std::to_string(other.LENGTH()));
         constrain(1, other.LENGTH());
       }
       for (int i = 0; i < LENGTH(); i++) {
@@ -246,23 +256,23 @@ namespace vhdl {
     }
     
     void operator=(const SUBTYPE other) {
-      m_debug.functionStart("operator=(other = " + other.toString() + ")");
+      m_debug.functionStart("operator=(other = " + other.toString() + ")", false, __FILE__, __LINE__);
       m_content = other;
       m_debug.functionEnd("operator=");
     }
     void operator=(const char* other) {
-      m_debug.functionStart("operator=(other = " + std::string(other) + ")");
+      m_debug.functionStart("operator=(other = " + std::string(other) + ")", false, __FILE__, __LINE__);
       std::string s(other);
       setString(s);
       m_debug.functionEnd("operator=");
     }
     void operator=(const std::string other) {
-      m_debug.functionStart("operator=(other = " + other + ")");
+      m_debug.functionStart("operator=(other = " + other + ")", false, __FILE__, __LINE__);
       setString(other);
       m_debug.functionEnd("operator=");
     }
     void operator=(Array<RANGE, SUBTYPE>& other) {
-      m_debug.functionStart("operator=", false, __FILE__, __LINE__);
+      m_debug.functionStart("operator=(other = " + other.info() + ")", false, __FILE__, __LINE__);
       set(other);
       m_debug.functionEnd("operator=");
     }
@@ -309,7 +319,11 @@ namespace vhdl {
     
     inline SUBTYPE& HIGH() { return VAL(m_range.HIGH()); };
     inline SUBTYPE& LOW() { return VAL(m_range.LOW()); }
-    inline SUBTYPE& ELEMENT() { return LOW(); }
+    inline SUBTYPE& ELEMENT() {
+      m_debug.functionStart("ELEMENT", false, __FILE__, __LINE__);
+      SUBTYPE& x = LOW(); 
+      m_debug.functionEnd("ELEMENT: " + x.info());
+      return x; }
     inline SUBTYPE& LEFT() { return VAL(m_range.LEFT()); }
     inline SUBTYPE& RIGHT() { return VAL(m_range.RIGHT()); }
     inline SUBTYPE& VAL(RANGE index) { return get(index.POS()); }
@@ -352,29 +366,35 @@ namespace vhdl {
     }
 
     inline Array<RANGE, SUBTYPE>& setOthers(SUBTYPE value) {
-      m_debug.functionStart("setOthers(value = " + value.toString() + ")");
+      m_debug.functionStart("setOthers(value = " + value.toString() + ")", false, __FILE__, __LINE__);
       setAll(value);
       m_debug.functionEnd("setOthers");
       return *this;
     }
 
     inline Array<RANGE, SUBTYPE>& setIndex(int index, SUBTYPE value) {
-      m_debug.functionStart("setIndex(index = " + std::to_string(index) + ")");
+      m_debug.functionStart("setIndex(index = " + std::to_string(index) + ", value = " + value.info() + ")", false, __FILE__, __LINE__);
+      m_debug.debug("info = " + info());
       m_content.at(index) = value;
+      m_debug.debug("info = " + info());
       m_debug.functionEnd("setIndex");
       return *this;
     }
 
     inline Array<RANGE, SUBTYPE>& setElement(RANGE element, SUBTYPE value) {
-      m_debug.functionStart("setElement(element = " + element.toString() + ")");
-      m_debug.debug("1");
+      m_debug.functionStart("setElement(element = " + element.toString() + ")", false, __FILE__, __LINE__);
       int i = element.POS(element);
-      m_debug.debug("2");
       m_content.at(i) = value;
       m_debug.functionEnd("setElement");
       return *this;
     }
   
+    inline Array<RANGE, SUBTYPE>& setArray(SUBTYPE& value) {
+      m_debug.functionStart("setArray(value = " + value.info() + ")", false, __FILE__, __LINE__);
+      m_debug.functionEnd("setArray");
+      return *this;
+    }
+
   };
 
 }

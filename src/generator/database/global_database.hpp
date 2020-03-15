@@ -19,7 +19,7 @@ namespace generator {
     
     Debug<false> m_debug;
 
-    Exceptions exceptions;
+    Exceptions m_exceptions;
 
     struct Object {
       ast::ObjectType type;

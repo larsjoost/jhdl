@@ -43,6 +43,7 @@ namespace generator {
   }
 
   bool SystemC::lookupSeverity(parameters& parm, ast::ReportStatement* p, std::string& severity, std::list<std::string>& sequential_list) {
+    m_debug.functionStart("lookupSeverity", false, __FILE__, __LINE__);
     bool found;
     static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
     static ast::ObjectValueContainer expected_type =
@@ -65,16 +66,21 @@ namespace generator {
 			   name + ", __FILE__, __LINE__);", __FILE__, __LINE__);
       }
     }
+    m_debug.functionEnd("lookupSeverity");
     return found;
   }
   
   void SystemC::reportStatement(parameters& parm, ast::ReportStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
-      m_debug.functionStart("reportStatement");
+      m_debug.functionStart("reportStatement", false, __FILE__, __LINE__);
       std::string severity = p->severity->toString(true);
-      if (!lookupSeverity(parm, p, severity, sequential_list)) {
-        exceptions.printError("Cound to find severity level " + severity + ". Must be one of NOTE, WARNING, ERROR or FAILURE", &p->severity->text);
-        parm.printAllObjects(severity);
+      try {
+	if (!lookupSeverity(parm, p, severity, sequential_list)) {
+	  exceptions.printError("Cound to find severity level " + severity + ". Must be one of NOTE, WARNING, ERROR or FAILURE", &p->severity->text);
+	  parm.printAllObjects(severity);
+	} 
+      } catch (ExpressionParser::ObjectNotFound& e) {
+	e.print();
       }
       m_debug.functionEnd("reportStatement");
     }
@@ -93,13 +99,13 @@ namespace generator {
 
   void SystemC::returnStatement(parameters& parm, ast::ReturnStatement* r, std::list<std::string>& sequential_list) {
     if (r) {
-       m_debug.functionStart("returnStatement");
-       try {
-         parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, parm.returnType) + ";", __FILE__, __LINE__);
-       } catch (ExpressionParser::ObjectNotFound e) {
-         e.print();
-       }
-       m_debug.functionEnd("returnStatement");
+      m_debug.functionStart("returnStatement", false, __FILE__, __LINE__);
+      try {
+	parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, parm.returnType) + ";", __FILE__, __LINE__);
+      } catch (ExpressionParser::ObjectNotFound& e) {
+	e.print();
+      }
+      m_debug.functionEnd("returnStatement");
     }
   }
 

@@ -53,7 +53,7 @@ namespace generator {
 
     bool m_convert_to_systemc = false;
     
-    Debug<false> m_debug;
+    Debug<true> m_debug;
 
     Exceptions exceptions;
     

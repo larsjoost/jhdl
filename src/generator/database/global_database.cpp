@@ -19,8 +19,8 @@ namespace generator {
       if (found_object == l->second.end()) {
 	l->second[object_name] = object;
       } else {
-        exceptions.printError(library + "." + object_name + " is already defined", source_text);
-        exceptions.printError("Defined here:", found_object->second.source_text);
+        m_exceptions.printError(library + "." + object_name + " is already defined", source_text, __FILE__, __LINE__);
+        m_exceptions.printError("Defined here:", found_object->second.source_text, __FILE__, __LINE__);
       }
     } else {
       std::unordered_map<std::string, Object> x;
@@ -94,7 +94,7 @@ namespace generator {
         std::cout << "[GLOBAL] library = " << i->first << std::endl;
         print(i->second);
       } else {
-        std::cerr << "Did not find " + library + " in global database" << std::endl;
+	std::cerr << "Did not find " + library + " in global database" << std::endl;
       }
              
     }

@@ -223,7 +223,7 @@ namespace generator {
   int parameters::findBestMatch(DatabaseResults& matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    m_debug.functionStart("findBestMatch)");
+    m_debug.functionStart("findBestMatch)", false, __FILE__, __LINE__);
     int found = 0;
     for (auto& i : matches) {
       if (valid(i.object)) {
@@ -240,6 +240,8 @@ namespace generator {
 	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString(), bestMatch.object->text); 
 	  found++;
 	} 
+      } else {
+	m_debug.debug(i.toString() + " is not valid");
       }
     }
     m_debug.functionEnd("findBestMatch: " + std::to_string(found));
@@ -251,7 +253,7 @@ namespace generator {
 				 DatabaseResults& local_matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    m_debug.functionStart("findBestMatch)");
+    m_debug.functionStart("findBestMatch)", false, __FILE__, __LINE__);
     int found = findBestMatch(global_matches, bestMatch, valid);
     bestMatch.local = false;
     if (found == 0) {
@@ -284,7 +286,7 @@ namespace generator {
     }
     bool found = findBestMatch(global_results, local_results, object, valid);
     if (!found) {
-      std::cout << "Did not find any matches of " << name << std::endl;
+      std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Did not find any matches of " << name << std::endl;
       for (auto& i : global_results) {
 	std::cout << "Found global: " << i.toString() << std::endl;
       }

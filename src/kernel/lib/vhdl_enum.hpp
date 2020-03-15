@@ -55,7 +55,7 @@ namespace vhdl {
   template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
   class Enumeration {
 
-    Debug<false> m_debug;
+    Debug<true> m_debug;
     std::string m_name;
     
     template<int N>
@@ -190,7 +190,7 @@ namespace vhdl {
   public:
     int m_value = 0;
     int m_left = 0;
-    int m_right = 0;
+    int m_right = SIZE - 1;
 
     Enumeration(const char* name) : m_debug(this), m_name(name) {
       m_debug.functionStart("Enumeration(char c = " + std::string(name) + ")", false, __FILE__, __LINE__);
@@ -199,16 +199,12 @@ namespace vhdl {
  
     Enumeration() : m_debug(this) {
       m_debug.functionStart("Enumeration", false, __FILE__, __LINE__);
-      m_left = 0;
-      m_right = size() - 1;
       m_debug.functionEnd("Enumeration");
     }
     
     Enumeration(T v) : m_debug(this) {
       m_debug.functionStart("Enumeration(v = " + toString(v) + ")", false, __FILE__, __LINE__);
       set(v);
-      m_left = 0;
-      m_right = size() - 1;
       m_debug.functionEnd("Enumeration");
     }
 
@@ -225,6 +221,11 @@ namespace vhdl {
       m_debug.functionEnd("Enumeration");
     }
     
+    Enumeration(int i) : m_debug(this) {
+      m_debug.functionStart("Enumeration(int i = " + std::to_string(i) + ")", false, __FILE__, __LINE__);
+      m_value = i;
+      m_debug.functionEnd("Enumeration");
+    }
     void constrain(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>& other) {
       m_left = other.m_left;
       m_right = other.m_right;
@@ -345,7 +346,27 @@ namespace vhdl {
       m_debug.functionEnd("LENGTH: " + std::to_string(e.m_value));
       return e;
     }
-    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> RIGHT() { Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> e; e.m_value = m_right; return e; }
+    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> LEFTOF() {
+      Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> e;
+      e.m_value = m_value - 1;
+      return e;
+    }
+    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> LOW() {
+      return LEFT();
+    }
+    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> RIGHT() {
+      Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> e;
+      e.m_value = m_right;
+      return e;
+    }
+    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> RIGHTOF() {
+      Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> e;
+      e.m_value = m_value + 1;
+      return e;
+    }
+    inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> HIGH() {
+      return RIGHT();
+    }
     inline bool ASCENDING() { return true; };
     inline int POS(char a) { return char_position(a); };
     inline int POS(T e) { return enum_position(e); };
@@ -365,6 +386,8 @@ namespace vhdl {
     inline bool operator==(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value == other.m_value;}
     inline bool operator!=(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value != other.m_value;}
     inline bool operator==(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value == other.m_value; }
+    inline bool operator<=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value <= other.m_value; }
+    inline bool operator>=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value >= other.m_value; }
     inline bool operator!=(Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value != other.m_value; }
 
     std::string info() {
