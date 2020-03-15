@@ -1,0 +1,3 @@
+[submodule "lib/systemc"]
+	path = lib/systemc
+	url = https://github.com/accellera-official/systemc.git
