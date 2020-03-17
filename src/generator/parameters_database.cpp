@@ -125,6 +125,7 @@ namespace generator {
 			     ast::Text* text) {
     m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString() +
 			  ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
+    m_debug.debug("Hierarchy = " + hierarchyToString());
     getActiveClassContainer()->database.add(id, name,  type, arguments, text);
     m_debug.functionEnd("addObjectValueContainer");
   }
@@ -149,9 +150,11 @@ namespace generator {
   }
 
   void parameters::printDatabase(std::string name) {
+    m_debug.functionStart("printDatabase", false, __FILE__, __LINE__);
     ClassContainer* c = getCurrentClassContainer();
     if (c) {c->database.print(name);}
     a_global_database.print(name);
+    m_debug.functionEnd("printDatabase");
   }
 
   void parameters::globalizeClass(ast::Text* text) {

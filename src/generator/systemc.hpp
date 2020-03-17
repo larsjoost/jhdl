@@ -115,7 +115,6 @@ namespace generator {
                                          ast::ObjectValue object_value, std::string definition);
     ast::ObjectValueContainer FileType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
     ast::ObjectValueContainer AccessType(parameters& parm, ast::SimpleIdentifier* identifier, ast::SimpleIdentifier* type);
-    ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     ast::ObjectValueContainer enumerationType(parameters& parm, ast::SimpleIdentifier* identifier, ast::EnumerationType* t);
     template<typename Func>
     void PrintTypeObject(parameters& parm, const std::string& name, Func func);
@@ -128,7 +127,7 @@ namespace generator {
                       ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype_name, ast::RangeType* subtype_range,
                         ast::ObjectValueContainer::Array& arguments);
-    void printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
+    ast::ObjectValue printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
     void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
                                    std::string& name, std::string& type,
@@ -153,13 +152,14 @@ namespace generator {
     // declarations.cpp
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
+    ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
     void type_declarations(parameters& parm, ast::TypeDeclaration* t);
     void FileDeclaration(parameters& parm, ast::FileDeclaration* file);
     void AliasDeclaration(parameters& parm, ast::AliasDeclaration* file);
     std::string InterfaceTypeConverter(std::string& type, ast::ObjectType id,
                                        ast::ObjectDeclaration::Direction direction);
     void StoreInterfaceInDatabase(parameters& parm, ast::InterfaceList* interface);
-    void PrintInterface(parameters& parm, ast::InterfaceList* interface);
+    void PrintInterface(parameters& parm, ast::InterfaceList* interface, bool database_enable = true);
     std::string GetInterface(parameters& parm, ast::InterfaceList* interface,
                              bool initialization = true, std::string local_prefix = "");
     std::string getArgumentTypes(parameters& parm, ast::InterfaceList* interface);

@@ -18,10 +18,19 @@ namespace generator {
 
   std::string DatabaseResult::toString() {
     std::string l = local ? "local" : "global"; 
-    std::string s = object ? (hierarchyToString("", ".") + " " + object->toString() + " (" + l + ")") : "NIL";
+    std::string s = object ? (hierarchyToString("", ".") + " " + object->toString() + " (" + l + ") [" + (valid ? "valid" : "invalid") + "] [hierarchy = " + std::to_string(hierarchySize()) + "]") : "NIL";
     return s;
   }
 
+  void DatabaseResult::print() {
+    std::cout << toString() << std::endl;
+    if (object && object->text) {
+      std::cout << object->text->getFilename() << "(" << object->text->getLine() << ")" << std::endl;
+      std::cout << object->text->getCurrentLine() << std::endl;
+      std::cout << object->text->getCurrentLinePositionMarker() << std::endl;
+    }
+  }
+  
   std::string DatabaseResult::hierarchyToString(std::string first_delimiter, std::string delimiter) {
     std::string result;
     if (hierarchy.use_count() > 0) {
@@ -35,7 +44,11 @@ namespace generator {
   };
 
   int DatabaseResult::hierarchySize() {
-    return hierarchy.get()->size();
+    int size = -1;
+    if (hierarchy.use_count() > 0) {
+      size = hierarchy.get()->size();
+    }
+    return size;
   }
 
 }

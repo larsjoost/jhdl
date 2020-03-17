@@ -29,8 +29,8 @@ void Exceptions::printNote(std::string message, ast::Text* text) {
 
 void Exceptions::printError(std::string message, ast::Text* text, const char* file_name, int line_number) {
   m_number_of_errors++;
-  if (verbose && file_name) {
-    message += " " + std::string(file_name) + ":" + std::to_string(line_number);
+  if (file_name) {
+    message = std::string(file_name) + "(" + std::to_string(line_number) + "): " + message;
   }
   print("Error", Output::Color::RED, message, text);
 }

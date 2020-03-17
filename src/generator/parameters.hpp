@@ -18,9 +18,9 @@ namespace generator {
 
   class parameters {
 
-    Debug<false> m_debug;
+    Debug<true> m_debug;
     Exceptions exceptions;
-    bool a_verbose = false;
+    bool a_verbose = true;
 
     InfoWriter info_writer;
 
@@ -159,7 +159,7 @@ namespace generator {
     template<typename Func>
     int findBestMatch(DatabaseResults& matches, DatabaseResult& bestMatch, Func valid);
     template<typename Func>
-    bool findBestMatch(DatabaseResults& global_matches, DatabaseResults& local_matches, DatabaseResult& bestMatch, Func valid);
+    int findBestMatch(DatabaseResults& global_matches, DatabaseResults& local_matches, DatabaseResult& bestMatch, Func valid);
     void findAllLocal(DatabaseResults& objects, std::string& name, std::string& package, std::string& library);
   public:
     template<typename Func>
@@ -226,7 +226,9 @@ namespace generator {
     m_debug.functionStart("findBestMatch)", false, __FILE__, __LINE__);
     int found = 0;
     for (auto& i : matches) {
-      if (valid(i.object)) {
+      bool is_valid = valid(i.object);
+      i.valid = is_valid;
+      if (is_valid) {
 	if (found == 0) {
 	  bestMatch = i;
 	  found++;
@@ -249,7 +251,7 @@ namespace generator {
   }
 
   template<typename Func>
-  bool parameters::findBestMatch(DatabaseResults& global_matches,
+  int parameters::findBestMatch(DatabaseResults& global_matches,
 				 DatabaseResults& local_matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
@@ -260,8 +262,11 @@ namespace generator {
       found = findBestMatch(local_matches, bestMatch, valid);
       bestMatch.local = true;
     }
+    if (found != 1 && a_verbose) {
+      printDatabase();
+    }
     m_debug.functionEnd("findBestMatch: " + std::to_string(found));
-    return (found == 1);
+    return found;
   }
 
   template<typename Func>
@@ -284,17 +289,25 @@ namespace generator {
 	std::cout << i.toString() << std::endl;
       }
     }
-    bool found = findBestMatch(global_results, local_results, object, valid);
-    if (!found) {
-      std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Did not find any matches of " << name << std::endl;
+    int found = findBestMatch(global_results, local_results, object, valid);
+    if (found != 1) {
+      if (found == 0) {
+	std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Did not find any matches of " << name << std::endl;
+      } else {
+	std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Found " << found << " matches of " << name << std::endl;
+      }
       for (auto& i : global_results) {
-	std::cout << "Found global: " << i.toString() << std::endl;
+	if (found == 0 || i.valid) {
+	  i.print();
+	}
       }
       for (auto& i : local_results) {
-	std::cout << "Found local: " << i.toString() << std::endl;
+	if (found == 0 || i.valid) {
+	  i.print();
+	}
       }
     } else if (m_debug.isVerbose()) {
-      std::cout << "Found: " << object.toString() << std::endl;
+      object.print(); 
     }
     m_debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;

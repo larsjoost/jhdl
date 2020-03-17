@@ -15,7 +15,7 @@ namespace generator {
       m_debug.functionStart("ObjectDeclaration(type_name = " + type_name + ")", false, __FILE__, __LINE__);
       DatabaseResult database_result;
       if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) { 
-	m_debug.debug("database_result = " + database_result.toString());
+	m_debug.debug("database_result = " + database_result.toString(), __FILE__, __LINE__);
         type_name = NameConverter::getName(parm, database_result, false);
         std::string factory_arguments;
         if (v->type->range) {
@@ -31,15 +31,15 @@ namespace generator {
         std::string factory_name = NameConverter::getName(parm, database_result, true, factory_arguments);
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
           std::string name = id.toString(true);
-          m_debug.debug("Name = " + name + ", type = " + type_name);
-          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, database_result.object->type);}
+          m_debug.debug("Name = " + name + ", type = " + type_name, __FILE__, __LINE__);
+          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, database_result.object->type, ast::ObjectArguments(false), v->text);}
           std::string init = "";
           if (v->initialization) {
             auto sensitivity_list_callback = 
 	      [&](DatabaseResult& object, std::string& name_extension) {};
 	    init = a_expression.assignmentString(parm, v->initialization->value, database_result.object->type,
 						 sensitivity_list_callback, name);
-            m_debug.debug("Init = " + init, true);
+            m_debug.debug("Init = " + init, __FILE__, __LINE__);
           }
           callback(name, type_name, init, factory_name, v->objectType, v->direction);
         }

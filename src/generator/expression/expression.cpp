@@ -375,7 +375,7 @@ namespace generator {
 
   ast::ObjectArguments ExpressionParser::toObjectArguments(parameters& parm,
 							   ast::AssociationList* associationList) {
-    m_debug.functionStart("toObjectArguments");
+    m_debug.functionStart("toObjectArguments", false, __FILE__, __LINE__);
     ast::ObjectArguments result(false);
     if (associationList) {
       for (auto& i : associationList->associationElements.list) {

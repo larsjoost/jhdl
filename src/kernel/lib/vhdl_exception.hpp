@@ -17,7 +17,6 @@
 namespace vhdl {
 
   class RuntimeError : public std::exception {
-    
   };
   
 }

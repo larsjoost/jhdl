@@ -6,7 +6,7 @@
 namespace generator {
   
   void GlobalDatabase::append(std::shared_ptr<LocalDatabase>& database, std::string& library, std::string& object_name, ast::ObjectType type, ast::Text* source_text) {
-    m_debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")");
+    m_debug.functionStart("append(library = " + library + ", object_name = " + object_name + ")", false, __FILE__, __LINE__);
     Object object;
     object.type = type;
     object.database = database;

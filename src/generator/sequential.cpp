@@ -7,7 +7,7 @@ namespace generator {
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
       m_debug.functionStart("procedureCallStatement");
-      parm.addTextToList(sequential_list, a_expression.procedureCallStatementToString(parm, p) + ";", __FILE__, __LINE__);
+      parm.addTextToList(sequential_list, a_expression.procedureCallStatementToString(parm, p) + ";", __FILE__, __LINE__, false, &p->name->text);
       m_debug.functionEnd("procedureCallStatement");
     }
   }

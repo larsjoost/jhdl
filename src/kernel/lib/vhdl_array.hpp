@@ -42,7 +42,7 @@ namespace vhdl {
     
     RANGE m_range;
     bool m_constrained = false;
-    std::vector<SUBTYPE> m_content;
+    std::vector<SUBTYPE> m_content = std::vector<SUBTYPE>();
     SUBTYPE m_subtype;
 
   public:
@@ -140,6 +140,20 @@ namespace vhdl {
       m_debug.functionEnd("setString: " + toString());
     }
 
+    void push_back(std::string& s) {
+      m_debug.functionStart("push_back(s = " + s + ")", false, __FILE__, __LINE__);
+      // std::raise(SIGINT);
+      for (auto c : s) {
+	m_debug.debug("c = " + std::string(1, c));
+	m_content.push_back(SUBTYPE());
+	assert(!m_content.empty());
+	SUBTYPE& a = m_content.back();
+	a.constrain(m_subtype);
+	a = c;
+      }
+      m_debug.functionEnd("push_back");
+    }
+    
     void set(Array<RANGE, SUBTYPE>& other) {
       m_debug.functionStart("set(other = " + other.info() + ")", false, __FILE__, __LINE__);
       if (LENGTH() != other.LENGTH()) {

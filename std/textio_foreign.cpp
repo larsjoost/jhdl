@@ -125,13 +125,7 @@ namespace STD {
   void Package_TEXTIO::std_textio_write5(LINE& L, STD::STANDARD::INTEGER VALUE, SIDE JUSTIFIED, WIDTH FIELD) {
     STD::STANDARD::INTEGER i;
     std::string x = i.IMAGE(VALUE);
-    if (!L.isNull()) {
-      x = STD::STANDARD::STRING::IMAGE(L.ALL()) + x;
-    }
-    STD::STANDARD::STRING s;
-    s = x;
-    // std::cout << "s = " << s.IMAGE(s) << std::endl;
-    L.set(s);
+    L.push_back(x);
   }
   /*
    * This is the definition of the foreign function set as an attribute.

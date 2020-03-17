@@ -13,8 +13,7 @@ namespace generator {
     if (iteration->range) {
       ast::RangeType* r = iteration->range;
       typeName = name + "_type";
-      type = ast::ObjectValueContainer(ast::ObjectValue::INTEGER);
-      printRangeType(parm, typeName, r);
+      type = printRangeType(parm, typeName, r);
       std::string factory_name = NameConverter::getFactoryInstanceName(typeName) + "->create()";
       variable_creation = name + ".constrain(" + factory_name + ");"; 
     } else if (iteration->identifier) {

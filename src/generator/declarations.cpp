@@ -22,8 +22,7 @@ namespace generator {
       printPhysicalType(parm, name, t);
       value = ast::ObjectValue::PHYSICAL;
     } else {
-      printRangeType(parm, name, t->range);
-      value = ast::ObjectValue::INTEGER;
+      value = printRangeType(parm, name, t->range);
     }
     ast::ObjectValueContainer type(value, name);
     m_debug.functionEnd("numberType: " + type.toString());
@@ -424,7 +423,7 @@ namespace generator {
     m_debug.functionEnd("StoreInterfaceInDatabase");
   }
 
-  void SystemC::PrintInterface(parameters& parm, ast::InterfaceList* interface) {
+  void SystemC::PrintInterface(parameters& parm, ast::InterfaceList* interface, bool database_enable) {
     m_debug.functionStart("PrintInterface", false, __FILE__, __LINE__);
     std::string result;
     if (interface) {
@@ -432,7 +431,7 @@ namespace generator {
                                 ast::ObjectDeclaration::Direction direction) {
         return InterfaceTypeConverter(type, id, direction);
       };
-      result = interfaceListToString(parm, interface, ", ", true, type_converter, "", true);
+      result = interfaceListToString(parm, interface, ", ", true, type_converter, "", database_enable);
     }
     m_debug.functionEnd("PrintInterface");
   }
@@ -570,9 +569,9 @@ namespace generator {
   }
 
   void SystemC::ForeignAttribute(parameters& parm, ast::Attribute* a) {
-    m_debug.functionStart("ForeignAttribute", false, __FILE__, __LINE__);
-    ast::Text* text = a->item ? &a->item->text : &a->string->text;
     std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
+    m_debug.functionStart("ForeignAttribute(name = " + name + ")", false, __FILE__, __LINE__);
+    ast::Text* text = a->item ? &a->item->text : &a->string->text;
     ast::ObjectArguments arguments(false);
     generateObjectArguments(parm, a->arguments, arguments);
     ast::ObjectType id = a->objectType;
@@ -591,7 +590,7 @@ namespace generator {
       assert(e->function);
       ast::InterfaceList* i = e->function->interface;
       std::string interface = "(" + GetInterface(parm, i) + ")";
-      PrintInterface(parm, i);
+      PrintInterface(parm, i, false);
       std::string returnName = "void";
       if (id == ast::ObjectType::FUNCTION) {
         DatabaseResult result;
@@ -616,12 +615,12 @@ namespace generator {
   
   void SystemC::attribute_declarations(parameters& parm, ast::Attribute* a) {
     if (a) {
-      m_debug.functionStart("attribute_declarations", false, __FILE__, __LINE__);
+      assert(a->identifier);
+      std::string identifier = a->identifier->toString(true);
+      m_debug.functionStart("attribute_declarations(name = " + identifier + ")", false, __FILE__, __LINE__);
       if (a->item || a->string) {
         static std::unordered_map<std::string, bool> ignored_attributes =
           {{"SYNTHESIS_RETURN", false}};
-        assert(a->identifier);
-        std::string identifier = a->identifier->toString(true);
         if (identifier == "FOREIGN") {
           ForeignAttribute(parm, a);
         } else if (ignored_attributes.find(identifier) != ignored_attributes.end()) {

@@ -11,7 +11,10 @@ namespace generator {
   }
 
   void LocalDatabase::add(std::string& name, DatabaseElement& e) {
+    m_debug.functionStart("add(name = " + name + ")", false, __FILE__, __LINE__);
+    m_debug.debug("e = " + e.toString());
     a_content.add(name, e);
+    m_debug.functionEnd("add");
   }
   
   bool LocalDatabase::setVisible(std::string name) {
@@ -24,14 +27,15 @@ namespace generator {
 
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                           ast::ObjectArguments arguments, ast::Text* text) {
+    m_debug.functionStart("add(name = " + name + ")", false, __FILE__, __LINE__);
     DatabaseElement e = {id, name, arguments, type, false, NULL, NULL, text};
     add(name, e);
+    m_debug.functionEnd("add");
   }
 
   void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
-    Debug<false> debug(this);
-    m_debug.functionStart("addAttribute(name = " + name + ")");
+    m_debug.functionStart("addAttribute(name = " + name + ")", false, __FILE__, __LINE__);
     if (m_debug.isVerbose()) {
       print();
     }

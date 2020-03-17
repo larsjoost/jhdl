@@ -135,7 +135,7 @@ namespace generator {
     return left_type;
   }
 
-  void SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
+  ast::ObjectValue SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     m_debug.functionStart("printRangeType", false, __FILE__, __LINE__);
     RangeDefinition range_definition;
     ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
@@ -144,7 +144,8 @@ namespace generator {
     std::string t = integer_type ? "int" : "double";
     parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
     printFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
-    m_debug.functionEnd("printRangeType");
+    m_debug.functionEnd("printRangeType: " + found_type.toString());
+    return found_type.GetValue();
   }
 
   void SystemC::printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n) {

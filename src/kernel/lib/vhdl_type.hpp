@@ -13,6 +13,8 @@
 
 #include <systemc.h>
 
+#include "../../debug/debug.hpp"
+
 namespace vhdl {
 
   /*
@@ -129,50 +131,6 @@ namespace vhdl {
 
   };
 
-  template<class T>
-  class vhdl_access {
-
-    std::string m_name;
-    
-    T m_value;
-
-    bool a_null = true;
-  
-  public:
-
-    vhdl_access(const char* name) : m_name(name) {};
-
-    T& ALL() {
-      assert(!a_null);
-      return m_value;
-    }
-
-    void set(T& s) {
-      a_null = false;
-      m_value.set(s);
-    }
-
-    void constrain() {
-      // TODO: Implement
-    }
-    
-    void constrain(vhdl_access<T> s) {
-      m_value.constrain(s.m_value);
-    }
-  
-    bool isNull() {
-      return a_null;
-    };
-
-    void DEALLOCATE() {
-      a_null = true;
-    }
-
-  };
-
-
-  
-  
 }
 
 #endif

@@ -16,8 +16,12 @@ namespace generator {
   
   void parameters::close() {
     m_debug.functionStart("close", false, __FILE__, __LINE__);
-    file_container.flush(true);
-    info_writer.Close();
+    if (!exceptions.errorsExists()) {
+      file_container.flush(true);
+      info_writer.Close();
+    } else {
+      m_debug.debug("Errors exists so files wont be saved");
+    }
     m_debug.functionEnd("close");
   }
   
@@ -124,7 +128,7 @@ namespace generator {
 				 const char* file_name, int line_number, bool breakpoint,
 				 ast::Text* source_line) {
     if (breakpoint) {
-      list.push_back("std::raise(SIGINT);");
+      list.push_back("std::cerr << \"Breakpoint\" << std:endl; std::raise(SIGINT);");
     }
     if (source_line) {
       text = "try { " + text + " } catch (const vhdl::RuntimeError& e) { SC_REPORT_FATAL(\"VHDL code:\", \"" +
