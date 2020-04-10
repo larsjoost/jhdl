@@ -171,14 +171,14 @@ namespace generator {
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier, ast::ObjectType type);
     bool findOne(DatabaseResult& result, ast::SimpleIdentifier* identifier);
     void findAll(DatabaseResults& objects, std::string& name, std::string package = "", std::string library = "");
-    void addAttribute(std::string& name, ast::ObjectArguments& arguments,
+    void addAttribute(std::string& name, ast::ObjectInterface& interface,
                       ast::ObjectType id, ast::Attribute* attribute,
                       ast::Text* text = NULL);
-    void addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
+    void addFunction(ast::ObjectType type, std::string& name, ast::ObjectInterface& arguments,
                      ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
                      ast::Text* text = NULL);
     void addObjectValueContainer(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
-				 ast::ObjectArguments arguments = ast::ObjectArguments(false),
+				 ast::ObjectInterface interface = ast::ObjectInterface(),
 				 ast::Text* text = NULL);
     bool findObject(std::shared_ptr<LocalDatabase>& object, std::string& library, std::string& name, ast::ObjectType type = ast::ObjectType::UNKNOWN);
     bool setVisible(std::string& name, std::string package = "", std::string library = "");
@@ -239,7 +239,7 @@ namespace generator {
 	    exceptions.printError("More than one match of " + bestMatch.toString());
 	    exceptions.printError("match #1: " + bestMatch.toString(), bestMatch.object->text); 
 	  }
-	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString(), bestMatch.object->text); 
+	  exceptions.printError("match #" + std::to_string(found + 1) + ": " + i.toString(), i.object->text); 
 	  found++;
 	} 
       } else {

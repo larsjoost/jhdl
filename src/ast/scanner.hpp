@@ -119,6 +119,11 @@ namespace ast {
       if (getTokenPosition() == position) {
         p = NULL;
       }
+      if (m_debug.isVerbose()) {
+	if (p) {
+	  printCurrentLine();
+	}
+      }
       m_debug.functionEnd("Optional[" + std::to_string(getTokenPosition()) + "]: " + typeid(p).name() + " : " +
                         (p ? "[FOUND]" : "[MISSED]"), true);
       return p; 

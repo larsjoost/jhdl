@@ -9,10 +9,10 @@
 
 namespace generator {
 
-  FileInfo::FileInfo(ast::DesignFile& designFile) {
+  FileInfo::FileInfo(ast::DesignFile& designFile, std::ostream& file_handle) {
     for (ast::DesignUnit& u : designFile.designUnits.list) {
       if (u.module.interface && u.module.interface->name) {
-        std::cout << u.module.interface->name->toString(true);
+        file_handle << u.module.interface->name->toString(true);
       }
       
     }

@@ -45,29 +45,31 @@ namespace generator {
   template<typename Func>
   void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type,
 			   std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
-    std::string name = a_expression.basicIdentifierToString(parm, target);
-    m_debug.functionStart("assignment(name = " + name + ")");
+    m_debug.functionStart("assignment", false, __FILE__, __LINE__);
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
     try {
-      parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
+     std::string name = a_expression.basicIdentifierToString(parm, target);
+     parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
       ast::ReturnTypes return_types;
       a_expression.basicIdentifierReturnTypes(parm, target, return_types);
-      ast::ObjectValueContainer expectedType;
-      if (a_expression.uniqueReturnType(parm, return_types, expectedType, &target->getText())) {
+      ast::ObjectTypes expectedType;
+      ast::ObjectValueContainer found_type;
+      if (a_expression.uniqueReturnType(parm, return_types, found_type, &target->getText())) {
+	ExpectedType expected_type(found_type);
 	for (ast::AssignmentCondition s : p->assignment_conditions.list) {
 	  if (s.condition) {
-	    static ast::ObjectValueContainer expectedValue(ast::ObjectValue::BOOLEAN);
-	    parm.addTextToList(sequential_list, command + " (" + a_expression.assignmentString(parm, s.condition, expectedValue, sensitivity_list_callback) + ") {", __FILE__, __LINE__);
+	    static ExpectedType e(ast::ObjectValue::BOOLEAN);
+	    parm.addTextToList(sequential_list, command + " (" + a_expression.assignmentString(parm, s.condition, e, sensitivity_list_callback) + ") {", __FILE__, __LINE__);
 	    command = "else if";
 	    noConditionCommand = "else {";
 	    noConditionDelimiter = "}";
 	  } else {
 	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
-	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expectedType, sensitivity_list_callback, name) + ";", __FILE__, __LINE__, false, &target->getText());
+	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expected_type, sensitivity_list_callback, name) + ";", __FILE__, __LINE__, false, &target->getText());
 	  if (s.condition) {
 	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
 	  } else {
@@ -87,7 +89,7 @@ namespace generator {
   template <typename Func>
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
-      m_debug.functionStart("signalAssignment");
+      m_debug.functionStart("signalAssignment", false, __FILE__, __LINE__);
       assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, sequential_list, sensitivity_list_callback);
       m_debug.functionEnd("signalAssignment");
     }
@@ -96,11 +98,11 @@ namespace generator {
   template <typename Func>
   void SystemC::ifStatement(parameters& parm, ast::IfStatement* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
-      m_debug.functionStart("ifStatement");
+      m_debug.functionStart("ifStatement", false, __FILE__, __LINE__);
       std::string command = "if ";
       for (::ast::ConditionalStatement c : p->conditionalStatements.list) {
 	if (c.condition) {
-          static ast::ObjectValueContainer expectedType(ast::ObjectValue::BOOLEAN);
+          ExpectedType expectedType(ast::ObjectValue::BOOLEAN);
           try {
             std::string condition = a_expression.toString(parm, c.condition, expectedType);
             parm.addTextToList(sequential_list, command + " (" + condition + ") {", __FILE__, __LINE__);

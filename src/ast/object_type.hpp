@@ -1,6 +1,6 @@
 
-#ifndef AST_OBJECT_TYPE_H_
-#define AST_OBJECT_TYPE_H_
+#ifndef AST_OBJECT_TYPE_HPP_
+#define AST_OBJECT_TYPE_HPP_
 
 #include "../debug/debug.hpp"
 
@@ -23,20 +23,54 @@ namespace ast {
 
   std::string toString(ObjectValue o);
 
+  class ObjectArguments;
+  
   class ObjectValueContainer {
     ObjectValue a_value = ObjectValue::UNKNOWN;
     std::string a_type_name;
   public:
-    class IndexOutOfRange {
-    };
+    class IndexOutOfRange {};
     typedef std::list<ObjectValueContainer> Array;
   private:
     Array a_arguments;
     Array a_subtype;
   public:
+    ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
+      if (HasArray(value)) {
+        a_subtype.push_back(ObjectValueContainer(ObjectValue::UNKNOWN));
+      }
+      if (value == ObjectValue::BOOLEAN) {
+        a_value = ObjectValue::ENUMERATION;
+        a_type_name = "BOOLEAN";
+      } else {
+        a_value = value;
+        a_type_name = type_name;
+      }
+    }
+    ObjectValueContainer(ObjectValue value, const Array& arguments, const ObjectValueContainer& subtype) {
+      set(value, arguments, subtype);
+    }
+    ObjectValueContainer(ObjectValue value, const ObjectValueContainer& argument, const ObjectValueContainer& subtype) {
+      Array arguments;
+      arguments.push_back(argument);
+      set(value, arguments, subtype);
+    }
+    ObjectValueContainer(ObjectValue value, const ObjectValueContainer& subtype) {
+      Array arguments;
+      set(value, arguments, subtype);
+    }
+    ObjectValueContainer(std::string type_name) {
+      a_value = ObjectValue::USER_TYPE;
+      a_type_name = type_name;
+    }
+    ObjectValueContainer(const ObjectValueContainer& value) {
+      set(value);
+    }
     bool numberEquals(ObjectValue l, ObjectValue r) const;
     bool equals(const Array& l, const Array& r) const;
     bool equals(const ObjectValueContainer& other) const;
+    bool equals(const ObjectArguments& arguments);
+    bool equalsExact(const ObjectValueContainer& other) const;
     inline bool operator==(const ObjectValueContainer& other) const {
       return equals(other);
     }
@@ -50,6 +84,7 @@ namespace ast {
       a_subtype = other.a_subtype;
     }
     bool IsValue(ObjectValue other) const {return a_value == other; }
+    bool isArray() { return IsValue(ObjectValue::ARRAY); }
     bool IsArrayWithDimension(const int dim) {
       return IsValue(ObjectValue::ARRAY) && (a_arguments.size() == 1) && !SubtypeIsValue(ObjectValue::ARRAY);
     }
@@ -61,6 +96,7 @@ namespace ast {
       return false;
     }
     Array& GetSubtype() { return a_subtype; }
+    void nextSubtype();
     bool SetSubtype(ObjectValueContainer& other) const {
       bool result = true;
       if (a_subtype.empty()) {
@@ -96,80 +132,104 @@ namespace ast {
       a_subtype.push_back(subtype);
       a_arguments = arguments;
     }
-    ObjectValueContainer(ObjectValue value = ObjectValue::UNKNOWN, std::string type_name = "") {
-      if (HasArray(value)) {
-        a_subtype.push_back(ObjectValueContainer(ObjectValue::UNKNOWN));
-      }
-      if (value == ObjectValue::BOOLEAN) {
-        a_value = ObjectValue::ENUMERATION;
-        a_type_name = "BOOLEAN";
-      } else {
-        a_value = value;
-        a_type_name = type_name;
-      }
-    }
-    ObjectValueContainer(ObjectValue value, const Array& arguments, const ObjectValueContainer& subtype) {
-      set(value, arguments, subtype);
-    }
-    ObjectValueContainer(ObjectValue value, const ObjectValueContainer& argument, const ObjectValueContainer& subtype) {
-      Array arguments;
-      arguments.push_back(argument);
-      set(value, arguments, subtype);
-    }
-    ObjectValueContainer(ObjectValue value, const ObjectValueContainer& subtype) {
-      Array arguments;
-      set(value, arguments, subtype);
-    }
-    ObjectValueContainer(std::string type_name) {
-      a_value = ObjectValue::USER_TYPE;
-      a_type_name = type_name;
-    }
-    /*
-    ~ObjectValueContainer() {
-      if (a_subtype) {
-        delete a_subtype;
-        a_subtype = NULL;
-      }
-    }
-    */
     std::string toString(bool verbose = false) const;
     std::string ToString(const Array& l, bool verbose = false) const;
   };
 
-  class Expression;
+  struct ObjectTypes {
+    std::list<ObjectValueContainer> m_types;
+    ObjectTypes() {}
+    ObjectTypes(ObjectValue x) { set(x); }
+    ObjectTypes(const ObjectValueContainer& x) { add(x); }
+    bool equals(ObjectValue x) const;
+    bool equals(ObjectTypes& x) const;
+    bool equals(const ObjectValueContainer& x) const;
+    bool isUnique() { return m_types.size() == 1; }
+    ObjectValueContainer& get() { assert(!m_types.empty()); return m_types.front(); }
+    void set(const ObjectValueContainer& x) { add(x); }
+    void set(ObjectValue x) { add(x); }
+    void add(ObjectValue x) { ObjectValueContainer y(x); add(y); }
+    void add(const ObjectValueContainer& x);
+    void nextSubtype();
+    bool isArray();
+    bool equalsExact(const ObjectValueContainer& x) const;
+    std::string toString(bool verbose = false) const;
+  };
   
   struct ObjectArgument {
-    std::string name;
-    std::string type_name;
-    ObjectValueContainer type;
-    Expression* default_value = NULL;
-    ObjectArgument(const ObjectValueContainer& type) : type(type) {}
-    ObjectArgument(std::string name) : name(name) { type = ObjectValue::USER_TYPE; }
-    ObjectArgument() { type = ObjectValue::UNKNOWN; }
-    std::string toString();
+    std::string m_name;
+    std::string m_type_name;
+    ObjectTypes m_types;
+    ObjectArgument(const ObjectValueContainer& type) {m_types.set(type);}
+    ObjectArgument(std::string name) : m_name(name) { m_types.set(ObjectValue::USER_TYPE); }
+    ObjectArgument() {}
+    bool equals(const ObjectValueContainer& x) const { return m_types.equals(x); }
+    std::string toString(bool verbose = false) const;
   };
 
 
   class ObjectArguments {
-    bool a_interface;
-    void setDefaultValues(bool m[], ObjectArguments& interface);
-    int match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose);
+    std::list<ObjectArgument> m_elements;
   public:
-    std::list<ObjectArgument> list;
-    ObjectArguments(bool interface, std::list<ObjectArgument> o = {}) {
-      list = o;
-      a_interface = interface;
+    ObjectArguments(std::list<ObjectArgument> o) {
+      m_elements = o;
     };
-    void push_back(ObjectArgument& o) {list.push_back(o);}
-    bool equals(ObjectArguments& other, bool array_type = false, const bool verbose = false);
-    bool equals(ObjectValueContainer::Array& other, bool array_type = false, bool verbose = false);
-    bool equals(const ObjectValueContainer& other, bool verbose = false);
-    bool ExactMatch(ObjectArguments& other);
-    bool empty() { return list.empty(); }
-    bool isInterface() {return a_interface;}
-    int size() { return list.size(); }
-    std::string toString();
-  };  
+    ObjectArguments() {}
+    void add(ObjectArgument& o) {m_elements.push_back(o);}
+    bool empty() { return m_elements.empty(); }
+    int size() const { return m_elements.size(); }
+    const std::list<ObjectArgument>& getList() const { return m_elements; }
+    std::string toString(bool verbose = false) const;
+  };
+
+  class Expression;
+
+  struct ObjectInterfaceElement {
+    std::string m_name;
+    std::string m_type_name;
+    ObjectValueContainer m_type;
+    Expression* m_default_value = NULL;
+    std::string toString(bool verbose = false);
+  };
+  
+  class ObjectInterface {
+    std::list<ObjectInterfaceElement> m_elements;
+    int match(const ObjectArgument& association, int index);
+  public:
+    template<class T>
+    bool exactMatch(T& other);
+    bool matches(ObjectArguments& association);
+    std::list<ObjectInterfaceElement>& getList() { return m_elements; }
+    bool empty() { return m_elements.empty(); }
+    int size() const { return m_elements.size(); }
+    void add(ObjectInterfaceElement& e) { m_elements.push_back(e); }
+    std::string toString(bool verbose = false);
+  };
+
+  template<class T>
+  bool ObjectInterface::exactMatch(T& other) {
+    Debug<false> debug = Debug<false>(this);
+    debug.functionStart("exactMatch");
+    bool result = true;
+    if (size() == other.size()) {
+      auto l = m_elements.begin();
+      auto r = other.getList().begin();
+      while (l != m_elements.end() && r != other.getList().end()) {
+        if (l->m_type_name != r->m_type_name) {
+          result = false;
+          break;
+        }
+        l++;
+        r++;
+      }
+    } else {
+      result = false;
+    }
+    debug.debug("(" + toString() + ")" + (result ? " == " : " /= ") + "(" + other.toString() + ")",
+                true, result ? Output::Color::GREEN : Output::Color::RED);
+    debug.functionEnd("exactMatch");
+    return result;
+  }
 
   struct ReturnTypesHash {
     std::size_t operator() (const ast::ObjectValueContainer& o) const {
@@ -184,6 +244,8 @@ namespace ast {
   };
 
   typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash> ReturnTypes;
+
+  
   
 }
 

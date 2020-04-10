@@ -1,6 +1,6 @@
 SOURCE := $(wildcard *.cpp)
 VHDL_SOURCE := std_logic_1164.vhd
-VHDL_HPP := $(VHDL_SOURCE:.vhd=.hpp)
+VHDL_HPP := $(addprefix ieee_, $(VHDL_SOURCE:.vhd=.hpp))
 VHDL_CPP := $(VHDL_SOURCE:.vhd=.cpp)
 VHDL_INC := $(VHDL_SOURCE:.vhd=.i)
 VHDL_INCLUDE_FILES := $(shell cat $(VHDL_INC))
@@ -14,10 +14,10 @@ all: hpp $(VHDL_CPP) $(OBJS)
 
 hpp: $(VHDL_HPP)
 
-%.hpp: %.vhd ../src/hdlc
+ieee_%.hpp: %.vhd ../src/hdlc
 	../src/hdlc.sh -f $< -l ieee -s 
 
-%.o: %.cpp %.hpp
+%.o: %.cpp ieee_%.hpp
 	g++ $(CXXFLAGS) -c $< -o $@ -I../src/kernel/lib $(VHDL_INCLUDES)
 
 -include $(VHDL_INC)

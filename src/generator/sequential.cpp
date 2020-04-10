@@ -6,7 +6,7 @@ namespace generator {
 
   void SystemC::procedureCallStatement(parameters& parm, ast::ProcedureCallStatement* p, std::list<std::string>& sequential_list) {
     if (p) {
-      m_debug.functionStart("procedureCallStatement");
+      m_debug.functionStart("procedureCallStatement", false, __FILE__, __LINE__);
       parm.addTextToList(sequential_list, a_expression.procedureCallStatementToString(parm, p) + ";", __FILE__, __LINE__, false, &p->name->text);
       m_debug.functionEnd("procedureCallStatement");
     }
@@ -46,8 +46,8 @@ namespace generator {
     m_debug.functionStart("lookupSeverity", false, __FILE__, __LINE__);
     bool found;
     static ast::ObjectValueContainer enum_type =  ast::ObjectValueContainer(ast::ObjectValue::ENUMERATION);
-    static ast::ObjectValueContainer expected_type =
-      ast::ObjectValueContainer(ast::ObjectValue::ARRAY, ast::ObjectValueContainer(ast::ObjectValue::INTEGER), enum_type); 
+    static ast::ObjectValueContainer e(ast::ObjectValue::ARRAY, ast::ObjectValueContainer(ast::ObjectValue::INTEGER), enum_type);
+    static ExpectedType expected_type(e); 
     std::string message = a_expression.toString(parm, p->message, expected_type, true);
     if (m_convert_to_systemc) {
       static std::unordered_map<std::string, std::string> severity_lookup({{"NOTE", "INFO"}, {"WARNING", "WARNING"}, {"ERROR", "ERROR"}, {"FAILURE", "FATAL"}});
@@ -101,7 +101,8 @@ namespace generator {
     if (r) {
       m_debug.functionStart("returnStatement", false, __FILE__, __LINE__);
       try {
-	parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, parm.returnType) + ";", __FILE__, __LINE__);
+	ExpectedType expected_type(parm.returnType);
+	parm.addTextToList(sequential_list, "return " + a_expression.toString(parm, r->value, expected_type) + ";", __FILE__, __LINE__);
       } catch (ExpressionParser::ObjectNotFound& e) {
 	e.print();
       }

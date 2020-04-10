@@ -17,7 +17,7 @@ namespace generator {
   struct DatabaseElement {
     ast::ObjectType id;
     std::string name;
-    ast::ObjectArguments arguments;
+    ast::ObjectInterface interface;
     ast::ObjectValueContainer type;
     bool visible;
     ast::Attribute* attribute = NULL;

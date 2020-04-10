@@ -114,15 +114,16 @@ namespace generator {
     ast::ObjectValueContainer right_type;
     assert(r);
     if (r->range_direction_type) {
-      left_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->left, expectedType);
-      right_type = a_expression.collectAllReturnTypes(parm, r->range_direction_type->right, expectedType);
+      ExpectedType t(expectedType);
+      a_expression.collectUniqueReturnType(parm, r->range_direction_type->left, left_type, &t);
+      a_expression.collectUniqueReturnType(parm, r->range_direction_type->right, right_type, &t);
       m_debug.debug("Left type = " + left_type.toString() + ", right type = " + right_type.toString());
       if (left_type != right_type) {
 	exceptions.printError("Left range type " + left_type.toString() + " is not the same as right type " +
 			      right_type.toString(), r->range_direction_type->left->text);
       }
-      range_definition.left = a_expression.toString(parm, r->range_direction_type->left, expectedType);
-      range_definition.right = a_expression.toString(parm, r->range_direction_type->right, expectedType);
+      range_definition.left = a_expression.toString(parm, r->range_direction_type->left, t);
+      range_definition.right = a_expression.toString(parm, r->range_direction_type->right, t);
       if (r->range_direction_type->range_direction) {
 	range_definition.ascending = (r->range_direction_type->range_direction->direction == ast::RangeDirection::Direction::TO ? "true" : "false");
       }

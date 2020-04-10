@@ -104,14 +104,14 @@ namespace generator {
     return c != NULL;
   }
 
-  void parameters::addAttribute(std::string& name, ast::ObjectArguments& arguments,
+  void parameters::addAttribute(std::string& name, ast::ObjectInterface& interface,
 				ast::ObjectType id, ast::Attribute* attribute,
 				ast::Text* text) {
-    getActiveClassContainer()->database.addAttribute(name, arguments,
+    getActiveClassContainer()->database.addAttribute(name, interface,
 						     id, attribute, text);
 
   }
-  void parameters::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
+  void parameters::addFunction(ast::ObjectType type, std::string& name, ast::ObjectInterface& arguments,
 			       ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
 			       ast::Text* text) {
     getActiveClassContainer()->database.addFunction(type, name, arguments,
@@ -121,12 +121,12 @@ namespace generator {
   
   void parameters::addObjectValueContainer(ast::ObjectType id, std::string& name,
 			     ast::ObjectValueContainer type,
-			     ast::ObjectArguments arguments,
+			     ast::ObjectInterface interface,
 			     ast::Text* text) {
     m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString() +
-			  ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
+			  ", interface = " + interface.toString() + ")", false, __FILE__, __LINE__);
     m_debug.debug("Hierarchy = " + hierarchyToString());
-    getActiveClassContainer()->database.add(id, name,  type, arguments, text);
+    getActiveClassContainer()->database.add(id, name,  type, interface, text);
     m_debug.functionEnd("addObjectValueContainer");
   }
   

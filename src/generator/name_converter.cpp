@@ -122,11 +122,11 @@ namespace generator {
     return s;
   }
   
-  std::string NameConverter::getName(std::string& name, ast::ObjectArguments& arguments,
+  std::string NameConverter::getName(std::string& name, ast::ObjectInterface& interface,
                                      ast::ObjectValueContainer& return_type) {
     std::string s = name;
-    for (ast::ObjectArgument& o : arguments.list) {
-      s += "_" + toLower(o.type_name);
+    for (const ast::ObjectInterfaceElement& o : interface.getList()) {
+      s += "_" + toLower(o.m_type_name);
     }
     s += "__" + ast::toString(return_type.GetValue());
     return s;

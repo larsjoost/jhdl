@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <exception>
 #include <iostream>
+#include <ostream>
+#include <fstream>
 #include "parser/design_file.hpp"
 #include "generator/file_info.hpp"
 #include "ast/scanner.hpp"
@@ -24,14 +26,20 @@ main (int argc, char **argv)
   char *expression = NULL;
   int c;
   bool verbose = false;
+  std::ofstream file_handle;
+  bool output_to_file = false;
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:ve:")) != -1) {
+  while ((c = getopt (argc, argv, "f:o:ve:")) != -1) {
     switch (c)
       {
       case 'f':
         filename = optarg;
         break;
+      case 'o':
+	file_handle.open(optarg);
+	output_to_file = true;
+	break;
       case 'e':
         expression = optarg;
         break;
@@ -56,7 +64,12 @@ main (int argc, char **argv)
   try {
     parser::DesignFile parserDesignFile;
     parserDesignFile.parse(filename);
-    generator::FileInfo fileInfo(parserDesignFile);
+    if (output_to_file) {
+      generator::FileInfo fileInfo(parserDesignFile, file_handle);
+      file_handle.close();
+    } else {
+      generator::FileInfo fileInfo(parserDesignFile, std::cout);
+    }
     return 0;
   } catch (const ast::SyntaxError &e) {
     if (verbose) {

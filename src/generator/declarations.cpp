@@ -126,11 +126,11 @@ namespace generator {
       std::string range;
       if (r.range) {
 	assert(r.range->range_direction_type);
-	ast::ObjectValueContainer t;
-	a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, t);
-	type = t.GetValue();
+	ast::ObjectValueContainer result;
+	a_expression.collectUniqueReturnType(parm, r.range->range_direction_type->left, result);
+	type = result.GetValue();
 	range = "vhdl::Range<int>";
-	arguments.push_back(t);
+	arguments.push_back(result);
       } else if (r.identifier) {
         DatabaseResult database_result;
         type = ast::ObjectValue::ENUMERATION;
@@ -308,39 +308,45 @@ namespace generator {
     }
   }
   
-  void SystemC::generateObjectArguments(parameters& parm, ast::InterfaceList* interface, ast::ObjectArguments& arguments) {
-    if (interface) {
-      for (ast::InterfaceElement& i : interface->interfaceElements.list) {
-        ast::ObjectArgument a;
+  void SystemC::generateObjectInterface(parameters& parm, ast::InterfaceList* interface_list, ast::ObjectInterface& interface) {
+    if (interface_list) {
+      m_debug.functionStart("generateObjectInterface", false, __FILE__, __LINE__);
+      for (ast::InterfaceElement& i : interface_list->interfaceElements.list) {
+        ast::ObjectInterfaceElement a;
         DatabaseResult result;
-        a.type_name = i.object->type->name->toString(true);
-        if (parm.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
-	  a.type = result.object->type;
-	  a.default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
+        a.m_type_name = i.object->type->name->toString(true);
+	m_debug.debug("a.m_type_name = " + a.m_type_name);
+	if (parm.findOne(result, a.m_type_name, ast::ObjectType::TYPE)) {
+	  m_debug.debug("result = " + result.toString());
+	  a.m_type = result.object->type;
+	  a.m_default_value = (i.object->initialization) ? i.object->initialization->value : NULL;
 	  for (ast::SimpleIdentifier& id : i.object->identifiers.list) { 
-	    a.name = id.toString(true);
-	    arguments.push_back(a);
+	    a.m_name = id.toString(true);
+	    interface.add(a);
 	  }
 	}
       }
+      m_debug.functionEnd("generateObjectInterface");
     }
   }
   
-  void SystemC::generateObjectArguments(parameters& parm, ast::List<ast::SimpleIdentifier>* args, ast::ObjectArguments& arguments) {
+  void SystemC::generateObjectInterface(parameters& parm, ast::List<ast::SimpleIdentifier>* args, ast::ObjectInterface& interface) {
     if (args) {
+      m_debug.functionStart("generateObjectInterface", false, __FILE__, __LINE__);
       for (ast::SimpleIdentifier& i : args->list) {
-        ast::ObjectArgument a;
-        a.name = "";
+        ast::ObjectInterfaceElement a;
+        a.m_name = "";
         DatabaseResult result;
-        a.type_name = i.toString(true);
-        if (parm.findOne(result, a.type_name, ast::ObjectType::TYPE)) {
-	  a.type = result.object->type;
-	  a.default_value = NULL;
-	  arguments.push_back(a);
+        a.m_type_name = i.toString(true);
+        if (parm.findOne(result, a.m_type_name, ast::ObjectType::TYPE)) {
+	  a.m_type = result.object->type;
+	  a.m_default_value = NULL;
+	  interface.add(a);
 	} else {
-	  m_debug.debug("Did not find object argument type " + a.type_name);
+	  m_debug.debug("Did not find object argument type " + a.m_type_name);
 	}
       }
+      m_debug.functionEnd("generateObjectInterface");
     }
   }
 
@@ -440,15 +446,15 @@ namespace generator {
     return a->expression->toString(true, true);
   }
   
-  std::string SystemC::FunctionAttribute(parameters& parm,
+  std::string SystemC::functionAttribute(parameters& parm,
                                          std::string &name,
                                          ast::ObjectType type,
-                                         ast::ObjectArguments& arguments,
+                                         ast::ObjectInterface& interface,
                                          ast::Text* text) {
-    m_debug.functionStart("FunctionAttribute(name = " + name + ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
+    m_debug.functionStart("functionAttribute(name = " + name + ", interface = " + interface.toString() + ")", false, __FILE__, __LINE__);
     std::string foreignName = "";
     auto valid = [&](DatabaseElement* e) {
-      bool match = (e->id == type) && e->attribute && e->arguments.ExactMatch(arguments);
+      bool match = (e->id == type) && e->attribute && e->interface.exactMatch(interface);
       m_debug.debug((match ? "Match = " : "Different = ") + e->toString(), true,
                   match ? Output::Color::GREEN : Output::Color::RED);
       return match;
@@ -464,7 +470,7 @@ namespace generator {
       m_debug.debug("Did not find attribute of function " + name);
     }
     m_debug.debug("Foreign name = " + foreignName);
-    m_debug.functionEnd("FunctionAttribute");
+    m_debug.functionEnd("functionAttribute");
     return foreignName;
   };
 
@@ -491,7 +497,6 @@ namespace generator {
       m_debug.functionStart("function_declarations(name = " + origin_name + ")", false, __FILE__, __LINE__);
       parm.package_contains_function = true;
       ast::Text& text = operatorName ? function_declaration->string->text : function_declaration->name->text;
-      
       ast::ObjectType type = function_declaration->type;
       std::string translatedName = origin_name;
       std::string class_name = origin_name;
@@ -499,15 +504,15 @@ namespace generator {
         translatedName = "operator " + a_expression.translateOperator(parm, origin_name);
         class_name = "line" + std::to_string(text.getLine());
       } 
-      ast::ObjectArguments arguments(true);
-      generateObjectArguments(parm, function_declaration->interface, arguments);
+      ast::ObjectInterface function_interface;
+      generateObjectInterface(parm, function_declaration->interface, function_interface);
       std::string localReturnTypeName = FunctionReturn(parm, function_declaration, false);
       std::string globalReturnTypeName = FunctionReturn(parm, function_declaration, true);
       parm.addImplementationContents(getSourceLine(text), __FILE__, __LINE__);
       std::string argumentNames = getArgumentNames(parm, function_declaration->interface);
-      parm.addFunction(type, origin_name, arguments, parm.returnType, function_declaration, &text);
+      parm.addFunction(type, origin_name, function_interface, parm.returnType, function_declaration, &text);
       if (!parm.parse_declarations_only) {
-        class_name = NameConverter::getName(origin_name, arguments, parm.returnType);
+        class_name = NameConverter::getName(origin_name, function_interface, parm.returnType);
 	ParentInfo parent_info;
         parm.getParent(parent_info);
         bool package_body = (parent_info.type == ast::ObjectType::PACKAGE_BODY);
@@ -517,7 +522,7 @@ namespace generator {
           auto callback = [&](parameters& parm) {
             PrintInterface(parm, function_declaration->interface);
             if (function_declaration->body) {
-              std::string foreignFunctionName = FunctionAttribute(parm, origin_name, type, arguments, &text);
+              std::string foreignFunctionName = functionAttribute(parm, origin_name, type, function_interface, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
               parm.addClassContents(localReturnTypeName + " " + "run" + interface + ";", __FILE__, __LINE__);
 	      std::string global_prefix = parm.hierarchyToString("::", true) + "::";
@@ -552,8 +557,8 @@ namespace generator {
 					 global_prefix + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
           parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);", __FILE__, __LINE__);
           std::string s,d;
-          for (auto& i : arguments.list) {
-            s += d + i.name;
+          for (auto& i : function_interface.getList()) {
+            s += d + i.m_name;
             d = ", ";
           }
           std::string r = localReturnTypeName == "void" ? "" : "return ";
@@ -572,14 +577,14 @@ namespace generator {
     std::string name = a->item ? a->item->toString(true) : a->string->toString(true);
     m_debug.functionStart("ForeignAttribute(name = " + name + ")", false, __FILE__, __LINE__);
     ast::Text* text = a->item ? &a->item->text : &a->string->text;
-    ast::ObjectArguments arguments(false);
-    generateObjectArguments(parm, a->arguments, arguments);
+    ast::ObjectInterface interface;
+    generateObjectInterface(parm, a->arguments, interface);
     ast::ObjectType id = a->objectType;
-    m_debug.debug("id = " + ast::toString(id) + ", name = " + name + ", arguments = " + arguments.toString());
-    parm.addAttribute(name, arguments, id, a, text);
+    m_debug.debug("id = " + ast::toString(id) + ", name = " + name + ", interface = " + interface.toString());
+    parm.addAttribute(name, interface, id, a, text);
     auto valid = [&](DatabaseElement* e) {
-      bool arguments_match = arguments.empty() || e->arguments.ExactMatch(arguments);
-      bool match = (e->id == id) && arguments_match;
+      bool interfaces_match = interface.empty() || e->interface.exactMatch(interface);
+      bool match = (e->id == id) && interfaces_match;
       std::string s = (match ? "Match" : "Different"); 
       m_debug.debug(s + ": " + e->toString());
       return match;
@@ -674,7 +679,7 @@ namespace generator {
         parm.addClassConstructorInitializer(name + "(\"" + name + "\")");
         parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);
       	parm.addClassConstructorContents(name + ".constrain(" + factory_name + ");", __FILE__, __LINE__);
-        if (init.size() > 0) {
+        if (!init.empty()) {
           parm.addClassConstructorContents(name + " = " + init + ";", __FILE__, __LINE__);
         }
       };

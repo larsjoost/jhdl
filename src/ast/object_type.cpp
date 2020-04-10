@@ -58,6 +58,26 @@ namespace ast {
     };
   }
 
+  bool ObjectValueContainer::equals(const ObjectArguments& arguments) {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equals(this = " + toString(true) + "; arguments = " + arguments.toString(true), false, __FILE__, __LINE__);
+    bool result = true;
+    if (a_arguments.size() >= arguments.size()) {
+      auto il = a_arguments.begin();
+      auto ir = arguments.getList().begin();
+      for ( ; ir != arguments.getList().end(); il++, ir++) {
+        if (!ir->equals(*il)) {
+          result = false;
+          break;
+        } 
+      }
+    } else {
+      debug.debug("(a_arguments.size() = " + std::to_string(a_arguments.size()) + ") != (other.size() = " + std::to_string(arguments.size()) + ")"); 
+    }
+    debug.functionEnd("equals: " + std::to_string(result));
+    return result;
+  }
+
   std::string ObjectValueContainer::ToString(const Array& l, bool verbose) const {
     std::string subtype;
     std::string delimiter;
@@ -70,7 +90,7 @@ namespace ast {
   
   std::string ObjectValueContainer::toString(bool verbose) const {
     if (verbose) {
-      return "value = " + ast::toString(a_value) + "type name = \"" + a_type_name + "\", subtype = (" + ToString(a_subtype, verbose) + ")";
+      return "a_value = " + ast::toString(a_value) + ", a_type_name = \"" + a_type_name + "\", a_subtype = (" + ToString(a_subtype, verbose) + ")";
     } else {
       if (a_value == ObjectValue::USER_TYPE) {
         return a_type_name + "(User type)";
@@ -86,6 +106,25 @@ namespace ast {
     }
   }
 
+  void ObjectValueContainer::nextSubtype() {
+    Debug<false> debug = Debug<false>(this);
+    debug.functionStart("nextSubtype", false, __FILE__, __LINE__);
+    debug.debug("this = " + this->toString(true));
+    if (a_value == ObjectValue::ARRAY) {
+      assert(a_subtype.size() > 0);
+      if (a_subtype.size() == 1) {
+      	ObjectValueContainer& x = a_subtype.front();
+	a_value = x.a_value;
+	a_type_name = x.a_type_name;
+      }
+      a_subtype.pop_front();
+    } else {
+      a_value = ObjectValue::NONE;
+      a_type_name = "";
+    }
+    debug.functionEnd("nextSubtype: " + this->toString(true));
+  }
+  
   bool ObjectValueContainer::numberEquals(ObjectValue l, ObjectValue r) const {
     return
       (l == ObjectValue::NUMBER) &&
@@ -93,6 +132,8 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equals(const Array& l, const Array& r) const {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equals", false, __FILE__, __LINE__);
     bool result = true;
     if (l.size() != r.size()) {
       result = false;
@@ -106,10 +147,13 @@ namespace ast {
         } 
       }
     }
+    debug.functionEnd("equals: " + std::to_string(result));
     return result;
   }
 
   bool ObjectValueContainer::equals(const ObjectValueContainer& other) const {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equals(this = [" + toString(true) + "], other = [" + other.toString(true) + "])", false, __FILE__, __LINE__);
     bool verbose = false;
     bool result;
     if (a_value == ObjectValue::UNKNOWN || other.a_value == ObjectValue::UNKNOWN) {
@@ -131,150 +175,121 @@ namespace ast {
     if (verbose) {
       std::cout << "ObjectValueContainer::equals: " << toString() << (result ? " == " : " != ") << other.toString() << std::endl;
     }
+    debug.functionEnd("equals: " + std::to_string(result));
     return result;
   }
 
-  int ObjectArguments::match(ObjectArguments& interface, ObjectArgument& association, int index, bool verbose) {
+  bool ObjectValueContainer::equalsExact(const ObjectValueContainer& other) const {
     Debug<false> debug = Debug<false>(this);
-    debug.setVerbose(verbose);
-    debug.functionStart("match(interface =  " + interface.toString() + ", association = " + association.toString() +
-			", index = " + std::to_string(index) + ")");
-    int result = -1;
-    auto it = interface.list.begin();
-    debug.debug("association.name.empty() " + std::string(association.name.empty() ? "true" : "false"));
-    if (association.name.empty() && index >= 0 && interface.list.size() > index) {
-      std::advance(it, index);
-      debug.debug("it->type = " + it->type.toString());
-      debug.debug("association.type = " + association.type.toString());
-      result = (it->type.equals(association.type) ? index : -1);
-    } else {
-      for (int i = 0; i < interface.list.size(); i++, it++) {
-	debug.debug("interface name = " + it->name + ", association name = " + association.name);
-	if (it->name == association.name) {
-	  debug.debug("it->type = " + it->type.toString());
-	  debug.debug("association.type = " + association.type.toString());
-          result = (it->type.equals(association.type) ? i : -1);
-	  break;
-        }
+    debug.functionStart("equalsExact(other = " + other.toString(true) + ")", false, __FILE__, __LINE__);
+    debug.debug("this = " + this->toString(true));
+    bool match = (a_value == other.a_value);
+    debug.debug(ast::toString(a_value) + (match ? " == " : " != ") + ast::toString(other.a_value));
+    if (match) {
+      std::string s1 = a_type_name; 
+      std::transform(s1.begin(), s1.end(), s1.begin(), ::toupper);
+      std::string s2 = other.a_type_name; 
+      std::transform(s2.begin(), s2.end(), s2.begin(), ::toupper);
+      match = (s1 == s2);
+      debug.debug(s1 + (match ? " == " : " != ") + s2);
+    }
+    debug.functionEnd("equalsExact: " + std::string(match ? "true" : "false"));
+    return match;
+  }
+
+  void ObjectTypes::nextSubtype() {
+    for (auto& i: m_types) {
+      i.nextSubtype();
+    }
+  }
+  
+  bool ObjectTypes::equalsExact(const ObjectValueContainer& x) const {
+    for (auto& i: m_types) {
+      if (i.equalsExact(x)) { return true; };
+    }
+    return false;
+  }
+
+  bool ObjectTypes::equals(ObjectValue x) const {
+    for (auto& i: m_types) {
+      if (i.IsValue(x)) {
+	return true;
       }
     }
-    debug.functionEnd("match: " + std::to_string(result));
-    return result;
+    return false;
   }
 
-  void ObjectArguments::setDefaultValues(bool m[], ObjectArguments& interface) {
-    int index = 0;
-    for (auto& i : interface.list) {
-      m[index] = i.default_value ? true : false;
-      index++;
-    }
+  void ObjectTypes::add(const ObjectValueContainer& x) {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("add(x = " + x.toString(true) + ")", false, __FILE__, __LINE__);
+    assert(!x.IsValue(ObjectValue::UNKNOWN));
+    m_types.push_back(x);
+    debug.functionEnd("add");
   }
-  
-  /*
-   *    interface      association       
-   *    a : type1      a : type1   
-   *    b : type2      c : type3   
-   *    c : type3                  
-   */
-  
-  bool ObjectArguments::equals(ObjectArguments& other, bool array_type, const bool verbose) {
-    Debug<false> debug = Debug<false>(this);
-    debug.setVerbose(verbose);
-    debug.functionStart("equals(this = " + this->toString() + ", other = " + other.toString() +
-			", array_type = " + std::to_string(array_type) + ")");
-    ObjectArguments& interface   = isInterface() ? *this : other;
-    ObjectArguments& association = isInterface() ? other : *this;
-    bool result = true;
-    debug.debug("Interface = " + interface.toString());
-    debug.debug("Association = " + association.toString());
-    int size = interface.list.size();
-    bool m[size];
-    setDefaultValues(m, interface);
-    int index = 0;
-    for (ObjectArgument& a : association.list) {
-      int i = match(interface, a, index, verbose);
-      debug.debug("i = " + std::to_string(i));
-      debug.debug("index = " + std::to_string(index));
-      if (i < 0) {
-	result = false;
+
+  bool ObjectTypes::equals(const ObjectValueContainer& x) const {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equals(this = [" + toString(true) + "], x = [" + x.toString(true) + "])", false, __FILE__, __LINE__);
+    bool result = false;
+    for (auto& i: m_types) {
+      if (i.equals(x)) {
+	result = true;
 	break;
-      }
-      if (index >= 0) {
-        if (i == index) {
-          index++;
-        } else {
-          index = -1;
-        }
-      }
-      m[i] = true;
-    }
-    if (result && !array_type) {
-      for (int i=0; i<size; i++) {
-	if (!m[i]) {
-	  result = false;
-	  break;
-	}
       }
     }
     debug.functionEnd("equals: " + std::to_string(result));
     return result;
   }
 
-  bool ObjectArguments::equals(ObjectValueContainer::Array& other, bool array_type, bool verbose) {
-    ObjectArguments args(false);
-    for (ObjectValueContainer& i : other) {
-      ObjectArgument x(i);
-      args.list.push_back(x);
-    }
-    return equals(args, array_type, verbose);
-  }
-
-  bool ObjectArguments::equals(const ObjectValueContainer& other, bool verbose) {
-    if (verbose) { std::cout << "equals(other = " << other.toString() << ")" << std::endl; }
-    ObjectArguments args(false);
-    ObjectArgument x(other);
-    args.list.push_back(x);
-    return equals(args, false, verbose);
-  }
-  
-  bool ObjectArguments::ExactMatch(ObjectArguments& other) {
-    Debug<false> debug = Debug<false>(this);
-    debug.functionStart("ExactMatch");
-    bool result = true;
-    if (size() == other.size()) {
-      auto l = list.begin();
-      auto r = other.list.begin();
-      while (l != list.end() && r != other.list.end()) {
-        if (l->type_name != r->type_name) {
-          result = false;
-          break;
-        }
-        l++;
-        r++;
+  bool ObjectTypes::equals(ObjectTypes& x) const {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equals", false, __FILE__, __LINE__);
+    bool result = false;
+    for (auto& i: x.m_types) {
+      if (equals(i)) {
+        result = true;
+	break;
       }
-    } else {
-      result = false;
     }
-    debug.debug("(" + toString() + ")" + (result ? " == " : " /= ") + "(" + other.toString() + ")",
-                true, result ? Output::Color::GREEN : Output::Color::RED);
-    debug.functionEnd("ExactMatch");
+    debug.functionEnd("equals: " + std::to_string(result));
     return result;
   }
 
-  std::string ObjectArgument::toString() {
-    return name + (type_name.empty() ? " " : " : " + type_name) + "(" + type.toString() + ")" + (default_value ? " := [DEFAULT]" : "");
+  std::string ObjectTypes::toString(bool verbose) const {
+    std::string delimiter;
+    std::string result;
+    for (auto& i : m_types) {
+      result += delimiter + i.toString(verbose);
+      delimiter = ", ";
+    }
+    return result;
+  }
+
+  bool ObjectTypes::isArray() {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("isArray", false, __FILE__, __LINE__);
+    debug.debug("this = " + toString());
+    assert(m_types.size() == 1);
+    ObjectValue x = m_types.front().GetValue();
+    bool result = (x == ObjectValue::ARRAY);
+    debug.functionEnd("isArray: " + std::to_string(result));
+    return result;
+  }
+
+  std::string ObjectArgument::toString(bool verbose) const {
+    return m_name + (m_type_name.empty() ? " " : " : " + m_type_name) + "(" + m_types.toString(verbose) + ")";
   }
   
-  std::string ObjectArguments::toString() {
+  std::string ObjectArguments::toString(bool verbose) const {
     std::string delimiter = "";
-    std::string s = "interface = " + std::string(isInterface() ? "true" : "false") + ": ";
-    for (auto& a : list) {
-      s += delimiter + a.toString();
+    std::string s;
+    for (auto& a : m_elements) {
+      s += delimiter + a.toString(verbose);
       delimiter = ", ";
     }
     return s;
   }
-  
+
 }
 
  

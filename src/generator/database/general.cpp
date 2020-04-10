@@ -9,7 +9,7 @@ namespace generator {
   }
 
   std::string DatabaseElement::toString() {
-    std::string args = arguments.toString();
+    std::string args = interface.toString();
     args = args.empty() ? "" : "(" + args + ")";
     std::string attr = (attribute ? " [ATTRIBUTE]" : "");
     std::string v = (visible ? "visible" : "hidden");

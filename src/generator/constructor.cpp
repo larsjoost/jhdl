@@ -47,7 +47,7 @@ namespace generator {
         auto valid = [&] (DatabaseElement* e) { return true; };
         DatabaseResult object;
         if (parm.findOneBase(object, formalName, valid, entityName, library)) {
-          ast::ObjectValueContainer formalType = object.object->type;
+          ExpectedType formalType(object.object->type);
           return instanceName + "->" + formalName +
             "(" + a_expression.toString(parm, a.actualPart, formalType) + ".getInterfaceReference())";
         } else {

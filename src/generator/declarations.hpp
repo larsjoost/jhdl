@@ -32,12 +32,13 @@ namespace generator {
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
           std::string name = id.toString(true);
           m_debug.debug("Name = " + name + ", type = " + type_name, __FILE__, __LINE__);
-          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, database_result.object->type, ast::ObjectArguments(false), v->text);}
+          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, database_result.object->type, ast::ObjectInterface(), v->text);}
           std::string init = "";
           if (v->initialization) {
             auto sensitivity_list_callback = 
 	      [&](DatabaseResult& object, std::string& name_extension) {};
-	    init = a_expression.assignmentString(parm, v->initialization->value, database_result.object->type,
+	    ExpectedType expected_type(database_result.object->type);
+	    init = a_expression.assignmentString(parm, v->initialization->value, expected_type,
 						 sensitivity_list_callback, name);
             m_debug.debug("Init = " + init, __FILE__, __LINE__);
           }

@@ -4,27 +4,27 @@
 namespace generator {
 
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
-                     ast::ObjectArguments arguments, ast::Text* text) {
+                     ast::ObjectInterface interface, ast::Text* text) {
     m_debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + type.toString() + ")", true);
-    local_database.get()->add(id, name, type, arguments, text);
+    local_database.get()->add(id, name, type, interface, text);
     m_debug.functionEnd("add");
   }
 
   void Database::add(ast::ObjectType id, std::string& name, ast::ObjectValue type, ast::Text* text) {
     m_debug.functionStart("add(id = " + ast::toString(id) + ", name = " + name + ", type = " + ast::toString(type) + ")", true);
-    ast::ObjectValueContainer t = ast::ObjectValueContainer(type);
-    local_database.get()->add(id, name, type, text); 
+    ast::ObjectValueContainer t(type);
+    local_database.get()->add(id, name, t, text); 
     m_debug.functionEnd("add");
   }
 
-  void Database::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
+  void Database::addAttribute(std::string& name, ast::ObjectInterface& interface, ast::ObjectType id,
                               ast::Attribute* attribute, ast::Text* text) {
-    local_database.get()->addAttribute(name, arguments, id, attribute, text);
+    local_database.get()->addAttribute(name, interface, id, attribute, text);
   }
-  void Database::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
+  void Database::addFunction(ast::ObjectType type, std::string& name, ast::ObjectInterface& interface,
                              ast::ObjectValueContainer returnType, ast::FunctionDeclaration* function,
                              ast::Text* text) {
-    local_database.get()->addFunction(type, name, arguments, returnType, function, text);
+    local_database.get()->addFunction(type, name, interface, returnType, function, text);
   }
 
 

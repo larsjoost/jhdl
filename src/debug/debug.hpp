@@ -48,7 +48,7 @@ protected:
 
 public:
 
-  Debug(const char* name) : m_name(name) {};
+  Debug(const char* name) : m_name(name) { m_verbose = enable; };
   
   template <class T>
   Debug(T* instance, std::string subname = "") : m_name(boost::core::demangle(typeid(*instance).name())), m_subname(subname) {

@@ -34,12 +34,13 @@ namespace generator {
     bool setVisible(std::string name = "");
 
     void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
-             ast::ObjectArguments arguments = ast::ObjectArguments(false),
+             ast::ObjectInterface interface, ast::Text* text = NULL);
+    void add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
              ast::Text* text = NULL);
-    void addAttribute(std::string& name, ast::ObjectArguments& arguments,
+    void addAttribute(std::string& name, ast::ObjectInterface& interface,
                       ast::ObjectType id, ast::Attribute* attribute,
                       ast::Text* text = NULL);
-    void addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
+    void addFunction(ast::ObjectType type, std::string& name, ast::ObjectInterface& interface,
                      ast::ObjectValueContainer returnType,
                      ast::FunctionDeclaration* function,
                      ast::Text* text = NULL);

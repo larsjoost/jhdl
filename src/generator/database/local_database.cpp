@@ -26,14 +26,22 @@ namespace generator {
   }
 
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
-                          ast::ObjectArguments arguments, ast::Text* text) {
+                          ast::Text* text) {
     m_debug.functionStart("add(name = " + name + ")", false, __FILE__, __LINE__);
-    DatabaseElement e = {id, name, arguments, type, false, NULL, NULL, text};
+    ast::ObjectInterface a;
+    add(id, name, type, a, text);
+    m_debug.functionEnd("add");
+  }
+
+  void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
+                          ast::ObjectInterface interface, ast::Text* text) {
+    m_debug.functionStart("add(name = " + name + ")", false, __FILE__, __LINE__);
+    DatabaseElement e = {id, name, interface, type, false, NULL, NULL, text};
     add(name, e);
     m_debug.functionEnd("add");
   }
 
-  void LocalDatabase::addAttribute(std::string& name, ast::ObjectArguments& arguments, ast::ObjectType id,
+  void LocalDatabase::addAttribute(std::string& name, ast::ObjectInterface& interface, ast::ObjectType id,
                                    ast::Attribute* attribute, ast::Text* text) {
     m_debug.functionStart("addAttribute(name = " + name + ")", false, __FILE__, __LINE__);
     if (m_debug.isVerbose()) {
@@ -44,17 +52,17 @@ namespace generator {
     findAll(results, name);
     for (auto& i : results) {
       m_debug.debug("i = " + i.toString());
-      if (id == i.object->id && (arguments.empty() || i.object->arguments.ExactMatch(arguments))) {
+      if (id == i.object->id && (interface.empty() || i.object->interface.exactMatch(interface))) {
 	assert(!i.object->attribute);
 	i.object->attribute = attribute;
 	if (found) {
-	  a_exceptions.printError("Attribute " + toString(id) + ": " +  name + "(" + arguments.toString() + ")" + " already exists", text);
+	  a_exceptions.printError("Attribute " + toString(id) + ": " +  name + "(" + interface.toString() + ")" + " already exists", text);
 	}
 	found = true;
       }
     }
     if (!found) {
-      a_exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + arguments.toString() + ")", text);
+      a_exceptions.printError("Could not find " + toString(id) + ": " +  name + "(" + interface.toString() + ")", text);
       printAllObjects(name);
       if (a_verbose) {
 	print();
@@ -79,11 +87,11 @@ namespace generator {
       }
   }
   
-  void LocalDatabase::addFunction(ast::ObjectType type, std::string& name, ast::ObjectArguments& arguments,
+  void LocalDatabase::addFunction(ast::ObjectType type, std::string& name, ast::ObjectInterface& interface,
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {type, name, arguments,
+    DatabaseElement e = {type, name, interface,
                          returnType, false, NULL, function, text};
     add(name, e);
   };
