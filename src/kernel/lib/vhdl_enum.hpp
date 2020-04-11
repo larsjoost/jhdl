@@ -236,11 +236,19 @@ namespace vhdl {
       m_right = right;
     };
 
+    template<typename T1, typename T2>
+    void constrain(T1 left, T2 right, int ascending = true) {
+      m_left = POS(left);
+      m_right = POS(right);
+    }
+    
     void constrain() {
       m_left = 0;
       m_right = SIZE - 1;
     };
 
+    
+    
     void operator=(T v) {
       m_debug.functionStart("operator=", false, __FILE__, __LINE__);
       set(v);
@@ -372,11 +380,12 @@ namespace vhdl {
       return RIGHT();
     }
     inline bool ASCENDING() { return true; };
-    inline int POS(char a) { return char_position(a); };
-    inline int POS(T e) { return enum_position(e); };
+    inline int relative_position(int i) { return i - m_left; }
+    inline int POS(char a) { return relative_position(char_position(a)); };
+    inline int POS(T e) { return relative_position(enum_position(e)); };
     inline int POS(Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>& r) {
       m_debug.functionStart("POS", false, __FILE__, __LINE__);
-      int pos = r.POS();
+      int pos = relative_position(r.POS());
       m_debug.functionEnd("POS: " + std::to_string(pos));
       return pos;
     }

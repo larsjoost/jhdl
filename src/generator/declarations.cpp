@@ -88,14 +88,13 @@ namespace generator {
 
   void SystemC::printFactory(parameters& parm, const std::string& name, 
                              ast::RangeType* range, ast::SimpleIdentifier* identifier,
-                             ast::ObjectValue expected_value,
+                             ast::ObjectValueContainer& expected_type,
                              ast::ArraySubtypeDefinition* subtype) {
-    m_debug.functionStart("printFactory(name = " + name + ", expected_value = " + ast::toString(expected_value) + ")",
+    m_debug.functionStart("printFactory(name = " + name + ", expected_type = " + expected_type.toString(true) + ")",
 			  false, __FILE__, __LINE__);
     auto f = [&](parameters& parm, RangeDefinition& range_definition, RangeDefinition& subtype_range_definition) {
       if (range) {
-        ast::ObjectValueContainer type(expected_value);
-        rangeToString(parm, range, range_definition, type);
+        rangeToString(parm, range, range_definition, expected_type);
       } else if (identifier || subtype) {
         ast::SimpleIdentifier* id = (identifier ? identifier : subtype->identifier);
 	assert(id);
@@ -658,7 +657,7 @@ namespace generator {
       parm.addObjectValueContainer(ast::ObjectType::TYPE, name, database_result.object->type);
       parm.addClassContents(getSourceLine(t->identifier), __FILE__, __LINE__);
       parm.addClassContents("using " + name + " = " + type_name + ";", __FILE__, __LINE__);
-      printFactory(parm, name, t->type->range, NULL, database_result.object->type.GetValue());
+      printFactory(parm, name, t->type->range, NULL, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);
       if (a_verbose) {parm.printDatabase();}

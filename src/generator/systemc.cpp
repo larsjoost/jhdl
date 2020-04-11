@@ -139,12 +139,12 @@ namespace generator {
   ast::ObjectValue SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
     m_debug.functionStart("printRangeType", false, __FILE__, __LINE__);
     RangeDefinition range_definition;
-    ast::ObjectValueContainer type(ast::ObjectValue::NUMBER);
-    ast::ObjectValueContainer found_type = rangeToString(parm, r, range_definition, type);
+    ast::ObjectValueContainer expected_type(ast::ObjectValue::NUMBER);
+    ast::ObjectValueContainer found_type = rangeToString(parm, r, range_definition, expected_type);
     bool integer_type = found_type.IsValue(ast::ObjectValue::INTEGER);
     std::string t = integer_type ? "int" : "double";
     parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
-    printFactory(parm, name, r, NULL, ast::ObjectValue::NUMBER);
+    printFactory(parm, name, r, NULL, expected_type);
     m_debug.functionEnd("printRangeType: " + found_type.toString());
     return found_type.GetValue();
   }

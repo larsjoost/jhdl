@@ -123,7 +123,7 @@ namespace generator {
 				const std::string subtype_name = "");
     void printFactory(parameters& parm, const std::string& name, 
                       ast::RangeType* range, ast::SimpleIdentifier* identifier,
-                      ast::ObjectValue expected_value,
+                      ast::ObjectValueContainer& expected_type,
                       ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype_name, ast::RangeType* subtype_range,
                         ast::ObjectValueContainer::Array& arguments);
