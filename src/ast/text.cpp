@@ -144,12 +144,11 @@ namespace ast {
   }
 
   void Text::print(std::ostream& output) {
-    int s = getColumn();
-    for (int i = 0; i < s; i++) {
-      output << lookAhead(i);
-    }
+    output << getCurrentLine() << std::endl;
+    output << getCurrentLinePositionMarker() << std::endl;
   }
-
+    
+  
   void Text::debug(std::ostream& output) {
     output << "Text::position = " << position << std::endl;
     output << "Text::size = " << size << std::endl;

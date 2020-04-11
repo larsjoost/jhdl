@@ -16,11 +16,29 @@ architecture rtl of test is
     (3, 4)
     );
 
+  type char1_t is ('a', 'b');
+
+  type char2_t is ('a', 'c');
+
+  type char_array_t is array(char1_t, char2_t) of char1_t;
+
+  constant c_char_array : char_array_t := (
+    ('a', 'b'),
+    ('b', 'a')
+    );
+  
 begin
 
 
   process is
   begin  -- process
+    report "#1" severity note;
+    if (c_char_array('a', 'c') /= 'b') then
+      report "c_char_array('a', 'c') = " & char1_t'image(c_char_array('a', 'c')) &
+        ", but expected = " & char1_t'image('c')
+        severity failure;
+    end if;
+    report "#2" severity note;
     for i in enum_t loop
       for j in enum_t loop
         report "C_D(" & enum_t'image(i) & ", " & enum_t'image(j) & ") = " & integer'image(C_D(i, j)) severity note; 

@@ -149,7 +149,8 @@ namespace generator {
           type = database_result.object->type.GetValue();
         }
       }
-      array_template_start = "vhdl::Array<" + range + ", " + array_template_start;
+      m_debug.debug("range = " + range);
+      array_template_start += "vhdl::Array<" + range + ", ";
       array_template_end += ">";
     }
     parm.addClassContents("using " + name + " = " + array_template_start + subtype_name + array_template_end + ";", __FILE__, __LINE__);

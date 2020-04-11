@@ -338,6 +338,10 @@ namespace vhdl {
       return other.toString();
     }
     
+    inline std::string IMAGE(char c) {
+      return std::string(1, c);
+    }
+    
     inline int LENGTH() { return m_right - m_left + 1; }
     inline Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> LEFT() {
       m_debug.functionStart("LENGTH");

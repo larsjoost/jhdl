@@ -8,6 +8,7 @@
 #include <boost/core/demangle.hpp>
 
 #include "../output/output.hpp"
+#include "../ast/text.hpp"
 
 template<bool enable>
 class Debug {
@@ -55,9 +56,12 @@ public:
     m_verbose = enable;
   }
 
-  inline void functionStart(std::string name, bool highlight = false, const char* file_name = NULL, int line_number = -1) {
+  inline void functionStart(std::string name, bool highlight = false, const char* file_name = NULL, int line_number = -1, ast::Text* text = NULL) {
     if (isVerbose()) {
       print(name, "FUNCTION START", highlight, true, file_name, line_number);
+      if (text) {
+	text->print();
+      }
     }
   }
 

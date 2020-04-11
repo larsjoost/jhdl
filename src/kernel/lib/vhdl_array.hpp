@@ -311,6 +311,14 @@ namespace vhdl {
       return get(index);
     }
 
+    inline SUBTYPE& operator[](char c) {
+      m_debug.functionStart("operator['" + std::string(1, c) + "']", false, __FILE__, __LINE__);
+      int index = m_range.POS(c);
+      m_debug.debug("index = " + std::to_string(index));
+      m_debug.functionEnd("operator[]");
+      return get(index);
+    }
+
     inline SUBTYPE& operator[](RANGE index) {
       m_debug.functionStart("operator[" + index.toString() + "]", false, __FILE__, __LINE__);
       int i = index.POS();

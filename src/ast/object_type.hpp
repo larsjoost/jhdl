@@ -133,7 +133,7 @@ namespace ast {
       a_arguments = arguments;
     }
     std::string toString(bool verbose = false) const;
-    std::string ToString(const Array& l, bool verbose = false) const;
+    std::string toString(const Array& l, bool verbose = false) const;
   };
 
   struct ObjectTypes {
@@ -148,6 +148,7 @@ namespace ast {
     ObjectValueContainer& get() { assert(!m_types.empty()); return m_types.front(); }
     void set(const ObjectValueContainer& x) { add(x); }
     void set(ObjectValue x) { add(x); }
+    void set(ObjectTypes& x) { for (auto i : x.m_types) { add(i); }; }
     void add(ObjectValue x) { ObjectValueContainer y(x); add(y); }
     void add(const ObjectValueContainer& x);
     void nextSubtype();
@@ -231,22 +232,43 @@ namespace ast {
     return result;
   }
 
-  struct ReturnTypesHash {
-    std::size_t operator() (const ast::ObjectValueContainer& o) const {
-      ObjectValue v = o.GetValue();
-      if (v == ObjectValue::NUMBER || v == ObjectValue::INTEGER || v == ObjectValue::REAL) {
-        v = ObjectValue::NUMBER;
+  struct ReturnTypes {
+  
+    struct ReturnTypesHash {
+      std::size_t operator() (const ObjectValueContainer& o) const {
+	ObjectValue v = o.GetValue();
+	if (v == ObjectValue::NUMBER || v == ObjectValue::INTEGER || v == ObjectValue::REAL) {
+	  v = ObjectValue::NUMBER;
+	}
+	size_t result = static_cast<std::underlying_type_t<ast::ObjectValue>>(v);
+	// result += std::hash<std::string>{}(o.GetTypeName());
+	return result;
       }
-      size_t result = static_cast<std::underlying_type_t<ast::ObjectValue>>(v);
-      // result += std::hash<std::string>{}(o.GetTypeName());
+    };
+
+    typedef std::unordered_set<ObjectValueContainer, ReturnTypesHash> List; 
+    
+    List m_list;
+
+    List& getList() { return m_list; }
+    
+    void insert(const ObjectValueContainer& x) { m_list.insert(x); }
+    void clear() { m_list.clear(); }
+    bool empty() { return m_list.empty(); }
+    int size() { return m_list.size(); }
+    void append(ReturnTypes& x) { m_list.insert(x.getList().begin(), x.getList().end()); };
+    const ObjectValueContainer& front() { return *m_list.begin(); }
+    std::string toString(bool verbose = false) {
+      std::string result;
+      std::string delimiter;
+      for (auto& i : m_list) {
+	result += delimiter + i.toString(verbose);
+	delimiter = ", ";
+      };
       return result;
-    }
+    };
   };
-
-  typedef std::unordered_set<ast::ObjectValueContainer, ReturnTypesHash> ReturnTypes;
-
   
-  
-}
+};
 
 #endif

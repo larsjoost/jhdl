@@ -10,8 +10,7 @@ void Exceptions::print(std::string severity, Output::Color color, std::string& m
      std::to_string(text->getLine()) + ")") : ""; 
     *out << "#" << severity << location << ": " << message << std::endl;
     if (text) {
-      *out << text->getCurrentLine() << std::endl;
-      *out << text->getCurrentLinePositionMarker() << std::endl;
+      text->print(*out);
     }
   };
   m_output.print(color, func);

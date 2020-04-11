@@ -78,7 +78,7 @@ namespace ast {
     return result;
   }
 
-  std::string ObjectValueContainer::ToString(const Array& l, bool verbose) const {
+  std::string ObjectValueContainer::toString(const Array& l, bool verbose) const {
     std::string subtype;
     std::string delimiter;
     for (const ObjectValueContainer& s : l) {
@@ -90,14 +90,14 @@ namespace ast {
   
   std::string ObjectValueContainer::toString(bool verbose) const {
     if (verbose) {
-      return "a_value = " + ast::toString(a_value) + ", a_type_name = \"" + a_type_name + "\", a_subtype = (" + ToString(a_subtype, verbose) + ")";
+      return "a_value = " + ast::toString(a_value) + ", a_type_name = \"" + a_type_name + "\", a_arguments = (" + toString(a_arguments) + "), a_subtype = (" + toString(a_subtype, verbose) + ")";
     } else {
       if (a_value == ObjectValue::USER_TYPE) {
         return a_type_name + "(User type)";
       }
       if (a_value == ObjectValue::ARRAY) {
         assert(!a_subtype.empty());
-        return "array(" + ToString(a_arguments) + ") of " + ToString(a_subtype);
+        return "array(" + toString(a_arguments) + ") of " + toString(a_subtype);
       }
       if (a_value == ObjectValue::ENUMERATION) {
         return "enumeration " + a_type_name;
@@ -107,17 +107,22 @@ namespace ast {
   }
 
   void ObjectValueContainer::nextSubtype() {
-    Debug<false> debug = Debug<false>(this);
+    Debug<true> debug = Debug<true>(this);
     debug.functionStart("nextSubtype", false, __FILE__, __LINE__);
     debug.debug("this = " + this->toString(true));
     if (a_value == ObjectValue::ARRAY) {
-      assert(a_subtype.size() > 0);
-      if (a_subtype.size() == 1) {
-      	ObjectValueContainer& x = a_subtype.front();
-	a_value = x.a_value;
-	a_type_name = x.a_type_name;
+      if (a_arguments.size() > 0) {
+	a_arguments.pop_front();
       }
-      a_subtype.pop_front();
+      if (a_arguments.empty()) {
+	assert(a_subtype.size() > 0);
+	if (a_subtype.size() == 1) {
+	  ObjectValueContainer& x = a_subtype.front();
+	  a_value = x.a_value;
+	  a_type_name = x.a_type_name;
+	}
+	a_subtype.pop_front();
+      }
     } else {
       a_value = ObjectValue::NONE;
       a_type_name = "";
@@ -180,8 +185,8 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equalsExact(const ObjectValueContainer& other) const {
-    Debug<false> debug = Debug<false>(this);
-    debug.functionStart("equalsExact(other = " + other.toString(true) + ")", false, __FILE__, __LINE__);
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equalsExact(this = " + toString(true) + ", other = " + other.toString(true) + ")", false, __FILE__, __LINE__);
     debug.debug("this = " + this->toString(true));
     bool match = (a_value == other.a_value);
     debug.debug(ast::toString(a_value) + (match ? " == " : " != ") + ast::toString(other.a_value));
@@ -192,6 +197,12 @@ namespace ast {
       std::transform(s2.begin(), s2.end(), s2.begin(), ::toupper);
       match = (s1 == s2);
       debug.debug(s1 + (match ? " == " : " != ") + s2);
+      if (match && HasArray(a_value)) {
+	assert(!a_subtype.empty());
+	assert(!other.a_subtype.empty());
+	match = equals(a_subtype, other.a_subtype);
+	debug.debug(toString(a_subtype, true) + (match ? " == " : " != ") + toString(other.a_subtype, true));
+      }
     }
     debug.functionEnd("equalsExact: " + std::string(match ? "true" : "false"));
     return match;
@@ -204,10 +215,14 @@ namespace ast {
   }
   
   bool ObjectTypes::equalsExact(const ObjectValueContainer& x) const {
+    Debug<true> debug = Debug<true>(this);
+    debug.functionStart("equalsExact(this = " + toString(true) + ", x = " + x.toString(true) + ")", false, __FILE__, __LINE__);
+    bool result = false;
     for (auto& i: m_types) {
-      if (i.equalsExact(x)) { return true; };
+      if (i.equalsExact(x)) { result = true; break; };
     }
-    return false;
+    debug.functionEnd("equalsExact: " + std::to_string(result));
+    return result;
   }
 
   bool ObjectTypes::equals(ObjectValue x) const {

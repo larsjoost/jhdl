@@ -174,9 +174,6 @@ namespace generator {
 			   ast::ObjectArguments& arguments);
 
 
-    std::string returnTypesToString(parameters& parm,
-				    ast::ReturnTypes& return_types);
-    
     bool getStaticAttributeType(parameters& parm,
 				std::string attributeName,
 				ast::ObjectValueContainer& result);
@@ -278,7 +275,7 @@ namespace generator {
     for (auto& i : objects) {
       return_types.insert(i.object->type);
     }
-    m_debug.functionEnd("GetReturnTypes = " + returnTypesToString(parm, return_types));
+    m_debug.functionEnd("GetReturnTypes = " + return_types.toString());
   }
   
   
@@ -403,11 +400,11 @@ namespace generator {
     std::string result;
     std::list<ReturnTypePair> typePairs;
     ast::ReturnTypes t;
-    for (const ast::ObjectValueContainer& i : e->term->returnTypes) {
-      for (const ast::ObjectValueContainer& j : e->expression->returnTypes) {
+    for (const ast::ObjectValueContainer& i : e->term->returnTypes.getList()) {
+      for (const ast::ObjectValueContainer& j : e->expression->returnTypes.getList()) {
         t.clear();
         operatorReturnTypes(parm, e->op->op, i, j, t);
-        for (const ast::ObjectValueContainer& x : t) {
+        for (const ast::ObjectValueContainer& x : t.getList()) {
           if (expected_type.equals(x)) {
             ReturnTypePair pair = {i, j};
             if (!exists(parm, pair, typePairs)) {
@@ -474,7 +471,7 @@ namespace generator {
 								Func sensitivityListCallback,
 								ast::Text* text,
 								std::string& assignment_name) {
-    m_debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expected_type.toString() + ")", false, __FILE__, __LINE__);
+    m_debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expected_type.toString() + ")", false, __FILE__, __LINE__, text);
     std::string result;
     if (!expected_type.isUnique()) {
       exceptions.printError("Could not determine parenthis type since expected type is not unique. Expected type is: " + expected_type.toString(), text);
@@ -540,15 +537,25 @@ namespace generator {
                                                        std::string assignment_name) {
     std::string result = "";
     if (e) {
-      m_debug.functionStart("expressionTermToString(expected_type = " + expected_type.toString() + ")", false, __FILE__, __LINE__);
+      m_debug.functionStart("expressionTermToString(expected_type = " + expected_type.toString() + ")", false, __FILE__, __LINE__, e->text);
       if (!e->parenthis.list.empty()) {
-	expected_type.nextParenthisHierarchy();
-	result = parenthisExpressionTermToString(parm,
-						 e->parenthis,
-						 expected_type,
-						 sensitivityListCallback,
-						 e->text,
-						 assignment_name);
+	if (expected_type.isArray()) {
+	  ExpectedType expected_subtype;
+	  expected_subtype.subtype(expected_type);
+	  result = parenthisExpressionTermToString(parm,
+						   e->parenthis,
+						   expected_subtype,
+						   sensitivityListCallback,
+						   e->text,
+						   assignment_name);
+	} else {
+	  result = parenthisExpressionTermToString(parm,
+						   e->parenthis,
+						   expected_type,
+						   sensitivityListCallback,
+						   e->text,
+						   assignment_name);
+	}
       } else if (e->physical) {
         m_debug.debug("Physical");
         result = physicalToString(parm, e->physical);
