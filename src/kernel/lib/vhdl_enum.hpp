@@ -394,14 +394,14 @@ namespace vhdl {
       e.m_value = index;
       return e; };
     
-    inline bool operator==(T e) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value == other.m_value;}
-    inline bool operator!=(T e) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value != other.m_value;}
+    // inline bool operator==(T e) const {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value == other.m_value;}
+    // inline bool operator!=(T e) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(e); return m_value != other.m_value;}
     inline bool operator==(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value == other.m_value;}
     inline bool operator!=(char c) {Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> other; other.set(c); return m_value != other.m_value;}
     inline bool operator==(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value == other.m_value; }
     inline bool operator<=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value <= other.m_value; }
     inline bool operator>=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value >= other.m_value; }
-    inline bool operator!=(Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value != other.m_value; }
+    inline bool operator!=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { return m_value != other.m_value; }
 
     std::string info() {
       return "Enum<" + std::to_string(m_left) + "(" + toString(m_left) + ") to " + std::to_string(m_right) + "(" + toString(m_right) + ") = " +

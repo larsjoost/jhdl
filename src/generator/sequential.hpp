@@ -112,7 +112,7 @@ namespace generator {
 	} else {
 	  parm.addTextToList(sequential_list, "} else {", __FILE__, __LINE__);
 	}
-	command = "} elsif";
+	command = "} else if";
         sequentialStatements(parm, c.sequentialStatements, sequential_list, sensitivity_list_callback);
       }
       parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);

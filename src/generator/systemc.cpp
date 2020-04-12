@@ -105,7 +105,16 @@ namespace generator {
   }
   
 
-
+  ast::ObjectValueContainer SystemC::rangeAttributeToString(parameters& parm, ast::RangeAttributeType* r) {
+    m_debug.functionStart("rangeAttributeToString", false, __FILE__, __LINE__, &r->identifier->text);
+    ast::ObjectValueContainer found_type;
+    DatabaseResult result;
+    if (parm.findOne(result, r->identifier)) {
+      found_type = result.object->type.GetArgument();
+    };
+    m_debug.functionEnd("rangeAttributeToString: " + found_type.toString());
+    return found_type;
+  }
   ast::ObjectValueContainer SystemC::rangeToString(parameters& parm, ast::RangeType* r, RangeDefinition& range_definition,
 						   ast::ObjectValueContainer& expectedType) {
     m_debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")",
@@ -130,7 +139,7 @@ namespace generator {
       }
       found_type = left_type;
     } else if (r->range_attribute_type) {
-      
+      found_type = rangeAttributeToString(parm, r->range_attribute_type);
     } else {
       assert(false);
     }
@@ -144,8 +153,13 @@ namespace generator {
     ast::ObjectValueContainer expected_type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer found_type = rangeToString(parm, r, range_definition, expected_type);
     bool integer_type = found_type.IsValue(ast::ObjectValue::INTEGER);
-    std::string t = integer_type ? "int" : "double";
-    parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
+    bool real_type = found_type.IsValue(ast::ObjectValue::REAL);
+    if (integer_type || real_type) {
+      std::string t = integer_type ? "int" : "double";
+      parm.addClassContents("using " + name + " = vhdl::Range<" + t + ">;", __FILE__, __LINE__);
+    } else {
+      parm.addClassContents("using " + name + " = " + found_type.GetTypeName() + ";", __FILE__, __LINE__);
+    }
     printFactory(parm, name, r, NULL, expected_type);
     m_debug.functionEnd("printRangeType: " + found_type.toString());
     return found_type.GetValue();
