@@ -110,10 +110,11 @@ namespace generator {
 						   ast::ObjectValueContainer& expectedType) {
     m_debug.functionStart("rangeToString(expectedType = " + expectedType.toString() + ")",
 			  false, __FILE__, __LINE__);
-    ast::ObjectValueContainer left_type;
-    ast::ObjectValueContainer right_type;
+    ast::ObjectValueContainer found_type;
     assert(r);
     if (r->range_direction_type) {
+      ast::ObjectValueContainer left_type;
+      ast::ObjectValueContainer right_type;
       ExpectedType t(expectedType);
       a_expression.collectUniqueReturnType(parm, r->range_direction_type->left, left_type, &t);
       a_expression.collectUniqueReturnType(parm, r->range_direction_type->right, right_type, &t);
@@ -127,17 +128,18 @@ namespace generator {
       if (r->range_direction_type->range_direction) {
 	range_definition.ascending = (r->range_direction_type->range_direction->direction == ast::RangeDirection::Direction::TO ? "true" : "false");
       }
+      found_type = left_type;
     } else if (r->range_attribute_type) {
       
     } else {
       assert(false);
     }
-    m_debug.functionEnd("rangeToString: " + left_type.toString());
-    return left_type;
+    m_debug.functionEnd("rangeToString: " + found_type.toString());
+    return found_type;
   }
 
   ast::ObjectValue SystemC::printRangeType(parameters& parm, std::string& name, ast::RangeType* r) {
-    m_debug.functionStart("printRangeType", false, __FILE__, __LINE__);
+    m_debug.functionStart("printRangeType(name = " + name + ")", false, __FILE__, __LINE__);
     RangeDefinition range_definition;
     ast::ObjectValueContainer expected_type(ast::ObjectValue::NUMBER);
     ast::ObjectValueContainer found_type = rangeToString(parm, r, range_definition, expected_type);

@@ -503,7 +503,7 @@ namespace generator {
 		addAssignment(result,  ".setIndex(" + std::to_string(index) + ", " + x + ")", assignment_name);
 	      }
 	    } else {
-	      result = x;
+	      result = "(" + x + ")";
 	    }
 	  } else {
 	    exceptions.printInternal("Could not resolve type of more than one choise", text);

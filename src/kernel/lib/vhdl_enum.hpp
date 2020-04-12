@@ -255,27 +255,27 @@ namespace vhdl {
       m_debug.functionEnd("operator=");
     }
 
-    void operator=(int v) {
+    inline void operator=(int v) {
       m_value = v;
     }
     
-    void operator=(char c) {
+    inline void operator=(char c) {
       m_debug.functionStart("operator=(char c = " + std::string(1, c) + ")");
       set(c);
       m_debug.functionEnd("operator=");
     }
 
-    void operator=(bool v) {
+    inline void operator=(bool v) {
       m_value = v ? (T)1 : (T)0;
     }
 
     inline void operator=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { m_value = other.m_value; }
     
-    bool operator!() {
+    inline bool operator!() {
       return m_value != 0;
     }
       
-    operator bool() const {
+    inline operator bool() const {
       return m_value != 0;
     }
 

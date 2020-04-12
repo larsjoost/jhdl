@@ -5,7 +5,7 @@ namespace generator {
 
   template<typename Func>
   void SystemC::forLoop(parameters& parm, std::string& name, ast::IterationScheme* iteration, Func callback) {
-    m_debug.functionStart("forLoop(name = " + name + ")");
+    m_debug.functionStart("forLoop(name = " + name + ")", false, __FILE__, __LINE__);
     std::string typeName;
     ast::ObjectValueContainer type;
     std::string variable_instance;
@@ -125,7 +125,7 @@ namespace generator {
     if (f) {
       assert(f->identifier);
       std::string name = f->identifier->toString(true);
-      m_debug.functionStart("forLoopStatement(name = " + name + ")", false, __FILE__, __LINE__);
+      m_debug.functionStart("forLoopStatement(name = " + name + ")", false, __FILE__, __LINE__, &f->identifier->text);
       auto callback =
 	[&](parameters& parm,
 	    std::string& forloop_execution,

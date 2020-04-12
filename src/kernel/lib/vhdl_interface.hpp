@@ -62,51 +62,49 @@ namespace vhdl {
       return *this;
     }
 
-    bool operator!=(interface<T1, T2>& other) {
+    inline bool operator!=(interface<T1, T2>& other) {
       return m_data != other.m_data;
     }
 
-    bool operator!=(auto other) {
+    inline bool operator!=(auto other) {
       T2 x;
       x = other;
       return (m_data.read() != x);
     }
 
-    bool operator==(interface<T1, T2>& other) {
+    inline bool operator==(interface<T1, T2>& other) {
       return m_data == other.m_data;
     }
 
-    bool operator==(auto other) {
+    inline bool operator==(auto other) {
       return m_data == other.get();
     }
 
-    interface<T1, T2> operator!() {
-      interface<T1, T2> x;
-      x.m_data = !m_data;
-      return x;
+    inline bool operator!() {
+      return !m_type;
     }
 
-    operator bool() const {
+    inline operator bool() const {
       return bool(m_data.read());
     }
   
     template<typename TYPE>
-    interface<T1, T2> operator+(TYPE other) {
+    inline interface<T1, T2> operator+(TYPE other) {
       interface<T1, T2> r;
       r.m_data = m_data + other;
       return r;
     }
 
-    unsigned int LENGTH() {
+    inline unsigned int LENGTH() {
       return m_type.LENGTH();
     }
     
 
-    const std::string toString() const {
+    inline const std::string toString() const {
       return m_data.read().toString();
     }
 
-    const T2& read() const {
+    inline const T2& read() const {
       return m_data.read();
     }
     

@@ -144,6 +144,7 @@ namespace ast {
   }
 
   void Text::print(std::ostream& output) {
+    output << getFilename() << "(" << getLine() << "):" << std::endl;
     output << getCurrentLine() << std::endl;
     output << getCurrentLinePositionMarker() << std::endl;
   }

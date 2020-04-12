@@ -209,7 +209,7 @@ namespace generator {
   std::string ExpressionParser::translateOperator(parameters& parm,
 						  std::string& op) {
     static std::unordered_map<std::string, std::string> translate =
-      { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"}, {"**", "^"} };
+      { {"/=", "!="}, {"=", "=="}, {">=", ">="}, {"+", "+"}, {"-", "-"}, {"&", "+"}, {"**", "^"}, {"and", "&&"}, {"or", "||"} };
     auto i = translate.find(op);
     std::string result = op;
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
@@ -284,7 +284,7 @@ namespace generator {
   }
 
   void ExpressionParser::expressionReturnTypes(parameters& parm, ast::Expression* e, ast::ReturnTypes& return_types) {
-    m_debug.functionStart("ExpressionReturnTypes");
+    m_debug.functionStart("ExpressionReturnTypes", false, __FILE__, __LINE__, e->text);
     assert(e);
     if (e->unaryOperator) {
       expressionReturnTypes(parm, e->expression, e->returnTypes);

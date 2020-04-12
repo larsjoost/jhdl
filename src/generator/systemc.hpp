@@ -121,10 +121,6 @@ namespace generator {
     template<typename Func>
     void printFactoryDefinition(parameters& parm, const std::string& name, Func func,
 				const std::string subtype_name = "");
-    void printFactory(parameters& parm, const std::string& name, 
-                      ast::RangeType* range, ast::SimpleIdentifier* identifier,
-                      ast::ObjectValueContainer& expected_type,
-                      ast::ArraySubtypeDefinition* subtype = NULL);
     void printArrayType(parameters& parm, std::string& name, ast::List<ast::ArrayDefinition>& definition, std::string& subtype_name, ast::RangeType* subtype_range,
                         ast::ObjectValueContainer::Array& arguments);
     ast::ObjectValue printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
@@ -150,6 +146,10 @@ namespace generator {
                                       bool database_enable = true);
     
     // declarations.cpp
+    void printFactory(parameters& parm, const std::string& name, 
+                      ast::RangeType* range, ast::SimpleIdentifier* identifier,
+                      ast::ObjectValueContainer& expected_type,
+                      ast::ArraySubtypeDefinition* subtype = NULL);
     ast::ObjectValueContainer arrayType(parameters& parm, ast::SimpleIdentifier* identifier, ast::ArrayType* t);
     void subtype_declarations(parameters& parm, ast::SubtypeDeclaration* t);
     ast::ObjectValueContainer numberType(parameters& parm, ast::SimpleIdentifier* identifier, ast::NumberType* t);
