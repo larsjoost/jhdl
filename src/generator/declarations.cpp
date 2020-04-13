@@ -565,9 +565,8 @@ namespace generator {
 				localReturnTypeName + " " +
 				translatedName + interface + ";", __FILE__, __LINE__);
           std::string global_prefix = parm.hierarchyToString("::", true) + "::";
-	  parm.addImplementationContents((operatorName ? "friend " : "") +
-					 globalReturnTypeName + " " +
-					 global_prefix + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
+	  parm.addImplementationContents(globalReturnTypeName + " " +
+					 (operatorName ? "" : global_prefix) + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
           parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);", __FILE__, __LINE__);
           std::string s,d;
           for (auto& i : function_interface.getList()) {

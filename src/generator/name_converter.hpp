@@ -18,10 +18,12 @@ namespace generator {
 
     static std::string getTopLevelPrefix(parameters& parm, int hierarchy_offset = 0);
     static std::string getParentPrefix(parameters& parm, int hierarchy_offset = 0);
-    static std::string globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension = false, bool global_scope = false, int hierarchy_offset = 0);
+    static std::string globalPrefix(parameters& parm, DatabaseResult& object, bool factory_extension = false,
+				    bool global_scope = false, int hierarchy_offset = 0);
     static std::string getPrefix(parameters& parm, DatabaseResult& object, std::string first_separator, std::string last_separator);
 
-    static std::string getName(parameters& parm, DatabaseResult& object, bool factory_extension = false, std::string factory_arguments = "", bool global_scope = false);
+    static std::string getName(parameters& parm, DatabaseResult& object, bool factory_extension = false,
+			       std::string factory_arguments = "", bool global_scope = false);
     static std::string getName(std::string& name, ast::ObjectInterface& interface,
 			       ast::ObjectValueContainer& return_type);
     static std::string getHierarchyOffsetName(parameters& parm, DatabaseResult& object, int hierarchy_offset);

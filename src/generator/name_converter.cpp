@@ -9,29 +9,10 @@ namespace generator {
 				       std::string first_separator,
 				       std::string last_separator) {
     Debug<false> debug("NameConverter::getPrefix");
-    debug.functionStart("getPrefix");
-    std::string name;
-    name = object.hierarchyToString("", first_separator) + last_separator;
-    debug.functionEnd("getPrefix: " + name);
-    return toUpper(name);
-    /*
-    std::list<std::string> current_hierarchy;
-    parm.getHierarchy(current_hierarchy);
-    std::list<std::string> object_hierarchy;
-    for (auto& i : *object.hierarchy) {
-      std::string u = toUpper(i);
-      if (!name.empty()) {
-	name += first_separator + u; 
-      } else if (u != toUpper(current_hierarchy.front())) {
-	name = u;
-      } else {
-	current_hierarchy.pop_front();
-      }
-    }
-    name += last_separator;
+    debug.functionStart("getPrefix", false, __FILE__, __LINE__);
+    std::string name = object.hierarchyToString("", first_separator) + last_separator;
     debug.functionEnd("getPrefix: " + name);
     return name;
-    */
   }
 
   std::string NameConverter::getTopLevelPrefix(parameters& parm, int hierarchy_offset) {

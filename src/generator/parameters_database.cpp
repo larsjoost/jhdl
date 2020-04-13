@@ -16,7 +16,8 @@ namespace generator {
       };
     auto class_container_callback =
       [&](ClassContainer& class_container, int hierarchy) {
-	current_hierarchy.push_back(class_container.name);
+	std::string hierarchy_name = NameConverter::objectName(class_container.type, class_container.name);
+	current_hierarchy.push_back(hierarchy_name);
 	m_debug.debug("Hierarchy name = " + class_container.name);
 	hierarchy_ptr = std::make_shared<std::list<std::string>>();
 	*hierarchy_ptr = current_hierarchy;
@@ -125,7 +126,7 @@ namespace generator {
 			     ast::Text* text) {
     m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString(true) +
 			  ", interface = " + interface.toString() + ")", false, __FILE__, __LINE__);
-    m_debug.debug("Hierarchy = " + hierarchyToString());
+    m_debug.debug("Hierarchy = " + hierarchyToString(), __FILE__, __LINE__);
     getActiveClassContainer()->database.add(id, name,  type, interface, text);
     m_debug.functionEnd("addObjectValueContainer");
   }

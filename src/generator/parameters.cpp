@@ -58,7 +58,8 @@ namespace generator {
 
   void parameters::newClass(std::string description, std::string name, ast::ObjectType type,
 			    std::string base_name) {
-    m_debug.functionStart("newClass(" + description + ")", false, __FILE__, __LINE__);
+    m_debug.functionStart("newClass(description = " + description + ", name = " + name +
+			  ", type = " + ast::toString(type) + ")", false, __FILE__, __LINE__);
     ClassContainer a;
     a.active = true;
     a.class_description = description;
