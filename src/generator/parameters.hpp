@@ -223,7 +223,7 @@ namespace generator {
   int parameters::findBestMatch(DatabaseResults& matches,
 				 DatabaseResult& bestMatch,
 				 Func valid) {
-    m_debug.functionStart("findBestMatch)", false, __FILE__, __LINE__);
+    m_debug.functionStart("findBestMatch", false, __FILE__, __LINE__);
     int found = 0;
     for (auto& i : matches) {
       bool is_valid = valid(i.object);

@@ -181,6 +181,7 @@ namespace ast {
     bool empty() { return m_elements.empty(); }
     int size() const { return m_elements.size(); }
     const std::list<ObjectArgument>& getList() const { return m_elements; }
+    ObjectArgument& front() { return m_elements.front(); }
     std::string toString(bool verbose = false) const;
   };
 

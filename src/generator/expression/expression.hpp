@@ -19,7 +19,7 @@ namespace generator {
     Debug<true> m_debug;
     
     bool verbose = false;
-    Exceptions exceptions;
+    Exceptions m_exceptions;
 
     struct ReturnTypePair {
       ast::ObjectValueContainer left;
@@ -51,7 +51,7 @@ namespace generator {
 	return	"[" + m_file_name + "(" + std::to_string(m_line_number) + ")] : " + m_message;
       }
       void print() {
-        m_parent->exceptions.printError(getMessage(), m_text);
+        m_parent->m_exceptions.printError(getMessage(), m_text);
       }
       virtual const char* what() const throw() {
 	std::string m = getMessage() + ": " + m_text->getCurrentLine();
@@ -184,7 +184,8 @@ namespace generator {
 
     bool objectWithArguments(parameters& parm,
 			     DatabaseElement* e, ast::ObjectArguments& arguments,
-			     ExpectedType* expectedReturnType = NULL);
+			     ExpectedType* expectedReturnType = NULL,
+			     ast::Text* text = NULL);
 
     std::string procedureCallStatementToString(parameters& parm,
 					       ast::ProcedureCallStatement* p,
@@ -338,7 +339,7 @@ namespace generator {
     for (auto& i : interface.getList()) {
       std::string argument = associateArgument(parm, i, argumentNumber, associationList, sensitivityListCallback);
       if (argument.size() == 0) {
-        exceptions.printError("No argument associated element " + std::to_string(argumentNumber));
+        m_exceptions.printError("No argument associated element " + std::to_string(argumentNumber));
       }
       s += delimiter + argument;
       delimiter = ", ";
@@ -415,7 +416,7 @@ namespace generator {
       }
     }
     if (typePairs.size() != 1) {
-      exceptions.printError("Cound not resolve expected type " + expected_type.toString(), e->text);
+      m_exceptions.printError("Cound not resolve expected type " + expected_type.toString(), e->text);
       if (typePairs.empty()) {
         std::cerr << "Did not find anything" << std::endl;
       } else {
@@ -474,7 +475,7 @@ namespace generator {
     m_debug.functionStart("parenthisExpressionTermToString(assignment_name = " + assignment_name + ", expected_type = " + expected_type.toString() + ")", false, __FILE__, __LINE__, text);
     std::string result;
     if (!expected_type.isUnique()) {
-      exceptions.printError("Could not determine parenthis type since expected type is not unique. Expected type is: " + expected_type.toString(), text);
+      m_exceptions.printError("Could not determine parenthis type since expected type is not unique. Expected type is: " + expected_type.toString(), text);
     } else {
       for (ast::ElementAssociation& i : parenthis_expression.list) {
 	if (i.choises) {
@@ -506,7 +507,7 @@ namespace generator {
 	      result = "(" + x + ")";
 	    }
 	  } else {
-	    exceptions.printInternal("Could not resolve type of more than one choise", text);
+	    m_exceptions.printInternal("Could not resolve type of more than one choise", text);
 	  }
 	} else {
 	  for (ast::Choise& j : i.choises->choises.list) {
@@ -594,7 +595,7 @@ namespace generator {
       auto valid =
 	[&](DatabaseElement* e)
 	{
-	  bool result = objectWithArguments(parm, e, arguments, expected_type);
+	  bool result = objectWithArguments(parm, e, arguments, expected_type, &identifier->getText());
 	  return result;
 	};
       DatabaseResult object;
@@ -648,7 +649,7 @@ namespace generator {
       }
       name += "(" + a + ")";
     } else {
-      exceptions.printError("Could not find match for attribute \"" + attributeName +
+      m_exceptions.printError("Could not find match for attribute \"" + attributeName +
                             "\" with expected type " + expected_type.toString(), attribute);
     }
     m_debug.functionEnd("attributeToString: " + name);

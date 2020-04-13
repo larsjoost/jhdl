@@ -45,10 +45,10 @@ namespace generator {
       if (found_matches != 1) {
 	found = return_types.toString();
 	result = false;
-	exceptions.printError("Could not resolve unique type." +
-			      (expected_type ? " Expected type " + expected_type->toString() + "." : "") +
-			      " Found the following types: " + found,
-			      text);
+	m_exceptions.printError("Could not resolve unique type." +
+				(expected_type ? " Expected type " + expected_type->toString() + "." : "") +
+				" Found the following types: " + found,
+				text);
       }
     }
     m_debug.functionEnd("uniqueReturnType");
@@ -122,7 +122,7 @@ namespace generator {
     if (parm.findOneBase(object, name, valid)) {
       result = objectToString(parm, object, p->arguments, [&](DatabaseResult& e, std::string& name_extension) {});
     } else {
-      exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
+      m_exceptions.printError("Could not find definition of procedure \"" + name + "\"", &p->name->text);
       parm.printAllObjects(name);
     }
     m_debug.functionEnd("procedureCallStatementToString: " + result);
@@ -144,14 +144,20 @@ namespace generator {
   bool ExpressionParser::objectWithArguments(parameters& parm,
 					     DatabaseElement* e,
 					     ast::ObjectArguments& arguments,
-                                             ExpectedType* expectedReturnType) {
+                                             ExpectedType* expectedReturnType,
+					     ast::Text* text) {
     m_debug.functionStart("objectWithArguments(e = " + e->toString() + ", arguments = " + arguments.toString() + ")", false, __FILE__, __LINE__);
     bool result;
     bool cast_operation = (e->id == ast::ObjectType::TYPE);
+    m_debug.debug("cast_operation = " + std::string(cast_operation ? "true" : "false"));
     if (e->id == ast::ObjectType::FUNCTION && !e->interface.matches(arguments)) {
       result = false;
     } else if (cast_operation) {
-      result = e->type.equals(arguments);
+      if (arguments.size() == 1) {
+	result = arguments.front().equals(e->type);
+      } else {
+	m_exceptions.printError("Cast operation requires only one and only one argument. Found " + std::to_string(arguments.size()) + ".", text,  __FILE__, __LINE__);
+      }
     } else if (e->type.isArray() && !e->type.equals(arguments)) {
       result = false;
     } else {
@@ -299,15 +305,15 @@ namespace generator {
         }
       }
       if (e->returnTypes.empty()) {
-        exceptions.printError("Could not resolve type of expression \"" +
-                              term.toString() + "\" " + e->op->op + " \"" +
-                              expression.toString() + "\"", e->text);
+        m_exceptions.printError("Could not resolve type of expression \"" +
+				term.toString() + "\" " + e->op->op + " \"" +
+				expression.toString() + "\"", e->text);
       }
     } else {
       expressionTermReturnTypes(parm, e->term, e->returnTypes);
     }
     if (e->returnTypes.empty()) {
-      exceptions.printError("Could not resolve type of expression", e->text);
+      m_exceptions.printError("Could not resolve type of expression", e->text);
     }
     return_types.append(e->returnTypes);
     m_debug.functionEnd("expressionReturnTypes = " + return_types.toString());
@@ -333,7 +339,7 @@ namespace generator {
       if (x.choises->choises.list.size() == 1) {
         expression = x.choises->choises.list.back().expression;
       } else {
-        exceptions.printInternal("Could not resolve type of more than one choise", e->text);
+        m_exceptions.printInternal("Could not resolve type of more than one choise", e->text);
       }
     }
     bool choise_exists = (x.expression ? true : false);
@@ -382,10 +388,10 @@ namespace generator {
       };
       getReturnTypes(parm, n, valid, e->returnTypes);
     } else {
-      exceptions.printInternal("Unknown expression term", e->text);
+      m_exceptions.printInternal("Unknown expression term", e->text);
     }
     if (e->returnTypes.empty()) {
-      exceptions.printError("Could not resolve type of expression term", e->text);
+      m_exceptions.printError("Could not resolve type of expression term", e->text);
     }
     return_types.append(e->returnTypes);
     m_debug.functionEnd("ExpressionTermReturnTypes");
@@ -403,7 +409,7 @@ namespace generator {
         expressionReturnTypes(parm, i.actualPart, r);
 	if (r.empty()) {
 	  ast::Text* text = i.formalPart ? &i.formalPart->name->text : NULL;
-	  exceptions.printError("Could not resolve argument type", text);
+	  m_exceptions.printError("Could not resolve argument type", text);
        	} else {
 	  for (auto& i : r.getList()) {
 	    x.m_types.add(i);
@@ -430,7 +436,7 @@ namespace generator {
       ast::ObjectValueContainer type = getAttributeType(parm, object.object->type, attribute);
       return_types.insert(type);
     } else {
-      exceptions.printError("Could not resolve type of attribute \"" + attribute + "\" of \"" + name + "\"");
+      m_exceptions.printError("Could not resolve type of attribute \"" + attribute + "\" of \"" + name + "\"");
     }
     m_debug.functionEnd("AttributeReturnTypes");
   }
@@ -452,7 +458,7 @@ namespace generator {
       getReturnTypes(parm, name, valid, b->returnTypes);
     }
     if (b->returnTypes.empty()) {
-      exceptions.printError("Could not resolve type of " + name, &b->getText());
+      m_exceptions.printError("Could not resolve type of " + name, &b->getText());
     }
     return_types.append(b->returnTypes);
     m_debug.functionEnd("BasicIdentifierReturnTypes = " + return_types.toString());
@@ -490,10 +496,10 @@ namespace generator {
         case ast::ObjectValue::PHYSICAL: 
         case ast::ObjectValue::ENUMERATION: result = type; break;
         case ast::ObjectValue::ARRAY: result = type.GetArgument(); break;
-        default: exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString(), __FILE__, __LINE__); 
+        default: m_exceptions.printError("Could not find attribute \"" + attributeName + "\" of type " + type.toString(), __FILE__, __LINE__); 
         };
       } else {
-        exceptions.printError("Could not resolve type of attribute " + attributeName + " with type " + type.toString(), __FILE__, __LINE__);
+        m_exceptions.printError("Could not resolve type of attribute " + attributeName + " with type " + type.toString(), __FILE__, __LINE__);
       }
     }
     m_debug.functionEnd("getAttributeType = " + result.toString());
@@ -515,9 +521,9 @@ namespace generator {
           match = i;
           foundMatch = true;
         } else {
-          exceptions.printError("Found more than one attribute match on " + name);
-          exceptions.printError("Last match = " + match.toString());
-          exceptions.printError("New match = " + i.toString());
+          m_exceptions.printError("Found more than one attribute match on " + name);
+          m_exceptions.printError("Last match = " + match.toString());
+          m_exceptions.printError("New match = " + i.toString());
         }
       }
     }
