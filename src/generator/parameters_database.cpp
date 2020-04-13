@@ -123,7 +123,7 @@ namespace generator {
 			     ast::ObjectValueContainer type,
 			     ast::ObjectInterface interface,
 			     ast::Text* text) {
-    m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString() +
+    m_debug.functionStart("addObjectValueContainer(name = " + name + ", type = " + type.toString(true) +
 			  ", interface = " + interface.toString() + ")", false, __FILE__, __LINE__);
     m_debug.debug("Hierarchy = " + hierarchyToString());
     getActiveClassContainer()->database.add(id, name,  type, interface, text);

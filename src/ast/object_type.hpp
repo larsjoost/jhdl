@@ -123,6 +123,7 @@ namespace ast {
       return o.GetValue();
     }
     std::string GetTypeName() const { return a_type_name; }
+    void setTypeName(std::string name) { assert(a_type_name.empty()); a_type_name = name; }
     bool HasArray(ObjectValue value) const {
       return ((value == ObjectValue::ARRAY) || (value == ObjectValue::ACCESS) || (value == ObjectValue::FILE));
     }

@@ -48,7 +48,7 @@ namespace vhdl {
   public:
 
     Array(const char* name) : m_debug(this), m_name(name), m_subtype(name) {
-      m_debug.functionStart("Array(name = " + std::string(name) + ")");
+      m_debug.functionStart("Array(name = " + std::string(name) + ")", false, __FILE__, __LINE__);
       m_debug.functionEnd("Array");
     };
     Array() : m_debug(this) {
@@ -167,6 +167,13 @@ namespace vhdl {
       m_debug.functionEnd("set");
     }
 
+    /*
+     * 1 to 3: index = 1, result = 0
+     * 1 to 3: index = 2, result = 1
+     * 4 downto 1: index = 4, result = 0
+     * 4 downto 1: index = 3, result = 1
+     */
+    
     int ConvertIndex(int index) {
       m_debug.functionStart("ConvertIndex(index = " + std::to_string(index) + ")");
       m_debug.debug("m_range: " + m_range.info());
@@ -175,7 +182,7 @@ namespace vhdl {
       m_debug.debug("left: " + left.info());
       int left_pos = m_range.POS(left);
       m_debug.debug("x = " + std::to_string(x) + ", left_pos = " + std::to_string(left_pos));
-      int result = x * index - left_pos;
+      int result = x * (index - left_pos);
       m_debug.functionEnd("ConvertIndex: " + std::to_string(result) + ")");
       return result;
     }
@@ -196,11 +203,24 @@ namespace vhdl {
       m_debug.functionStart("get(index = " + std::to_string(index) + ")");
       int i = ConvertIndex(index);
       m_debug.debug("i = " + std::to_string(i));
-      assert(IndexCheck(i));
-      assert(i >= 0 && i < m_content.size());
-      SUBTYPE& result = m_content.at(i);
+      SUBTYPE& result = getAbsolute(i);
       m_debug.functionEnd("get");
       return result;
+    }
+    
+    inline SUBTYPE& getAbsolute(int index) {
+      m_debug.functionStart("getAbsolute(index = " + std::to_string(index) + ")");
+      assert(IndexCheck(index));
+      assert(index >= 0 && index < m_content.size());
+      SUBTYPE& result = m_content.at(index);
+      m_debug.functionEnd("getAbsolute: " + result.info());
+      return result;
+    }
+
+    template <typename T>
+    inline int getAbsoluteIndex(T index) {
+      int i = getIndex(index);
+      return ConvertIndex(i);
     }
     
     bool equals(const std::string& other) {
@@ -213,7 +233,7 @@ namespace vhdl {
       return true;
     }
 
-    Array(RANGE left, RANGE right, bool ascending = true) {
+    Array(RANGE left, RANGE right, bool ascending = true) : m_debug(this) {
       constrain(left, right, ascending);
     }
     /*
@@ -299,11 +319,26 @@ namespace vhdl {
       }
       return true;
     }
+
     bool operator!=(const std::string other) {
       Array<RANGE, SUBTYPE> o;
       o.init_string(other);
       return (*this != o);
     }
+    
+    inline int getIndex(int index) {
+      return index;
+    }
+
+    inline int getIndex(char c) {
+      return m_range.POS(c);
+    }
+    
+    inline int getIndex(RANGE index) {
+      return index.POS();
+    }
+
+    
     
     inline SUBTYPE& operator[](int index) {
       m_debug.functionStart("operator[" + std::to_string(index) + "]", false, __FILE__, __LINE__);
@@ -313,7 +348,7 @@ namespace vhdl {
 
     inline SUBTYPE& operator[](char c) {
       m_debug.functionStart("operator['" + std::string(1, c) + "']", false, __FILE__, __LINE__);
-      int index = m_range.POS(c);
+      int index = getIndex(c);
       m_debug.debug("index = " + std::to_string(index));
       m_debug.functionEnd("operator[]");
       return get(index);
@@ -321,7 +356,7 @@ namespace vhdl {
 
     inline SUBTYPE& operator[](RANGE index) {
       m_debug.functionStart("operator[" + index.toString() + "]", false, __FILE__, __LINE__);
-      int i = index.POS();
+      int i = getIndex(index);
       m_debug.debug("i = " + std::to_string(i));
       SUBTYPE& result = get(i); 
       m_debug.functionEnd("operator[]: " + result.info());

@@ -325,11 +325,6 @@ namespace vhdl {
       return m_value;
     }
     
-    std::string IMAGE(T r) {
-      int index = enum_position(r);
-      return value_array[index].s;
-    }
-
     int ToInt() {
       return m_value;
     }
@@ -337,17 +332,26 @@ namespace vhdl {
     /*
       Emulation of VHDL functions
     */
-    
-    
-    inline std::string IMAGE(Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>& r) {return r.toString();}
 
-    template<class X>
+    std::string IMAGE(T r) {
+      m_debug.functionStart("IMAGE", false, __FILE__, __LINE__);
+      int index = enum_position(r);
+      m_debug.functionEnd("IMAGE");
+      return value_array[index].s;
+    }
+    
+    template<typename X>
     inline std::string IMAGE(X& other) {
+      m_debug.functionStart("IMAGE", false, __FILE__, __LINE__);
+      m_debug.functionEnd("IMAGE");
       return other.toString();
     }
     
     inline std::string IMAGE(char c) {
-      return std::string(1, c);
+      m_debug.functionStart("IMAGE(c = " + std::to_string(c) + ")", false, __FILE__, __LINE__);
+      std::string result = std::string(1, c);
+      m_debug.functionEnd("IMAGE: " + result);
+      return result;
     }
     
     inline int LENGTH() { return m_right - m_left + 1; }

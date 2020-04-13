@@ -299,11 +299,21 @@ namespace generator {
       std::string type;
       DatabaseResult result;
       if (parm.findOne(result, alias->name)) {
-        type = NameConverter::getName(parm, result);
+	m_debug.debug("database result = " + result.toString(), __FILE__, __LINE__);
         parm.addObjectValueContainer(result.object->id, designator, result.object->type);
+	m_debug.debug("type = " + result.object->type.toString(true), __FILE__, __LINE__);
+        type = result.object->type.GetTypeName();
       }
       parm.addClassContents(getSourceLine(alias->designator), __FILE__, __LINE__);
-      parm.addClassContents("using " + designator + " = " + type + ";", __FILE__, __LINE__); 
+      parm.addClassContents("vhdl::Alias<" + type + "> " + designator + ";", __FILE__, __LINE__); 
+      parm.addClassConstructorInitializer(designator + "(" + name + ")");
+      RangeDefinition range_definition;
+      ast::ObjectValueContainer expected_type;
+      a_expression.collectUniqueReturnType(parm, alias->type->range->range_direction_type->left, expected_type);
+      rangeToString(parm, alias->type->range, range_definition, expected_type);
+      parm.addClassConstructorContents(designator + ".constrain(" + range_definition.left +
+				       ", " + range_definition.right + ", " +
+				       range_definition.ascending + ");", __FILE__, __LINE__);
       m_debug.functionEnd("AliasDeclaration");
     }
   }

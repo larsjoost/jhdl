@@ -125,9 +125,6 @@ namespace generator {
                         ast::ObjectValueContainer::Array& arguments);
     ast::ObjectValue printRangeType(parameters& parm, std::string& name, ast::RangeType* r);
     void printPhysicalType(parameters& parm, std::string& name, ast::NumberType* n);
-    void subtypeIndicationToString(parameters& parm, ast::SubtypeIndication* s,
-                                   std::string& name, std::string& type,
-                                   std::string& preDefinition);
 
     // declarations.hpp
     template<typename Func>
