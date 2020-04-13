@@ -4,7 +4,7 @@
 namespace generator {
 
 
-  template <typename Func>
+  template <typename F1, typename F2>
   void SystemC::defineObject(parameters& parm,
                              bool topHierarchy,
                              std::string name,
@@ -14,7 +14,8 @@ namespace generator {
 			     std::string* argument,
                              ast::List<ast::Declaration>* declarationList,
                              ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                             Func callback,
+                             F1 initial_callback,
+			     F2 body_callback,
 			     bool wait_statements,
                              bool init_enable) {
     m_debug.functionStart("defineObject(name = " + name + ", base_name = " + base_name + ")", false,  __FILE__, __LINE__);
@@ -26,12 +27,13 @@ namespace generator {
     parm.getParent(parent_info);
     if (!topHierarchy) {
       parm.addClassContents(ObjectName(parent_info) + "* p = NULL; // Used to access parent class.", __FILE__, __LINE__);
-     }
+    }
+    initial_callback(parm);
     m_debug.debug("Declaration");
     if (declarationList) {
       declarations(parm, *declarationList);
     }
-    callback(parm);
+    body_callback(parm);
     createConstructor(parm, topHierarchy, type, name, argument, concurrentStatements);
     if (concurrentStatements) {
       concurrentStatementsDefinition(parm, *concurrentStatements);

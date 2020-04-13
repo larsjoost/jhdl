@@ -256,7 +256,7 @@ namespace generator {
 	};
       std::string class_description = "struct " + class_name;
       defineObject(parm, true, name, type, "", &class_description, NULL,
-                   &package->declarations, NULL, callback, false, true);
+                   &package->declarations, NULL, [&](parameters& parm){}, callback, false, true);
       if (type == ast::ObjectType::PACKAGE_BODY) {
 	std::string l = NameConverter::toUpper(library);
 	std::string declaration = l + "::" + class_name + " " + l + "_" + name + ";";
@@ -304,6 +304,7 @@ namespace generator {
     defineObject(parm, true, name, type, "", &class_description, NULL,
 		 NULL,
 		 NULL,
+		 [&](parameters& parm){},
 		 callback,
 		 false, true);
     topHierarchyEnd(parm, &interface->name->text, true);
@@ -337,7 +338,8 @@ namespace generator {
       defineObject(parm, true, architecture_name, type, entity_name, &class_description, NULL,
                    &implementation->declarations,
                    &implementation->concurrentStatements,
-                   callback,
+		   [&](parameters& parm){},
+		   callback,
                    false, true);
       topHierarchyEnd(parm, &implementation->architecture_name->text);
       m_debug.functionEnd("implementationDeclaration");

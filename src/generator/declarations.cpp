@@ -529,8 +529,10 @@ namespace generator {
         std::string interface_with_initialization = "(" + GetInterface(parm, function_declaration->interface, true) + ")";
         std::string interface_without_initialization = "(" + GetInterface(parm, function_declaration->interface, false) + ")";
         if (function_declaration->body) {
-          auto callback = [&](parameters& parm) {
+          auto initial_callback = [&](parameters& parm) {
             PrintInterface(parm, function_declaration->interface);
+          };
+          auto body_callback = [&](parameters& parm) {
             if (function_declaration->body) {
               std::string foreignFunctionName = functionAttribute(parm, origin_name, type, function_interface, &text);
               std::string interface = package_body ? interface_without_initialization : interface_with_initialization;
@@ -553,7 +555,8 @@ namespace generator {
             }
           };
 	  defineObject(parm, false, class_name, type, "", NULL, NULL,
-                       &function_declaration->body->declarations, NULL, callback, false, true);
+                       &function_declaration->body->declarations, NULL,
+		       initial_callback, body_callback, false, true);
         } 
         std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
         if (function_declaration->body) {

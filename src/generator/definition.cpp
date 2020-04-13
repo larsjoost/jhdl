@@ -20,6 +20,7 @@ namespace generator {
 		   NULL, NULL, 
                    &blockStatement->declarations,
                    &blockStatement->concurrentStatements,
+		   [&](parameters& parm){},
                    [&](parameters& parm){},
 		   false, true);
     }
@@ -63,6 +64,7 @@ namespace generator {
 		   NULL, &identifier,
                    &forGenerateStatement->declarations,
                    &forGenerateStatement->concurrentStatements,
+		   [&](parameters& parm){},
 		   callback, false, true);
     }
   }
@@ -99,7 +101,8 @@ namespace generator {
     std::string class_description = "struct " + class_name;
     defineObject(parm, false, name, type, "",
 		 &class_description, NULL,
-		 declarations, NULL, callback, true, true);
+		 declarations, NULL, [&](parameters& parm){},
+		 callback, true, true);
     bool spawn_method = !parm.process_contains_wait;
     std::list<std::string>* actual_sensitivity_list = (sensitivity_all ? &signal_list : sensitivity_list);
     instantiateType(parm, name, ast::ObjectType::PROCESS, actual_sensitivity_list);

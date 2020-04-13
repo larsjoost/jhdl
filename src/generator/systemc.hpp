@@ -163,7 +163,8 @@ namespace generator {
     std::string getArgumentNames(parameters& parm, ast::InterfaceList* interface);
     std::string getArgumentTypes(parameters& parm, ast::List<ast::SimpleIdentifier>* arguments);
     void generateObjectInterface(parameters& parm, ast::List<ast::SimpleIdentifier>* args, ast::ObjectInterface& interface);
-    void generateObjectInterface(parameters& parm, ast::InterfaceList* interface_list, ast::ObjectInterface& interface);
+    void generateObjectInterface(parameters& parm, ast::InterfaceList* interface_list,
+				 ast::ObjectInterface& interface);
     std::string functionAttribute(parameters& parm, std::string& name, ast::ObjectType type,
                                   ast::ObjectInterface& interface, ast::Text* text);
     std::string function_attribute(parameters& parm, DatabaseElement* e, std::string& interface);
@@ -184,9 +185,11 @@ namespace generator {
     void createThread(parameters& parm, std::string& name, T sensitivity,
                       ast::List<ast::Declaration>* declarationList,
                       Func body);  
-    bool getObjectName(parameters& parm, std::string& name, ast::ObjectValueContainer& type, ast::ObjectType id, ast::Text* text = NULL);
-    bool getObjectName(parameters& parm, std::string& name, ast::ObjectType id, ast::Text* text = NULL);
-    template <typename Func>
+    bool getObjectName(parameters& parm, std::string& name, ast::ObjectValueContainer& type,
+		       ast::ObjectType id, ast::Text* text = NULL);
+    bool getObjectName(parameters& parm, std::string& name, ast::ObjectType id,
+		       ast::Text* text = NULL);
+    template <typename F1, typename F2>
     void defineObject(parameters& parm,
                       bool topHierarchy,
                       std::string name,
@@ -196,10 +199,12 @@ namespace generator {
 		      std::string* argument,
                       ast::List<ast::Declaration>* declarations,
                       ast::List<ast::ConcurrentStatement>* concurrentStatements,
-                      Func callback,
+                      F1 initial_callback,
+                      F2 body_callback,
                       bool wait_statements,
                       bool init_enable);
-    void forGenerateStatementDefinition(parameters& parm, ast::ForGenerateStatement* forGenerateStatement);
+    void forGenerateStatementDefinition(parameters& parm,
+					ast::ForGenerateStatement* forGenerateStatement);
     void blockStatementDefinition(parameters& parm, ast::BlockStatement* blockStatement);
     void concurrentSignalAssignment(parameters& parm, ast::SignalAssignment* s);
     void processDefinition(parameters& parm, ast::Process* process);
