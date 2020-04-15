@@ -54,7 +54,7 @@ namespace vhdl {
 
   template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
   class Enumeration {
-
+    
     Debug<true> m_debug;
     std::string m_name;
     
@@ -266,7 +266,7 @@ namespace vhdl {
     }
 
     inline void operator=(bool v) {
-      m_value = v ? (T)1 : (T)0;
+      m_value = (int)v;
     }
 
     inline void operator=(const Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE> &other) { m_value = other.m_value; }
@@ -425,6 +425,7 @@ namespace vhdl {
 
   template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
   Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::Array<CHAR_SIZE> Enumeration<T, E, SIZE, ENUM_SIZE, CHAR_SIZE>::char_position_lookup;
+
 }
 
 #endif

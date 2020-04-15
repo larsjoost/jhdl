@@ -232,6 +232,9 @@ namespace generator {
 				 ast::ObjectValueContainer& type,
 				 ExpectedType* expected_type = NULL);
     
+    std::string translateUserDefinedOperator(parameters& parm,
+					     std::string& op);
+
     std::string translateOperator(parameters& parm,
 				  std::string& op);
 
@@ -426,13 +429,32 @@ namespace generator {
         }
       }
     } else {
-      ExpectedType expected_type_left(typePairs.back().left);
+      ast::ObjectValueContainer l = typePairs.back().left;
+      ast::ObjectValueContainer r = typePairs.back().right;
+      ExpectedType expected_type_left(l);
+      ExpectedType expected_type_right(r);
       std::string term = expressionTermToString(parm, e->term, expected_type_left, sensitivityListCallback);
-      ExpectedType expected_type_right(typePairs.back().right);
       std::string expr = expressionToString(parm, e->expression, expected_type_right, sensitivityListCallback);
-      std::string op;
-      op = translateOperator(parm, e->op->op);
-      result = term + " " + op + " " + expr;
+      ast::ObjectArguments arguments;
+      ast::ObjectArgument left_argument(l);
+      ast::ObjectArgument right_argument(r);
+      arguments.add(left_argument);
+      arguments.add(right_argument);
+      auto valid =
+	[&](DatabaseElement* e)
+	{
+	  bool result = objectWithArguments(parm, e, arguments, &expected_type, e->text);
+	  return result;
+	};
+      DatabaseResult object;
+      std::string op = translateUserDefinedOperator(parm, e->op->op);
+      if (parm.findOneBase(object, op, valid)) {
+	result = op + "(" + term + ", " + expr + ")";
+      } else {
+	// TODO: Check if built-in operation exists
+	op = translateOperator(parm, e->op->op);
+	result = term + " " + op + " " + expr;
+      }
     }
     m_debug.functionEnd("operationToString");
     return result;

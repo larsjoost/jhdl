@@ -212,6 +212,20 @@ namespace generator {
     m_debug.functionEnd("FunctionReturnTypes = " + return_types.toString());
   }
 
+  std::string ExpressionParser::translateUserDefinedOperator(parameters& parm,
+						  std::string& op) {
+    static std::unordered_map<std::string, std::string> translate =
+      { {"/=", "Neq"}, {"=", "Eq"}, {">=", "Ge"}, {"+", "Add"}, {"-", "Sub"}, {"&", "Concat"}, {"**", "Pow"}, {"and", "And"}, {"or", "Or"} };
+    auto i = translate.find(op);
+    std::string result = op;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    result[0] = toupper(result[0]);
+    if (i != translate.end()) {
+      result  = i->second;
+    }
+    return result;
+  }
+
   std::string ExpressionParser::translateOperator(parameters& parm,
 						  std::string& op) {
     static std::unordered_map<std::string, std::string> translate =

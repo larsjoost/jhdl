@@ -511,7 +511,7 @@ namespace generator {
       std::string translatedName = origin_name;
       std::string class_name = origin_name;
       if (operatorName) {
-        translatedName = "operator " + a_expression.translateOperator(parm, origin_name);
+        translatedName = a_expression.translateUserDefinedOperator(parm, origin_name);
         class_name = "line" + std::to_string(text.getLine());
       } 
       ast::ObjectInterface function_interface;
@@ -561,12 +561,11 @@ namespace generator {
         std::string interface = "(" + GetInterface(parm, function_declaration->interface, !package_body, class_name + "::") + ")";
         if (function_declaration->body) {
 	  m_debug.debug("Function declaration body");
-	  parm.addClassContents((operatorName ? "friend " : "") +
-				localReturnTypeName + " " +
+	  parm.addClassContents(localReturnTypeName + " " +
 				translatedName + interface + ";", __FILE__, __LINE__);
           std::string global_prefix = parm.hierarchyToString("::", true) + "::";
 	  parm.addImplementationContents(globalReturnTypeName + " " +
-					 (operatorName ? "" : global_prefix) + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
+					 global_prefix + translatedName + interface_without_initialization + " {", __FILE__, __LINE__);
           parm.addImplementationContents("auto inst = " + NameConverter::objectName(type, class_name) + "(this);", __FILE__, __LINE__);
           std::string s,d;
           for (auto& i : function_interface.getList()) {
@@ -577,7 +576,7 @@ namespace generator {
           parm.addImplementationContents(r + "inst.run(" + s + ");", __FILE__, __LINE__);
           parm.addImplementationContents("}", __FILE__, __LINE__);
         } else {
-	  parm.addClassContents("virtual " + std::string(operatorName ? "friend " : "") + localReturnTypeName + " " +
+	  parm.addClassContents("virtual " + localReturnTypeName + " " +
 				translatedName + interface + " = 0;", __FILE__, __LINE__);
 	}
       }
