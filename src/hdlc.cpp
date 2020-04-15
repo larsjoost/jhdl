@@ -7,6 +7,7 @@
 #include <iostream>
 #include "parser/design_file.hpp"
 #include "generator/systemc.hpp"
+#include "generator/name_converter.hpp"
 #include "ast/scanner.hpp"
 #include "version/version.h"
 #include "debug/debug.hpp"
@@ -43,7 +44,7 @@ main (int argc, char **argv)
         filename = optarg;
         break;
       case 'l':
-        library = optarg;
+        library = generator::NameConverter::toUpper(optarg);
         break;
       case 'c':
         configurationFilename = optarg;
