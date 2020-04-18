@@ -28,6 +28,7 @@ namespace ast {
   class ObjectValueContainer {
     ObjectValue a_value = ObjectValue::UNKNOWN;
     std::string a_type_name;
+    std::string m_resolution_function_name;
   public:
     class IndexOutOfRange {};
     typedef std::list<ObjectValueContainer> Array;
@@ -83,8 +84,12 @@ namespace ast {
       a_arguments = other.a_arguments;
       a_subtype = other.a_subtype;
     }
+    void setResolutionFunctionName(std::string& name) {
+      m_resolution_function_name = name;
+    }
+    bool isResolved() const { return !m_resolution_function_name.empty(); }
     bool IsValue(ObjectValue other) const {return a_value == other; }
-    bool isArray() { return IsValue(ObjectValue::ARRAY); }
+    bool isArray() const { return IsValue(ObjectValue::ARRAY); }
     bool IsArrayWithDimension(const int dim) {
       return IsValue(ObjectValue::ARRAY) && (a_arguments.size() == 1) && !SubtypeIsValue(ObjectValue::ARRAY);
     }
@@ -178,6 +183,7 @@ namespace ast {
     };
     ObjectArguments() {}
     void add(ObjectArgument& o) {m_elements.push_back(o);}
+    void add(ObjectValueContainer& o) {ObjectArgument a(o); add(a);}
     bool empty() { return m_elements.empty(); }
     int size() const { return m_elements.size(); }
     const std::list<ObjectArgument>& getList() const { return m_elements; }

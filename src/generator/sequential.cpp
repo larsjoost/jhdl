@@ -37,7 +37,7 @@ namespace generator {
     if (p) {
       m_debug.functionStart("variableAssignment");
       assignment(parm, p->assignment, p->target, ast::ObjectType::VARIABLE, sequential_list,
-		 [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";});
+		 [](DatabaseResult& object, std::string& name_extension) {name_extension = ".read()";}, false);
       m_debug.functionEnd("variableAssignment");
     }
   }

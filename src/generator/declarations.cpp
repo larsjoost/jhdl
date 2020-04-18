@@ -664,10 +664,34 @@ namespace generator {
     std::string type_name = t->type->name->toString(true);
     DatabaseResult database_result;
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
-      std::string type_name = NameConverter::getName(parm, database_result, false);
-      parm.addObjectValueContainer(ast::ObjectType::TYPE, name, database_result.object->type);
+      ast::ObjectValueContainer subtype = database_result.object->type;
+      std::string type_using_name = NameConverter::getName(parm, database_result, false);
+      if (t->resolution_function) {
+	type_using_name = "vhdl::Resolved<" + type_name + ">";
+	std::string resolution_function_name = t->resolution_function->toString(true);
+	subtype.setResolutionFunctionName(resolution_function_name);
+	ast::ObjectValueContainer::Array array_arguments;
+	ast::ObjectValueContainer integer_type(ast::ObjectValue::INTEGER);
+	array_arguments.push_back(integer_type);
+	auto resolution_function_arguments = ast::ObjectValueContainer(ast::ObjectValue::ARRAY, array_arguments, database_result.object->type);
+	ast::ObjectArguments arguments;
+	arguments.add(resolution_function_arguments);
+	auto valid =
+	  [&](DatabaseElement* e) {
+	    bool match = (e->id == ast::ObjectType::FUNCTION) && e->interface.matches(arguments);
+	    m_debug.debug((match ? "Match = " : "Different = ") + e->toString(), true,
+			  match ? Output::Color::GREEN : Output::Color::RED);
+	    return match;
+	  };
+	DatabaseResult resolution_function_database_result;
+   	if (!parm.findOneBase(resolution_function_database_result, resolution_function_name, valid)) {
+	  exceptions.printError("Could not find resolution function " + resolution_function_name + " with arguments: " + arguments.toString(),
+				&t->resolution_function->text);
+	}
+      }
+      parm.addObjectValueContainer(ast::ObjectType::TYPE, name, subtype);
       parm.addClassContents(getSourceLine(t->identifier), __FILE__, __LINE__);
-      parm.addClassContents("using " + name + " = " + type_name + ";", __FILE__, __LINE__);
+      parm.addClassContents("using " + name + " = " + type_using_name + ";", __FILE__, __LINE__);
       printFactory(parm, name, t->type->range, NULL, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);

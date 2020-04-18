@@ -44,15 +44,21 @@ namespace generator {
 
   template<typename Func>
   void SystemC::assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type,
-			   std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
+			   std::list<std::string>& sequential_list, Func sensitivity_list_callback, bool signal_assignment) {
     m_debug.functionStart("assignment", false, __FILE__, __LINE__);
     std::string command = "if";
     std::string noConditionCommand = "";
     std::string noConditionDelimiter = "";
 
     try {
-     std::string name = a_expression.basicIdentifierToString(parm, target);
-     parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
+      DatabaseResult database_result;
+      std::string name = a_expression.basicIdentifierToString(parm, target, database_result);
+      if (signal_assignment) {
+	std::string hierarchy = parm.hierarchyToString();
+	int current_index = database_result.object->getSignalAssignmentIndex(hierarchy, &target->getText());
+	name += "[" + std::to_string(current_index) + "]";
+      }
+      parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
       ast::ReturnTypes return_types;
       a_expression.basicIdentifierReturnTypes(parm, target, return_types);
       ast::ObjectTypes expectedType;
@@ -90,7 +96,7 @@ namespace generator {
   void SystemC::signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback) {
     if (p) {
       m_debug.functionStart("signalAssignment", false, __FILE__, __LINE__);
-      assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, sequential_list, sensitivity_list_callback);
+      assignment(parm, p->assignment, p->target, ast::ObjectType::SIGNAL, sequential_list, sensitivity_list_callback, true);
       m_debug.functionEnd("signalAssignment");
     }
   }

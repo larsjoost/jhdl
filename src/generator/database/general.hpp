@@ -14,17 +14,24 @@
 
 namespace generator {
 
+  struct SignalAssignmentContainer {
+    ast::Text* text;
+    int index;
+  };
+  
   struct DatabaseElement {
     ast::ObjectType id;
     std::string name;
     ast::ObjectInterface interface;
     ast::ObjectValueContainer type;
-    bool visible;
+    bool visible = false;
     ast::Attribute* attribute = NULL;
-    ast::FunctionDeclaration* function;
-    ast::Text* text;
+    ast::FunctionDeclaration* function = NULL;
+    std::unordered_map<std::string, SignalAssignmentContainer> signal_assignments;
+    ast::Text* text = NULL;
     void print();
     std::string toString();
+    int getSignalAssignmentIndex(std::string& name, ast::Text* text);
   };
   
   struct DatabaseResult {

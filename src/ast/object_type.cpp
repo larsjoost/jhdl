@@ -90,7 +90,8 @@ namespace ast {
   
   std::string ObjectValueContainer::toString(bool verbose) const {
     if (verbose) {
-      return "a_value = " + ast::toString(a_value) + ", a_type_name = \"" + a_type_name + "\", a_arguments = (" + toString(a_arguments) + "), a_subtype = (" + toString(a_subtype, verbose) + ")";
+      std::string resolution_function_name = isResolved() ? ", m_resolution_function_name = " + m_resolution_function_name : "";
+      return "a_value = " + ast::toString(a_value) + ", a_type_name = \"" + a_type_name + "\", a_arguments = (" + toString(a_arguments) + "), a_subtype = (" + toString(a_subtype, verbose) + resolution_function_name + ")";
     } else {
       if (a_value == ObjectValue::USER_TYPE) {
         return a_type_name + "(User type)";

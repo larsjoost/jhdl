@@ -36,7 +36,12 @@ namespace generator {
   void LocalDatabase::add(ast::ObjectType id, std::string& name, ast::ObjectValueContainer type,
                           ast::ObjectInterface interface, ast::Text* text) {
     m_debug.functionStart("add(name = " + name + ")", false, __FILE__, __LINE__);
-    DatabaseElement e = {id, name, interface, type, false, NULL, NULL, text};
+    DatabaseElement e;
+    e.id = id;
+    e.name = name;
+    e.interface = interface;
+    e.type = type;
+    e.text = text;
     add(name, e);
     m_debug.functionEnd("add");
   }
@@ -91,8 +96,13 @@ namespace generator {
                                   ast::ObjectValueContainer returnType,
                                   ast::FunctionDeclaration* function,
                                   ast::Text* text) {
-    DatabaseElement e = {type, name, interface,
-                         returnType, false, NULL, function, text};
+    DatabaseElement e;
+    e.id = type;
+    e.name = name;
+    e.interface = interface;
+    e.type = returnType;
+    e.function = function;
+    e.text = text;
     add(name, e);
   };
 

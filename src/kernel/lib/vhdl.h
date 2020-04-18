@@ -17,6 +17,7 @@
 #include "vhdl_file.hpp"
 #include "vhdl_interface.hpp"
 #include "vhdl_exception.hpp"
+#include "vhdl_resolved.hpp"
 
 namespace vhdl {
   

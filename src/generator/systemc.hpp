@@ -86,7 +86,7 @@ namespace generator {
     // sequential.cpp
     template<typename Func>
     void assignment(parameters& parm, ast::Assignment* p, ast::BasicIdentifier* target, ast::ObjectType object_type, std::list<std::string>& sequential_list,
-		    Func sensitivity_list_sensitivity_list_callback);
+		    Func sensitivity_list_sensitivity_list_callback, bool signal_assignment);
     template<typename Func>
     void signalAssignment(parameters& parm, ast::SignalAssignment* p, std::list<std::string>& sequential_list, Func sensitivity_list_callback);
     template<typename Func>

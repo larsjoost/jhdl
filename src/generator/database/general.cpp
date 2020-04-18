@@ -16,6 +16,22 @@ namespace generator {
     return ast::toString(id) + " " + name + args + ": " + type.toString() + attr + " (" + v + ")";
   }
 
+  int DatabaseElement::getSignalAssignmentIndex(std::string& name, ast::Text* text) {
+    int current_index;
+    auto signal_assignment = signal_assignments.find(name);
+    if (signal_assignment != signal_assignments.end()) {
+      current_index = signal_assignment->second.index++;
+      signal_assignment->second.text = text;
+    } else {
+      SignalAssignmentContainer x;
+      x.text = text;
+      x.index = signal_assignments.size();
+      current_index = x.index;
+      signal_assignments[name] = x;
+    }
+    return current_index;
+  }
+  
   std::string DatabaseResult::toString() {
     std::string l = local ? "local" : "global"; 
     std::string s = object ? (hierarchyToString("", ".") + " " + object->toString() + " (" + l + ") [" + (valid ? "valid" : "invalid") + "] [hierarchy = " + std::to_string(hierarchySize()) + "]") : "NIL";

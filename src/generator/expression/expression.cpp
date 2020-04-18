@@ -550,6 +550,11 @@ namespace generator {
                                                         ExpectedType* expected_type) {
     return basicIdentifierToString(parm, identifier, expected_type, [](DatabaseResult& r, std::string& name_extension) {});
   }
-      
+  
+  std::string ExpressionParser::basicIdentifierToString(parameters& parm,
+							ast::BasicIdentifier* identifier,
+							DatabaseResult& database_result) {
+    return basicIdentifierToString(parm, identifier, NULL, database_result, [](DatabaseResult& r, std::string& name_extension) {});
+  }
 
 }

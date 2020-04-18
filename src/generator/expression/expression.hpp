@@ -125,6 +125,11 @@ namespace generator {
 				       std::string assignment_name = "");
   public:
     template <typename Func>
+    std::string basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier,
+					ExpectedType* expected_type,
+					DatabaseResult& database_result,
+					Func sensitivityListCallback);
+    template <typename Func>
     std::string basicIdentifierToString(parameters& parm,
 					ast::BasicIdentifier* identifier,
 					ExpectedType* expected_type,
@@ -132,6 +137,10 @@ namespace generator {
     std::string basicIdentifierToString(parameters& parm,
 					ast::BasicIdentifier* identifier,
 					ExpectedType* expected_type = NULL);
+
+    std::string basicIdentifierToString(parameters& parm,
+					ast::BasicIdentifier* identifier,
+					DatabaseResult& database_result);
   private:
     template <typename Func>
     std::string objectToString(parameters& parm,
@@ -605,6 +614,15 @@ namespace generator {
   std::string ExpressionParser::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier,
 							ExpectedType* expected_type,
                                                         Func sensitivityListCallback) {
+    DatabaseResult database_result;
+    return basicIdentifierToString(parm, identifier, expected_type, database_result, sensitivityListCallback);
+  }
+  
+  template <typename Func>
+  std::string ExpressionParser::basicIdentifierToString(parameters& parm, ast::BasicIdentifier* identifier,
+							ExpectedType* expected_type,
+							DatabaseResult& database_result,
+                                                        Func sensitivityListCallback) {
     std::string name = identifier->toString(true);
     ast::ObjectArguments arguments;
     toObjectArguments(parm, identifier->arguments, arguments);
@@ -620,13 +638,12 @@ namespace generator {
 	  bool result = objectWithArguments(parm, e, arguments, expected_type, &identifier->getText());
 	  return result;
 	};
-      DatabaseResult object;
-      if (parm.findOneBase(object, name, valid)) {
+      if (parm.findOneBase(database_result, name, valid)) {
 	std::string name_extension;
-	if (object.object->id == ast::ObjectType::SIGNAL || object.object->id == ast::ObjectType::PORT) {
-	  sensitivityListCallback(object, name_extension);
+	if (database_result.object->id == ast::ObjectType::SIGNAL || database_result.object->id == ast::ObjectType::PORT) {
+	  sensitivityListCallback(database_result, name_extension);
         }
-        name = objectToString(parm, object, identifier->arguments, sensitivityListCallback) + name_extension;
+        name = objectToString(parm, database_result, identifier->arguments, sensitivityListCallback) + name_extension;
       } else {
 	std::string args = arguments.toString();
 	args = args.empty() ? "" : "(" + args + ")";
