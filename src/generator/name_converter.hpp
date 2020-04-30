@@ -41,6 +41,8 @@ namespace generator {
 
     static std::string getFactoryInstanceName(std::string s);
 
+    static std::string getResolvedName(std::string s);
+    
     static std::string listAppend(std::string& e);
 
     static std::string makeStringPrintable(std::string s);

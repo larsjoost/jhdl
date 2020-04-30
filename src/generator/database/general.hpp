@@ -31,7 +31,7 @@ namespace generator {
     ast::Text* text = NULL;
     void print();
     std::string toString();
-    int getSignalAssignmentIndex(std::string& name, ast::Text* text);
+    void setSignalAssignment(std::string& name, ast::Text* text);
   };
   
   struct DatabaseResult {

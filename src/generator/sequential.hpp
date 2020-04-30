@@ -53,10 +53,10 @@ namespace generator {
     try {
       DatabaseResult database_result;
       std::string name = a_expression.basicIdentifierToString(parm, target, database_result);
-      if (signal_assignment) {
+      if (signal_assignment && database_result.object->type.isResolved()) {
 	std::string hierarchy = parm.hierarchyToString();
-	int current_index = database_result.object->getSignalAssignmentIndex(hierarchy, &target->getText());
-	name += "[" + std::to_string(current_index) + "]";
+	database_result.object->setSignalAssignment(hierarchy, &target->getText());
+	name = NameConverter::getResolvedName(name);
       }
       parm.addTextToList(sequential_list, getSourceLine(target), __FILE__, __LINE__);
       ast::ReturnTypes return_types;
@@ -75,7 +75,9 @@ namespace generator {
 	  } else {
 	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
-	  parm.addTextToList(sequential_list, name + " = " + a_expression.assignmentString(parm, s.expression, expected_type, sensitivity_list_callback, name) + ";", __FILE__, __LINE__, false, &target->getText());
+	  std::string a = a_expression.assignmentString(parm, s.expression, expected_type, sensitivity_list_callback, name);
+	  parm.addTextToList(sequential_list, name + ".assign(this, " + a + ");",
+			     __FILE__, __LINE__, false, &target->getText());
 	  if (s.condition) {
 	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
 	  } else {

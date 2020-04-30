@@ -331,6 +331,7 @@ namespace generator {
 	[&](parameters& parm) {
 	  std::string derived_class = NameConverter::objectName(ast::ObjectType::ENTITY, entity_name);
 	  parm.addDerivedClass(derived_class);
+	  parm.addDerivedClass("vhdl::Architecture");
 	  parm.setClassConstructorDescription(class_name + "(const sc_module_name& name)");
 	  parm.addClassConstructorInitializer(derived_class + "(name)");
 	};

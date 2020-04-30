@@ -18,6 +18,8 @@
 #include "vhdl_interface.hpp"
 #include "vhdl_exception.hpp"
 #include "vhdl_resolved.hpp"
+#include "vhdl_process.hpp"
+#include "vhdl_architecture.hpp"
 
 namespace vhdl {
   

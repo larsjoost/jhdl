@@ -665,9 +665,11 @@ namespace generator {
     DatabaseResult database_result;
     if (parm.findOne(database_result, type_name, ast::ObjectType::TYPE)) {
       ast::ObjectValueContainer subtype = database_result.object->type;
-      std::string type_using_name = NameConverter::getName(parm, database_result, false);
+      type_name = NameConverter::getName(parm, database_result, false);
       if (t->resolution_function) {
-	type_using_name = "vhdl::Resolved<" + type_name + ">";
+	std::string resolved_type_name = "vhdl::Resolved<" + type_name + ">";
+	std::string resolved_name = NameConverter::getResolvedName(name);
+	parm.addClassContents("using " + resolved_name + " = " + resolved_type_name + ";", __FILE__, __LINE__);
 	std::string resolution_function_name = t->resolution_function->toString(true);
 	subtype.setResolutionFunctionName(resolution_function_name);
 	ast::ObjectValueContainer::Array array_arguments;
@@ -691,7 +693,7 @@ namespace generator {
       }
       parm.addObjectValueContainer(ast::ObjectType::TYPE, name, subtype);
       parm.addClassContents(getSourceLine(t->identifier), __FILE__, __LINE__);
-      parm.addClassContents("using " + name + " = " + type_using_name + ";", __FILE__, __LINE__);
+      parm.addClassContents("using " + name + " = " + type_name + ";", __FILE__, __LINE__);
       printFactory(parm, name, t->type->range, NULL, database_result.object->type);
     } else {
       exceptions.printError("Could not find type \"" + type_name + "\"", &t->identifier->text);

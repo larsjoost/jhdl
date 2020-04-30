@@ -127,6 +127,10 @@ namespace generator {
     return toLower(library) + "_" + replaceFileExtension(toLower(file_name), ".hpp");
   }
 
+  std::string NameConverter::getResolvedName(std::string s) {
+    return s + "_Resolved";
+  }
+  
   std::string NameConverter::objectName(ast::ObjectType type, const std::string& name) {
     return objectTypeToString(type) + "_" + name;
   }

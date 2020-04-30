@@ -65,7 +65,7 @@ namespace ast {
       a_type_name = type_name;
     }
     ObjectValueContainer(const ObjectValueContainer& value) {
-      set(value);
+      *this = value;
     }
     bool numberEquals(ObjectValue l, ObjectValue r) const;
     bool equals(const Array& l, const Array& r) const;
@@ -77,12 +77,6 @@ namespace ast {
     }
     inline bool operator!=(const ObjectValueContainer& other) const {
       return !equals(other);
-    }
-    void set(const ObjectValueContainer& other) {
-      a_value = other.a_value;
-      a_type_name = other.a_type_name;
-      a_arguments = other.a_arguments;
-      a_subtype = other.a_subtype;
     }
     void setResolutionFunctionName(std::string& name) {
       m_resolution_function_name = name;
@@ -109,7 +103,7 @@ namespace ast {
         result = false;
       } else {
         assert(a_subtype.size() == 1);
-        other.set(a_subtype.front());
+        other = a_subtype.front();
       }
       return result;
     }
