@@ -14,6 +14,11 @@ namespace vhdl {
   public:
     Resolved() : m_debug(this) {}
 
+    template<typename Object>
+    void assign(Object* object, auto value) {
+      
+    }
+    
     
   };
 

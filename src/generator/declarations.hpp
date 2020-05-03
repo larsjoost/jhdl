@@ -29,14 +29,14 @@ namespace generator {
 	    ", " + range_definition.ascending;
         }
         std::string factory_name = NameConverter::getName(parm, database_result, true, factory_arguments);
-	ast::ObjectValueContainer x = database_result.object->type;
-	if (x.GetTypeName().empty()) { 
-	  x.setTypeName(type_name);
+	ast::ObjectValueContainer type = database_result.object->type;
+	if (type.GetTypeName().empty()) { 
+	  type.setTypeName(type_name);
 	}
         for (ast::SimpleIdentifier& id : v->identifiers.list) {
           std::string name = id.toString(true);
-          m_debug.debug("Name = " + name + ", type = " + type_name, __FILE__, __LINE__);
-          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, x, ast::ObjectInterface(), v->text);}
+          m_debug.debug("Object name = " + name + ", type = " + type_name, __FILE__, __LINE__);
+          if (database_enable) {parm.addObjectValueContainer(v->objectType, name, type, ast::ObjectInterface(), v->text);}
           std::string init = "";
           if (v->initialization) {
             auto sensitivity_list_callback = 
@@ -46,7 +46,7 @@ namespace generator {
 						 sensitivity_list_callback, name);
             m_debug.debug("Init = " + init, __FILE__, __LINE__);
           }
-          callback(name, type_name, init, factory_name, v->objectType, v->direction);
+          callback(name, type, type_name, init, factory_name, v->objectType, v->direction);
         }
       } else {
         exceptions.printError("Could not find type \"" + type_name + "\"", v->text);

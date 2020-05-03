@@ -47,8 +47,8 @@ namespace generator {
 			   std::list<std::string>& sequential_list, Func sensitivity_list_callback, bool signal_assignment) {
     m_debug.functionStart("assignment", false, __FILE__, __LINE__);
     std::string command = "if";
-    std::string noConditionCommand = "";
-    std::string noConditionDelimiter = "";
+    std::string noConditionCommand;
+    std::string noConditionDelimiter;
 
     try {
       DatabaseResult database_result;
@@ -72,15 +72,20 @@ namespace generator {
 	    command = "else if";
 	    noConditionCommand = "else {";
 	    noConditionDelimiter = "}";
-	  } else {
+	  } else if (!noConditionCommand.empty()) {
 	    parm.addTextToList(sequential_list, noConditionCommand, __FILE__, __LINE__);
 	  }
 	  std::string a = a_expression.assignmentString(parm, s.expression, expected_type, sensitivity_list_callback, name);
-	  parm.addTextToList(sequential_list, name + ".assign(this, " + a + ");",
-			     __FILE__, __LINE__, false, &target->getText());
+	  if (signal_assignment) {
+	    parm.addTextToList(sequential_list, name + ".assign(this, " + a + ");",
+			       __FILE__, __LINE__, false, &target->getText());
+	  } else {
+	    parm.addTextToList(sequential_list, name + " = " + a + ";",
+			       __FILE__, __LINE__, false, &target->getText());
+	  }
 	  if (s.condition) {
 	    parm.addTextToList(sequential_list, "}", __FILE__, __LINE__);
-	  } else {
+	  } else if (!noConditionDelimiter.empty()) {
 	    parm.addTextToList(sequential_list, noConditionDelimiter, __FILE__, __LINE__);
 	  }
 	}

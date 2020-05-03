@@ -94,7 +94,6 @@ namespace generator {
       [&](parameters& parm) {
 	parm.addDerivedClass("vhdl::Process");
 	parm.addClassConstructorInitializer("Process(parent)");
-	parm.addClassConstructorContents("setProcessId();", __FILE__, __LINE__);
 	parm.addClassContents("void run();", __FILE__, __LINE__);
 	std::string prefix = parm.hierarchyToString("::", true);
 	parm.addImplementationContents("void " + prefix + "::run() {", __FILE__, __LINE__);

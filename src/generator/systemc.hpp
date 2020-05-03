@@ -143,6 +143,7 @@ namespace generator {
                                       bool database_enable = true);
     
     // declarations.cpp
+    std::string getSignalType(std::string& type);
     void printFactory(parameters& parm, const std::string& name, 
                       ast::RangeType* range, ast::SimpleIdentifier* identifier,
                       ast::ObjectValueContainer& expected_type,
@@ -317,11 +318,11 @@ namespace generator {
     if (l) {
       std::string x = "";
       std::string d = "";
-      auto func = [&](std::string& name,
-                      std::string& type, std::string& init, std::string& factory_name, 
+      auto func = [&](std::string& name, ast::ObjectValueContainer& type,
+		      std::string& type_name, std::string& init, std::string& factory_name, 
                       ast::ObjectType id, ast::ObjectDeclaration::Direction direction) {
         std::string x = (initialization && !init.empty()) ? " = " + init : "";
-        s += d + typeConverter(type, id, direction) + " " + name + x;
+	s += d + typeConverter(type_name, id, direction) + " " + name + x;
         d = delimiter;
       };
       traverseInterfaceList(parm, l, func, local_prefix, database_enable);

@@ -667,9 +667,6 @@ namespace generator {
       ast::ObjectValueContainer subtype = database_result.object->type;
       type_name = NameConverter::getName(parm, database_result, false);
       if (t->resolution_function) {
-	std::string resolved_type_name = "vhdl::Resolved<" + type_name + ">";
-	std::string resolved_name = NameConverter::getResolvedName(name);
-	parm.addClassContents("using " + resolved_name + " = " + resolved_type_name + ";", __FILE__, __LINE__);
 	std::string resolution_function_name = t->resolution_function->toString(true);
 	subtype.setResolutionFunctionName(resolution_function_name);
 	ast::ObjectValueContainer::Array array_arguments;
@@ -702,23 +699,36 @@ namespace generator {
     m_debug.functionEnd("subtype_declarations");
   }
 
+  std::string SystemC::getSignalType(std::string& type) {
+    return "vhdl::interface<sc_signal<" + type + ">, " + type + ">";
+  }
+  
   void SystemC::ObjectDeclarations(parameters& parm, ast::ObjectDeclaration* v) {
     if (v) {
       m_debug.functionStart("ObjectDeclarations", false, __FILE__, __LINE__);
-      auto func = [&](std::string& name, std::string& type, std::string& init,
-		      std::string& factory_name, ast::ObjectType id,
-                      ast::ObjectDeclaration::Direction direction) {
-        if (id == ast::ObjectType::SIGNAL) {
-          type = "vhdl::interface<sc_signal<" + type + ">, " + type + ">";
-        }
-	parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
-        parm.addClassContents(type + " " + name + ";", __FILE__, __LINE__);
-        parm.addClassConstructorInitializer(name + "(\"" + name + "\")");
-        parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);
-      	parm.addClassConstructorContents(name + ".constrain(" + factory_name + ");", __FILE__, __LINE__);
-        if (!init.empty()) {
-          parm.addClassConstructorContents(name + " = " + init + ";", __FILE__, __LINE__);
-        }
+      auto func =
+	[&](std::string& name, ast::ObjectValueContainer& type,
+	    std::string& type_name, std::string& init,
+	    std::string& factory_name, ast::ObjectType id,
+	    ast::ObjectDeclaration::Direction direction)
+	{
+	  parm.addClassContents(getSourceLine(v->text), __FILE__, __LINE__);
+	  std::string definition_type_name = type_name;
+	  if (id == ast::ObjectType::SIGNAL) {
+	    definition_type_name = getSignalType(type_name);
+	    if (type.isResolved()) {
+	      std::string resolved_name = NameConverter::getResolvedName(name);
+	      std::string resolved_type_name = "vhdl::Resolved<" + getSignalType(type_name) + ">";
+	      parm.addClassContents(resolved_type_name + " " + resolved_name + ";", __FILE__, __LINE__);
+	    }
+	  }
+	  parm.addClassContents(definition_type_name + " " + name + ";", __FILE__, __LINE__);
+	  parm.addClassConstructorInitializer(name + "(\"" + name + "\")");
+	  parm.addClassConstructorContents(getSourceLine(v->text), __FILE__, __LINE__);
+	  parm.addClassConstructorContents(name + ".constrain(" + factory_name + ");", __FILE__, __LINE__);
+	  if (!init.empty()) {
+	    parm.addClassConstructorContents(name + " = " + init + ";", __FILE__, __LINE__);
+	  }
       };
       ObjectDeclaration(parm, v, func);
       m_debug.functionEnd("ObjectDeclarations");
