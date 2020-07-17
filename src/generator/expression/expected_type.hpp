@@ -8,7 +8,7 @@ namespace generator {
 
   class ExpectedType {
 
-    Debug<true> m_debug;
+    Debug<false> m_debug;
   protected:
     bool m_is_array;
     ast::ObjectTypes m_types;

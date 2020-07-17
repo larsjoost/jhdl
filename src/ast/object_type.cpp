@@ -59,7 +59,7 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equals(const ObjectArguments& arguments) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equals(this = " + toString(true) + "; arguments = " + arguments.toString(true), false, __FILE__, __LINE__);
     bool result = true;
     if (a_arguments.size() >= arguments.size()) {
@@ -108,7 +108,7 @@ namespace ast {
   }
 
   void ObjectValueContainer::nextSubtype() {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("nextSubtype", false, __FILE__, __LINE__);
     debug.debug("this = " + this->toString(true));
     if (a_value == ObjectValue::ARRAY) {
@@ -138,7 +138,7 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equals(const Array& l, const Array& r) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equals", false, __FILE__, __LINE__);
     bool result = true;
     if (l.size() != r.size()) {
@@ -158,7 +158,7 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equals(const ObjectValueContainer& other) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equals(this = [" + toString(true) + "], other = [" + other.toString(true) + "])", false, __FILE__, __LINE__);
     bool verbose = false;
     bool result;
@@ -186,7 +186,7 @@ namespace ast {
   }
 
   bool ObjectValueContainer::equalsExact(const ObjectValueContainer& other) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equalsExact(this = " + toString(true) + ", other = " + other.toString(true) + ")", false, __FILE__, __LINE__);
     debug.debug("this = " + this->toString(true));
     bool match = (a_value == other.a_value);
@@ -216,7 +216,7 @@ namespace ast {
   }
   
   bool ObjectTypes::equalsExact(const ObjectValueContainer& x) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equalsExact(this = " + toString(true) + ", x = " + x.toString(true) + ")", false, __FILE__, __LINE__);
     bool result = false;
     for (auto& i: m_types) {
@@ -236,7 +236,7 @@ namespace ast {
   }
 
   void ObjectTypes::add(const ObjectValueContainer& x) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("add(x = " + x.toString(true) + ")", false, __FILE__, __LINE__);
     assert(!x.IsValue(ObjectValue::UNKNOWN));
     m_types.push_back(x);
@@ -244,7 +244,7 @@ namespace ast {
   }
 
   bool ObjectTypes::equals(const ObjectValueContainer& x) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equals(this = [" + toString(true) + "], x = [" + x.toString(true) + "])", false, __FILE__, __LINE__);
     bool result = false;
     for (auto& i: m_types) {
@@ -258,7 +258,7 @@ namespace ast {
   }
 
   bool ObjectTypes::equals(ObjectTypes& x) const {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("equals", false, __FILE__, __LINE__);
     bool result = false;
     for (auto& i: x.m_types) {
@@ -282,7 +282,7 @@ namespace ast {
   }
 
   bool ObjectTypes::isArray() {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("isArray", false, __FILE__, __LINE__);
     debug.debug("this = " + toString());
     assert(m_types.size() == 1);

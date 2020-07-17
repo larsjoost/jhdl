@@ -55,7 +55,7 @@ namespace vhdl {
   template <typename T, class E, int SIZE, int ENUM_SIZE, int CHAR_SIZE>
   class Enumeration {
     
-    Debug<true> m_debug;
+    Debug<false> m_debug;
     std::string m_name;
     
     template<int N>

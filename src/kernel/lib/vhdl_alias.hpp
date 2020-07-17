@@ -8,7 +8,7 @@ namespace vhdl {
 
   template<typename T>
   class Alias {
-    Debug<true> m_debug;
+    Debug<false> m_debug;
 
     T& m_value;
     T m_type;

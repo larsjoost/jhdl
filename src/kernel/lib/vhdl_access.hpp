@@ -22,7 +22,7 @@ namespace vhdl {
   template<class T>
   class vhdl_access {
 
-    Debug<true> m_debug;
+    Debug<false> m_debug;
     Exceptions m_exceptions;
 
     std::string m_name;

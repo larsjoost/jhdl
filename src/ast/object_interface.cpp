@@ -9,7 +9,7 @@
 namespace ast {
 
   int ObjectInterface::match(const ObjectArgument& association, int index) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("match(association = " + association.toString(true) +
 			", index = " + std::to_string(index) + ")", false, __FILE__, __LINE__);
     int result = -1;
@@ -40,7 +40,7 @@ namespace ast {
    */
   
   bool ObjectInterface::matches(ObjectArguments& association) {
-    Debug<true> debug = Debug<true>(this);
+    Debug<false> debug = Debug<false>(this);
     debug.functionStart("matches(this = " + toString() + ", association = " + association.toString() + ")", false, __FILE__, __LINE__);
     bool result = true;
     debug.debug("Interface = " + toString());

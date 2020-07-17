@@ -8,7 +8,7 @@ namespace vhdl {
 
   template<typename T>
   class Resolved {
-    Debug<true> m_debug;
+    Debug<false> m_debug;
 
     T m_value;
   public:

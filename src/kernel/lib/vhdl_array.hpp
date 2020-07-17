@@ -27,7 +27,7 @@ namespace vhdl {
   template<class RANGE, class SUBTYPE>
   class Array {
 
-    Debug<true> m_debug;
+    Debug<false> m_debug;
     Exceptions m_exceptions;
     
     inline void setAll(SUBTYPE& value) {
