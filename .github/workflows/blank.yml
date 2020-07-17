@@ -10,9 +10,6 @@ on:
   pull_request:
     branches: [ master ]
 
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -24,6 +21,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+	submodules: recursive
 
     # Install dependencies
     - name: Install boost
