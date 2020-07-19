@@ -17,7 +17,7 @@ INC := -L$(SYSTEMC)/lib64
 
 all: $(OBJS)
 
-$(HEADER_FILE): test.vhdl ${JHDL}/src/hdlc ${JHDL}/src/hdlc.sh
+$(HEADER_FILE): test.vhdl
 	${JHDL}/src/hdlc.sh -f test.vhdl
 	g++ $(CXXFLAGS) -c test.cpp -o test.o $(LINK) $(INC_DIR) $(LIBS) $(INC) $(VHDL_INCLUDES)  
 

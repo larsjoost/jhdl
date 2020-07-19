@@ -1,5 +1,5 @@
 JHDL := $(shell pwd)
-DIRS := src std src/kernel/lib lib 
+DIRS := lib src std src/kernel/lib 
 
 .PHONY: all test clean 
 

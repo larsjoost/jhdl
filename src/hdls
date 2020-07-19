@@ -115,7 +115,8 @@ sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILENAME)
 templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
 TMP_FILE=$(mktemp)
-$SCRIPTPATH/hdlf -f $FILENAME -o $TMP_FILE
+BUILD_PATH=$SCRIPTPATH/build
+$BUILD_PATH/hdlf -f $FILENAME -o $TMP_FILE
 MODULE_NAME=$(cat $TMP_FILE)
 rm $TMP_FILE
 if [ -z "$MODULE_NAME" ]; then
