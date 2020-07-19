@@ -3,6 +3,7 @@
 #define VHDL_RESOLVED_HPP
 
 #include "../../debug/debug.hpp"
+#include "vhdl_array.hpp"
 
 namespace vhdl {
 

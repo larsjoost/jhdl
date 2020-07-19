@@ -10,7 +10,9 @@ namespace generator {
     ast::ObjectValueContainer type;
     std::string variable_instance;
     std::string variable_creation;
+    std::string iterator_name;
     if (iteration->range) {
+      iterator_name = name;
       ast::RangeType* r = iteration->range;
       typeName = name + "_type";
       type = printRangeType(parm, typeName, r);
@@ -20,7 +22,8 @@ namespace generator {
       DatabaseResult object;
       if (parm.findOne(object, iteration->identifier)) {  
         typeName = NameConverter::getName(parm, object);
-        if (iteration->range_attribute) {
+	iterator_name = name;
+	if (iteration->range_attribute) {
           if (object.object->type.GetValue() == ast::ObjectValue::ARRAY) { 
             type = object.object->type.GetArgument();
           } else {
@@ -35,9 +38,9 @@ namespace generator {
     variable_instance = typeName + " " + name + ";"; 
     parm.addObjectValueContainer(ast::ObjectType::VARIABLE, name, type);
     std::string forloop_execution = "for (" +
-      name + " = " + name + ".LEFT(); " +
-      name + " <= " + name + ".RIGHT(); " +
-      name + " = " + name + ".RIGHTOF()) {";
+      name + " = " + iterator_name + ".LEFT(); " +
+      name + " <= " + iterator_name + ".RIGHT(); " +
+      name + " = " + iterator_name + ".RIGHTOF()) {";
     callback(parm, forloop_execution, variable_instance, variable_creation, type);
     m_debug.functionEnd("forLoop");
   }  

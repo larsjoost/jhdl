@@ -1,1 +1,2 @@
-add_library(lib_parser design_file.cpp)
+file(GLOB all_source_files_in_directory "*.cpp")
+add_library(lib_parser ${all_source_files_in_directory})

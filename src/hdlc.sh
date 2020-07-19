@@ -28,5 +28,5 @@ export JHDL=$SCRIPTPATH/..
 
 source $SCRIPTPATH/setup.sh
 
-$OPTIONS $JHDL/src/hdlc -c $JHDL/config/jhdl.conf $ARGS 
+$OPTIONS $JHDL/src/build/hdlc -c $JHDL/config/jhdl.conf $ARGS 
 
