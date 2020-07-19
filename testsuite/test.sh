@@ -28,8 +28,8 @@ red=1
 green=2
 
 function echo_color {
-    local color=$(tput setaf $1)
-    local reset=$(tput sgr0)
+    local color=$(tty -s && tput setaf $1)
+    local reset=$(tty -s && tput sgr0)
     printf "${color}$2${reset} $3\n"
 }
 
