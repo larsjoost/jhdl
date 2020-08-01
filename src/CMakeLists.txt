@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 
 project(Jhdl VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(_executables hdlc hdlf)
+set(_executables hdlc)
 set(_header_libraries version)
 set(_source_libraries debug exceptions generator generator/expression generator/database parser ast output vhdl/scanner vhdl/parser verilog/scanner verilog/parser)
 

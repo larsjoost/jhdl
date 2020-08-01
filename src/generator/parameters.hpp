@@ -290,24 +290,26 @@ namespace generator {
       }
     }
     int found = findBestMatch(global_results, local_results, object, valid);
-    if (found != 1) {
-      if (found == 0) {
-	std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Did not find any matches of " << name << std::endl;
-      } else {
-	std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Found " << found << " matches of " << name << std::endl;
-      }
-      for (auto& i : global_results) {
-	if (found == 0 || i.valid) {
-	  i.print();
+    if (m_debug.isVerbose()) {
+      if (found != 1) {
+	if (found == 0) {
+	  std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Did not find any matches of " << name << std::endl;
+	} else {
+	  std::cout << "[" << __FILE__ << "(" << __LINE__ << ")]: Found " << found << " matches of " << name << std::endl;
 	}
-      }
-      for (auto& i : local_results) {
-	if (found == 0 || i.valid) {
-	  i.print();
+	for (auto& i : global_results) {
+	  if (found == 0 || i.valid) {
+	    i.print();
+	  }
 	}
+	for (auto& i : local_results) {
+	  if (found == 0 || i.valid) {
+	    i.print();
+	  }
+	}
+      } else  {
+	object.print(); 
       }
-    } else if (m_debug.isVerbose()) {
-      object.print(); 
     }
     m_debug.functionEnd("findOneBase: " + std::to_string(found));
     return found;

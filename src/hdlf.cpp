@@ -65,7 +65,8 @@ main (int argc, char **argv)
     parser::DesignFile parserDesignFile;
     parserDesignFile.parse(filename);
     if (output_to_file) {
-      generator::FileInfo fileInfo(parserDesignFile, file_handle);
+      generator::FileInfo fileInfo(filename);
+      fileInfo.write_dependencies(parserDesignFile, file_handle);
       file_handle.close();
     } else {
       generator::FileInfo fileInfo(parserDesignFile, std::cout);

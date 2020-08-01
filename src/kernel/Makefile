@@ -1,4 +1,4 @@
-JHDL := $(shell pwd)/../../..
+JHDL := $(shell pwd)/../..
 include $(JHDL)/include.mak
 SOURCE := $(wildcard *.cpp)
 OBJS := $(SOURCE:.cpp=.o)

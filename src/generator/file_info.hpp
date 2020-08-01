@@ -9,8 +9,15 @@
 namespace generator {
   
   class FileInfo { 
+    std::string m_file_name;
+
+    std::string replace_extension(std::string file_name, std::string file_extension);
   public:
-    FileInfo(ast::DesignFile& designFile, std::ostream& file_handle);
+    FileInfo(std::string& file_name);
+    
+    void write_dependencies(ast::DesignFile& designFile, std::string file_extension);
+    void write_makefile_dependencies(ast::DesignFile& designFile, std::string file_extension);
+
   };
 }
 

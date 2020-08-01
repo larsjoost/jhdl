@@ -2,31 +2,23 @@
 ifndef JHDL
 $(error JHDL is not defined)
 endif
-include $(JHDL)/include.mak
 HEADER_FILE := work_test.hpp
-SOURCE_FILE := test.cpp
-SOURCE := $(wildcard *.cpp)
-OBJS := $(SOURCE:.cpp=.o)
-DEPS := $(OBJS:.o=.d)
-CXXFLAGS := -std=c++14 -g -fconcepts -MMD -O0 # -Wall -ansi
-INC_DIR := -I$(SYSTEMC)/include -I${JHDL}/src/kernel/lib -I${JHDL}/src/output -I${JHDL}/src/debug  -I${JHDL}/src/exceptions -I${JHDL}/std -I. 
+BUILD_DIR := build
+EXECUTABLE := $(BUILD_DIR)/test
 VHDL_INCLUDE_FILES := $(shell cat test.i)
 VHDL_INCLUDES := $(addprefix -I, $(VHDL_INCLUDE_FILES))
-LIBS := -lsystemc
-INC := -L$(SYSTEMC)/lib64 
 
-all: $(OBJS)
+all: $(HEADER_FILE)
 
 $(HEADER_FILE): test.vhdl
 	${JHDL}/src/hdlc.sh -f test.vhdl
-	g++ $(CXXFLAGS) -c test.cpp -o test.o $(LINK) $(INC_DIR) $(LIBS) $(INC) $(VHDL_INCLUDES)  
 
-%.o: %.cpp $(HEADER_FILE)
-	g++ $(CXXFLAGS) -c $< -o $@ $(LINK) $(INC_DIR) $(LIBS) $(INC) $(VHDL_INCLUDES)  
+$(EXECUTABLE): $(HEADER_FILE)
+	mkdir -p $(BUILD_DIR)
+	cd $(BUILD_DIR); cmake ../
 
-simulate: %.o
+simulate: $(EXECUTABLE)
 	${JHDL}/src/hdls -f test.vhdl -d run.do 
-
 
 -include $(DEPS)
 

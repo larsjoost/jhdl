@@ -8,6 +8,7 @@
 #include "parser/design_file.hpp"
 #include "generator/systemc.hpp"
 #include "generator/name_converter.hpp"
+#include "generator/file_info.hpp"
 #include "ast/scanner.hpp"
 #include "version/version.h"
 #include "debug/debug.hpp"
@@ -33,7 +34,7 @@ main (int argc, char **argv)
   bool verbose = false;
   std::string library = "WORK";
   std::string configurationFilename = "";
-  bool saveLibraryInfo = false;
+  bool save_info = false;
   bool standardPackage = false;
   
   opterr = 0;
@@ -50,7 +51,7 @@ main (int argc, char **argv)
         configurationFilename = optarg;
         break;
       case 's':
-        saveLibraryInfo = true;
+        save_info = true;
         break;
       case 'p':
         standardPackage = true;
@@ -81,8 +82,11 @@ main (int argc, char **argv)
     generator::SystemC systemC(verbose);
     debug.debug("Generating SystemC files");
     systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
-    if (saveLibraryInfo) {
+    if (save_info) {
       systemC.saveLibraryInfo();
+      generator::FileInfo file_info(filename);
+      file_info.write_dependencies(parserDesignFile, ".d");
+      file_info.write_makefile_dependencies(parserDesignFile, ".mak");
     }
     Exceptions exceptions;
     return exceptions.errorsExists();

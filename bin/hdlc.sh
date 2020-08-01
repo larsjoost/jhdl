@@ -24,9 +24,12 @@ for i in $@; do
     esac
 done
 
-export JHDL=$SCRIPTPATH/..
+HDLC=$SCRIPTPATH/../src/build/hdlc
 
-source $SCRIPTPATH/setup.sh
+if [ ! -e $HDLC ]; then
+    error "Could not find $HDLC. Please build file by running make -C $SCRIPTPATH/.."
+    exit 1
+fi
 
-$OPTIONS $JHDL/src/build/hdlc -c $JHDL/config/jhdl.conf $ARGS 
+$OPTIONS $SCRIPTPATH/../src/build/hdlc -c $SCRIPTPATH/../config/jhdl.conf $ARGS 
 

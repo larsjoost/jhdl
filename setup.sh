@@ -11,12 +11,11 @@ function error {
 }
 
 if [ -z "$JHDL" ]; then
-    error "JHDL variable is not defined"
-    exit 1
+    export JHDL=$SCRIPTPATH
 fi
 
 if [ -z "$SYSTEMC" ]; then
     SYSTEMC=/opt/systemc
 fi
 
-export LD_LIBRARY_PATH=$SYSTEMC/lib64
+export PATH=$PATH:$SCRIPTPATH/bin

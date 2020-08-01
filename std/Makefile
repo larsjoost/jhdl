@@ -5,7 +5,7 @@ OBJS := $(SOURCE:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 MAX_ERRORS := 5
 CXXFLAGS := -std=c++14 -g -MMD -fconcepts -fmax-errors=$(MAX_ERRORS) # -Wall -ansi
-INC_DIR := -I$(SYSTEMC)/include -I. -I$(JHDL)/src/kernel/lib -I$(JHDL)/src/output -I$(JHDL)/src/debug
+INC_DIR := -I$(SYSTEMC)/include -I. -I$(JHDL)/src/kernel -I$(JHDL)/src/output -I$(JHDL)/src/debug
 LIBS := -llibsystemc
 INC := -L$(SYSTEMC)/lib64
 
@@ -21,7 +21,7 @@ std_textio.hpp: textio.vhd
 	../src/hdlc.sh -f textio.vhd -l std -s
 
 %.o: %.cpp std_standard.hpp std_env.hpp std_textio.hpp
-	g++ $(CXXFLAGS) $(INC_DIR) $(INC) $(LIBS) -c $< -o $@ -I../src/kernel/lib 
+	g++ $(CXXFLAGS) $(INC_DIR) $(INC) $(LIBS) -c $< -o $@ -I../src/kernel
 
 -include $(DEPS)
 

@@ -1,0 +1,116 @@
+#!/bin/bash
+
+ALL_ARGUMENTS=$@
+
+SCRIPT=$(realpath $0)
+SCRIPTPATH=$(dirname $SCRIPT)
+
+function error {
+    local message=$1
+    echo "[ERROR] $SCRIPT: $message" 1>&2
+}
+
+usage()
+{
+    cat << EOF
+Command: $0 $ALL_ARGUMENTS
+
+Generates .jhdl.ini scripts which contains mapping from package and entity to file names
+	  
+usage: $0 options [FILE]
+
+OPTIONS:
+   -h           Show this message
+   -d <path>    Directory
+   -l <name>    Library name
+   -x           Debug
+   -v           Verbose 
+EOF
+}
+
+DIR="./"
+
+while getopts ":hd:l:v" OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 0
+            ;;
+        l)
+            LIBRARY="-l $OPTARG"
+            ;;
+        d)
+            DIR="$OPTARG"
+            ;;
+        v)
+            VERBOSE="-v"
+	    set -x
+            ;;
+        ?)
+            echo "Unknown option $OPTARG"
+            usage
+            exit 1
+            ;;
+        :)
+            echo "No argument value for option $OPTARG"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+for i in "$@"; do
+    files="$files $(find $DIR -name $i)"
+done
+
+STANDARD_PACKAGE_FILE=$(realpath $SCRIPTPATH/../std/standard.vhd)
+
+if [ ! -e $STANDARD_PACKAGE_FILE ]; then
+    error "$STANDARD_PACKAGE_FILE does not exist"
+    exit 1
+fi
+
+RESULT=0
+
+red=1
+green=2
+
+function echo_color {
+    local color=$(tty -s && tput setaf $1)
+    local reset=$(tty -s && tput sgr0)
+    printf "${color}$2${reset} $3\n"
+}
+
+function generate {
+    $SCRIPTPATH/hdlc.sh $@
+    local EXIT_VALUE=$?
+    if [ $EXIT_VALUE -eq 0 ] ; then
+        echo_color $green "[SUCCESS]" 
+    else
+        echo_color $red "[FAILURE]"
+        RESULT=1
+    fi
+}
+
+# If standard package is in file list generate it first
+
+for i in $(echo "$files"); do
+    if [ $STANDARD_PACKAGE_FILE == $(realpath $i) ]; then
+	echo -n "$i "
+	generate -f $i $LIBRARY -s -p
+    fi
+done
+
+# Then generate the rest of the files in the file list
+
+for i in $(echo "$files"); do
+    if [ $STANDARD_PACKAGE_FILE != $(realpath $i) ]; then
+	echo -n "$i "
+	generate -f $i $LIBRARY -s
+    fi
+done
+
+exit $RESULT
