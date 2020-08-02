@@ -1,9 +1,12 @@
 /std_standard.hpp
 /standard.cpp
 /standard.i
+/standard.mak
 /std_env.hpp
 /env.cpp
 /env.i
+/env.mak
 /std_textio.hpp
 /textio.cpp
 /textio.i
+/textio.mak

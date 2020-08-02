@@ -85,7 +85,7 @@ function echo_color {
 }
 
 function generate {
-    $SCRIPTPATH/hdlc.sh $@
+    $SCRIPTPATH/hdlc $@
     local EXIT_VALUE=$?
     if [ $EXIT_VALUE -eq 0 ] ; then
         echo_color $green "[SUCCESS]" 
@@ -100,7 +100,7 @@ function generate {
 for i in $(echo "$files"); do
     if [ $STANDARD_PACKAGE_FILE == $(realpath $i) ]; then
 	echo -n "$i "
-	generate -f $i $LIBRARY -s -p
+	generate $LIBRARY -s -p $i
     fi
 done
 
@@ -109,7 +109,7 @@ done
 for i in $(echo "$files"); do
     if [ $STANDARD_PACKAGE_FILE != $(realpath $i) ]; then
 	echo -n "$i "
-	generate -f $i $LIBRARY -s
+	generate $LIBRARY -s $i
     fi
 done
 

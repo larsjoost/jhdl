@@ -2,7 +2,11 @@
 ifndef JHDL
 $(error JHDL is not defined)
 endif
-HEADER_FILE := work_test.hpp
+# definitions.include must contain definition of LIBRARY variable
+include definitions.include
+SOURCE := $(wildcard *.vhd *.vhdl)
+HEADER_FILE_LONG_EXTENSION := $(SOURCE:.vhdl=.hpp)
+HEADER_FILE := $(HEADER_FILE_LONG_EXTENSION:.vhd=.hpp)
 BUILD_DIR := build
 EXECUTABLE := $(BUILD_DIR)/test
 VHDL_INCLUDE_FILES := $(shell cat test.i)
@@ -10,15 +14,15 @@ VHDL_INCLUDES := $(addprefix -I, $(VHDL_INCLUDE_FILES))
 
 all: $(HEADER_FILE)
 
-$(HEADER_FILE): test.vhdl
-	${JHDL}/src/hdlc.sh -f test.vhdl
+$(LIBRARY)_%.hpp: %.vhd?
+	hdlc -f $<
 
-$(EXECUTABLE): $(HEADER_FILE)
+$(BUILD_DIR)/%: %.cpp
 	mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR); cmake ../
 
-simulate: $(EXECUTABLE)
-	${JHDL}/src/hdls -f test.vhdl -d run.do 
+simulate: $(BUILD_DIR)/
+	hdls -d run.do $<
 
 -include $(DEPS)
 

@@ -1,0 +1,102 @@
+#!/bin/bash
+
+SCRIPT=$(realpath $0)
+SCRIPTPATH=$(dirname $SCRIPT)
+
+function error {
+    local message=$1
+    echo "[ERROR] $SCRIPT: $message" 1>&2
+}
+
+
+usage()
+{
+    cat << EOF
+Command: $0 $ALL_ARGUMENTS
+
+Compiles FILES and generates scripts for building
+	  
+usage: $0 [OPTIONS] FILES
+
+OPTIONS:
+   -h           Show this message
+   -l <name>    Library name
+   -c <name>    Configuration file
+   -x           Debug using gdb
+   -y           Debug using valgrind
+   -v           Verbose 
+EOF
+}
+
+CONFIGURATION_FILES="-c $SCRIPTPATH/../config/jhdl.conf"
+
+DIR="./"
+
+while getopts ":hc:l:spvxy" OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 0
+            ;;
+        l)
+            LIBRARY="-l $OPTARG"
+            ;;
+        c)
+            CONFIGURATION_FILES="$CONFIGURATION_FILES -c $OPTARG"
+            ;;
+        s)
+            SAVE_INFO="-s"
+            ;;
+        p)
+            STANDARD_PACKAGE="-p"
+            ;;
+        v)
+            VERBOSE="-v"
+	    set -x
+            ;;
+        x)
+            OPTIONS="gdb --args"
+	    ;;
+        y)
+            OPTIONS="valgrind --leak-check=yes"
+            ;;
+        ?)
+            echo "Unknown option $OPTARG"
+            usage
+            exit 1
+            ;;
+        :)
+            echo "No argument value for option $OPTARG"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+shift "$((OPTIND-1))"
+
+for i in "$@"; do
+    x=$(find $DIR -name $(basename $i))
+    if [ -z "$x" ]; then
+	error "Could not find file $i"
+	exit 1
+    fi
+    files="$files $x"
+done
+
+HDLC=$SCRIPTPATH/../src/build/hdlc
+
+if [ ! -e $HDLC ]; then
+    error "Could not find $HDLC. Please build file by running make -C $SCRIPTPATH/.."
+    exit 1
+fi
+
+RESULT=0
+
+for i in $(echo "$files"); do
+    $OPTIONS $HDLC $CONFIGURATION_FILES $SAVE_INFO $STANDARD_PACKAGE -f $i
+    set "RESULT |= $?"
+done
+
+exit $RESULT
