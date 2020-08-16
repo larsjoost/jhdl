@@ -1,9 +1,6 @@
 #!/bin/bash
 
-set -e
-
-SCRIPT=$(realpath $0)
-SCRIPTPATH=$(dirname $SCRIPT)
+SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
 function error {
     local message=$1
@@ -15,11 +12,10 @@ usage()
     cat << EOF
 Command: $0 $ALL_ARGUMENTS
 
-usage: $0 options
+usage: $0 options [FILE]
 
 OPTIONS:
    -h           Show this message
-   -f <name>    Filename
    -d <name>    Do filename
    -l <name>    Library name
    -o <name>    VCD output filename
@@ -32,24 +28,21 @@ MAX_ERRORS=5
 
 library="work"
 
-while getopts ":hd:f:l:o:vxy" OPTION
+while getopts ":hd:l:o:vxy" OPTION
 do
     case $OPTION in
         h)
             usage
             exit 1
             ;;
-        f)
-            FILENAME="$OPTARG"
-            ;;
         d)
-            DO_FILENAME="-d $OPTARG"
+            DO_FILE_NAME="-d $OPTARG"
             ;;
         l)
             library="$OPTARG"
             ;;
         o)
-            VCD_FILENAME="$OPTARG"
+            VCD_FILE_NAME="$OPTARG"
             ;;
         v)
             VERBOSE="-v"
@@ -75,7 +68,22 @@ do
     esac
 done
 
-if [ -z "$FILENAME" ]; then
+shift "$((OPTIND-1))"
+
+for i in "$@"; do
+    x=$(find $DIR -name $(basename $i))
+    if [ -z "$x" ]; then
+	error "Could not find file $i"
+	exit 1
+    fi
+    if [ -n "$FILE_NAME" ]; then
+	error "Filename already specified as $FILE_NAME. Found the following file name specificaton $x. Only one file can be simulated."
+	exit 1
+    fi
+    FILE_NAME=$x
+done
+
+if [ -z "$FILE_NAME" ]; then
     error "Filename must be specified"
     usage
     exit 1
@@ -85,42 +93,26 @@ if [ -z "$JHDL" ]; then
     export JHDL=$SCRIPTPATH/../
 fi
 
-source $SCRIPTPATH/setup.sh
-
-LINK=""
-INCLUDES=""
-
-filebase="${FILENAME%.*}"
+filebase="${FILE_NAME%.*}"
 headerfile="${library}_$filebase.hpp"
 sourcefile="$filebase.cpp"
-targetdir=$(dirname $FILENAME)
-templatefiles=$(ls $SCRIPTPATH/templates/*.cpp)
-TMP_FILE=$(mktemp)
-BUILD_PATH=$SCRIPTPATH/build
-$BUILD_PATH/hdlf -f $FILENAME -o $TMP_FILE
-MODULE_NAME=$(cat $TMP_FILE)
-rm $TMP_FILE
-if [ -z "$MODULE_NAME" ]; then
-    error "Did not find module name in $FILENAME" 
+targetdir=$(dirname $FILE_NAME)
+BUILD_PATH=build
+ENTITY_NAME=$(hdle -e "%e" $FILE_NAME)
+if [ -z "$ENTITY_NAME" ]; then
+    error "Did not find entity name in $FILE_NAME" 
     exit 1
 fi
-for i in $templatefiles; do
-    target=$targetdir/$(basename "$i")
-    if [ ! -e $target ]; then
-        cp $i $target
-	sed -i "s/%module%/${MODULE_NAME}/g" $target
-        sed -i "s/%include%/$headerfile/g" $target
+ENTITY_NAME_LOWER_CASE=$(echo $ENTITY_NAME  | tr '[:upper:]' '[:lower:]') 
+mkdir -p $BUILD_PATH
+cd $BUILD_PATH
+cmake -DLIBRARY:STRING=$library -DENTITY_NAME:STRING=$ENTITY_NAME_LOWER_CASE -DFILE_NAME:STRING=$FILE_NAME ../
+if [ -n "$VCD_FILE_NAME" ]; then
+    if [ ! -e $VCD_FILE_NAME ]; then
+        mkfifo --mode=666 $VCD_FILE_NAME
     fi
-done
-cp $SCRIPTPATH/templates/Makefile $targetdir
-cp $SCRIPTPATH/templates/CMakeLists.txt $targetdir
-make -C $targetdir
-if [ -n "$VCD_FILENAME" ]; then
-    if [ ! -e $VCD_FILENAME ]; then
-        mkfifo --mode=666 $VCD_FILENAME
-    fi
-    shmidcat $VCD_FILENAME | gtkwave -v -I output.sav &
-    $DEBUG ./$filebase $DO_FILENAME -o $VCD_FILENAME $VERBOSE 
+    shmidcat $VCD_FILE_NAME | gtkwave -v -I output.sav &
+    $DEBUG ./$filebase $DO_FILE_NAME -o $VCD_FILE_NAME $VERBOSE 
 else
-    $DEBUG ./$filebase $DO_FILENAME $VERBOSE
+    $DEBUG ./$filebase $DO_FILE_NAME $VERBOSE
 fi

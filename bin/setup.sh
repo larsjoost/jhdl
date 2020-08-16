@@ -1,9 +1,6 @@
 #!/bin/bash
 
-set -e
-
-SCRIPT=$(realpath $0)
-SCRIPTPATH=$(dirname $SCRIPT)
+SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
 function error {
     local message=$1

@@ -46,6 +46,7 @@
 
 #include "parameters.hpp"
 #include "name_converter.hpp"
+#include "file_info.hpp"
 
 namespace generator {
   
@@ -66,8 +67,9 @@ namespace generator {
     ExpressionParser a_expression; 
 
     Config config;
-    Config libraryInfo;
 
+    std::string m_output_expression;
+    
     struct RangeDefinition {
       std::string left;
       std::string right;
@@ -250,10 +252,9 @@ namespace generator {
     void parsePackage(parameters& parm, std::string name, std::string library);
 
   public:
-    SystemC(bool verbose = false);
+    SystemC(std::string& output_expression, bool verbose = false);
     void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                   bool standardPackage);
-    void saveLibraryInfo();
   };
 
   template<class Key, class Value, typename Func>

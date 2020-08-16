@@ -1,13 +1,11 @@
 #!/bin/bash
 
-set -e
+set -x
 
 SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
-OPTIONS=""
-
 if [ -z "$JHDL" ]; then
-    export JHDL=$SCRIPTPATH/..
+    export JHDL=$(realpath $SCRIPTPATH/..)
 fi
 
 if [ -n "$VERBOSE" ]; then
@@ -17,13 +15,15 @@ fi
 source $JHDL/setup.sh
 
 function analyse {
-    $JHDL/src/hdlc.sh -f $1 $VERBOSE $@
+    hdlc $VERBOSE $@ 
 }
 
 function compile {
-    make
+    hdlg $@
+    hdlm $@
 }
 
 function simulate {
-    $JHDL/src/hdls -f $@ $HDLS_DEBUG $@
+    compile $@
+    hdls $HDLS_DEBUG -d $SCRIPTPATH/run.do $@
 }

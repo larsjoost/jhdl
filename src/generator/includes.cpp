@@ -13,6 +13,7 @@ namespace generator {
     bool packageExists = parm.findObject(object, library, package, ast::ObjectType::PACKAGE);
     if (!packageExists) {
       exceptions.printNote("Loading package " + library + "." + package);
+      parm.m_file_info.write_package_dependency(package, library);
       parsePackage(parm, package, library);
       packageExists = parm.findObject(object, library, package, ast::ObjectType::PACKAGE);
     }

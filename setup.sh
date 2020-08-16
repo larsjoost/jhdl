@@ -1,9 +1,6 @@
 #!/bin/bash
 
-set -e
-
-SCRIPT=$(realpath $0)
-SCRIPTPATH=$(dirname $SCRIPT)
+SCRIPTPATH=$(dirname ${BASH_SOURCE[0]})
 
 function error {
     local message=$1
@@ -18,4 +15,11 @@ if [ -z "$SYSTEMC" ]; then
     SYSTEMC=/opt/systemc
 fi
 
-export PATH=$PATH:$SCRIPTPATH/bin
+BIN_PATH=$(realpath $SCRIPTPATH/bin)
+
+BIN_IN_PATH=$(echo $PATH | grep $BIN_PATH)
+
+if [ -z "$BIN_IN_PATH" ]; then
+    export PATH=$PATH:$BIN_PATH
+fi
+

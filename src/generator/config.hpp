@@ -26,7 +26,6 @@ public:
   
   void add(std::string section, std::string key, std::string value);
   bool load(std::string filename);
-  void save();
   std::string find(std::string section, std::string key, bool expand = true);
 };
 

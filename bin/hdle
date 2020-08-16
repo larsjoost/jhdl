@@ -1,0 +1,36 @@
+#!/bin/bash
+
+SCRIPT=$(realpath $0)
+SCRIPTPATH=$(dirname $SCRIPT)
+
+function error {
+    local message=$1
+    echo "[ERROR] $SCRIPT: $message" 1>&2
+}
+
+usage()
+{
+    cat << EOF
+Command: $0 $ALL_ARGUMENTS
+
+usage: hdle -e <expression> FILES
+
+OPTIONS:
+   -h           Show this message
+   -e <text>    Output expression
+   -v           Verbose 
+EOF
+}
+
+if [ "$1" != "-e" ]; then
+   error "Expected first argument to be -e"
+   exit 1
+fi
+
+shift
+
+OUTPUT_EXPRESSION="$1"
+
+shift
+
+hdlc -e "$OUTPUT_EXPRESSION" $@ 2> /dev/null

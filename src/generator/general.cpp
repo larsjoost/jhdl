@@ -8,15 +8,13 @@ namespace generator {
                                   ast::ObjectType type, std::string& filename) {
     m_debug.functionStart("topHierarchyStart(name = " + name + ")", false, __FILE__, __LINE__);
     if (!parm.isQuiet()) {
-      std::string s;
       switch (type) {
-      case ast::ObjectType::PACKAGE_BODY: {s = "body"; break;}
-      case ast::ObjectType::PACKAGE : {s = "package"; break;}
-      case ast::ObjectType::ENTITY : {s = "entity"; break;}
-      case ast::ObjectType::ARCHITECTURE : {s = "architecture"; break; }
+      case ast::ObjectType::PACKAGE_BODY: {parm.m_file_info.write_package_body(name, library); break;}
+      case ast::ObjectType::PACKAGE : {parm.m_file_info.write_package(name, library); break;}
+      case ast::ObjectType::ENTITY : {parm.m_file_info.write_entity(name, library); break;}
+      case ast::ObjectType::ARCHITECTURE : {parm.m_file_info.write_architecture(name, library); break; }
       default: assert(false);
       }
-      libraryInfo.add(s, name, filename);
     }
     if (a_verbose) {
       parm.addTop("// Hierarchy top start, library = " + library +

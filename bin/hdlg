@@ -66,6 +66,10 @@ for i in "$@"; do
     files="$files $(find $DIR -name $i)"
 done
 
+if [ -n "$VERBOSE" ]; then
+    echo "# Running: hdlg $ALL_ARGUMENTS"
+fi
+
 STANDARD_PACKAGE_FILE=$(realpath $SCRIPTPATH/../std/standard.vhd)
 
 if [ ! -e $STANDARD_PACKAGE_FILE ]; then
@@ -84,8 +88,41 @@ function echo_color {
     printf "${color}$2${reset} $3\n"
 }
 
+TEMPLATE_DIR=$SCRIPTPATH/../templates
+
+if [ ! -e $TEMPLATE_DIR ]; then
+    error "Could not find $TEMPLATE_DIR"
+    exit 1
+fi
+
+function copy_template_files {
+    local FILENAME=$1
+
+    TARGETDIR=$(dirname $FILENAME)
+
+    TEMPLATE_FILES=("CMakeLists.txt")
+    
+    for i in "${TEMPLATE_FILES[@]}"; do
+	local target=$TARGETDIR/$i
+	if [ ! -e $target ]; then
+	    cp $TEMPLATE_DIR/$i $target
+	fi
+    done
+
+    templatefiles=$(ls $TEMPLATE_DIR/*.cpp)
+
+    for i in $templatefiles; do
+	target=$TARGETDIR/$(basename "$i")
+	if [ ! -e $target ]; then
+            cp $i $target
+	    sed -i "s/%module%/${MODULE_NAME}/g" $target
+            sed -i "s/%include%/$headerfile/g" $target
+	fi
+    done
+}
+
 function generate {
-    $SCRIPTPATH/hdlc $@
+    hdld $@
     local EXIT_VALUE=$?
     if [ $EXIT_VALUE -eq 0 ] ; then
         echo_color $green "[SUCCESS]" 
@@ -100,7 +137,8 @@ function generate {
 for i in $(echo "$files"); do
     if [ $STANDARD_PACKAGE_FILE == $(realpath $i) ]; then
 	echo -n "$i "
-	generate $LIBRARY -s -p $i
+	generate $LIBRARY -p $i
+	copy_template_files $i
     fi
 done
 
@@ -109,8 +147,10 @@ done
 for i in $(echo "$files"); do
     if [ $STANDARD_PACKAGE_FILE != $(realpath $i) ]; then
 	echo -n "$i "
-	generate $LIBRARY -s $i
+	generate $LIBRARY $i
+	copy_template_files $i
     fi
 done
+
 
 exit $RESULT

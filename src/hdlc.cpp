@@ -7,8 +7,8 @@
 #include <iostream>
 #include "parser/design_file.hpp"
 #include "generator/systemc.hpp"
-#include "generator/name_converter.hpp"
 #include "generator/file_info.hpp"
+#include "generator/name_converter.hpp"
 #include "ast/scanner.hpp"
 #include "version/version.h"
 #include "debug/debug.hpp"
@@ -21,7 +21,8 @@ void usage() {
   std::cout << "  -f <name> : File name" << std::endl;
   std::cout << "  -l <name> : Library name (default = work)"  << std::endl;
   std::cout << "  -c <name> : Configuration file name" << std::endl;
-  std::cout << "  -s        : Save library info file"  << std::endl;
+  std::cout << "  -e <text> : Output file info in <text> format"  << std::endl;
+  generator::FileInfo::help(4);
   std::cout << "  -v : Verbose" << std::endl;
 }
 
@@ -34,11 +35,11 @@ main (int argc, char **argv)
   bool verbose = false;
   std::string library = "WORK";
   std::string configurationFilename = "";
-  bool save_info = false;
   bool standardPackage = false;
+  std::string output_expression;
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:l:c:svp")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:c:e:vp")) != -1) {
     switch (c)
       {
       case 'f':
@@ -50,8 +51,8 @@ main (int argc, char **argv)
       case 'c':
         configurationFilename = optarg;
         break;
-      case 's':
-        save_info = true;
+      case 'e':
+        output_expression = optarg;
         break;
       case 'p':
         standardPackage = true;
@@ -79,15 +80,9 @@ main (int argc, char **argv)
     parser::DesignFile parserDesignFile;
     debug.debug("Parsing " + filename);
     parserDesignFile.parse(filename);
-    generator::SystemC systemC(verbose);
+    generator::SystemC systemC(output_expression, verbose);
     debug.debug("Generating SystemC files");
     systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
-    if (save_info) {
-      systemC.saveLibraryInfo();
-      generator::FileInfo file_info(filename);
-      file_info.write_dependencies(parserDesignFile, ".d");
-      file_info.write_makefile_dependencies(parserDesignFile, ".mak");
-    }
     Exceptions exceptions;
     return exceptions.errorsExists();
   } catch (const ast::SyntaxError &e) {

@@ -8,7 +8,7 @@
 #include "../ast/object_type.hpp"
 #include "../ast/text.hpp"
 
-#include "info_writer.hpp"
+#include "file_info.hpp"
 
 #include <string>
 #include <fstream>
@@ -22,8 +22,10 @@ namespace generator {
     Exceptions exceptions;
     bool a_verbose = true;
 
-    InfoWriter info_writer;
+  public:
+    FileInfo m_file_info;
 
+  private:
     static GlobalDatabase a_global_database;
     
     /*
@@ -118,7 +120,8 @@ namespace generator {
     ClassContainer* getActiveClassContainer();
     
   public:
-    parameters(std::string& library, bool verbose = false) : m_debug(this) {
+    parameters(std::string& library, std::string& file_name,
+	       std::string& output_expression, bool verbose = false) : m_debug(this), m_file_info(file_name, output_expression) {
       file_container.library = library;
       a_verbose = verbose;
     };
@@ -147,13 +150,9 @@ namespace generator {
     void addTextToList(std::list<std::string>& list, std::string text, const char* file_name, int line_number,
 		       bool breakpoint = false, ast::Text* source_line = NULL);
     
-    void open(std::string filename);
-    void close();
     bool isQuiet();
     bool setQuiet(bool quiet);
     
-    void setPackageName(const std::string& path, const std::string& name);
-
     // Database access
   private:
     template<typename Func>

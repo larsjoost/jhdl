@@ -4,4 +4,4 @@ source ../../../envsetup.sh
 
 # analyse test.vhdl
 
-simulate test.vhdl -d run.do $@
+simulate -d run.do $@ test.vhdl

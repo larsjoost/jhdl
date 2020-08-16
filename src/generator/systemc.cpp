@@ -14,17 +14,16 @@
 
 namespace generator {
 
-  SystemC::SystemC(bool verbose) : m_debug(this) {
+  SystemC::SystemC(std::string& output_expression, bool verbose) : m_debug(this) {
     a_verbose |= verbose; 
+    m_output_expression = output_expression;
   }
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
                          bool standardPackage) {
     m_debug.functionStart("generate(library = " + library + ")", false, __FILE__, __LINE__);
     a_filename = designFile.filename;
-    parameters parm(library, a_verbose);
-    parm.open(a_filename); 
-    libraryInfo.load(libraryInfoFilename);
+    parameters parm(library, a_filename, m_output_expression, a_verbose);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
         exceptions.printError("Could not open configuration file " + configurationFilename);
@@ -38,12 +37,7 @@ namespace generator {
     }
     if (!standardPackage) {parm.addInclude("#include <standard.h>");}
     parse(parm, designFile, library);
-    parm.close();
     m_debug.functionEnd("generate");
-  }
-
-  void SystemC::saveLibraryInfo() {
-    libraryInfo.save();
   }
 
   void SystemC::parse(parameters& parm, ast::DesignFile& designFile, std::string& library) {
@@ -83,11 +77,10 @@ namespace generator {
 	if (filename != a_filename) {
           std::string header_filename = NameConverter::getHeaderFileName(library, filename);
 	  parm.addInclude("#include \"" + header_filename + "\"");
-          parm.setPackageName(stdPath, filename);
-	  filename = stdPath + "/" + filename;
+          filename = stdPath + "/" + filename;
           parser::DesignFile parserDesignFile;
 	  parserDesignFile.parse(filename);
-	  parameters p(library, a_verbose);
+	  parameters p(library, filename, m_output_expression, a_verbose);
           p.setQuiet(true);
           p.parse_declarations_only = true;
 	  parse(p, parserDesignFile, library);

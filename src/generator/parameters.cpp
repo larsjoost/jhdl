@@ -7,24 +7,6 @@ namespace generator {
 
   GlobalDatabase parameters::a_global_database;
   
-  void parameters::open(std::string filename) {
-    m_debug.functionStart("open(filename = " + filename + ")", false, __FILE__, __LINE__);
-    info_writer.Open(NameConverter::replaceFileExtension(filename, ".i"));
-    file_container.file_name = filename;
-    m_debug.functionEnd("open");
-  }
-  
-  void parameters::close() {
-    m_debug.functionStart("close", false, __FILE__, __LINE__);
-    if (!exceptions.errorsExists()) {
-      file_container.flush(true);
-      info_writer.Close();
-    } else {
-      m_debug.debug("Errors exists so files wont be saved");
-    }
-    m_debug.functionEnd("close");
-  }
-  
   void parameters::println(std::ostream& handle, std::string text) {
     handle << text << std::endl;
   }
@@ -177,10 +159,6 @@ namespace generator {
     bool q = this->quiet;
     this->quiet = quiet;
     return q;
-  }
-
-  void parameters::setPackageName(const std::string& path, const std::string& name) {
-    info_writer.SetPackageName(path, name);
   }
 
   void parameters::printHierarchy() {
