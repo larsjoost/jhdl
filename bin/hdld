@@ -65,7 +65,20 @@ done
 
 PYTHON_SCRIPT_PATH=$SCRIPTPATH/../scripts
 
-for i in $(echo "$files"); do
-    hdle -e "%t,%f,%l,%u" $i | python $PYTHON_SCRIPT_PATH/parse_expression.py -f $i
-done
+mkdir -p cmake
 
+function get_element {
+    local text="$1"
+    local element=$2
+    python -c "a = \"$text\"; print(a.split(',')[$element])"
+}
+
+function exists_in_list {
+    list=$1
+    find=$2
+    echo "$1" | grep "$find"
+}
+
+for i in $(echo "$files"); do
+    hdle -e "%t,%l,%u" $i | python $PYTHON_SCRIPT_PATH/parse_expression.py $VERBOSE -c $SCRIPTPATH/../config/jhdl.conf -f $i -e "type,library,unit"
+done

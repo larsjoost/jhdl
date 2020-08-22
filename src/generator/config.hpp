@@ -12,7 +12,7 @@ class Config {
 
   Exceptions exceptions;
   
-  std::string filename;
+  std::string m_filename;
   
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> map;
   

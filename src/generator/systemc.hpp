@@ -58,7 +58,7 @@ namespace generator {
 
     Exceptions exceptions;
     
-    const std::string libraryInfoFilename = ".jhdl.ini";
+    const std::string m_library_info_filename = ".jhdl.ini";
     
     bool a_verbose = false;
 

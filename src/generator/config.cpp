@@ -20,7 +20,7 @@ void Config::removeWhitespace(std::string& s) {
 
 bool Config::load(std::string filename) {
   int lineNumber = 0;
-  this->filename = filename;
+  m_filename = filename;
   std::ifstream cFile (filename);
   if (cFile.is_open()) {
     std::string line;

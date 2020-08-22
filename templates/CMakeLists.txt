@@ -19,6 +19,9 @@ SET(LIBRARY "work" CACHE STRING "Specifies the library name")
 SET(ENTITY_NAME "" CACHE STRING "Specifies the entity name")
 SET(FILE_NAME "" CACHE STRING "Specifies the file name")
 
+file(GLOB all_source_files_in_directory "*.cpp")
+add_library(lib_${LIBRARY} ${all_source_files_in_directory})
+
 set(_executable ${ENTITY_NAME})
 
 add_executable(${_executable} test.cpp)
@@ -50,3 +53,30 @@ endforeach()
 link_directories(${SYSTEMC}/lib64)
 target_link_libraries(${_executable} libsystemc)
 
+file(GLOB _library_dependency_files "cmake/*.inc")
+
+foreach(_file ${_library_dependency_files})
+  include(${_file})
+endforeach()
+
+foreach(_library ${_dependency_libraries})
+  include_directories(${_library})
+  link_directories(${_library})
+endforeach()
+
+foreach(_executable ${_executables})
+  add_executable(${_executable} "${_executable}.cpp")
+
+  function(_add_source_library dir) 
+    string(REPLACE "/" "_" _library_name ${dir})
+    target_link_libraries(
+      ${_executable} PUBLIC "lib_${_library_name}" 
+      )
+  
+  endfunction()
+
+  foreach(_library ${_source_libraries})
+    _add_source_library(${_library})
+  endforeach()
+
+endforeach()

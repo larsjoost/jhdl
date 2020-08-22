@@ -70,7 +70,7 @@ namespace generator {
     std::string stdPath = (library == "WORK") ? "." : config.find("hdl", library);
     if (!stdPath.empty()) {
       Config c;
-      std::string config_file = stdPath + "/" + libraryInfoFilename;
+      std::string config_file = stdPath + "/" + m_library_info_filename;
       c.load(config_file);
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
