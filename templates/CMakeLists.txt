@@ -51,7 +51,7 @@ foreach(_directory ${_source_directories})
 endforeach()
 
 link_directories(${SYSTEMC}/lib64)
-target_link_libraries(${_executable} libsystemc)
+#target_link_libraries(${_executable} libsystemc)
 
 file(GLOB _library_dependency_files "cmake/*.inc")
 
@@ -70,7 +70,7 @@ foreach(_executable ${_executables})
   function(_add_source_library dir) 
     string(REPLACE "/" "_" _library_name ${dir})
     target_link_libraries(
-      ${_executable} PUBLIC "lib_${_library_name}" 
+      ${_executable} "lib_${_library_name}" 
       )
   
   endfunction()

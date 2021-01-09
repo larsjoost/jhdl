@@ -16,7 +16,10 @@ class FileContents:
         if self.verbose:
             print("# " + msg)
         
-    def add_file_contents(self, library, unit, contents):
+    def add_dependency(self, library, unit, unit_type, contents):
+        pass
+    
+    def add_unit(self, library, unit, unit_type, contents):
         self.debug(library + " " + unit + " " + contents)
         l = library.lower()
         u = unit.lower()
@@ -67,7 +70,7 @@ class RecurseDependencies:
         c.file_name = file_name
         return c
  
-    def parse_file(self, file_name, library, file_contents, output_expressions):
+    def parse_file(self, file_name, library, visitor):
         if file_name not in self.parsed_files:
             self.debug("Parsing file " + file_name + " in library " + library)
             self.parsed_files[file_name] = True
@@ -77,11 +80,12 @@ class RecurseDependencies:
                 line_content = self.parse_line(line, file_name)
                 if line_content.unit_type in ["entity_dependency", "package_dependency"]:
                     dependency_type = line_content.unit_type.split('_')[0]
+                    visitor.add_dependency(line_content.library, line_content.unit, dependency_type, file_name)
                     self.debug(file_name + ": Searching library " + line_content.library + " for " + line_content.unit + " " + dependency_type)
-                    self.parse_unit(line_content.library, line_content.unit, dependency_type, file_contents)
+                    self.parse_unit(line_content.library, line_content.unit, dependency_type, visitor)
                 elif line_content.unit_type in ["entity", "package"]:
-                    file_contents.add_file_contents(library, unit, file_name)
-                    self.config.set_unit_file_name(unit, library, unit_type, file_name)
+                    visitor.add_unit(line_content.library, line_content.unit, line_content.unit_type, file_name)
+                    self.config.set_unit_file_name(line_content.unit, line_content.library, line_content.unit_type, file_name)
                         
     def get_vhdl_files_in_library(self, library):
         library_path = self.get_library_path(library)
@@ -92,23 +96,23 @@ class RecurseDependencies:
             self.debug("VHDL files matching " + vhdl_files + " in " + library + " : " + str(files)) 
         return files
     
-    def parse_files_in_library(self, library, file_contents):
+    def parse_files_in_library(self, library, visitor):
         files = self.get_vhdl_files_in_library(library)
         for i in files:
-            self.parse_file(i, library, file_contents)
+            self.parse_file(i, library, visitor)
         
-    def get_unit_file_name(self, unit, library, unit_type, file_contents):
+    def get_unit_file_name(self, unit, library, unit_type, visitor):
         file_name = self.config.get_unit_file_name(unit, library, unit_type)
         if file_name is None:
             self.debug("Did not find " + unit_type + " " + unit + " in library " + library + " config file")
-            self.parse_files_in_library(library, file_contents)
+            self.parse_files_in_library(library, visitor)
         file_name = self.config.get_unit_file_name(unit, library, unit_type)
         if file_name is None:
             self.error("Could not get file name of " + unit_type + " " + unit + " in library " + library)
         return file_name
     
-    def parse_unit(self, library, unit, dependency_type, file_contents):
-        file_name = self.get_unit_file_name(unit, library, dependency_type, file_contents)
+    def parse_unit(self, library, unit, dependency_type, visitor):
+        file_name = self.get_unit_file_name(unit, library, dependency_type, visitor)
 
     def save_config_files(self):
         self.config.save()
@@ -120,14 +124,13 @@ if __name__ == "__main__":
     argument_parser.add_argument("-c", dest="config_file_name", type=str, required=True,
                                  help="Name of configuration ini file containing library path description")
     argument_parser.add_argument("-l", dest="library", type=str, default="work", help="Name of VHDL library")
-    argument_parser.add_argument("-e", dest="expression", action="append", type=str, default=["%a"], help="Expressions to output")
-
+    
     args = argument_parser.parse_args()
 
-    file_contents = FileContents(verbose=True)
+    visitor = FileContents(verbose=True)
 
     r = RecurseDependencies(config_file_name=args.config_file_name, verbose=False)
 
-    r.parse_file(args.file_name, args.library, file_contents, args.output_expressions)
+    r.parse_file(args.file_name, args.library, visitor)
     r.save_config_files()
     

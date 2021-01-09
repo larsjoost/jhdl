@@ -46,6 +46,7 @@ do
             ;;
         v)
             VERBOSE="-v"
+	    CMAKE_DEBUG="--debug-output"
 	    set -x
             ;;
         x)
@@ -97,16 +98,25 @@ filebase="${FILE_NAME%.*}"
 headerfile="${library}_$filebase.hpp"
 sourcefile="$filebase.cpp"
 targetdir=$(dirname $FILE_NAME)
-BUILD_PATH=build
-ENTITY_NAME=$(hdle -e "%e" $FILE_NAME)
+JHDL_INI_FILE=".jhdl.ini"
+if [ ! -e $JHDL_INI_FILE ]; then
+    error "Did not find $JHDL_INI_FILE. Please run hdlg"
+    exit 1
+fi
+ENTITY_NAME=$(python $SCRIPTPATH/../scripts/ini_file_reader.py -f $JHDL_INI_FILE -s "entity" -a $(basename $FILE_NAME))
 if [ -z "$ENTITY_NAME" ]; then
     error "Did not find entity name in $FILE_NAME" 
     exit 1
 fi
-ENTITY_NAME_LOWER_CASE=$(echo $ENTITY_NAME  | tr '[:upper:]' '[:lower:]') 
+BUILD_PATH=build
 mkdir -p $BUILD_PATH
 cd $BUILD_PATH
-cmake -DLIBRARY:STRING=$library -DENTITY_NAME:STRING=$ENTITY_NAME_LOWER_CASE -DFILE_NAME:STRING=$FILE_NAME ../
+cmake $CMAKE_DEBUG -DLIBRARY:STRING=$library -DENTITY_NAME:STRING=$ENTITY_NAME -DFILE_NAME:STRING=$FILE_NAME ../
+EXE_FILE=$BUILD_PATH/$filebase
+if [ ! -e $EXE_FILE ]; then
+    error "Could not find $EXE_FILE"
+    exit 1
+fi
 if [ -n "$VCD_FILE_NAME" ]; then
     if [ ! -e $VCD_FILE_NAME ]; then
         mkfifo --mode=666 $VCD_FILE_NAME

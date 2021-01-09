@@ -62,7 +62,8 @@ namespace generator {
     
     bool a_verbose = false;
 
-    std::string a_filename;
+    std::string m_output_path;
+    std::string m_filename;
 
     ExpressionParser a_expression; 
 
@@ -254,7 +255,7 @@ namespace generator {
   public:
     SystemC(std::string& output_expression, bool verbose = false);
     void generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
-                  bool standardPackage);
+                  bool standardPackage, std::string& output_path);
   };
 
   template<class Key, class Value, typename Func>

@@ -23,6 +23,7 @@ OPTIONS:
    -h           Show this message
    -d <path>    Directory
    -l <name>    Library name
+   -w           Force write
    -x           Debug
    -v           Verbose 
 EOF
@@ -30,7 +31,7 @@ EOF
 
 DIR="./"
 
-while getopts ":hd:l:v" OPTION
+while getopts ":hd:l:vw" OPTION
 do
     case $OPTION in
         h)
@@ -43,6 +44,9 @@ do
         d)
             DIR="$OPTARG"
             ;;
+        w)
+            FORCE_WRITE="True"
+	    ;;
         v)
             VERBOSE="-v"
 	    set -x
@@ -104,7 +108,7 @@ function copy_template_files {
     
     for i in "${TEMPLATE_FILES[@]}"; do
 	local target=$TARGETDIR/$i
-	if [ ! -e $target ]; then
+	if [ ! -e $target ] || [ -n "$FORCE_WRITE" ]; then
 	    cp $TEMPLATE_DIR/$i $target
 	fi
     done

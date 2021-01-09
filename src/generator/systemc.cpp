@@ -20,10 +20,11 @@ namespace generator {
   }
 
   void SystemC::generate(ast::DesignFile& designFile, std::string& library, std::string& configurationFilename,
-                         bool standardPackage) {
+                         bool standardPackage, std::string& output_path) {
     m_debug.functionStart("generate(library = " + library + ")", false, __FILE__, __LINE__);
-    a_filename = designFile.filename;
-    parameters parm(library, a_filename, m_output_expression, a_verbose);
+    m_filename = designFile.filename;
+    m_output_path = output_path;
+    parameters parm(library, m_filename, m_output_expression, a_verbose);
     if (!configurationFilename.empty()) {
       if (!config.load(configurationFilename)) {
         exceptions.printError("Could not open configuration file " + configurationFilename);
@@ -74,7 +75,7 @@ namespace generator {
       c.load(config_file);
       std::string filename = c.find("package", name);
       if (!filename.empty()) {
-	if (filename != a_filename) {
+	if (filename != m_filename) {
           std::string header_filename = NameConverter::getHeaderFileName(library, filename);
 	  parm.addInclude("#include \"" + header_filename + "\"");
           filename = stdPath + "/" + filename;
@@ -232,7 +233,7 @@ namespace generator {
       m_debug.functionStart("packageDeclaration(library = " + library +
                           ", packet = " + name + ", type = " + toString(type) + ")",
 			    false, __FILE__, __LINE__);
-      topHierarchyStart(parm, library, name, type, a_filename);
+      topHierarchyStart(parm, library, name, type, m_filename);
       parm.package_contains_function = false;
       // bool declare_object = type == ast::ObjectType::PACKAGE_BODY || !parm.package_contains_function;
       std::string class_name = NameConverter::objectName(type, name);
@@ -266,7 +267,7 @@ namespace generator {
     std::string name = interface->name->toString(true);
     const ast::ObjectType type = ast::ObjectType::ENTITY;
     std::string class_name = NameConverter::objectName(type, name);
-    topHierarchyStart(parm, library, name, type, a_filename);
+    topHierarchyStart(parm, library, name, type, m_filename);
     auto callback =
       [&](parameters& parm) {
 	if (interface->generics) {
@@ -310,7 +311,7 @@ namespace generator {
       std::string entity_name = implementation->entity_name->toString(true);
       std::string architecture_name = entity_name + "_" + implementation->architecture_name->toString(true);
       const ast::ObjectType type = ast::ObjectType::ARCHITECTURE;
-      topHierarchyStart(parm, library, architecture_name, type, a_filename);
+      topHierarchyStart(parm, library, architecture_name, type, m_filename);
       std::shared_ptr<LocalDatabase> object;
       if (!parm.findObject(object, library, entity_name, ast::ObjectType::ENTITY)) {
         exceptions.printError("Could not find " + ast::toString(ast::ObjectType::ENTITY) + " " +

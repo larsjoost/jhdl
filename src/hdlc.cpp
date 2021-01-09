@@ -20,6 +20,7 @@ void usage() {
   std::cout << "Version " << v.version << " (" << v.date << "), id " << v.id << std::endl;
   std::cout << "  -f <name> : File name" << std::endl;
   std::cout << "  -l <name> : Library name (default = work)"  << std::endl;
+  std::cout << "  -o <path> : Output path (default = ./)"  << std::endl;
   std::cout << "  -c <name> : Configuration file name" << std::endl;
   std::cout << "  -e <text> : Output file info in <text> format"  << std::endl;
   generator::FileInfo::help(4);
@@ -37,9 +38,10 @@ main (int argc, char **argv)
   std::string configurationFilename = "";
   bool standardPackage = false;
   std::string output_expression;
+  std:string output_path;
   
   opterr = 0;
-  while ((c = getopt (argc, argv, "f:l:c:e:vp")) != -1) {
+  while ((c = getopt (argc, argv, "f:l:c:e:vo:p")) != -1) {
     switch (c)
       {
       case 'f':
@@ -53,6 +55,9 @@ main (int argc, char **argv)
         break;
       case 'e':
         output_expression = optarg;
+        break;
+      case 'o':
+        output_path = optarg;
         break;
       case 'p':
         standardPackage = true;
@@ -82,7 +87,7 @@ main (int argc, char **argv)
     parserDesignFile.parse(filename);
     generator::SystemC systemC(output_expression, verbose);
     debug.debug("Generating SystemC files");
-    systemC.generate(parserDesignFile, library, configurationFilename, standardPackage);
+    systemC.generate(parserDesignFile, library, configurationFilename, standardPackage, output_path);
     Exceptions exceptions;
     return exceptions.errorsExists();
   } catch (const ast::SyntaxError &e) {
