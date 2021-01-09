@@ -38,7 +38,7 @@ main (int argc, char **argv)
   std::string configurationFilename = "";
   bool standardPackage = false;
   std::string output_expression;
-  std:string output_path;
+  std::string output_path;
   
   opterr = 0;
   while ((c = getopt (argc, argv, "f:l:c:e:vo:p")) != -1) {

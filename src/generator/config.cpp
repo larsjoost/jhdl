@@ -100,7 +100,7 @@ std::string Config::find(std::string section, std::string key, bool expand) {
     }
   }
   if (result.empty()) {
-    exceptions.printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + filename);
+    exceptions.printError("Could not find key \"" + key + "\" in section [" + s + "] of config file " + m_filename);
   }
   m_debug.functionEnd("find: " + result);
   return result;
